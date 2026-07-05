@@ -1,4 +1,9 @@
+# Maven build output and temporary files
 target/
+
+# IDEs and editors
 .idea/
-.agents/*
 *.iml
+
+# Project agent configurations
+.agents/**
