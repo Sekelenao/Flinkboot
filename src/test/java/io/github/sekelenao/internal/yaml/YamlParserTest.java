@@ -6,7 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.github.sekelenao.api.exception.ConfigurationException;
+import io.github.sekelenao.api.exception.configuration.ConfigurationException;
+import io.github.sekelenao.api.exception.configuration.YamlParsingException;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import java.io.ByteArrayInputStream;
@@ -81,7 +82,7 @@ class YamlParserTest {
         }
 
         @Test
-        @DisplayName("Should throw JacksonException when YAML is malformed")
+        @DisplayName("Should throw YamlParsingException when YAML is malformed")
         void shouldThrowExceptionWhenYamlIsMalformed() {
             String yamlContent = """
                 name: "Flink Job
@@ -90,7 +91,12 @@ class YamlParserTest {
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
 
             try (var parser = new YamlParser()) {
-                assertThrows(JacksonException.class, () -> parser.parse(stream, TestConfig.class));
+                var exception = assertThrows(YamlParsingException.class, () -> parser.parse(stream, TestConfig.class));
+                assertAll(
+                    () -> assertNotNull(exception.getMessage(), "Exception message should not be null"),
+                    () -> assertNotNull(exception.getCause(), "Exception cause should not be null"),
+                    () -> assertTrue(exception.getCause() instanceof JacksonException, "Exception cause should be a JacksonException")
+                );
             }
         }
     }
