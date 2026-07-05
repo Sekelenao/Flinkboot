@@ -85,6 +85,7 @@
             <artifactId>hibernate-validator</artifactId>
             <version>${dependency.validation.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.glassfish.expressly</groupId>
             <artifactId>expressly</artifactId>
