@@ -60,8 +60,11 @@ class YamlParserTest {
 
             try (var parser = new YamlParser()) {
                 var exception = assertThrows(ConfigurationException.class, () -> parser.parse(stream, TestConfig.class));
-                assertNotNull(exception.getMessage());
-                assertTrue(exception.getMessage().contains("name") || exception.getMessage().contains("value"));
+                assertAll(
+                    () -> assertNotNull(exception.getMessage(), "Exception message should not be null"),
+                    () -> assertTrue(exception.getMessage().contains("name"), "Exception message should mention the invalid 'name' field"),
+                    () -> assertTrue(exception.getMessage().contains("value"), "Exception message should mention the invalid 'value' field")
+                );
             }
         }
 
