@@ -75,5 +75,20 @@ class CommandLineTest {
                 () -> assertTrue(cmd.flag("debug"))
             );
         }
+
+        @Test
+        @DisplayName("Should parse and retrieve options and flags case-insensitively")
+        void shouldParseCaseInsensitively() {
+            String[] args = {"-KeY", "Value", "--VeRbOsE"};
+            var cmd = CommandLine.parse(args);
+            assertAll(
+                () -> assertEquals("Value", cmd.option("key").orElseThrow()),
+                () -> assertEquals("Value", cmd.option("KEY").orElseThrow()),
+                () -> assertEquals("Value", cmd.option("KeY").orElseThrow()),
+                () -> assertTrue(cmd.flag("verbose")),
+                () -> assertTrue(cmd.flag("VERBOSE")),
+                () -> assertTrue(cmd.flag("VeRbOsE"))
+            );
+        }
     }
 }

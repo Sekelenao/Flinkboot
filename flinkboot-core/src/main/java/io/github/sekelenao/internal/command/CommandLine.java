@@ -2,6 +2,7 @@ package io.github.sekelenao.internal.command;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -33,20 +34,20 @@ public final class CommandLine {
         for (int i = 0; i < args.length; i++) {
             var argument = args[i];
             if (argument.startsWith("--")) {
-                flags.add(argument.substring(2));
+                flags.add(argument.substring(2).toLowerCase(Locale.ROOT));
             } else if (argument.startsWith("-")) {
-                options.put(argument.substring(1), retrieveValue(args, i++));
+                options.put(argument.substring(1).toLowerCase(Locale.ROOT), retrieveValue(args, i++));
             }
         }
         return new CommandLine(options, flags);
     }
 
     public Optional<String> option(String option){
-        return Optional.ofNullable(options.get(option));
+        return Optional.ofNullable(options.get(option.toLowerCase(Locale.ROOT)));
     }
 
     public boolean flag(String flag){
-        return flags.contains(flag);
+        return flags.contains(flag.toLowerCase(Locale.ROOT));
     }
 
 }
