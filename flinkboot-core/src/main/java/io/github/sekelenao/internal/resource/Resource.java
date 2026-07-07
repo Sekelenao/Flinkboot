@@ -16,7 +16,7 @@ public interface Resource {
         }
         var prefix = location.substring(0, index);
         var suffix = location.substring(index + 1);
-        if(prefix.equals("classpath")){
+        if(prefix.equals("classpath") || prefix.equals("resource")){
             return new ClasspathResource(suffix);
         }
         if(prefix.equals("file")){

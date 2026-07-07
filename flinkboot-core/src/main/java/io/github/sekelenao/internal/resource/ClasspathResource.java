@@ -15,9 +15,14 @@ public class ClasspathResource implements Resource {
     }
 
     @Override
-    public InputStream inputStream() throws IOException {
+    public InputStream inputStream() {
         Objects.requireNonNull(location);
-        var stream = ClasspathResource.class.getResourceAsStream(location);
+        var cleanPath = location.startsWith("/") ? location.substring(1) : location;
+        var classLoader = Thread.currentThread().getContextClassLoader();
+        if (classLoader == null) {
+            classLoader = ClasspathResource.class.getClassLoader();
+        }
+        var stream = classLoader.getResourceAsStream(cleanPath);
         if(stream == null){
             throw new ResourceNotFoundException(location);
         }

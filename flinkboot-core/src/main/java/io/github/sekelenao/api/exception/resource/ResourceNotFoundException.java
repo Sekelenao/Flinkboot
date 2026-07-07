@@ -1,6 +1,8 @@
 package io.github.sekelenao.api.exception.resource;
 
-public class ResourceNotFoundException extends RuntimeException {
+import io.github.sekelenao.api.exception.FlinkbootException;
+
+public class ResourceNotFoundException extends FlinkbootException {
 
     public ResourceNotFoundException(String location) {
         super("Resource could not be found: " + location);
