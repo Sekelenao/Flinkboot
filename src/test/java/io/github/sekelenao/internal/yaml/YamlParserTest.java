@@ -2,6 +2,7 @@ package io.github.sekelenao.internal.yaml;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -10,22 +11,42 @@ import io.github.sekelenao.api.exception.configuration.ConfigurationException;
 import io.github.sekelenao.api.exception.configuration.YamlParsingException;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import tools.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JacksonException;
 
 @DisplayName("YamlParser")
 class YamlParserTest {
 
-    private record TestConfig(
+    private static final class TestConfig {
         @NotBlank
-        String name,
+        private final String name;
+
         @Min(1)
-        int value
-    ) {}
+        private final int value;
+
+        @JsonCreator
+        public TestConfig(
+            @JsonProperty("name") String name,
+            @JsonProperty("value") int value
+        ) {
+            this.name = name;
+            this.value = value;
+        }
+
+        public String name() {
+            return name;
+        }
+
+        public int value() {
+            return value;
+        }
+    }
 
     @Nested
     @DisplayName("Parse")
@@ -34,10 +55,7 @@ class YamlParserTest {
         @Test
         @DisplayName("Should parse valid YAML configuration correctly")
         void shouldParseValidYaml() {
-            String yamlContent = """
-                name: "Flink Job"
-                value: 42
-                """;
+            var yamlContent = "name: \"Flink Job\"\nvalue: 42\n";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
 
             try (var parser = new YamlParser()) {
@@ -53,10 +71,7 @@ class YamlParserTest {
         @Test
         @DisplayName("Should throw ConfigurationException when validation fails")
         void shouldThrowExceptionWhenValidationFails() {
-            String yamlContent = """
-                name: ""
-                value: 0
-                """;
+            var yamlContent = "name: \"\"\nvalue: 0\n";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
 
             try (var parser = new YamlParser()) {
@@ -84,10 +99,7 @@ class YamlParserTest {
         @Test
         @DisplayName("Should throw YamlParsingException when YAML is malformed")
         void shouldThrowExceptionWhenYamlIsMalformed() {
-            String yamlContent = """
-                name: "Flink Job
-                value: invalid_number
-                """;
+            var yamlContent = "name: \"Flink Job\nvalue: invalid_number\n";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
 
             try (var parser = new YamlParser()) {
@@ -95,7 +107,7 @@ class YamlParserTest {
                 assertAll(
                     () -> assertNotNull(exception.getMessage(), "Exception message should not be null"),
                     () -> assertNotNull(exception.getCause(), "Exception cause should not be null"),
-                    () -> assertTrue(exception.getCause() instanceof JacksonException, "Exception cause should be a JacksonException")
+                    () -> assertInstanceOf(JacksonException.class, exception.getCause(), "Exception cause should be a JacksonException")
                 );
             }
         }

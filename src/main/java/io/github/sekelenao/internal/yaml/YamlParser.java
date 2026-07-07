@@ -4,9 +4,9 @@ import io.github.sekelenao.api.exception.configuration.ConfigurationException;
 import io.github.sekelenao.api.exception.configuration.YamlParsingException;
 import jakarta.validation.Validation;
 import jakarta.validation.ValidatorFactory;
-import tools.jackson.core.JacksonException;
-import tools.jackson.dataformat.yaml.YAMLMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -30,7 +30,7 @@ public final class YamlParser implements AutoCloseable {
                 throw new ConfigurationException(message);
             }
             return yaml;
-        } catch (JacksonException exception) {
+        } catch (IOException exception) {
             throw new YamlParsingException(exception.getMessage(), exception);
         }
     }
