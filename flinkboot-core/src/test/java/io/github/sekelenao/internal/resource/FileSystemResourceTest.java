@@ -34,6 +34,6 @@ class FileSystemResourceTest {
     @DisplayName("Should throw ResourceNotFoundException when file does not exist")
     void shouldThrowExceptionWhenNotFound() {
         var resource = new FileSystemResource("/non/existent/path/file.yaml");
-        assertThrows(ResourceNotFoundException.class, () -> resource.inputStream());
+        assertThrows(ResourceNotFoundException.class, resource::inputStream);
     }
 }

@@ -39,6 +39,6 @@ class ClasspathResourceTest {
     @DisplayName("Should throw ResourceNotFoundException when classpath resource is missing")
     void shouldThrowExceptionWhenNotFound() {
         var resource = new ClasspathResource("non-existent-resource.txt");
-        assertThrows(ResourceNotFoundException.class, () -> resource.inputStream());
+        assertThrows(ResourceNotFoundException.class, resource::inputStream);
     }
 }
