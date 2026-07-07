@@ -98,6 +98,34 @@
                 <artifactId>flinkboot-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
+            <!-- Jackson YAML -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>${dependency.jackson.version}</version>
+            </dependency>
+
+            <!-- Jakarta Validation (Hibernate Validator) -->
+            <dependency>
+                <groupId>org.hibernate.validator</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>${dependency.validation.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.glassfish.expressly</groupId>
+                <artifactId>expressly</artifactId>
+                <version>${dependency.expressly.version}</version>
+            </dependency>
+
+            <!--   Test   -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${dependency.junit.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
