@@ -1,4 +1,4 @@
-package io.github.sekelenao.internal.command;
+package io.github.sekelenao.internal.startup;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;

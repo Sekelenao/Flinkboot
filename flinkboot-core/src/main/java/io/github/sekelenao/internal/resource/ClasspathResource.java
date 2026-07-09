@@ -2,7 +2,6 @@ package io.github.sekelenao.internal.resource;
 
 import io.github.sekelenao.api.exception.resource.ResourceNotFoundException;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 

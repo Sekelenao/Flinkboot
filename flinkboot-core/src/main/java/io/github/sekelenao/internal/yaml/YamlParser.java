@@ -1,10 +1,10 @@
 package io.github.sekelenao.internal.yaml;
 
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.github.sekelenao.api.exception.configuration.ConfigurationException;
 import io.github.sekelenao.api.exception.configuration.YamlParsingException;
 import jakarta.validation.Validation;
 import jakarta.validation.ValidatorFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 import java.io.IOException;
 import java.io.InputStream;

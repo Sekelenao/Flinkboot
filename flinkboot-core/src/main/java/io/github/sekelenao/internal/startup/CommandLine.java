@@ -1,4 +1,4 @@
-package io.github.sekelenao.internal.command;
+package io.github.sekelenao.internal.startup;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-public final class CommandLine {
+final class CommandLine {
 
     private final Map<String, String> options;
 
