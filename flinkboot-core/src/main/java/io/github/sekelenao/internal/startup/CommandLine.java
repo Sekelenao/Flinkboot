@@ -34,8 +34,10 @@ final class CommandLine {
         for (int i = 0; i < args.length; i++) {
             var argument = args[i];
             if (argument.startsWith("--")) {
-                flags.add(argument.substring(2).toLowerCase(Locale.ROOT));
-            } else if (argument.startsWith("-")) {
+                if (argument.length() > 2) {
+                    flags.add(argument.substring(2).toLowerCase(Locale.ROOT));
+                }
+            } else if (argument.startsWith("-") && argument.length() > 1) {
                 options.put(argument.substring(1).toLowerCase(Locale.ROOT), retrieveValue(args, i++));
             }
         }

@@ -1,6 +1,8 @@
 package io.github.sekelenao.api.exception.resource;
 
-public class ResourceAccessException extends RuntimeException {
+import io.github.sekelenao.api.exception.FlinkbootException;
+
+public class ResourceAccessException extends FlinkbootException {
 
     public ResourceAccessException(String message){
         super(message);

@@ -69,6 +69,21 @@ public class YamlParserTest {
         }
 
         @Test
+        @DisplayName("Should parse twice in separate instances")
+        void shouldParseTwice() {
+            var yamlContent = "name: \"Flink Job\"\nvalue: 42\n";
+            var bytes = yamlContent.getBytes(StandardCharsets.UTF_8);
+            try (var parser1 = new YamlParser()) {
+                var config1 = parser1.parse(new ByteArrayInputStream(bytes), TestConfig.class);
+                assertNotNull(config1);
+            }
+            try (var parser2 = new YamlParser()) {
+                var config2 = parser2.parse(new ByteArrayInputStream(bytes), TestConfig.class);
+                assertNotNull(config2);
+            }
+        }
+
+        @Test
         @DisplayName("Should throw ConfigurationValidationException when validation fails")
         void shouldThrowExceptionWhenValidationFails() {
             var yamlContent = "name: \"\"\nvalue: 0\n";

@@ -90,5 +90,16 @@ class CommandLineTest {
                 () -> assertTrue(cmd.flag("VeRbOsE"))
             );
         }
+
+        @Test
+        @DisplayName("Should ignore single hyphen and double hyphen arguments")
+        void shouldIgnoreSingleAndDoubleHyphens() {
+            String[] args = {"-", "--"};
+            var cmd = CommandLine.parse(args);
+            assertAll(
+                () -> assertTrue(cmd.option("").isEmpty()),
+                () -> assertFalse(cmd.flag(""))
+            );
+        }
     }
 }

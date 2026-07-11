@@ -39,10 +39,11 @@ class FileSystemResourceTest {
     }
 
     @Test
-    @DisplayName("Should throw ResourceAccessException when location is a directory")
+    @DisplayName("Should throw ResourceAccessException inheriting from FlinkbootException when location is a directory")
     void shouldThrowResourceAccessExceptionWhenIsDirectory(@TempDir Path tempDir) {
         var resource = new FileSystemResource(tempDir.toAbsolutePath().toString());
-        assertThrows(ResourceAccessException.class, resource::inputStream);
+        var exception = assertThrows(ResourceAccessException.class, resource::inputStream);
+        org.junit.jupiter.api.Assertions.assertInstanceOf(io.github.sekelenao.api.exception.FlinkbootException.class, exception);
     }
 
 }

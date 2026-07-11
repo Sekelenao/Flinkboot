@@ -22,9 +22,8 @@ public final class Flinkboot {
 
     public <C> C loadConfiguration(Class<C> configurationClass) throws IOException {
         var location = startupEnvironment.configurationResourceLocation();
-        try(var parser = new YamlParser()) {
-            var resource = Resource.get(location);
-            return parser.parse(resource.inputStream(), configurationClass);
+        try(var parser = new YamlParser(); var inputStream = Resource.get(location).inputStream()) {
+            return parser.parse(inputStream, configurationClass);
         }
     }
 
