@@ -7,3 +7,6 @@ target/
 
 # Project agent configurations
 .agents/**
+
+# Local ideas and notes
+IDEAS.md
