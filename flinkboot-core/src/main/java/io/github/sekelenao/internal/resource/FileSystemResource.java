@@ -10,7 +10,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-public class FileSystemResource implements Resource {
+class FileSystemResource implements Resource {
 
     private final String location;
 

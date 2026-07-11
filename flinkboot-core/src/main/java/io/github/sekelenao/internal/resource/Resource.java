@@ -3,6 +3,7 @@ package io.github.sekelenao.internal.resource;
 import io.github.sekelenao.api.exception.resource.UnrecognizedResourceException;
 
 import java.io.InputStream;
+import java.util.Locale;
 import java.util.Objects;
 
 public interface Resource {
@@ -13,7 +14,7 @@ public interface Resource {
         if(index == -1 || index == 0){
             throw new UnrecognizedResourceException(location);
         }
-        var prefix = location.substring(0, index);
+        var prefix = location.substring(0, index).toLowerCase(Locale.ROOT);
         var suffix = location.substring(index + 1);
         if(prefix.equals("classpath") || prefix.equals("resource")){
             return new ClasspathResource(suffix);

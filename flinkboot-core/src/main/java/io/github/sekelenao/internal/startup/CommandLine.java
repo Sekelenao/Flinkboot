@@ -1,5 +1,6 @@
 package io.github.sekelenao.internal.startup;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -41,7 +42,7 @@ final class CommandLine {
                 options.put(argument.substring(1).toLowerCase(Locale.ROOT), retrieveValue(args, i++));
             }
         }
-        return new CommandLine(options, flags);
+        return new CommandLine(Collections.unmodifiableMap(options), Collections.unmodifiableSet(flags));
     }
 
     public Optional<String> option(String option){

@@ -8,6 +8,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("StartupEnvironment")
 class StartupEnvironmentTest {
@@ -108,7 +109,7 @@ class StartupEnvironmentTest {
             var cmd = CommandLine.parse(new String[0]);
             var resolver = new EnvVarResolver(k -> null);
             var startupEnv = new StartupEnvironment(cmd, resolver);
-            org.junit.jupiter.api.Assertions.assertTrue(startupEnv.get("key").isEmpty());
+            assertTrue(startupEnv.get("key").isEmpty());
         }
     }
 }

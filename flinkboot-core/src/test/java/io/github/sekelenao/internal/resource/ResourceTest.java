@@ -56,4 +56,14 @@ class ResourceTest {
     void shouldThrowExceptionForUnsupportedPrefix() {
         assertThrows(UnrecognizedResourceException.class, () -> Resource.get("http://localhost/config.yaml"));
     }
+
+    @Test
+    @DisplayName("Should successfully resolve resource case-insensitively")
+    void shouldResolveResourceCaseInsensitively() {
+        assertAll(
+            () -> assertInstanceOf(ClasspathResource.class, Resource.get("Classpath:config.yaml")),
+            () -> assertInstanceOf(ClasspathResource.class, Resource.get("RESOURCE:config.yaml")),
+            () -> assertInstanceOf(FileSystemResource.class, Resource.get("File:config.yaml"))
+        );
+    }
 }

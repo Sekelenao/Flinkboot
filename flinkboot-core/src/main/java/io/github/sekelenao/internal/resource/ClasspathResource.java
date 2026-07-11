@@ -5,7 +5,7 @@ import io.github.sekelenao.api.exception.resource.ResourceNotFoundException;
 import java.io.InputStream;
 import java.util.Objects;
 
-public class ClasspathResource implements Resource {
+class ClasspathResource implements Resource {
 
     private final String location;
 
