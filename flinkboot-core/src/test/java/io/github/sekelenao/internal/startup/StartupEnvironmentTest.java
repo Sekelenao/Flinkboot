@@ -4,7 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -45,10 +45,8 @@ class StartupEnvironmentTest {
         @DisplayName("Should return CommandLine option value when option is present")
         void shouldReturnCommandLineOptionWhenPresent() {
             var cmd = CommandLine.parse(new String[]{"-flinkboot-configuration", "custom-config.yaml"});
-            var env = new HashMap<String, String>();
-            env.put("FLINKBOOT_CONFIGURATION", "env-config.yaml");
+            var env = Map.of("FLINKBOOT_CONFIGURATION", "env-config.yaml");
             var resolver = new EnvVarResolver(env::get);
-            
             var startupEnv = new StartupEnvironment(cmd, resolver);
             assertEquals("custom-config.yaml", startupEnv.configurationResourceLocation());
         }
@@ -57,10 +55,8 @@ class StartupEnvironmentTest {
         @DisplayName("Should return environment variable value when option is not present but env var is set")
         void shouldReturnEnvVarWhenCommandLineOptionAbsent() {
             var cmd = CommandLine.parse(new String[0]);
-            var env = new HashMap<String, String>();
-            env.put("FLINKBOOT_CONFIGURATION", "env-config.yaml");
+            var env = Map.of("FLINKBOOT_CONFIGURATION", "env-config.yaml");
             var resolver = new EnvVarResolver(env::get);
-            
             var startupEnv = new StartupEnvironment(cmd, resolver);
             assertEquals("env-config.yaml", startupEnv.configurationResourceLocation());
         }
