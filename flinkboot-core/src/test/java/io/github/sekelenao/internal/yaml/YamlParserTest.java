@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.github.sekelenao.api.exception.configuration.ConfigurationValidationException;
 import io.github.sekelenao.api.exception.configuration.YamlParsingException;
 import jakarta.validation.constraints.Min;
@@ -15,7 +16,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -110,16 +113,21 @@ public class YamlParserTest {
 
         @Test
         @DisplayName("Should apply custom mapper configuration via builder consumer")
-        void shouldApplyCustomConfiguration() {
+        void shouldApplyCustomConfiguration() throws IOException {
             var yamlContent = "type: \"INVALID_TYPE\"\n";
-            var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-
-            try (var parser = new YamlParser(builder -> builder.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true))) {
-                var config = parser.parse(stream, TestConfigWithEnum.class);
+            var bytes = yamlContent.getBytes(StandardCharsets.UTF_8);
+            Consumer<YAMLMapper.Builder> additionalConfigurations = builder -> {
+                builder.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
+            };
+            try (var customizedParser = new YamlParser(additionalConfigurations); var inputStream = new ByteArrayInputStream(bytes)) {
+                var config = customizedParser.parse(inputStream, TestConfigWithEnum.class);
                 assertAll(
                     () -> assertNotNull(config),
                     () -> assertNull(config.type())
                 );
+            }
+            try (var defaultParser = new YamlParser(); var inputStream = new ByteArrayInputStream(bytes)) {
+                assertThrows(YamlParsingException.class, () -> defaultParser.parse(inputStream, TestConfigWithEnum.class));
             }
         }
 
