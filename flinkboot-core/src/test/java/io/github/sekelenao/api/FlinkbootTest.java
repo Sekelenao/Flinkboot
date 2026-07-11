@@ -76,6 +76,13 @@ class FlinkbootTest {
             );
         }
 
+        @Test
+        @DisplayName("Should throw NullPointerException when configurationClass is null")
+        void shouldThrowExceptionWhenConfigurationClassIsNull() {
+            var flinkboot = Flinkboot.initialize(new String[0]);
+            assertThrows(NullPointerException.class, () -> flinkboot.configuration(null));
+        }
+
     }
 
     @Nested

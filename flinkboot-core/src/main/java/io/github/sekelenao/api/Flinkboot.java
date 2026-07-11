@@ -27,6 +27,7 @@ public final class Flinkboot {
     }
 
     public <C> C configuration(Class<C> configurationClass) throws IOException {
+        Objects.requireNonNull(configurationClass);
         var location = startupEnvironment.configurationResourceLocation();
         try(var parser = new YamlParser(); var inputStream = Resource.get(location).inputStream()) {
             return parser.parse(inputStream, configurationClass);
