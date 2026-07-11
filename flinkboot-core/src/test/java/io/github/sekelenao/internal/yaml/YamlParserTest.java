@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.github.sekelenao.api.exception.configuration.ConfigurationException;
+import io.github.sekelenao.api.exception.configuration.ConfigurationValidationException;
 import io.github.sekelenao.api.exception.configuration.YamlParsingException;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -69,13 +69,13 @@ class YamlParserTest {
         }
 
         @Test
-        @DisplayName("Should throw ConfigurationException when validation fails")
+        @DisplayName("Should throw ConfigurationValidationException when validation fails")
         void shouldThrowExceptionWhenValidationFails() {
             var yamlContent = "name: \"\"\nvalue: 0\n";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
 
             try (var parser = new YamlParser()) {
-                var exception = assertThrows(ConfigurationException.class, () -> parser.parse(stream, TestConfig.class));
+                var exception = assertThrows(ConfigurationValidationException.class, () -> parser.parse(stream, TestConfig.class));
                 assertAll(
                     () -> assertNotNull(exception.getMessage(), "Exception message should not be null"),
                     () -> assertTrue(exception.getMessage().contains("name"), "Exception message should mention the invalid 'name' field"),

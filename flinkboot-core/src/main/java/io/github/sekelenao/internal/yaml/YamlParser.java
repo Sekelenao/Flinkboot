@@ -1,7 +1,7 @@
 package io.github.sekelenao.internal.yaml;
 
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import io.github.sekelenao.api.exception.configuration.ConfigurationException;
+import io.github.sekelenao.api.exception.configuration.ConfigurationValidationException;
 import io.github.sekelenao.api.exception.configuration.YamlParsingException;
 import jakarta.validation.Validation;
 import jakarta.validation.ValidatorFactory;
@@ -27,7 +27,7 @@ public final class YamlParser implements AutoCloseable {
                 var message = violations.stream().limit(3)
                     .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
                     .collect(Collectors.joining(", "));
-                throw new ConfigurationException(message);
+                throw new ConfigurationValidationException(message);
             }
             return yaml;
         } catch (IOException exception) {

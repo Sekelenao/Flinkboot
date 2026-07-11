@@ -2,7 +2,6 @@ package io.github.sekelenao.internal.resource;
 
 import io.github.sekelenao.api.exception.resource.UnrecognizedResourceException;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
@@ -25,6 +24,6 @@ public interface Resource {
         throw new UnrecognizedResourceException(location);
     }
 
-    InputStream inputStream() throws IOException;
+    InputStream inputStream();
 
 }
