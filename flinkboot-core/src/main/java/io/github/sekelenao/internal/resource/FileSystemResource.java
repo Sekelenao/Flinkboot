@@ -21,6 +21,9 @@ public class FileSystemResource implements Resource {
     @Override
     public InputStream inputStream() {
         var path = Paths.get(location);
+        if(Files.isDirectory(path)) {
+            throw new ResourceAccessException(location + " is a directory, not a readable resource");
+        }
         try {
             return Files.newInputStream(path);
         } catch (NoSuchFileException exception) {

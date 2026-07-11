@@ -21,9 +21,9 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.core.JacksonException;
 
 @DisplayName("YamlParser")
-class YamlParserTest {
+public class YamlParserTest {
 
-    private static final class TestConfig {
+    static final class TestConfig {
         @NotBlank
         private final String name;
 
@@ -77,9 +77,9 @@ class YamlParserTest {
             try (var parser = new YamlParser()) {
                 var exception = assertThrows(ConfigurationValidationException.class, () -> parser.parse(stream, TestConfig.class));
                 assertAll(
-                    () -> assertNotNull(exception.getMessage(), "Exception message should not be null"),
-                    () -> assertTrue(exception.getMessage().contains("name"), "Exception message should mention the invalid 'name' field"),
-                    () -> assertTrue(exception.getMessage().contains("value"), "Exception message should mention the invalid 'value' field")
+                    () -> assertNotNull(exception.getMessage()),
+                    () -> assertTrue(exception.getMessage().contains("name")),
+                    () -> assertTrue(exception.getMessage().contains("value"))
                 );
             }
         }

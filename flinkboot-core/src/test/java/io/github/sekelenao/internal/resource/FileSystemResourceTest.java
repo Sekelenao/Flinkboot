@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import io.github.sekelenao.api.exception.resource.ResourceAccessException;
 import io.github.sekelenao.api.exception.resource.ResourceNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -36,4 +37,12 @@ class FileSystemResourceTest {
         var resource = new FileSystemResource("/non/existent/path/file.yaml");
         assertThrows(ResourceNotFoundException.class, resource::inputStream);
     }
+
+    @Test
+    @DisplayName("Should throw ResourceAccessException when location is a directory")
+    void shouldThrowResourceAccessExceptionWhenIsDirectory(@TempDir Path tempDir) {
+        var resource = new FileSystemResource(tempDir.toAbsolutePath().toString());
+        assertThrows(ResourceAccessException.class, resource::inputStream);
+    }
+
 }

@@ -14,4 +14,5 @@ module io.github.sekelenao.flinkboot {
     requires static flink.streaming.java;
 
     opens io.github.sekelenao.internal.yaml to com.fasterxml.jackson.databind, org.hibernate.validator;
+    opens io.github.sekelenao.api to com.fasterxml.jackson.databind, org.hibernate.validator;
 }
