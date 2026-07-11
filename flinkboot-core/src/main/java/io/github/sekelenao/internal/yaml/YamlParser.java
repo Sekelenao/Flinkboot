@@ -1,5 +1,6 @@
 package io.github.sekelenao.internal.yaml;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.github.sekelenao.api.exception.configuration.ConfigurationValidationException;
 import io.github.sekelenao.api.exception.configuration.YamlParsingException;
@@ -15,7 +16,17 @@ public final class YamlParser implements AutoCloseable {
 
     private final ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
 
-    private final YAMLMapper mapper = new YAMLMapper();
+    private final YAMLMapper mapper;
+
+    public YamlParser() {
+        this.mapper = YAMLMapper.builder()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .build();
+    }
+
+    public YamlParser(YAMLMapper.Builder builder) {
+        this.mapper = Objects.requireNonNull(builder.build());
+    }
 
     public <Y> Y parse(InputStream source, Class<Y> clazz) {
         Objects.requireNonNull(source);

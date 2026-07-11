@@ -69,6 +69,22 @@ public class YamlParserTest {
         }
 
         @Test
+        @DisplayName("Should successfully parse YAML with unknown properties")
+        void shouldParseWithUnknownProperties() {
+            var yamlContent = "name: \"Flink Job\"\nvalue: 42\nextraField: \"ignoredValue\"\n";
+            var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
+
+            try (var parser = new YamlParser()) {
+                var config = parser.parse(stream, TestConfig.class);
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertEquals("Flink Job", config.name()),
+                    () -> assertEquals(42, config.value())
+                );
+            }
+        }
+
+        @Test
         @DisplayName("Should parse twice in separate instances")
         void shouldParseTwice() {
             var yamlContent = "name: \"Flink Job\"\nvalue: 42\n";
