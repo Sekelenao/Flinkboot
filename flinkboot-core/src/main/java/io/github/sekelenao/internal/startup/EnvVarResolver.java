@@ -3,17 +3,20 @@ package io.github.sekelenao.internal.startup;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 public final class EnvVarResolver {
 
-    private EnvVarResolver(){
-        throw new AssertionError("You cannot instantiate this class");
+    private final UnaryOperator<String> getter;
+
+    public EnvVarResolver(UnaryOperator<String> getter){
+        this.getter = Objects.requireNonNull(getter);
     }
 
-    public static Optional<String> get(String key){
+    public Optional<String> get(String key){
         Objects.requireNonNull(key);
         var varName = key.replaceAll("[-.]", "_").toUpperCase(Locale.ROOT);
-        return Optional.ofNullable(System.getenv(varName));
+        return Optional.ofNullable(getter.apply(varName));
     }
 
 }
