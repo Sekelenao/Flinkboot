@@ -8,14 +8,14 @@ import org.opentest4j.AssertionFailedError;
 
 import java.util.stream.Stream;
 
-import static io.github.sekelenao.flinkboot.test.FlinkbootAssertions.isPojo;
+import static io.github.sekelenao.flinkboot.test.FlinkbootTest.assertPojo;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Assertions")
-class FlinkbootAssertionsTest {
+class FlinkbootTestTest {
 
     // --- Valid POJO Variant ---
     public static class ValidPojo {
@@ -121,26 +121,26 @@ class FlinkbootAssertionsTest {
     @MethodSource("validPojoProvider")
     @DisplayName("Should pass when class is a valid POJO")
     void shouldPassWhenValidPojo(Class<?> validPojoClass) {
-        isPojo(validPojoClass);
+        assertPojo(validPojoClass);
     }
 
     @ParameterizedTest
     @MethodSource("invalidPojoProvider")
     @DisplayName("Should fail when class is not a valid POJO")
     void shouldFailWhenInvalidPojo(Class<?> invalidPojoClass) {
-        assertThrows(AssertionFailedError.class, () -> isPojo(invalidPojoClass));
+        assertThrows(AssertionFailedError.class, () -> assertPojo(invalidPojoClass));
     }
 
     @Test
     @DisplayName("Should throw NullPointerException when class is null")
     void shouldThrowExceptionWhenClassIsNull() {
-        assertThrows(NullPointerException.class, () -> isPojo(null));
+        assertThrows(NullPointerException.class, () -> assertPojo(null));
     }
 
     @Test
     @DisplayName("Should have private constructor that throws AssertionError to prevent instantiation")
     void shouldPreventInstantiation() throws Exception {
-        var constructor = FlinkbootAssertions.class.getDeclaredConstructor();
+        var constructor = FlinkbootTest.class.getDeclaredConstructor();
         assertTrue(java.lang.reflect.Modifier.isPrivate(constructor.getModifiers()), "Constructor should be private");
         constructor.setAccessible(true);
         var exception = assertThrows(java.lang.reflect.InvocationTargetException.class, constructor::newInstance);

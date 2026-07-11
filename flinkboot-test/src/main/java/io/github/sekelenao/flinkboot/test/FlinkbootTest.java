@@ -6,13 +6,13 @@ import org.junit.jupiter.api.Assertions;
 
 import java.util.Objects;
 
-public final class FlinkbootAssertions {
+public final class FlinkbootTest {
 
-    private FlinkbootAssertions() {
+    private FlinkbootTest() {
        throw new AssertionError("You cannot instantiate this class");
     }
 
-    public static void isPojo(Class<?> clazz) {
+    public static void assertPojo(Class<?> clazz) {
         Objects.requireNonNull(clazz, "Class to assert must not be null");
         var typeInfo = TypeExtractor.createTypeInfo(clazz);
         Assertions.assertInstanceOf(PojoTypeInfo.class, typeInfo, () -> String.format(
