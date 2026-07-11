@@ -1,6 +1,7 @@
 package io.github.sekelenao.internal.yaml;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.github.sekelenao.api.exception.configuration.ConfigurationValidationException;
 import io.github.sekelenao.api.exception.configuration.YamlParsingException;
@@ -10,6 +11,7 @@ import jakarta.validation.ValidatorFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public final class YamlParser implements AutoCloseable {
@@ -19,13 +21,21 @@ public final class YamlParser implements AutoCloseable {
     private final YAMLMapper mapper;
 
     public YamlParser() {
-        this.mapper = YAMLMapper.builder()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .build();
+        this(additionalConfiguration -> {});
     }
 
-    public YamlParser(YAMLMapper.Builder builder) {
-        this.mapper = Objects.requireNonNull(builder.build());
+    public YamlParser(Consumer<YAMLMapper.Builder> additionalConfiguration) {
+        Objects.requireNonNull(additionalConfiguration);
+        var builder = YAMLMapper.builder()
+            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
+            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        additionalConfiguration.accept(builder);
+        this.mapper = builder.build();
+    }
+
+    public YamlParser(YAMLMapper mapper){
+        this.mapper = Objects.requireNonNull(mapper);
     }
 
     public <Y> Y parse(InputStream source, Class<Y> clazz) {

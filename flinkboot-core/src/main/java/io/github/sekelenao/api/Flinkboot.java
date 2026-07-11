@@ -8,6 +8,7 @@ import io.github.sekelenao.internal.yaml.YamlParser;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public final class Flinkboot {
 
@@ -35,11 +36,11 @@ public final class Flinkboot {
         }
     }
 
-    public <C> C configuration(Class<C> configurationClass, YAMLMapper.Builder builder) throws IOException {
+    public <C> C configuration(Class<C> configurationClass, Consumer<YAMLMapper.Builder> customizer) throws IOException {
         Objects.requireNonNull(configurationClass);
-        Objects.requireNonNull(builder);
+        Objects.requireNonNull(customizer);
         var location = startupEnvironment.configurationResourceLocation();
-        try(var parser = new YamlParser(builder); var inputStream = Resource.get(location).inputStream()) {
+        try(var parser = new YamlParser(customizer); var inputStream = Resource.get(location).inputStream()) {
             return parser.parse(inputStream, configurationClass);
         }
     }

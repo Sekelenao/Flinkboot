@@ -1,27 +1,49 @@
 package io.github.sekelenao.internal.yaml;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.github.sekelenao.api.exception.configuration.ConfigurationValidationException;
 import io.github.sekelenao.api.exception.configuration.YamlParsingException;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import com.fasterxml.jackson.core.JacksonException;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("YamlParser")
 public class YamlParserTest {
+
+    enum JobType {
+        BATCH, STREAMING
+    }
+
+    static final class TestConfigWithEnum {
+        private final JobType type;
+
+        @JsonCreator
+        public TestConfigWithEnum(@JsonProperty("type") JobType type) {
+            this.type = type;
+        }
+
+        public JobType type() {
+            return type;
+        }
+    }
 
     static final class TestConfig {
         @NotBlank
@@ -52,12 +74,15 @@ public class YamlParserTest {
     @DisplayName("Parse")
     class Parse {
 
-        @Test
-        @DisplayName("Should parse valid YAML configuration correctly")
-        void shouldParseValidYaml() {
-            var yamlContent = "name: \"Flink Job\"\nvalue: 42\n";
+        @ParameterizedTest
+        @ValueSource(strings = {
+            "name: \"Flink Job\"\nvalue: 42\n",
+            "name: \"Flink Job\"\nvalue: 42\nextraField: \"ignoredValue\"\n",
+            "NAME: \"Flink Job\"\nVALUE: 42\n"
+        })
+        @DisplayName("Should successfully parse YAML configuration with standard, unknown, or case-insensitive properties")
+        void shouldParseYamlConfigurations(String yamlContent) {
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-
             try (var parser = new YamlParser()) {
                 var config = parser.parse(stream, TestConfig.class);
                 assertAll(
@@ -69,17 +94,31 @@ public class YamlParserTest {
         }
 
         @Test
-        @DisplayName("Should successfully parse YAML with unknown properties")
-        void shouldParseWithUnknownProperties() {
-            var yamlContent = "name: \"Flink Job\"\nvalue: 42\nextraField: \"ignoredValue\"\n";
+        @DisplayName("Should successfully parse YAML with case-insensitive enums by default")
+        void shouldParseCaseInsensitiveEnums() {
+            var yamlContent = "type: \"streaming\"\n";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
 
             try (var parser = new YamlParser()) {
-                var config = parser.parse(stream, TestConfig.class);
+                var config = parser.parse(stream, TestConfigWithEnum.class);
                 assertAll(
                     () -> assertNotNull(config),
-                    () -> assertEquals("Flink Job", config.name()),
-                    () -> assertEquals(42, config.value())
+                    () -> assertEquals(JobType.STREAMING, config.type())
+                );
+            }
+        }
+
+        @Test
+        @DisplayName("Should apply custom mapper configuration via builder consumer")
+        void shouldApplyCustomConfiguration() {
+            var yamlContent = "type: \"INVALID_TYPE\"\n";
+            var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
+
+            try (var parser = new YamlParser(builder -> builder.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true))) {
+                var config = parser.parse(stream, TestConfigWithEnum.class);
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertNull(config.type())
                 );
             }
         }
