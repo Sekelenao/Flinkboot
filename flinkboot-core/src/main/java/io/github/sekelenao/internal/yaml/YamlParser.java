@@ -22,6 +22,9 @@ public final class YamlParser implements AutoCloseable {
         Objects.requireNonNull(clazz);
         try {
             var yaml = mapper.readValue(source, clazz);
+            if (yaml == null) {
+                throw new YamlParsingException("Parsing resulted to null for configuration class: " + clazz.getName());
+            }
             var violations = validatorFactory.getValidator().validate(yaml);
             if(!violations.isEmpty()){
                 var message = violations.stream().limit(3)

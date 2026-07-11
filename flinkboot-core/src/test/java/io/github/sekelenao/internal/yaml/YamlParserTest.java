@@ -126,5 +126,26 @@ public class YamlParserTest {
                 );
             }
         }
+
+        @Test
+        @DisplayName("Should throw YamlParsingException when YAML is empty")
+        void shouldThrowExceptionWhenYamlIsEmpty() {
+            var yamlContent = "";
+            var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
+
+            try (var parser = new YamlParser()) {
+                assertThrows(YamlParsingException.class, () -> parser.parse(stream, TestConfig.class));
+            }
+        }
+
+        @Test
+        @DisplayName("Should throw YamlParsingException when YAML resolves to null")
+        void shouldThrowExceptionWhenYamlIsNullLiteral() {
+            var yamlContent = "null";
+            var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
+            try (var parser = new YamlParser()) {
+                assertThrows(YamlParsingException.class, () -> parser.parse(stream, TestConfig.class));
+            }
+        }
     }
 }
