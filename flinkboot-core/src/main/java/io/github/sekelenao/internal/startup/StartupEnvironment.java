@@ -3,6 +3,7 @@ package io.github.sekelenao.internal.startup;
 import io.github.sekelenao.internal.annotation.VisibleForTesting;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public final class StartupEnvironment {
 
@@ -22,11 +23,12 @@ public final class StartupEnvironment {
         this.envVarResolver = Objects.requireNonNull(envVarResolver);
     }
 
+    public Optional<String> get(String key){
+        return commandLine.option(key).or(() -> envVarResolver.get(key));
+    }
+
     public String configurationResourceLocation(){
-        var key = "flinkboot-configuration";
-        return commandLine.option(key)
-            .or(() -> envVarResolver.get(key))
-            .orElse("file:job-configuration.yaml");
+        return get("flinkboot-configuration").orElse("file:job-configuration.yaml");
     }
 
 }

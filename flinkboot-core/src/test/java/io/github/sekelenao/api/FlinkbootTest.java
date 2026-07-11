@@ -2,8 +2,6 @@ package io.github.sekelenao.api;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.github.sekelenao.api.exception.configuration.ConfigurationValidationException;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -71,12 +69,38 @@ class FlinkbootTest {
             Files.writeString(file, YAML);
             var args = new String[]{"-flinkboot-configuration", "file:" + file.toAbsolutePath()};
             var flinkboot = Flinkboot.initialize(args);
-            var config = flinkboot.loadConfiguration(TestConfig.class);
+            var config = flinkboot.configuration(TestConfig.class);
             assertAll(
                 () -> assertNotNull(config),
                 () -> assertEquals(YAML_VALUE, config.name())
             );
         }
 
+    }
+
+    @Nested
+    @DisplayName("Parameter")
+    class Parameter {
+
+        @Test
+        @DisplayName("Should throw NullPointerException when parameter name is null")
+        void shouldThrowExceptionWhenParameterNameIsNull() {
+            var flinkboot = Flinkboot.initialize(new String[0]);
+            assertThrows(NullPointerException.class, () -> flinkboot.parameter(null));
+        }
+
+        @Test
+        @DisplayName("Should return empty Optional when parameter is absent")
+        void shouldReturnEmptyWhenParameterAbsent() {
+            var flinkboot = Flinkboot.initialize(new String[0]);
+            org.junit.jupiter.api.Assertions.assertTrue(flinkboot.parameter("any-param").isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should return parameter value when present in command line arguments")
+        void shouldReturnParameterFromCommandLine() {
+            var flinkboot = Flinkboot.initialize(new String[]{"-my-param", "my-value"});
+            assertEquals("my-value", flinkboot.parameter("my-param").orElseThrow());
+        }
     }
 }

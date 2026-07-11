@@ -70,4 +70,45 @@ class StartupEnvironmentTest {
             assertEquals("file:job-configuration.yaml", startupEnv.configurationResourceLocation());
         }
     }
+
+    @Nested
+    @DisplayName("Get")
+    class Get {
+
+        @Test
+        @DisplayName("Should return parameter value from CommandLine when present")
+        void shouldReturnFromCommandLine() {
+            var cmd = CommandLine.parse(new String[]{"-key", "value"});
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertEquals("value", startupEnv.get("key").orElseThrow());
+        }
+
+        @Test
+        @DisplayName("Should return parameter value from EnvVarResolver when not in CommandLine but in env")
+        void shouldReturnFromEnvVar() {
+            var cmd = CommandLine.parse(new String[0]);
+            var resolver = new EnvVarResolver(k -> "env-value");
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertEquals("env-value", startupEnv.get("key").orElseThrow());
+        }
+
+        @Test
+        @DisplayName("Should prefer CommandLine option over EnvVarResolver")
+        void shouldPreferCommandLineOverEnv() {
+            var cmd = CommandLine.parse(new String[]{"-key", "cli-value"});
+            var resolver = new EnvVarResolver(k -> "env-value");
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertEquals("cli-value", startupEnv.get("key").orElseThrow());
+        }
+
+        @Test
+        @DisplayName("Should return empty Optional when key is absent everywhere")
+        void shouldReturnEmptyWhenAbsent() {
+            var cmd = CommandLine.parse(new String[0]);
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            org.junit.jupiter.api.Assertions.assertTrue(startupEnv.get("key").isEmpty());
+        }
+    }
 }

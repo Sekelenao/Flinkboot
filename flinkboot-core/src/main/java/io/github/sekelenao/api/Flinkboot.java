@@ -6,6 +6,7 @@ import io.github.sekelenao.internal.yaml.YamlParser;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Optional;
 
 public final class Flinkboot {
 
@@ -20,7 +21,12 @@ public final class Flinkboot {
         return new Flinkboot(args);
     }
 
-    public <C> C loadConfiguration(Class<C> configurationClass) throws IOException {
+    public Optional<String> parameter(String parameter){
+        Objects.requireNonNull(parameter);
+        return startupEnvironment.get(parameter);
+    }
+
+    public <C> C configuration(Class<C> configurationClass) throws IOException {
         var location = startupEnvironment.configurationResourceLocation();
         try(var parser = new YamlParser(); var inputStream = Resource.get(location).inputStream()) {
             return parser.parse(inputStream, configurationClass);
