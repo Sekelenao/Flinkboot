@@ -9,7 +9,10 @@ import org.opentest4j.AssertionFailedError;
 import java.util.stream.Stream;
 
 import static io.github.sekelenao.flinkboot.test.FlinkbootAssertions.isPojo;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Assertions")
 class FlinkbootAssertionsTest {
@@ -132,6 +135,17 @@ class FlinkbootAssertionsTest {
     @DisplayName("Should throw NullPointerException when class is null")
     void shouldThrowExceptionWhenClassIsNull() {
         assertThrows(NullPointerException.class, () -> isPojo(null));
+    }
+
+    @Test
+    @DisplayName("Should have private constructor that throws AssertionError to prevent instantiation")
+    void shouldPreventInstantiation() throws Exception {
+        var constructor = FlinkbootAssertions.class.getDeclaredConstructor();
+        assertTrue(java.lang.reflect.Modifier.isPrivate(constructor.getModifiers()), "Constructor should be private");
+        constructor.setAccessible(true);
+        var exception = assertThrows(java.lang.reflect.InvocationTargetException.class, constructor::newInstance);
+        assertInstanceOf(AssertionError.class, exception.getCause());
+        assertTrue(exception.getCause().getMessage().contains("You cannot instantiate this class"));
     }
 
 }
