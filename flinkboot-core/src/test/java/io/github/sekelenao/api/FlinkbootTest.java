@@ -2,6 +2,7 @@ package io.github.sekelenao.api;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import jakarta.validation.constraints.NotBlank;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -77,10 +79,46 @@ class FlinkbootTest {
         }
 
         @Test
-        @DisplayName("Should throw NullPointerException when configurationClass is null")
-        void shouldThrowExceptionWhenConfigurationClassIsNull() {
+        @DisplayName("Should successfully load configuration using builder customizer")
+        void shouldLoadConfigurationWithCustomizer(@TempDir Path tempDir) throws IOException {
+            var file = tempDir.resolve("config.yaml");
+            Files.writeString(file, YAML);
+            var args = new String[]{"-flinkboot-configuration", "file:" + file.toAbsolutePath()};
+            var flinkboot = Flinkboot.initialize(args);
+            var config = flinkboot.configuration(TestConfig.class, builder -> {});
+            assertAll(
+                () -> assertNotNull(config),
+                () -> assertEquals(YAML_VALUE, config.name())
+            );
+        }
+
+        @Test
+        @DisplayName("Should successfully load configuration using custom YAMLMapper")
+        void shouldLoadConfigurationWithCustomMapper(@TempDir Path tempDir) throws IOException {
+            var file = tempDir.resolve("config.yaml");
+            Files.writeString(file, YAML);
+            var args = new String[]{"-flinkboot-configuration", "file:" + file.toAbsolutePath()};
+            var flinkboot = Flinkboot.initialize(args);
+            var customMapper = new YAMLMapper();
+            var config = flinkboot.configuration(TestConfig.class, customMapper);
+            assertAll(
+                () -> assertNotNull(config),
+                () -> assertEquals(YAML_VALUE, config.name())
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when parameters are null")
+        void shouldThrowExceptionWhenParamsAreNull() {
             var flinkboot = Flinkboot.initialize(new String[0]);
-            assertThrows(NullPointerException.class, () -> flinkboot.configuration(null));
+            var mapper = new YAMLMapper();
+            assertAll(
+                () -> assertThrows(NullPointerException.class, () -> flinkboot.configuration(null)),
+                () -> assertThrows(NullPointerException.class, () -> flinkboot.configuration(TestConfig.class, (Consumer<YAMLMapper.Builder>) null)),
+                () -> assertThrows(NullPointerException.class, () -> flinkboot.configuration(null, builder -> {})),
+                () -> assertThrows(NullPointerException.class, () -> flinkboot.configuration(TestConfig.class, (YAMLMapper) null)),
+                () -> assertThrows(NullPointerException.class, () -> flinkboot.configuration(null, mapper))
+            );
         }
 
     }

@@ -1,13 +1,14 @@
 package io.github.sekelenao.internal.resource;
 
+import io.github.sekelenao.api.exception.resource.ResourceNotFoundException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import io.github.sekelenao.api.exception.resource.ResourceNotFoundException;
-import java.io.IOException;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 
 @DisplayName("ClasspathResource")
 class ClasspathResourceTest {

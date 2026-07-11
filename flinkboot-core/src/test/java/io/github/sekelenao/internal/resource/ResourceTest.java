@@ -1,16 +1,12 @@
 package io.github.sekelenao.internal.resource;
 
+import io.github.sekelenao.api.exception.resource.UnrecognizedResourceException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import io.github.sekelenao.api.exception.resource.UnrecognizedResourceException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 @DisplayName("Resource Factory")
 class ResourceTest {

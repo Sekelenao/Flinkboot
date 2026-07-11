@@ -45,4 +45,13 @@ public final class Flinkboot {
         }
     }
 
+    public <C> C configuration(Class<C> configurationClass, YAMLMapper mapper) throws IOException {
+        Objects.requireNonNull(configurationClass);
+        Objects.requireNonNull(mapper);
+        var location = startupEnvironment.configurationResourceLocation();
+        try(var parser = new YamlParser(mapper); var inputStream = Resource.get(location).inputStream()) {
+            return parser.parse(inputStream, configurationClass);
+        }
+    }
+
 }
