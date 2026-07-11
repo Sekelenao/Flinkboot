@@ -3,7 +3,7 @@ package io.github.sekelenao.flinkboot.core.api;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.github.sekelenao.flinkboot.core.internal.resource.Resource;
 import io.github.sekelenao.flinkboot.core.internal.startup.StartupEnvironment;
-import io.github.sekelenao.flinkboot.core.internal.yaml.YamlParser;
+import io.github.sekelenao.flinkboot.core.internal.parser.YamlParser;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -21,6 +21,11 @@ public final class Flinkboot {
     public static Flinkboot initialize(String[] args){
         Objects.requireNonNull(args);
         return new Flinkboot(args);
+    }
+
+    public boolean flag(String flag){
+        Objects.requireNonNull(flag);
+        return startupEnvironment.flag(flag);
     }
 
     public Optional<String> parameter(String parameter){

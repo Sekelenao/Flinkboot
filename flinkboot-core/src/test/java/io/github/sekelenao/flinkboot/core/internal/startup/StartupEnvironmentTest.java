@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -89,7 +90,8 @@ class StartupEnvironmentTest {
         @DisplayName("Should return parameter value from EnvVarResolver when not in CommandLine but in env")
         void shouldReturnFromEnvVar() {
             var cmd = CommandLine.parse(new String[0]);
-            var resolver = new EnvVarResolver(k -> "env-value");
+            var env = Map.of("KEY", "env-value");
+            var resolver = new EnvVarResolver(env::get);
             var startupEnv = new StartupEnvironment(cmd, resolver);
             assertEquals("env-value", startupEnv.get("key").orElseThrow());
         }
@@ -98,7 +100,8 @@ class StartupEnvironmentTest {
         @DisplayName("Should prefer CommandLine option over EnvVarResolver")
         void shouldPreferCommandLineOverEnv() {
             var cmd = CommandLine.parse(new String[]{"-key", "cli-value"});
-            var resolver = new EnvVarResolver(k -> "env-value");
+            var env = Map.of("KEY", "env-value");
+            var resolver = new EnvVarResolver(env::get);
             var startupEnv = new StartupEnvironment(cmd, resolver);
             assertEquals("cli-value", startupEnv.get("key").orElseThrow());
         }
@@ -110,6 +113,58 @@ class StartupEnvironmentTest {
             var resolver = new EnvVarResolver(k -> null);
             var startupEnv = new StartupEnvironment(cmd, resolver);
             assertTrue(startupEnv.get("key").isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("Flag")
+    class Flag {
+
+        @Test
+        @DisplayName("Should throw NullPointerException when flag is null")
+        void shouldThrowExceptionWhenFlagIsNull() {
+            var cmd = CommandLine.parse(new String[0]);
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertThrows(NullPointerException.class, () -> startupEnv.flag(null));
+        }
+
+        @Test
+        @DisplayName("Should return true when flag is present in CommandLine")
+        void shouldReturnTrueWhenFlagInCommandLine() {
+            var cmd = CommandLine.parse(new String[]{"--my-flag"});
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertTrue(startupEnv.flag("my-flag"));
+        }
+
+        @Test
+        @DisplayName("Should return true when flag is not in CommandLine but in EnvVarResolver as true")
+        void shouldReturnTrueWhenFlagInEnvAsTrue() {
+            var cmd = CommandLine.parse(new String[0]);
+            var env = Map.of("MY_FLAG", "TrUe");
+            var resolver = new EnvVarResolver(env::get);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertTrue(startupEnv.flag("my-flag"));
+        }
+
+        @Test
+        @DisplayName("Should return false when flag is not in CommandLine but in EnvVarResolver as false")
+        void shouldReturnFalseWhenFlagInEnvAsFalse() {
+            var cmd = CommandLine.parse(new String[0]);
+            var env = Map.of("MY_FLAG", "false");
+            var resolver = new EnvVarResolver(env::get);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertFalse(startupEnv.flag("my-flag"));
+        }
+
+        @Test
+        @DisplayName("Should return false when flag is absent everywhere")
+        void shouldReturnFalseWhenFlagAbsent() {
+            var cmd = CommandLine.parse(new String[0]);
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertFalse(startupEnv.flag("my-flag"));
         }
     }
 }

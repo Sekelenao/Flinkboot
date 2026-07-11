@@ -1,4 +1,4 @@
-package io.github.sekelenao.flinkboot.core.internal.yaml;
+package io.github.sekelenao.flinkboot.core.internal.parser;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;

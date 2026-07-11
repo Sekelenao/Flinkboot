@@ -23,6 +23,11 @@ public final class StartupEnvironment {
         this.envVarResolver = Objects.requireNonNull(envVarResolver);
     }
 
+    public boolean flag(String flag){
+        Objects.requireNonNull(flag);
+        return commandLine.flag(flag) || envVarResolver.get(flag).map(Boolean::parseBoolean).orElse(Boolean.FALSE);
+    }
+
     public Optional<String> get(String key){
         return commandLine.option(key).or(() -> envVarResolver.get(key));
     }

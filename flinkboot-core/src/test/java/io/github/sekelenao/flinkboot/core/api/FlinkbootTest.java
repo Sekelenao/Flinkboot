@@ -16,8 +16,10 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Flinkboot")
 class FlinkbootTest {
@@ -138,7 +140,7 @@ class FlinkbootTest {
         @DisplayName("Should return empty Optional when parameter is absent")
         void shouldReturnEmptyWhenParameterAbsent() {
             var flinkboot = Flinkboot.initialize(new String[0]);
-            org.junit.jupiter.api.Assertions.assertTrue(flinkboot.parameter("any-param").isEmpty());
+            assertTrue(flinkboot.parameter("any-param").isEmpty());
         }
 
         @Test
@@ -146,6 +148,32 @@ class FlinkbootTest {
         void shouldReturnParameterFromCommandLine() {
             var flinkboot = Flinkboot.initialize(new String[]{"-my-param", "my-value"});
             assertEquals("my-value", flinkboot.parameter("my-param").orElseThrow());
+        }
+    }
+
+    @Nested
+    @DisplayName("Flag")
+    class Flag {
+
+        @Test
+        @DisplayName("Should throw NullPointerException when flag name is null")
+        void shouldThrowExceptionWhenFlagNameIsNull() {
+            var flinkboot = Flinkboot.initialize(new String[0]);
+            assertThrows(NullPointerException.class, () -> flinkboot.flag(null));
+        }
+
+        @Test
+        @DisplayName("Should return true when flag is present in command line arguments")
+        void shouldReturnTrueWhenFlagInCommandLine() {
+            var flinkboot = Flinkboot.initialize(new String[]{"--my-flag"});
+            assertTrue(flinkboot.flag("my-flag"));
+        }
+
+        @Test
+        @DisplayName("Should return false when flag is absent")
+        void shouldReturnFalseWhenFlagAbsent() {
+            var flinkboot = Flinkboot.initialize(new String[0]);
+            assertFalse(flinkboot.flag("my-flag"));
         }
     }
 }
