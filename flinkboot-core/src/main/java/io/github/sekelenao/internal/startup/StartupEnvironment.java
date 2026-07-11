@@ -1,5 +1,7 @@
 package io.github.sekelenao.internal.startup;
 
+import io.github.sekelenao.internal.annotation.VisibleForTesting;
+
 import java.util.Objects;
 
 public final class StartupEnvironment {
@@ -14,10 +16,7 @@ public final class StartupEnvironment {
         this.envVarResolver = new EnvVarResolver(System::getenv);
     }
 
-    /**
-     * Testing-only constructor allowing injection of a controlled environment.
-     * Not part of the public API.
-     */
+    @VisibleForTesting
     StartupEnvironment(CommandLine commandLine, EnvVarResolver envVarResolver){
         this.commandLine = Objects.requireNonNull(commandLine);
         this.envVarResolver = Objects.requireNonNull(envVarResolver);
@@ -27,7 +26,7 @@ public final class StartupEnvironment {
         var key = "flinkboot-configuration";
         return commandLine.option(key)
             .or(() -> envVarResolver.get(key))
-            .orElse("file:job.yaml");
+            .orElse("file:job-configuration.yaml");
     }
 
 }

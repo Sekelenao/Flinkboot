@@ -71,7 +71,7 @@ class StartupEnvironmentTest {
             var cmd = CommandLine.parse(new String[0]);
             var resolver = new EnvVarResolver(key -> null);
             var startupEnv = new StartupEnvironment(cmd, resolver);
-            assertEquals("file:job.yaml", startupEnv.configurationResourceLocation());
+            assertEquals("file:job-configuration.yaml", startupEnv.configurationResourceLocation());
         }
     }
 }
