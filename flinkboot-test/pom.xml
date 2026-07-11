@@ -21,12 +21,6 @@
 
     <dependencies>
 
-        <!-- Flinkboot Core -->
-        <dependency>
-            <groupId>io.github.sekelenao</groupId>
-            <artifactId>flinkboot-core</artifactId>
-        </dependency>
-
         <!-- Flink dependencies -->
         <dependency>
             <groupId>org.apache.flink</groupId>
@@ -38,7 +32,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
+            <scope>compile</scope>
         </dependency>
 
     </dependencies>
