@@ -129,3 +129,14 @@ After all configurations have been merged, Flinkboot validates the final object 
 - If validation fails, Flinkboot throws a `ConfigurationValidationException` listing up to 3 violation details.
 - If a file is completely empty or contains only comments, it is safely ignored during merging.
 - If the configuration source is non-empty but does not resolve to a root YAML object (e.g., a YAML list or primitive value), a `YamlParsingException` is thrown.
+
+---
+
+## 4. Default Parser Settings
+
+By default, Flinkboot's parser configures the underlying `YAMLMapper` with the following behaviors:
+
+- **Strict Property Parsing** — Any property defined in your YAML that is not declared in your Java class will cause a `YamlParsingException`. This helps catch spelling mistakes immediately at startup.
+- **Case-Insensitive Properties** — Property keys in YAML are resolved case-insensitively (e.g., `parallelism` and `PARALLELISM` both map to the class field `parallelism`).
+- **Case-Insensitive Enums** — Deserialized enum values are matched case-insensitively (e.g., the string `"streaming"` maps to `JobType.STREAMING`).
+- **Automatic Module Discovery** — Flinkboot calls `.findAndAddModules()` on the mapper builder. Any Jackson modules available on the classpath (e.g., for Java 8 date/time libraries, parameter names, or custom types) are automatically registered.
