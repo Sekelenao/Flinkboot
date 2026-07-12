@@ -2,6 +2,9 @@
 
 In Flinkboot, a **flag** is a simple boolean switch. It allows you to enable or disable features or modes (such as a debug mode, a dry-run mode, etc.). By default, if the flag is not provided, its value is `false`.
 
+> [!IMPORTANT]
+> Before defining your custom flags, please check the [Reserved Keys](reserved-keys.md) page to avoid naming collisions with Flinkboot's built-in parameters.
+
 ---
 
 ## 1. Usage in Java Code
