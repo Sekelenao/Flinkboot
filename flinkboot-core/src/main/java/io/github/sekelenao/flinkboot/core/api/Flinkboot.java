@@ -1,9 +1,9 @@
 package io.github.sekelenao.flinkboot.core.api;
 
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import io.github.sekelenao.flinkboot.core.internal.parser.YamlParser;
 import io.github.sekelenao.flinkboot.core.internal.resource.Resource;
 import io.github.sekelenao.flinkboot.core.internal.startup.StartupEnvironment;
-import io.github.sekelenao.flinkboot.core.internal.parser.YamlParser;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -33,29 +33,36 @@ public final class Flinkboot {
         return startupEnvironment.get(parameter);
     }
 
+    private <C> C readConfigurations(Class<C> configurationClass, YamlParser parser) throws IOException {
+        var locations = startupEnvironment.configurationResourceLocations();
+        for (var location : locations){
+            try(var inputStream = Resource.get(location).inputStream()) {
+                parser.parse(inputStream);
+            }
+        }
+        return parser.convertTo(configurationClass);
+    }
+
     public <C> C configuration(Class<C> configurationClass) throws IOException {
         Objects.requireNonNull(configurationClass);
-        var location = startupEnvironment.configurationResourceLocation();
-        try(var parser = new YamlParser(); var inputStream = Resource.get(location).inputStream()) {
-            return parser.parse(inputStream, configurationClass);
+        try(var parser = new YamlParser()) {
+            return readConfigurations(configurationClass, parser);
         }
     }
 
     public <C> C configuration(Class<C> configurationClass, Consumer<YAMLMapper.Builder> customizer) throws IOException {
         Objects.requireNonNull(configurationClass);
         Objects.requireNonNull(customizer);
-        var location = startupEnvironment.configurationResourceLocation();
-        try(var parser = new YamlParser(customizer); var inputStream = Resource.get(location).inputStream()) {
-            return parser.parse(inputStream, configurationClass);
+        try(var parser = new YamlParser(customizer)) {
+            return readConfigurations(configurationClass, parser);
         }
     }
 
     public <C> C configuration(Class<C> configurationClass, YAMLMapper mapper) throws IOException {
         Objects.requireNonNull(configurationClass);
         Objects.requireNonNull(mapper);
-        var location = startupEnvironment.configurationResourceLocation();
-        try(var parser = new YamlParser(mapper); var inputStream = Resource.get(location).inputStream()) {
-            return parser.parse(inputStream, configurationClass);
+        try(var parser = new YamlParser(mapper)) {
+            return readConfigurations(configurationClass, parser);
         }
     }
 

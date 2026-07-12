@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,21 +47,30 @@ class StartupEnvironmentTest {
         @Test
         @DisplayName("Should return CommandLine option value when option is present")
         void shouldReturnCommandLineOptionWhenPresent() {
-            var cmd = CommandLine.parse(new String[]{"-flinkboot-configuration", "custom-config.yaml"});
-            var env = Map.of("FLINKBOOT_CONFIGURATION", "env-config.yaml");
+            var cmd = CommandLine.parse(new String[]{"-flinkboot-configurations", "custom-config.yaml"});
+            var env = Map.of("FLINKBOOT_CONFIGURATIONS", "env-config.yaml");
             var resolver = new EnvVarResolver(env::get);
             var startupEnv = new StartupEnvironment(cmd, resolver);
-            assertEquals("custom-config.yaml", startupEnv.configurationResourceLocation());
+            assertEquals(List.of("custom-config.yaml"), startupEnv.configurationResourceLocations());
+        }
+
+        @Test
+        @DisplayName("Should trim whitespace and filter out empty values in CommandLine option value")
+        void shouldTrimWhitespaceAndFilterEmptyValues() {
+            var cmd = CommandLine.parse(new String[]{"-flinkboot-configurations", "  custom-config1.yaml , , custom-config2.yaml  "});
+            var resolver = new EnvVarResolver(key -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertEquals(List.of("custom-config1.yaml", "custom-config2.yaml"), startupEnv.configurationResourceLocations());
         }
 
         @Test
         @DisplayName("Should return environment variable value when option is not present but env var is set")
         void shouldReturnEnvVarWhenCommandLineOptionAbsent() {
             var cmd = CommandLine.parse(new String[0]);
-            var env = Map.of("FLINKBOOT_CONFIGURATION", "env-config.yaml");
+            var env = Map.of("FLINKBOOT_CONFIGURATIONS", "env-config.yaml");
             var resolver = new EnvVarResolver(env::get);
             var startupEnv = new StartupEnvironment(cmd, resolver);
-            assertEquals("env-config.yaml", startupEnv.configurationResourceLocation());
+            assertEquals(List.of("env-config.yaml"), startupEnv.configurationResourceLocations());
         }
 
         @Test
@@ -69,7 +79,7 @@ class StartupEnvironmentTest {
             var cmd = CommandLine.parse(new String[0]);
             var resolver = new EnvVarResolver(key -> null);
             var startupEnv = new StartupEnvironment(cmd, resolver);
-            assertEquals("file:job-configuration.yaml", startupEnv.configurationResourceLocation());
+            assertEquals(List.of("file:job-configuration.yaml"), startupEnv.configurationResourceLocations());
         }
     }
 

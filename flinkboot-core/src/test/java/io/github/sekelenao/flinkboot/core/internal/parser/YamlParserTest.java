@@ -18,9 +18,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -73,6 +75,19 @@ public class YamlParserTest {
         }
     }
 
+    static final class TestConfigWithList {
+        private final List<String> items;
+
+        @JsonCreator
+        public TestConfigWithList(@JsonProperty("items") List<String> items) {
+            this.items = items;
+        }
+
+        public List<String> items() {
+            return items;
+        }
+    }
+
     @Nested
     @DisplayName("Parse")
     class Parse {
@@ -80,19 +95,30 @@ public class YamlParserTest {
         @ParameterizedTest
         @ValueSource(strings = {
             "name: \"Flink Job\"\nvalue: 42\n",
-            "name: \"Flink Job\"\nvalue: 42\nextraField: \"ignoredValue\"\n",
             "NAME: \"Flink Job\"\nVALUE: 42\n"
         })
-        @DisplayName("Should successfully parse YAML configuration with standard, unknown, or case-insensitive properties")
+        @DisplayName("Should successfully parse YAML configuration with standard or case-insensitive properties")
         void shouldParseYamlConfigurations(String yamlContent) {
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
             try (var parser = new YamlParser()) {
-                var config = parser.parse(stream, TestConfig.class);
+                parser.parse(stream);
+                var config = parser.convertTo(TestConfig.class);
                 assertAll(
                     () -> assertNotNull(config),
                     () -> assertEquals("Flink Job", config.name()),
                     () -> assertEquals(42, config.value())
                 );
+            }
+        }
+
+        @Test
+        @DisplayName("Should throw YamlParsingException when configuration contains unknown properties")
+        void shouldThrowExceptionWhenYamlContainsUnknownProperties() {
+            var yamlContent = "name: \"Flink Job\"\nvalue: 42\nextraField: \"value\"\n";
+            var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
+            try (var parser = new YamlParser()) {
+                parser.parse(stream);
+                assertThrows(YamlParsingException.class, () -> parser.convertTo(TestConfig.class));
             }
         }
 
@@ -103,7 +129,8 @@ public class YamlParserTest {
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
 
             try (var parser = new YamlParser()) {
-                var config = parser.parse(stream, TestConfigWithEnum.class);
+                parser.parse(stream);
+                var config = parser.convertTo(TestConfigWithEnum.class);
                 assertAll(
                     () -> assertNotNull(config),
                     () -> assertEquals(JobType.STREAMING, config.type())
@@ -120,14 +147,16 @@ public class YamlParserTest {
                 builder.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
             };
             try (var customizedParser = new YamlParser(additionalConfigurations); var inputStream = new ByteArrayInputStream(bytes)) {
-                var config = customizedParser.parse(inputStream, TestConfigWithEnum.class);
+                customizedParser.parse(inputStream);
+                var config = customizedParser.convertTo(TestConfigWithEnum.class);
                 assertAll(
                     () -> assertNotNull(config),
                     () -> assertNull(config.type())
                 );
             }
             try (var defaultParser = new YamlParser(); var inputStream = new ByteArrayInputStream(bytes)) {
-                assertThrows(YamlParsingException.class, () -> defaultParser.parse(inputStream, TestConfigWithEnum.class));
+                defaultParser.parse(inputStream);
+                assertThrows(YamlParsingException.class, () -> defaultParser.convertTo(TestConfigWithEnum.class));
             }
         }
 
@@ -137,12 +166,52 @@ public class YamlParserTest {
             var yamlContent = "name: \"Flink Job\"\nvalue: 42\n";
             var bytes = yamlContent.getBytes(StandardCharsets.UTF_8);
             try (var parser1 = new YamlParser()) {
-                var config1 = parser1.parse(new ByteArrayInputStream(bytes), TestConfig.class);
+                parser1.parse(new ByteArrayInputStream(bytes));
+                var config1 = parser1.convertTo(TestConfig.class);
                 assertNotNull(config1);
             }
             try (var parser2 = new YamlParser()) {
-                var config2 = parser2.parse(new ByteArrayInputStream(bytes), TestConfig.class);
+                parser2.parse(new ByteArrayInputStream(bytes));
+                var config2 = parser2.convertTo(TestConfig.class);
                 assertNotNull(config2);
+            }
+        }
+
+        @Test
+        @DisplayName("Should merge configurations when parsed multiple times")
+        void shouldMergeConfigurationsWhenParsedMultipleTimes() {
+            var baseYaml = "name: \"BaseApp\"\nvalue: 42\n";
+            var overrideYaml = "value: 100\n";
+
+            try (var parser = new YamlParser()) {
+                parser.parse(new ByteArrayInputStream(baseYaml.getBytes(StandardCharsets.UTF_8)));
+                parser.parse(new ByteArrayInputStream(overrideYaml.getBytes(StandardCharsets.UTF_8)));
+
+                var config = parser.convertTo(TestConfig.class);
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertEquals("BaseApp", config.name()),
+                    () -> assertEquals(100, config.value())
+                );
+            }
+        }
+
+        @Test
+        @DisplayName("Should merge configurations when fields are spread across multiple documents")
+        void shouldMergeConfigurationsWithSpreadFields() {
+            var firstYaml = "name: \"BaseApp\"\n";
+            var secondYaml = "value: 42\n";
+
+            try (var parser = new YamlParser()) {
+                parser.parse(new ByteArrayInputStream(firstYaml.getBytes(StandardCharsets.UTF_8)));
+                parser.parse(new ByteArrayInputStream(secondYaml.getBytes(StandardCharsets.UTF_8)));
+
+                var config = parser.convertTo(TestConfig.class);
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertEquals("BaseApp", config.name()),
+                    () -> assertEquals(42, config.value())
+                );
             }
         }
 
@@ -153,7 +222,8 @@ public class YamlParserTest {
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
 
             try (var parser = new YamlParser()) {
-                var exception = assertThrows(ConfigurationValidationException.class, () -> parser.parse(stream, TestConfig.class));
+                parser.parse(stream);
+                var exception = assertThrows(ConfigurationValidationException.class, () -> parser.convertTo(TestConfig.class));
                 assertAll(
                     () -> assertNotNull(exception.getMessage()),
                     () -> assertTrue(exception.getMessage().contains("name")),
@@ -165,11 +235,10 @@ public class YamlParserTest {
         @Test
         @DisplayName("Should throw NullPointerException when source or class is null")
         void shouldThrowExceptionWhenParamsAreNull() {
-            var stream = new ByteArrayInputStream("".getBytes());
             try (var parser = new YamlParser()) {
                 assertAll(
-                    () -> assertThrows(NullPointerException.class, () -> parser.parse(null, TestConfig.class)),
-                    () -> assertThrows(NullPointerException.class, () -> parser.parse(stream, null))
+                    () -> assertThrows(NullPointerException.class, () -> parser.parse(null)),
+                    () -> assertThrows(NullPointerException.class, () -> parser.convertTo(null))
                 );
             }
         }
@@ -179,9 +248,8 @@ public class YamlParserTest {
         void shouldThrowExceptionWhenYamlIsMalformed() {
             var yamlContent = "name: \"Flink Job\nvalue: invalid_number\n";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-
             try (var parser = new YamlParser()) {
-                var exception = assertThrows(YamlParsingException.class, () -> parser.parse(stream, TestConfig.class));
+                var exception = assertThrows(YamlParsingException.class, () -> parser.parse(stream));
                 assertAll(
                     () -> assertNotNull(exception.getMessage(), "Exception message should not be null"),
                     () -> assertNotNull(exception.getCause(), "Exception cause should not be null"),
@@ -191,23 +259,58 @@ public class YamlParserTest {
         }
 
         @Test
-        @DisplayName("Should throw YamlParsingException when YAML is empty")
-        void shouldThrowExceptionWhenYamlIsEmpty() {
+        @DisplayName("Should silently ignore empty YAML")
+        void shouldSilentlyIgnoreEmptyYaml() {
             var yamlContent = "";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-
             try (var parser = new YamlParser()) {
-                assertThrows(YamlParsingException.class, () -> parser.parse(stream, TestConfig.class));
+                assertDoesNotThrow(() -> parser.parse(stream));
             }
         }
 
         @Test
-        @DisplayName("Should throw YamlParsingException when YAML resolves to null")
-        void shouldThrowExceptionWhenYamlIsNullLiteral() {
+        @DisplayName("Should silently ignore null YAML literal")
+        void shouldSilentlyIgnoreNullYamlLiteral() {
             var yamlContent = "null";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
             try (var parser = new YamlParser()) {
-                assertThrows(YamlParsingException.class, () -> parser.parse(stream, TestConfig.class));
+                assertDoesNotThrow(() -> parser.parse(stream));
+            }
+        }
+
+        @Test
+        @DisplayName("Should throw YamlParsingException when configuration resolves to null")
+        void shouldThrowExceptionWhenConfigurationResolvesToNull() {
+            try (var parser = new YamlParser()) {
+                assertThrows(YamlParsingException.class, () -> parser.convertTo(Void.class));
+            }
+        }
+
+        @Test
+        @DisplayName("Should throw YamlParsingException when YAML root is a list")
+        void shouldThrowExceptionWhenYamlRootIsNonObject() {
+            var yamlContent = "- item1\n- item2\n";
+            var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
+            try (var parser = new YamlParser()) {
+                assertThrows(YamlParsingException.class, () -> parser.parse(stream));
+            }
+        }
+
+        @Test
+        @DisplayName("Should demonstrate list merge behavior (appending elements)")
+        void shouldAppendElementsWhenMergingLists() {
+            var baseYaml = "items:\n  - \"item1\"\n  - \"item2\"\n";
+            var overrideYaml = "items:\n  - \"item3\"\n";
+
+            try (var parser = new YamlParser()) {
+                parser.parse(new ByteArrayInputStream(baseYaml.getBytes(StandardCharsets.UTF_8)));
+                parser.parse(new ByteArrayInputStream(overrideYaml.getBytes(StandardCharsets.UTF_8)));
+
+                var config = parser.convertTo(TestConfigWithList.class);
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertEquals(List.of("item1", "item2", "item3"), config.items())
+                );
             }
         }
     }

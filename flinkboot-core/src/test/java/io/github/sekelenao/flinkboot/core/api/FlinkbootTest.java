@@ -44,6 +44,27 @@ class FlinkbootTest {
 
     }
 
+    static final class TestMergedConfig {
+        private final String name;
+        private final String environment;
+        private final Integer port;
+
+        @JsonCreator
+        public TestMergedConfig(
+            @JsonProperty("name") String name,
+            @JsonProperty("environment") String environment,
+            @JsonProperty("port") Integer port
+        ) {
+            this.name = name;
+            this.environment = environment;
+            this.port = port;
+        }
+
+        public String name() { return name; }
+        public String environment() { return environment; }
+        public Integer port() { return port; }
+    }
+
     @Nested
     @DisplayName("Initialize")
     class Initialize {
@@ -71,7 +92,7 @@ class FlinkbootTest {
         void shouldLoadValidConfiguration(@TempDir Path tempDir) throws IOException {
             var file = tempDir.resolve("config.yaml");
             Files.writeString(file, YAML);
-            var args = new String[]{"-flinkboot-configuration", "file:" + file.toAbsolutePath()};
+            var args = new String[]{"-flinkboot-configurations", "file:" + file.toAbsolutePath()};
             var flinkboot = Flinkboot.initialize(args);
             var config = flinkboot.configuration(TestConfig.class);
             assertAll(
@@ -85,7 +106,7 @@ class FlinkbootTest {
         void shouldLoadConfigurationWithCustomizer(@TempDir Path tempDir) throws IOException {
             var file = tempDir.resolve("config.yaml");
             Files.writeString(file, YAML);
-            var args = new String[]{"-flinkboot-configuration", "file:" + file.toAbsolutePath()};
+            var args = new String[]{"-flinkboot-configurations", "file:" + file.toAbsolutePath()};
             var flinkboot = Flinkboot.initialize(args);
             var config = flinkboot.configuration(TestConfig.class, builder -> {});
             assertAll(
@@ -99,13 +120,34 @@ class FlinkbootTest {
         void shouldLoadConfigurationWithCustomMapper(@TempDir Path tempDir) throws IOException {
             var file = tempDir.resolve("config.yaml");
             Files.writeString(file, YAML);
-            var args = new String[]{"-flinkboot-configuration", "file:" + file.toAbsolutePath()};
+            var args = new String[]{"-flinkboot-configurations", "file:" + file.toAbsolutePath()};
             var flinkboot = Flinkboot.initialize(args);
             var customMapper = new YAMLMapper();
             var config = flinkboot.configuration(TestConfig.class, customMapper);
             assertAll(
                 () -> assertNotNull(config),
                 () -> assertEquals(YAML_VALUE, config.name())
+            );
+        }
+
+        @Test
+        @DisplayName("Should successfully load and merge multiple configurations")
+        void shouldLoadAndMergeMultipleConfigurations(@TempDir Path tempDir) throws IOException {
+            var baseFile = tempDir.resolve("base.yaml");
+            var overrideFile = tempDir.resolve("override.yaml");
+
+            Files.writeString(baseFile, "name: \"BaseApp\"\nenvironment: \"dev\"\nport: 8080");
+            Files.writeString(overrideFile, "environment: \"prod\"\nport: 9000");
+
+            var args = new String[]{"-flinkboot-configurations", "file:" + baseFile.toAbsolutePath() + ",file:" + overrideFile.toAbsolutePath()};
+            var flinkboot = Flinkboot.initialize(args);
+            var config = flinkboot.configuration(TestMergedConfig.class);
+
+            assertAll(
+                () -> assertNotNull(config),
+                () -> assertEquals("BaseApp", config.name()),
+                () -> assertEquals("prod", config.environment()),
+                () -> assertEquals(9000, config.port())
             );
         }
 

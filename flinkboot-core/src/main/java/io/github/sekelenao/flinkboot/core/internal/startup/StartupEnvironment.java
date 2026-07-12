@@ -2,8 +2,12 @@ package io.github.sekelenao.flinkboot.core.internal.startup;
 
 import io.github.sekelenao.flinkboot.core.internal.annotation.VisibleForTesting;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public final class StartupEnvironment {
 
@@ -32,8 +36,13 @@ public final class StartupEnvironment {
         return commandLine.option(key).or(() -> envVarResolver.get(key));
     }
 
-    public String configurationResourceLocation(){
-        return get("flinkboot-configuration").orElse("file:job-configuration.yaml");
+    public List<String> configurationResourceLocations(){
+        return get("flinkboot-configurations")
+            .map(value -> Arrays.stream(value.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toUnmodifiableList()))
+            .orElse(Collections.singletonList("file:job-configuration.yaml"));
     }
 
 }
