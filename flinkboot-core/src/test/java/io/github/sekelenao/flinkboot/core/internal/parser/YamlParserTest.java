@@ -261,5 +261,15 @@ public class YamlParserTest {
                 assertThrows(YamlParsingException.class, () -> parser.convertTo(Void.class));
             }
         }
+
+        @Test
+        @DisplayName("Should throw YamlParsingException when YAML root is a list")
+        void shouldThrowExceptionWhenYamlRootIsNonObject() {
+            var yamlContent = "- item1\n- item2\n";
+            var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
+            try (var parser = new YamlParser()) {
+                assertThrows(YamlParsingException.class, () -> parser.parse(stream));
+            }
+        }
     }
 }
