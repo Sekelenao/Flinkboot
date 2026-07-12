@@ -153,6 +153,44 @@ public class YamlParserTest {
         }
 
         @Test
+        @DisplayName("Should merge configurations when parsed multiple times")
+        void shouldMergeConfigurationsWhenParsedMultipleTimes() {
+            var baseYaml = "name: \"BaseApp\"\nvalue: 42\n";
+            var overrideYaml = "value: 100\n";
+
+            try (var parser = new YamlParser()) {
+                parser.parse(new ByteArrayInputStream(baseYaml.getBytes(StandardCharsets.UTF_8)));
+                parser.parse(new ByteArrayInputStream(overrideYaml.getBytes(StandardCharsets.UTF_8)));
+
+                var config = parser.convertTo(TestConfig.class);
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertEquals("BaseApp", config.name()),
+                    () -> assertEquals(100, config.value())
+                );
+            }
+        }
+
+        @Test
+        @DisplayName("Should merge configurations when fields are spread across multiple documents")
+        void shouldMergeConfigurationsWithSpreadFields() {
+            var firstYaml = "name: \"BaseApp\"\n";
+            var secondYaml = "value: 42\n";
+
+            try (var parser = new YamlParser()) {
+                parser.parse(new ByteArrayInputStream(firstYaml.getBytes(StandardCharsets.UTF_8)));
+                parser.parse(new ByteArrayInputStream(secondYaml.getBytes(StandardCharsets.UTF_8)));
+
+                var config = parser.convertTo(TestConfig.class);
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertEquals("BaseApp", config.name()),
+                    () -> assertEquals(42, config.value())
+                );
+            }
+        }
+
+        @Test
         @DisplayName("Should throw ConfigurationValidationException when validation fails")
         void shouldThrowExceptionWhenValidationFails() {
             var yamlContent = "name: \"\"\nvalue: 0\n";
