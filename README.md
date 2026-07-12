@@ -8,7 +8,6 @@
 
 ### 📖 How-To Guides
 - [How-To Index](howto/README.md)
-- [How to Load a Flag](howto/load-a-flag.md)
 
 ---
 
