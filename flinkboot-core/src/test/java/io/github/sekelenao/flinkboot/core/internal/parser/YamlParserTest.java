@@ -18,9 +18,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.function.Consumer;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -96,10 +95,9 @@ public class YamlParserTest {
         @ParameterizedTest
         @ValueSource(strings = {
             "name: \"Flink Job\"\nvalue: 42\n",
-            "name: \"Flink Job\"\nvalue: 42\nextraField: \"ignoredValue\"\n",
             "NAME: \"Flink Job\"\nVALUE: 42\n"
         })
-        @DisplayName("Should successfully parse YAML configuration with standard, unknown, or case-insensitive properties")
+        @DisplayName("Should successfully parse YAML configuration with standard or case-insensitive properties")
         void shouldParseYamlConfigurations(String yamlContent) {
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
             try (var parser = new YamlParser()) {
@@ -110,6 +108,17 @@ public class YamlParserTest {
                     () -> assertEquals("Flink Job", config.name()),
                     () -> assertEquals(42, config.value())
                 );
+            }
+        }
+
+        @Test
+        @DisplayName("Should throw YamlParsingException when configuration contains unknown properties")
+        void shouldThrowExceptionWhenYamlContainsUnknownProperties() {
+            var yamlContent = "name: \"Flink Job\"\nvalue: 42\nextraField: \"value\"\n";
+            var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
+            try (var parser = new YamlParser()) {
+                parser.parse(stream);
+                assertThrows(YamlParsingException.class, () -> parser.convertTo(TestConfig.class));
             }
         }
 

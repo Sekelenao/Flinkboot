@@ -1,6 +1,5 @@
 package io.github.sekelenao.flinkboot.core.internal.parser;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
@@ -32,7 +31,6 @@ public final class YamlParser implements AutoCloseable {
         var builder = YAMLMapper.builder()
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true)
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .findAndAddModules();
         additionalConfiguration.accept(builder);
         this.mapper = builder.build();
