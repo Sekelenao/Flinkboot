@@ -7,7 +7,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.sekelenao/flinkboot-core?label=Maven%20central&logo=apachemaven&logoColor=white&color=E6526F&labelColor=E6526F)](https://central.sonatype.com/artifact/io.github.sekelenao/flinkboot-core)
 
 ### 📖 How-To Guides
-- [How to Load a Flag](howto/load-a-flag.md)
+- [How to ... ?](howto)
 
 ---
 
@@ -21,10 +21,10 @@ By combining clean Java configuration POJOs and Jakarta Bean Validation (JSR-380
 
 ## Key Features
 
-- ⚡ **Instant Setup** — Define your configuration as a simple Java class and load it with a single line of code.
-- 🔒 **Fail-Fast Validation** — Catch typos and invalid values at startup, before Flink resources are allocated.
-- 🔀 **Seamless Overrides** — Pass multiple configuration files sequentially to easily layer environment-specific overrides.
-- ⚙️ **Flexible Sources** — Automatically resolves configuration file locations from command-line options (`-flinkboot-configurations`) or environment variables (`FLINKBOOT_CONFIGURATIONS`).
+- **Instant Setup** — Define your configuration as a simple Java class and load it with a single line of code.
+- **Fail-Fast Validation** — Catch typos and invalid values at startup, before Flink resources are allocated.
+- **Seamless Overrides** — Pass multiple configuration files sequentially to easily layer environment-specific overrides.
+- **Flexible Sources** — Automatically resolves configuration file locations from command-line options (`-flinkboot-configurations`) or environment variables (`FLINKBOOT_CONFIGURATIONS`).
 
 ---
 
