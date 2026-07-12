@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -249,22 +250,22 @@ public class YamlParserTest {
         }
 
         @Test
-        @DisplayName("Should throw YamlParsingException when YAML is empty")
-        void shouldThrowExceptionWhenYamlIsEmpty() {
+        @DisplayName("Should silently ignore empty YAML")
+        void shouldSilentlyIgnoreEmptyYaml() {
             var yamlContent = "";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
             try (var parser = new YamlParser()) {
-                assertThrows(YamlParsingException.class, () -> parser.parse(stream));
+                assertDoesNotThrow(() -> parser.parse(stream));
             }
         }
 
         @Test
-        @DisplayName("Should throw YamlParsingException when YAML resolves to null")
-        void shouldThrowExceptionWhenYamlIsNullLiteral() {
+        @DisplayName("Should silently ignore null YAML literal")
+        void shouldSilentlyIgnoreNullYamlLiteral() {
             var yamlContent = "null";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
             try (var parser = new YamlParser()) {
-                assertThrows(YamlParsingException.class, () -> parser.parse(stream));
+                assertDoesNotThrow(() -> parser.parse(stream));
             }
         }
 

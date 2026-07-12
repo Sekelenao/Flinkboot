@@ -55,6 +55,15 @@ class StartupEnvironmentTest {
         }
 
         @Test
+        @DisplayName("Should trim whitespace and filter out empty values in CommandLine option value")
+        void shouldTrimWhitespaceAndFilterEmptyValues() {
+            var cmd = CommandLine.parse(new String[]{"-flinkboot-configurations", "  custom-config1.yaml , , custom-config2.yaml  "});
+            var resolver = new EnvVarResolver(key -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertEquals(List.of("custom-config1.yaml", "custom-config2.yaml"), startupEnv.configurationResourceLocations());
+        }
+
+        @Test
         @DisplayName("Should return environment variable value when option is not present but env var is set")
         void shouldReturnEnvVarWhenCommandLineOptionAbsent() {
             var cmd = CommandLine.parse(new String[0]);

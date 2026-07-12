@@ -48,8 +48,11 @@ public final class YamlParser implements AutoCloseable {
         Objects.requireNonNull(source);
         try {
             var node = mapper.readTree(source);
-            if (node == null || node.isNull() || node.isMissingNode() || !node.isObject()) {
-                throw new YamlParsingException("Configuration source is empty or invalid.");
+            if (node == null || node.isNull() || node.isMissingNode()) {
+                return;
+            }
+            if (!node.isObject()) {
+                throw new YamlParsingException("Configuration source is invalid");
             }
             mapper.readerForUpdating(root).readValue(node);
         } catch (IOException exception) {
