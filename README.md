@@ -7,7 +7,8 @@
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.sekelenao/flinkboot-core?label=Maven%20central&logo=apachemaven&logoColor=white&color=E6526F&labelColor=E6526F)](https://central.sonatype.com/artifact/io.github.sekelenao/flinkboot-core)
 
 ### 📖 How-To Guides
-- [How to ... ?](howto)
+- [How-To Index](howto/README.md)
+- [How to Load a Flag](howto/load-a-flag.md)
 
 ---
 
