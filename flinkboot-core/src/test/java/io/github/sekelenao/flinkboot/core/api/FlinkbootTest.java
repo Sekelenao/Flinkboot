@@ -71,7 +71,7 @@ class FlinkbootTest {
         void shouldLoadValidConfiguration(@TempDir Path tempDir) throws IOException {
             var file = tempDir.resolve("config.yaml");
             Files.writeString(file, YAML);
-            var args = new String[]{"-flinkboot-configuration", "file:" + file.toAbsolutePath()};
+            var args = new String[]{"-flinkboot-configurations", "file:" + file.toAbsolutePath()};
             var flinkboot = Flinkboot.initialize(args);
             var config = flinkboot.configuration(TestConfig.class);
             assertAll(
@@ -85,7 +85,7 @@ class FlinkbootTest {
         void shouldLoadConfigurationWithCustomizer(@TempDir Path tempDir) throws IOException {
             var file = tempDir.resolve("config.yaml");
             Files.writeString(file, YAML);
-            var args = new String[]{"-flinkboot-configuration", "file:" + file.toAbsolutePath()};
+            var args = new String[]{"-flinkboot-configurations", "file:" + file.toAbsolutePath()};
             var flinkboot = Flinkboot.initialize(args);
             var config = flinkboot.configuration(TestConfig.class, builder -> {});
             assertAll(
@@ -99,7 +99,7 @@ class FlinkbootTest {
         void shouldLoadConfigurationWithCustomMapper(@TempDir Path tempDir) throws IOException {
             var file = tempDir.resolve("config.yaml");
             Files.writeString(file, YAML);
-            var args = new String[]{"-flinkboot-configuration", "file:" + file.toAbsolutePath()};
+            var args = new String[]{"-flinkboot-configurations", "file:" + file.toAbsolutePath()};
             var flinkboot = Flinkboot.initialize(args);
             var customMapper = new YAMLMapper();
             var config = flinkboot.configuration(TestConfig.class, customMapper);

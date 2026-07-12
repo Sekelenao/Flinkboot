@@ -1,6 +1,7 @@
 package io.github.sekelenao.flinkboot.core.internal.parser;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.ConfigurationValidationException;
@@ -20,6 +21,8 @@ public final class YamlParser implements AutoCloseable {
 
     private final YAMLMapper mapper;
 
+    private final JsonNode root;
+
     public YamlParser() {
         this(additionalConfiguration -> {});
     }
@@ -33,19 +36,33 @@ public final class YamlParser implements AutoCloseable {
             .findAndAddModules();
         additionalConfiguration.accept(builder);
         this.mapper = builder.build();
+        this.root = mapper.createObjectNode();
     }
 
     public YamlParser(YAMLMapper mapper){
         this.mapper = Objects.requireNonNull(mapper);
+        this.root = mapper.createObjectNode();
     }
 
-    public <Y> Y parse(InputStream source, Class<Y> clazz) {
+    public void parse(InputStream source){
         Objects.requireNonNull(source);
-        Objects.requireNonNull(clazz);
         try {
-            var yaml = mapper.readValue(source, clazz);
+            var node = mapper.readTree(source);
+            if (node == null || node.isNull() || node.isMissingNode()) {
+                throw new YamlParsingException("Parsing resulted to null");
+            }
+            mapper.readerForUpdating(root).readValue(node);
+        } catch (IOException exception) {
+            throw new YamlParsingException(exception.getMessage(), exception);
+        }
+    }
+
+    public <Y> Y convertTo(Class<Y> type){
+        Objects.requireNonNull(type);
+        try {
+            var yaml = mapper.treeToValue(root, type);
             if (yaml == null) {
-                throw new YamlParsingException("Parsing resulted to null for configuration class: " + clazz.getName());
+                throw new YamlParsingException("Parsing resulted to null for configuration class: " + type.getName());
             }
             var violations = validatorFactory.getValidator().validate(yaml);
             if(!violations.isEmpty()){

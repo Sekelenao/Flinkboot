@@ -87,7 +87,8 @@ public class YamlParserTest {
         void shouldParseYamlConfigurations(String yamlContent) {
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
             try (var parser = new YamlParser()) {
-                var config = parser.parse(stream, TestConfig.class);
+                parser.parse(stream);
+                var config = parser.convertTo(TestConfig.class);
                 assertAll(
                     () -> assertNotNull(config),
                     () -> assertEquals("Flink Job", config.name()),
@@ -103,7 +104,8 @@ public class YamlParserTest {
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
 
             try (var parser = new YamlParser()) {
-                var config = parser.parse(stream, TestConfigWithEnum.class);
+                parser.parse(stream);
+                var config = parser.convertTo(TestConfigWithEnum.class);
                 assertAll(
                     () -> assertNotNull(config),
                     () -> assertEquals(JobType.STREAMING, config.type())
@@ -120,14 +122,16 @@ public class YamlParserTest {
                 builder.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
             };
             try (var customizedParser = new YamlParser(additionalConfigurations); var inputStream = new ByteArrayInputStream(bytes)) {
-                var config = customizedParser.parse(inputStream, TestConfigWithEnum.class);
+                customizedParser.parse(inputStream);
+                var config = customizedParser.convertTo(TestConfigWithEnum.class);
                 assertAll(
                     () -> assertNotNull(config),
                     () -> assertNull(config.type())
                 );
             }
             try (var defaultParser = new YamlParser(); var inputStream = new ByteArrayInputStream(bytes)) {
-                assertThrows(YamlParsingException.class, () -> defaultParser.parse(inputStream, TestConfigWithEnum.class));
+                defaultParser.parse(inputStream);
+                assertThrows(YamlParsingException.class, () -> defaultParser.convertTo(TestConfigWithEnum.class));
             }
         }
 
@@ -137,11 +141,13 @@ public class YamlParserTest {
             var yamlContent = "name: \"Flink Job\"\nvalue: 42\n";
             var bytes = yamlContent.getBytes(StandardCharsets.UTF_8);
             try (var parser1 = new YamlParser()) {
-                var config1 = parser1.parse(new ByteArrayInputStream(bytes), TestConfig.class);
+                parser1.parse(new ByteArrayInputStream(bytes));
+                var config1 = parser1.convertTo(TestConfig.class);
                 assertNotNull(config1);
             }
             try (var parser2 = new YamlParser()) {
-                var config2 = parser2.parse(new ByteArrayInputStream(bytes), TestConfig.class);
+                parser2.parse(new ByteArrayInputStream(bytes));
+                var config2 = parser2.convertTo(TestConfig.class);
                 assertNotNull(config2);
             }
         }
@@ -153,7 +159,8 @@ public class YamlParserTest {
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
 
             try (var parser = new YamlParser()) {
-                var exception = assertThrows(ConfigurationValidationException.class, () -> parser.parse(stream, TestConfig.class));
+                parser.parse(stream);
+                var exception = assertThrows(ConfigurationValidationException.class, () -> parser.convertTo(TestConfig.class));
                 assertAll(
                     () -> assertNotNull(exception.getMessage()),
                     () -> assertTrue(exception.getMessage().contains("name")),
@@ -165,11 +172,10 @@ public class YamlParserTest {
         @Test
         @DisplayName("Should throw NullPointerException when source or class is null")
         void shouldThrowExceptionWhenParamsAreNull() {
-            var stream = new ByteArrayInputStream("".getBytes());
             try (var parser = new YamlParser()) {
                 assertAll(
-                    () -> assertThrows(NullPointerException.class, () -> parser.parse(null, TestConfig.class)),
-                    () -> assertThrows(NullPointerException.class, () -> parser.parse(stream, null))
+                    () -> assertThrows(NullPointerException.class, () -> parser.parse(null)),
+                    () -> assertThrows(NullPointerException.class, () -> parser.convertTo(null))
                 );
             }
         }
@@ -179,9 +185,8 @@ public class YamlParserTest {
         void shouldThrowExceptionWhenYamlIsMalformed() {
             var yamlContent = "name: \"Flink Job\nvalue: invalid_number\n";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-
             try (var parser = new YamlParser()) {
-                var exception = assertThrows(YamlParsingException.class, () -> parser.parse(stream, TestConfig.class));
+                var exception = assertThrows(YamlParsingException.class, () -> parser.parse(stream));
                 assertAll(
                     () -> assertNotNull(exception.getMessage(), "Exception message should not be null"),
                     () -> assertNotNull(exception.getCause(), "Exception cause should not be null"),
@@ -195,9 +200,8 @@ public class YamlParserTest {
         void shouldThrowExceptionWhenYamlIsEmpty() {
             var yamlContent = "";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-
             try (var parser = new YamlParser()) {
-                assertThrows(YamlParsingException.class, () -> parser.parse(stream, TestConfig.class));
+                assertThrows(YamlParsingException.class, () -> parser.parse(stream));
             }
         }
 
@@ -207,7 +211,7 @@ public class YamlParserTest {
             var yamlContent = "null";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
             try (var parser = new YamlParser()) {
-                assertThrows(YamlParsingException.class, () -> parser.parse(stream, TestConfig.class));
+                assertThrows(YamlParsingException.class, () -> parser.parse(stream));
             }
         }
     }

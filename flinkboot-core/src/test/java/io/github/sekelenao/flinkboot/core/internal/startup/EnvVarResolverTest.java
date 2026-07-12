@@ -20,7 +20,7 @@ class EnvVarResolverTest {
     static Stream<Arguments> arguments() {
         // <Environment variable>, <Key to query>, <Value of the environment variable>
         return Stream.of(
-            Arguments.of("FLINKBOOT_CONFIGURATION", "flinkboot-configuration", "job-configuration.yaml"),
+            Arguments.of("FLINKBOOT_CONFIGURATIONS", "flinkboot-configurations", "job-configuration.yaml"),
             Arguments.of("SIMPLE", "simple", "easy"),
             Arguments.of("DOT_VAR", "dot.var", ".")
         );
