@@ -6,6 +6,9 @@
 [![Flink](https://img.shields.io/badge/Flink_1.20-%23E6526F.svg?logo=apacheflink&logoColor=white)](https://flink.apache.org/)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.sekelenao/flinkboot-core?label=Maven%20central&logo=apachemaven&logoColor=white&color=E6526F&labelColor=E6526F)](https://central.sonatype.com/artifact/io.github.sekelenao/flinkboot-core)
 
+### 📖 How-To Guides
+- [How to Load a Flag](howto/load-a-flag.md)
+
 ---
 
 ## What is Flinkboot?
