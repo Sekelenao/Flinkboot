@@ -49,7 +49,7 @@ public final class YamlParser implements AutoCloseable {
         try {
             var node = mapper.readTree(source);
             if (node == null || node.isNull() || node.isMissingNode()) {
-                throw new YamlParsingException("Parsing resulted to null");
+                throw new YamlParsingException("Configuration source is empty or invalid.");
             }
             mapper.readerForUpdating(root).readValue(node);
         } catch (IOException exception) {
@@ -62,7 +62,7 @@ public final class YamlParser implements AutoCloseable {
         try {
             var yaml = mapper.treeToValue(root, type);
             if (yaml == null) {
-                throw new YamlParsingException("Parsing resulted to null for configuration class: " + type.getName());
+                throw new YamlParsingException("Configuration could not be mapped to target class: " + type.getSimpleName());
             }
             var violations = validatorFactory.getValidator().validate(yaml);
             if(!violations.isEmpty()){
