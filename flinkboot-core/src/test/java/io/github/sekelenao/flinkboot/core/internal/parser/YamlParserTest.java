@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.function.Consumer;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -71,6 +72,19 @@ public class YamlParserTest {
 
         public int value() {
             return value;
+        }
+    }
+
+    static final class TestConfigWithList {
+        private final List<String> items;
+
+        @JsonCreator
+        public TestConfigWithList(@JsonProperty("items") List<String> items) {
+            this.items = items;
+        }
+
+        public List<String> items() {
+            return items;
         }
     }
 
@@ -269,6 +283,24 @@ public class YamlParserTest {
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
             try (var parser = new YamlParser()) {
                 assertThrows(YamlParsingException.class, () -> parser.parse(stream));
+            }
+        }
+
+        @Test
+        @DisplayName("Should demonstrate list merge behavior (appending elements)")
+        void shouldAppendElementsWhenMergingLists() {
+            var baseYaml = "items:\n  - \"item1\"\n  - \"item2\"\n";
+            var overrideYaml = "items:\n  - \"item3\"\n";
+
+            try (var parser = new YamlParser()) {
+                parser.parse(new ByteArrayInputStream(baseYaml.getBytes(StandardCharsets.UTF_8)));
+                parser.parse(new ByteArrayInputStream(overrideYaml.getBytes(StandardCharsets.UTF_8)));
+
+                var config = parser.convertTo(TestConfigWithList.class);
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertEquals(List.of("item1", "item2", "item3"), config.items())
+                );
             }
         }
     }
