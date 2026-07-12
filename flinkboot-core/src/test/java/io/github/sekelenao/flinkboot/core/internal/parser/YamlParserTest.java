@@ -18,6 +18,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -250,6 +251,14 @@ public class YamlParserTest {
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
             try (var parser = new YamlParser()) {
                 assertThrows(YamlParsingException.class, () -> parser.parse(stream));
+            }
+        }
+
+        @Test
+        @DisplayName("Should throw YamlParsingException when configuration resolves to null")
+        void shouldThrowExceptionWhenConfigurationResolvesToNull() {
+            try (var parser = new YamlParser()) {
+                assertThrows(YamlParsingException.class, () -> parser.convertTo(Void.class));
             }
         }
     }
