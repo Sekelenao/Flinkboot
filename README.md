@@ -23,7 +23,8 @@ By combining clean Java configuration POJOs and Jakarta Bean Validation (JSR-380
 
 - **Instant Setup** — Define your configuration as a simple Java class and load it with a single line of code.
 - **Fail-Fast Validation** — Catch typos and invalid values at startup, before Flink resources are allocated.
-- **Seamless Overrides** — Pass multiple configuration files sequentially to easily layer environment-specific overrides.
+- **Fail-Safe Merge Semantics** — By default, Flinkboot prevents accidental overrides during merges (throws an exception on key conflicts) unless explicit permission is granted.
+- **Layered Overrides & List Merging** — Optionally allow property overrides (`--flinkboot-configuration-override`) and list merging/appending (`--flinkboot-configuration-list-merging`) when resolving multiple configurations.
 - **Flexible Sources** — Automatically resolves configuration file locations from command-line options (`-flinkboot-configurations`) or environment variables (`FLINKBOOT_CONFIGURATIONS`).
 
 ---
@@ -125,20 +126,33 @@ public class UserActivityJob {
 
 ---
 
-## Command Line Usage
+## Command Line & Merging Usage
 
-To run the job above, specify the locations of your configurations using the `-flinkboot-configurations` argument (separated by commas):
+To run the job above, specify the locations of your configurations using the `-flinkboot-configurations` argument (separated by commas). 
+
+Since `prod-config.yaml` overrides `parallelism` from `base-config.yaml`, you must also pass the `--flinkboot-configuration-override` flag to authorize value overrides (otherwise, Flinkboot will throw a `YamlParsingException` to prevent accidental overwrites):
 
 ```bash
 flink run -c MyJobJar.jar \
-  -flinkboot-configurations file:/etc/configs/base-config.yaml,file:/etc/configs/prod-config.yaml
+  -flinkboot-configurations file:/etc/configs/base-config.yaml,file:/etc/configs/prod-config.yaml \
+  --flinkboot-configuration-override
 ```
 
-Flinkboot will load `base-config.yaml` first, then merge the values from `prod-config.yaml` (overriding `parallelism` to `16` and populating `bootstrapServers`), and validate the final merged state before starting the job.
+Flinkboot will load `base-config.yaml` first, merge the values from `prod-config.yaml` (overriding `parallelism` to `16` and populating `bootstrapServers`), and validate the final merged state before starting the job.
 
-Alternatively, you can specify configurations via the environment variable:
+### Merging Behavior Customization
+You can control the merging behavior of multiple files using these CLI flags and environment variables:
+
+| Command Line Key | Environment Key | Default | Description |
+|------------------|-----------------|---------|-------------|
+| `-flinkboot-configurations` | `FLINKBOOT_CONFIGURATIONS` | `file:job-configuration.yaml` | Comma-separated configurations list |
+| `--flinkboot-configuration-override` | `FLINKBOOT_CONFIGURATION_OVERRIDE` | `false` | Permits overriding existing configuration properties |
+| `--flinkboot-configuration-list-merging` | `FLINKBOOT_CONFIGURATION_LIST_MERGING` | `false` | Merges (appends) lists together instead of replacing them |
+
+For example, to configure using environment variables:
 ```bash
 export FLINKBOOT_CONFIGURATIONS="file:/etc/configs/base-config.yaml,file:/etc/configs/prod-config.yaml"
+export FLINKBOOT_CONFIGURATION_OVERRIDE="true"
 ```
 
 ---
