@@ -23,14 +23,15 @@ public final class YamlParser implements AutoCloseable {
 
     private final JsonNode root;
 
-    private final JacksonFusionProcessor fusionProcessor;
+    private final FusionProcessor fusionProcessor;
 
-    public YamlParser() {
-        this(additionalConfiguration -> {});
+    public YamlParser(FusionFeatures features) {
+        this(additionalConfiguration -> {}, Objects.requireNonNull(features));
     }
 
-    public YamlParser(Consumer<YAMLMapper.Builder> additionalConfiguration) {
+    public YamlParser(Consumer<YAMLMapper.Builder> additionalConfiguration, FusionFeatures features) {
         Objects.requireNonNull(additionalConfiguration);
+        Objects.requireNonNull(features);
         var builder = YAMLMapper.builder()
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true)
@@ -38,13 +39,14 @@ public final class YamlParser implements AutoCloseable {
         additionalConfiguration.accept(builder);
         this.mapper = builder.build();
         this.root = mapper.createObjectNode();
-        this.fusionProcessor = new JacksonFusionProcessor((ObjectNode) root);
+        this.fusionProcessor = new FusionProcessor((ObjectNode) root, features);
     }
 
-    public YamlParser(YAMLMapper mapper){
+    public YamlParser(YAMLMapper mapper, FusionFeatures fusionFeatures){
+        Objects.requireNonNull(fusionFeatures);
         this.mapper = Objects.requireNonNull(mapper);
         this.root = mapper.createObjectNode();
-        this.fusionProcessor = new JacksonFusionProcessor((ObjectNode) root);
+        this.fusionProcessor = new FusionProcessor((ObjectNode) root, fusionFeatures);
     }
 
     public void parse(InputStream source){

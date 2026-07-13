@@ -139,7 +139,7 @@ class FlinkbootTest {
             Files.writeString(baseFile, "name: \"BaseApp\"\nenvironment: \"dev\"\nport: 8080");
             Files.writeString(overrideFile, "environment: \"prod\"\nport: 9000");
 
-            var args = new String[]{"-flinkboot-configurations", "file:" + baseFile.toAbsolutePath() + ",file:" + overrideFile.toAbsolutePath()};
+            var args = new String[]{"-flinkboot-configurations", "file:" + baseFile.toAbsolutePath() + ",file:" + overrideFile.toAbsolutePath(), "--flinkboot-yaml-property-override"};
             var flinkboot = Flinkboot.initialize(args);
             var config = flinkboot.configuration(TestMergedConfig.class);
 

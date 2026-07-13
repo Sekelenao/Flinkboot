@@ -1,6 +1,7 @@
 package io.github.sekelenao.flinkboot.core.internal.startup;
 
 import io.github.sekelenao.flinkboot.core.internal.annotation.VisibleForTesting;
+import io.github.sekelenao.flinkboot.core.internal.parser.FusionFeatures;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,6 +44,13 @@ public final class StartupEnvironment {
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toUnmodifiableList()))
             .orElse(Collections.singletonList("file:job-configuration.yaml"));
+    }
+
+    public FusionFeatures fusionFeatures(){
+        return FusionFeatures.builder()
+            .permitOverride(flag("flinkboot-yaml-property-override"))
+            .listFusion(flag("flinkboot-yaml-property-list-fusion"))
+            .build();
     }
 
 }
