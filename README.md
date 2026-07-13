@@ -31,11 +31,7 @@ By combining clean Java configuration POJOs and Jakarta Bean Validation (JSR-380
 
 ## Quick Start Example
 
-Here is how to set up a multi-configuration job and configure a Flink stream in just a few lines of code.
-
-### 1. Define your Configuration Model
-
-Define your configuration as an immutable Java class with fluent accessor methods (without the `get` prefix) and a Jackson creator constructor:
+Define your configuration as an immutable Java class with Jakarta validation constraints:
 
 ```java
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -48,112 +44,50 @@ public final class JobConfig {
     @NotBlank 
     private final String jobName;
 
-    @NotBlank 
-    private final String bootstrapServers;
-
     @Min(1) 
     private final int parallelism;
 
     @JsonCreator
     public JobConfig(
         @JsonProperty("jobName") String jobName,
-        @JsonProperty("bootstrapServers") String bootstrapServers,
         @JsonProperty("parallelism") int parallelism
     ) {
         this.jobName = jobName;
-        this.bootstrapServers = bootstrapServers;
         this.parallelism = parallelism;
     }
 
     public String jobName() { return jobName; }
-    public String bootstrapServers() { return bootstrapServers; }
     public int parallelism() { return parallelism; }
 }
 ```
 
-### 2. Prepare Configuration Files
-
-**`base-config.yaml`** (Common settings)
-```yaml
-jobName: "UserActivityProcessor"
-parallelism: 4
-```
-
-**`prod-config.yaml`** (Production overrides)
-```yaml
-bootstrapServers: "kafka-prod-1:9092,kafka-prod-2:9092"
-parallelism: 16
-```
-
-### 3. Load Configurations & Run the Flink Stream
-
-Initialize [Flinkboot](file:///home/haine/Documents/Programmation/Flinkboot/flinkboot-core/src/main/java/io/github/sekelenao/flinkboot/core/api/Flinkboot.java) in your main method. Loading, merging, and validation are handled automatically in one step:
+Then, load and validate your configuration with a single line of code in your job's main class:
 
 ```java
 import io.github.sekelenao.flinkboot.core.api.Flinkboot;
-import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.connector.kafka.source.KafkaSource;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.common.serialization.SimpleStringSchema;
 
 public class UserActivityJob {
-
     public static void main(String[] args) throws Exception {
-        // 1. Initialize Flinkboot and load/validate configurations in one go
+        // Load, merge, and validate configurations in one step
         JobConfig config = Flinkboot.initialize(args).configuration(JobConfig.class);
 
-        // 2. Set up Flink Environment
-        var env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(config.parallelism());
-
-        // 3. Effortlessly build your stream using the validated configuration
-        KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
-            .setBootstrapServers(config.bootstrapServers())
-            .setTopics("user-activities")
-            .setGroupId("activity-group")
-            .setValueOnlyDeserializer(new SimpleStringSchema())
-            .build();
-
-        env.fromSource(kafkaSource, WatermarkStrategy.noWatermarks(), "Kafka Source")
-            .map(String::toUpperCase)
-            .print();
-
-        // 4. Execute Flink Job
-        env.execute(config.jobName());
+        System.out.println("Running Flink Job: " + config.jobName());
     }
 }
 ```
 
 ---
 
-## Command Line & Merging Usage
+## Command Line Usage
 
-To run the job above, specify the locations of your configurations using the `-flinkboot-configurations` argument (separated by commas). 
-
-Since `prod-config.yaml` overrides `parallelism` from `base-config.yaml`, you must also pass the `--flinkboot-configuration-override` flag to authorize value overrides (otherwise, Flinkboot will throw a `YamlParsingException` to prevent accidental overwrites):
-
+To run your job with custom configuration locations and options:
 ```bash
 flink run -c MyJobJar.jar \
   -flinkboot-configurations file:/etc/configs/base-config.yaml,file:/etc/configs/prod-config.yaml \
   --flinkboot-configuration-override
 ```
 
-Flinkboot will load `base-config.yaml` first, merge the values from `prod-config.yaml` (overriding `parallelism` to `16` and populating `bootstrapServers`), and validate the final merged state before starting the job.
-
-### Merging Behavior Customization
-You can control the merging behavior of multiple files using these CLI flags and environment variables:
-
-| Command Line Key | Environment Key | Default | Description |
-|------------------|-----------------|---------|-------------|
-| `-flinkboot-configurations` | `FLINKBOOT_CONFIGURATIONS` | `file:job-configuration.yaml` | Comma-separated configurations list |
-| `--flinkboot-configuration-override` | `FLINKBOOT_CONFIGURATION_OVERRIDE` | `false` | Permits overriding existing configuration properties |
-| `--flinkboot-configuration-list-merging` | `FLINKBOOT_CONFIGURATION_LIST_MERGING` | `false` | Merges (appends) lists together instead of replacing them |
-
-For example, to configure using environment variables:
-```bash
-export FLINKBOOT_CONFIGURATIONS="file:/etc/configs/base-config.yaml,file:/etc/configs/prod-config.yaml"
-export FLINKBOOT_CONFIGURATION_OVERRIDE="true"
-```
+For advanced CLI options, environment variables configuration, and detailed merging semantics, refer to the [How-To Index](howto/README.md).
 
 ---
 
