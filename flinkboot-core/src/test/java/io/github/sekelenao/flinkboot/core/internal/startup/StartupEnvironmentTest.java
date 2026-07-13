@@ -1,5 +1,6 @@
 package io.github.sekelenao.flinkboot.core.internal.startup;
 
+import io.github.sekelenao.flinkboot.core.api.exception.parsing.BooleanParsingException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -176,6 +177,15 @@ class StartupEnvironmentTest {
             var resolver = new EnvVarResolver(k -> null);
             var startupEnv = new StartupEnvironment(cmd, resolver);
             assertFalse(startupEnv.flag("my-flag"));
+        }
+        @Test
+        @DisplayName("Should throw BooleanParsingException when flag in EnvVarResolver has invalid boolean value")
+        void shouldThrowExceptionWhenFlagInEnvIsInvalid() {
+            var cmd = CommandLine.parse(new String[0]);
+            var env = Map.of("MY_FLAG", "yes");
+            var resolver = new EnvVarResolver(env::get);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertThrows(BooleanParsingException.class, () -> startupEnv.flag("my-flag"));
         }
     }
 

@@ -1,7 +1,7 @@
 package io.github.sekelenao.flinkboot.core.api;
 
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import io.github.sekelenao.flinkboot.core.internal.parser.YamlParser;
+import io.github.sekelenao.flinkboot.core.internal.parser.yaml.YamlParser;
 import io.github.sekelenao.flinkboot.core.internal.resource.Resource;
 import io.github.sekelenao.flinkboot.core.internal.startup.StartupEnvironment;
 

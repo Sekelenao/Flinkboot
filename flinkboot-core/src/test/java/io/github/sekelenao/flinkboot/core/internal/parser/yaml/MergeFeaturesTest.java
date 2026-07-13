@@ -1,4 +1,4 @@
-package io.github.sekelenao.flinkboot.core.internal.parser;
+package io.github.sekelenao.flinkboot.core.internal.parser.yaml;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertFalse;
