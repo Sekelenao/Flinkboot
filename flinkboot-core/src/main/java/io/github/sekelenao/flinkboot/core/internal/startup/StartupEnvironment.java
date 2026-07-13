@@ -46,7 +46,7 @@ public final class StartupEnvironment {
             .orElse(Collections.singletonList("file:job-configuration.yaml"));
     }
 
-    public MergeFeatures mergeFeatures(){
+    public MergeFeatures configurationMergeFeatures(){
         return MergeFeatures.builder()
             .permitOverride(flag("flinkboot-configuration-override"))
             .listMerging(flag("flinkboot-configuration-list-merging"))

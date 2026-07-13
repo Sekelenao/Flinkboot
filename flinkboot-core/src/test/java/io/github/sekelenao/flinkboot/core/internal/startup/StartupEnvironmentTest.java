@@ -1,6 +1,5 @@
 package io.github.sekelenao.flinkboot.core.internal.startup;
 
-import io.github.sekelenao.flinkboot.core.internal.parser.MergeFeatures;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -190,7 +189,7 @@ class StartupEnvironmentTest {
             var cmd = CommandLine.parse(new String[0]);
             var resolver = new EnvVarResolver(k -> null);
             var startupEnv = new StartupEnvironment(cmd, resolver);
-            var features = startupEnv.mergeFeatures();
+            var features = startupEnv.configurationMergeFeatures();
             assertAll(
                 () -> assertFalse(features.permitOverride()),
                 () -> assertFalse(features.listMerging())
@@ -203,7 +202,7 @@ class StartupEnvironmentTest {
             var cmd = CommandLine.parse(new String[]{"--flinkboot-configuration-override", "--flinkboot-configuration-list-merging"});
             var resolver = new EnvVarResolver(k -> null);
             var startupEnv = new StartupEnvironment(cmd, resolver);
-            var features = startupEnv.mergeFeatures();
+            var features = startupEnv.configurationMergeFeatures();
             assertAll(
                 () -> assertTrue(features.permitOverride()),
                 () -> assertTrue(features.listMerging())
@@ -220,7 +219,7 @@ class StartupEnvironmentTest {
             );
             var resolver = new EnvVarResolver(env::get);
             var startupEnv = new StartupEnvironment(cmd, resolver);
-            var features = startupEnv.mergeFeatures();
+            var features = startupEnv.configurationMergeFeatures();
             assertAll(
                 () -> assertTrue(features.permitOverride()),
                 () -> assertTrue(features.listMerging())
