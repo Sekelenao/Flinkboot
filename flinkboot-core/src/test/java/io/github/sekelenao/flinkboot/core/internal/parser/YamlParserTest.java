@@ -93,6 +93,48 @@ public class YamlParserTest {
         }
     }
 
+    static final class DatabaseConfig {
+        private final String host;
+        private final int port;
+        private final List<String> options;
+
+        @JsonCreator
+        public DatabaseConfig(
+            @JsonProperty("host") String host,
+            @JsonProperty("port") int port,
+            @JsonProperty("options") List<String> options
+        ) {
+            this.host = host;
+            this.port = port;
+            this.options = options;
+        }
+
+        public String host() { return host; }
+        public int port() { return port; }
+        public List<String> options() { return options; }
+    }
+
+    static final class ComplexConfig {
+        private final String env;
+        private final DatabaseConfig database;
+        private final List<DatabaseConfig> replicas;
+
+        @JsonCreator
+        public ComplexConfig(
+            @JsonProperty("env") String env,
+            @JsonProperty("database") DatabaseConfig database,
+            @JsonProperty("replicas") List<DatabaseConfig> replicas
+        ) {
+            this.env = env;
+            this.database = database;
+            this.replicas = replicas;
+        }
+
+        public String env() { return env; }
+        public DatabaseConfig database() { return database; }
+        public List<DatabaseConfig> replicas() { return replicas; }
+    }
+
     @Nested
     @DisplayName("Parse")
     class Parse {
@@ -432,6 +474,67 @@ public class YamlParserTest {
                 assertAll(
                     () -> assertNotNull(configList),
                     () -> assertEquals(List.of("a", "b"), configList.items())
+                );
+            }
+        }
+
+        @Test
+        @DisplayName("Should merge complex nested objects and lists correctly when merging is allowed")
+        void shouldMergeComplexNestedObjectsAndLists() {
+            var features = MergeFeatures.builder()
+                .permitOverride(true)
+                .listMerging(true)
+                .build();
+
+            var yaml1 = "env: \"dev\"\n" +
+                "database:\n" +
+                "  host: \"localhost\"\n" +
+                "  port: 5432\n" +
+                "  options:\n" +
+                "    - \"ssl=true\"\n" +
+                "replicas:\n" +
+                "  - host: \"replica1\"\n" +
+                "    port: 5433\n" +
+                "    options:\n" +
+                "      - \"readOnly=true\"\n";
+
+            var yaml2 = "env: \"prod\"\n" +
+                "database:\n" +
+                "  host: \"db-prod\"\n" +
+                "  options:\n" +
+                "    - \"timeout=30\"\n" +
+                "replicas:\n" +
+                "  - host: \"replica2\"\n" +
+                "    port: 5434\n" +
+                "    options:\n" +
+                "      - \"readOnly=true\"\n";
+
+            try (var parser = new YamlParser(features)) {
+                parser.parse(new ByteArrayInputStream(yaml1.getBytes(StandardCharsets.UTF_8)));
+                parser.parse(new ByteArrayInputStream(yaml2.getBytes(StandardCharsets.UTF_8)));
+
+                var config = parser.convertTo(ComplexConfig.class);
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertEquals("prod", config.env()),
+                    
+                    // Verify nested database object
+                    () -> assertNotNull(config.database()),
+                    () -> assertEquals("db-prod", config.database().host()),
+                    () -> assertEquals(5432, config.database().port()),
+                    () -> assertEquals(List.of("ssl=true", "timeout=30"), config.database().options()),
+
+                    // Verify replicas list
+                    () -> assertNotNull(config.replicas()),
+                    () -> assertEquals(2, config.replicas().size()),
+                    () -> assertEquals("replica1", config.replicas().get(0).host()),
+                    () -> assertEquals(5433, config.replicas().get(0).port()),
+                    () -> assertEquals(List.of("readOnly=true"), config.replicas().get(0).options()),
+                    
+                    // Verify replica2 was merged/appended
+                    () -> assertEquals("replica2", config.replicas().get(1).host()),
+                    () -> assertEquals(5434, config.replicas().get(1).port()),
+                    () -> assertEquals(List.of("readOnly=true"), config.replicas().get(1).options())
                 );
             }
         }
