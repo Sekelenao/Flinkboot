@@ -112,6 +112,7 @@ Use the flag `--flinkboot-configuration-list-merging` (or environment variable `
     ```
   * **Result:** `topics: ["users", "orders"]`
   * *Note:* If list merging is enabled but `--flinkboot-configuration-override` is disabled, scalar overrides will still throw an exception, but list merges (appends) are allowed. If both are enabled, both scalar overrides and list appends are allowed.
+  * *Strict Boolean Rule:* Just like any other Flinkboot flags, if you set `FLINKBOOT_CONFIGURATION_OVERRIDE` or `FLINKBOOT_CONFIGURATION_LIST_MERGING` via environment variables, their values must be strictly `"true"` or `"false"`. Any other value will cause Flinkboot to fail fast with a `BooleanParsingException`.
 
 ---
 

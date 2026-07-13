@@ -1,4 +1,4 @@
-package io.github.sekelenao.flinkboot.core.internal.parser;
+package io.github.sekelenao.flinkboot.core.internal.parser.yaml;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 

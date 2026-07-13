@@ -1,7 +1,8 @@
 package io.github.sekelenao.flinkboot.core.internal.startup;
 
 import io.github.sekelenao.flinkboot.core.internal.annotation.VisibleForTesting;
-import io.github.sekelenao.flinkboot.core.internal.parser.MergeFeatures;
+import io.github.sekelenao.flinkboot.core.internal.parser.bool.StrictBooleanParser;
+import io.github.sekelenao.flinkboot.core.internal.parser.yaml.MergeFeatures;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,7 +31,7 @@ public final class StartupEnvironment {
 
     public boolean flag(String flag){
         Objects.requireNonNull(flag);
-        return commandLine.flag(flag) || envVarResolver.get(flag).map(Boolean::parseBoolean).orElse(Boolean.FALSE);
+        return commandLine.flag(flag) || envVarResolver.get(flag).map(StrictBooleanParser::parse).orElse(Boolean.FALSE);
     }
 
     public Optional<String> get(String key){

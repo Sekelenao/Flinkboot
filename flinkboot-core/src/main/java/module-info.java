@@ -3,6 +3,7 @@ module io.github.sekelenao.flinkboot.core {
     exports io.github.sekelenao.flinkboot.core.api;
     exports io.github.sekelenao.flinkboot.core.api.exception;
     exports io.github.sekelenao.flinkboot.core.api.exception.configuration;
+    exports io.github.sekelenao.flinkboot.core.api.exception.parsing;
     exports io.github.sekelenao.flinkboot.core.api.exception.resource;
 
     requires com.fasterxml.jackson.databind;
@@ -13,6 +14,6 @@ module io.github.sekelenao.flinkboot.core {
 
 
 
-    opens io.github.sekelenao.flinkboot.core.internal.parser to com.fasterxml.jackson.databind, org.hibernate.validator;
     opens io.github.sekelenao.flinkboot.core.api to com.fasterxml.jackson.databind, org.hibernate.validator;
+    opens io.github.sekelenao.flinkboot.core.internal.parser.yaml to com.fasterxml.jackson.databind, org.hibernate.validator;
 }
