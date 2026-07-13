@@ -33,6 +33,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("YamlParser")
 public class YamlParserTest {
 
+    private static final MergeFeatures STANDARD_FEATURES = MergeFeatures.builder()
+        .permitOverride(false)
+        .listMerging(false)
+        .build();
+
     enum JobType {
         BATCH, STREAMING
     }
@@ -88,6 +93,48 @@ public class YamlParserTest {
         }
     }
 
+    static final class DatabaseConfig {
+        private final String host;
+        private final int port;
+        private final List<String> options;
+
+        @JsonCreator
+        public DatabaseConfig(
+            @JsonProperty("host") String host,
+            @JsonProperty("port") int port,
+            @JsonProperty("options") List<String> options
+        ) {
+            this.host = host;
+            this.port = port;
+            this.options = options;
+        }
+
+        public String host() { return host; }
+        public int port() { return port; }
+        public List<String> options() { return options; }
+    }
+
+    static final class ComplexConfig {
+        private final String env;
+        private final DatabaseConfig database;
+        private final List<DatabaseConfig> replicas;
+
+        @JsonCreator
+        public ComplexConfig(
+            @JsonProperty("env") String env,
+            @JsonProperty("database") DatabaseConfig database,
+            @JsonProperty("replicas") List<DatabaseConfig> replicas
+        ) {
+            this.env = env;
+            this.database = database;
+            this.replicas = replicas;
+        }
+
+        public String env() { return env; }
+        public DatabaseConfig database() { return database; }
+        public List<DatabaseConfig> replicas() { return replicas; }
+    }
+
     @Nested
     @DisplayName("Parse")
     class Parse {
@@ -100,7 +147,7 @@ public class YamlParserTest {
         @DisplayName("Should successfully parse YAML configuration with standard or case-insensitive properties")
         void shouldParseYamlConfigurations(String yamlContent) {
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-            try (var parser = new YamlParser()) {
+            try (var parser = new YamlParser(STANDARD_FEATURES)) {
                 parser.parse(stream);
                 var config = parser.convertTo(TestConfig.class);
                 assertAll(
@@ -116,7 +163,7 @@ public class YamlParserTest {
         void shouldThrowExceptionWhenYamlContainsUnknownProperties() {
             var yamlContent = "name: \"Flink Job\"\nvalue: 42\nextraField: \"value\"\n";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-            try (var parser = new YamlParser()) {
+            try (var parser = new YamlParser(STANDARD_FEATURES)) {
                 parser.parse(stream);
                 assertThrows(YamlParsingException.class, () -> parser.convertTo(TestConfig.class));
             }
@@ -128,7 +175,7 @@ public class YamlParserTest {
             var yamlContent = "type: \"streaming\"\n";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
 
-            try (var parser = new YamlParser()) {
+            try (var parser = new YamlParser(STANDARD_FEATURES)) {
                 parser.parse(stream);
                 var config = parser.convertTo(TestConfigWithEnum.class);
                 assertAll(
@@ -146,7 +193,7 @@ public class YamlParserTest {
             Consumer<YAMLMapper.Builder> additionalConfigurations = builder -> {
                 builder.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
             };
-            try (var customizedParser = new YamlParser(additionalConfigurations); var inputStream = new ByteArrayInputStream(bytes)) {
+            try (var customizedParser = new YamlParser(additionalConfigurations, STANDARD_FEATURES); var inputStream = new ByteArrayInputStream(bytes)) {
                 customizedParser.parse(inputStream);
                 var config = customizedParser.convertTo(TestConfigWithEnum.class);
                 assertAll(
@@ -154,7 +201,7 @@ public class YamlParserTest {
                     () -> assertNull(config.type())
                 );
             }
-            try (var defaultParser = new YamlParser(); var inputStream = new ByteArrayInputStream(bytes)) {
+            try (var defaultParser = new YamlParser(STANDARD_FEATURES); var inputStream = new ByteArrayInputStream(bytes)) {
                 defaultParser.parse(inputStream);
                 assertThrows(YamlParsingException.class, () -> defaultParser.convertTo(TestConfigWithEnum.class));
             }
@@ -165,12 +212,12 @@ public class YamlParserTest {
         void shouldParseTwice() {
             var yamlContent = "name: \"Flink Job\"\nvalue: 42\n";
             var bytes = yamlContent.getBytes(StandardCharsets.UTF_8);
-            try (var parser1 = new YamlParser()) {
+            try (var parser1 = new YamlParser(STANDARD_FEATURES)) {
                 parser1.parse(new ByteArrayInputStream(bytes));
                 var config1 = parser1.convertTo(TestConfig.class);
                 assertNotNull(config1);
             }
-            try (var parser2 = new YamlParser()) {
+            try (var parser2 = new YamlParser(STANDARD_FEATURES)) {
                 parser2.parse(new ByteArrayInputStream(bytes));
                 var config2 = parser2.convertTo(TestConfig.class);
                 assertNotNull(config2);
@@ -183,7 +230,8 @@ public class YamlParserTest {
             var baseYaml = "name: \"BaseApp\"\nvalue: 42\n";
             var overrideYaml = "value: 100\n";
 
-            try (var parser = new YamlParser()) {
+            var features = MergeFeatures.builder().permitOverride(true).listMerging(false).build();
+            try (var parser = new YamlParser(features)) {
                 parser.parse(new ByteArrayInputStream(baseYaml.getBytes(StandardCharsets.UTF_8)));
                 parser.parse(new ByteArrayInputStream(overrideYaml.getBytes(StandardCharsets.UTF_8)));
 
@@ -202,7 +250,7 @@ public class YamlParserTest {
             var firstYaml = "name: \"BaseApp\"\n";
             var secondYaml = "value: 42\n";
 
-            try (var parser = new YamlParser()) {
+            try (var parser = new YamlParser(STANDARD_FEATURES)) {
                 parser.parse(new ByteArrayInputStream(firstYaml.getBytes(StandardCharsets.UTF_8)));
                 parser.parse(new ByteArrayInputStream(secondYaml.getBytes(StandardCharsets.UTF_8)));
 
@@ -221,7 +269,7 @@ public class YamlParserTest {
             var yamlContent = "name: \"\"\nvalue: 0\n";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
 
-            try (var parser = new YamlParser()) {
+            try (var parser = new YamlParser(STANDARD_FEATURES)) {
                 parser.parse(stream);
                 var exception = assertThrows(ConfigurationValidationException.class, () -> parser.convertTo(TestConfig.class));
                 assertAll(
@@ -235,7 +283,7 @@ public class YamlParserTest {
         @Test
         @DisplayName("Should throw NullPointerException when source or class is null")
         void shouldThrowExceptionWhenParamsAreNull() {
-            try (var parser = new YamlParser()) {
+            try (var parser = new YamlParser(STANDARD_FEATURES)) {
                 assertAll(
                     () -> assertThrows(NullPointerException.class, () -> parser.parse(null)),
                     () -> assertThrows(NullPointerException.class, () -> parser.convertTo(null))
@@ -248,7 +296,7 @@ public class YamlParserTest {
         void shouldThrowExceptionWhenYamlIsMalformed() {
             var yamlContent = "name: \"Flink Job\nvalue: invalid_number\n";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-            try (var parser = new YamlParser()) {
+            try (var parser = new YamlParser(STANDARD_FEATURES)) {
                 var exception = assertThrows(YamlParsingException.class, () -> parser.parse(stream));
                 assertAll(
                     () -> assertNotNull(exception.getMessage(), "Exception message should not be null"),
@@ -263,7 +311,7 @@ public class YamlParserTest {
         void shouldSilentlyIgnoreEmptyYaml() {
             var yamlContent = "";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-            try (var parser = new YamlParser()) {
+            try (var parser = new YamlParser(STANDARD_FEATURES)) {
                 assertDoesNotThrow(() -> parser.parse(stream));
             }
         }
@@ -273,7 +321,7 @@ public class YamlParserTest {
         void shouldSilentlyIgnoreNullYamlLiteral() {
             var yamlContent = "null";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-            try (var parser = new YamlParser()) {
+            try (var parser = new YamlParser(STANDARD_FEATURES)) {
                 assertDoesNotThrow(() -> parser.parse(stream));
             }
         }
@@ -281,7 +329,7 @@ public class YamlParserTest {
         @Test
         @DisplayName("Should throw YamlParsingException when configuration resolves to null")
         void shouldThrowExceptionWhenConfigurationResolvesToNull() {
-            try (var parser = new YamlParser()) {
+            try (var parser = new YamlParser(STANDARD_FEATURES)) {
                 assertThrows(YamlParsingException.class, () -> parser.convertTo(Void.class));
             }
         }
@@ -291,7 +339,7 @@ public class YamlParserTest {
         void shouldThrowExceptionWhenYamlRootIsNonObject() {
             var yamlContent = "- item1\n- item2\n";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-            try (var parser = new YamlParser()) {
+            try (var parser = new YamlParser(STANDARD_FEATURES)) {
                 assertThrows(YamlParsingException.class, () -> parser.parse(stream));
             }
         }
@@ -302,7 +350,8 @@ public class YamlParserTest {
             var baseYaml = "items:\n  - \"item1\"\n  - \"item2\"\n";
             var overrideYaml = "items:\n  - \"item3\"\n";
 
-            try (var parser = new YamlParser()) {
+            var features = MergeFeatures.builder().permitOverride(false).listMerging(true).build();
+            try (var parser = new YamlParser(features)) {
                 parser.parse(new ByteArrayInputStream(baseYaml.getBytes(StandardCharsets.UTF_8)));
                 parser.parse(new ByteArrayInputStream(overrideYaml.getBytes(StandardCharsets.UTF_8)));
 
@@ -310,6 +359,182 @@ public class YamlParserTest {
                 assertAll(
                     () -> assertNotNull(config),
                     () -> assertEquals(List.of("item1", "item2", "item3"), config.items())
+                );
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("MergeFeatures Combinations")
+    class MergeFeaturesCombinations {
+
+        @Test
+        @DisplayName("With permitOverride=false and listMerging=false: should throw exception on any override or list merge")
+        void shouldThrowExceptionOnAnyOverrideOrListMerge() {
+            var features = MergeFeatures.builder().permitOverride(false).listMerging(false).build();
+            var yaml1 = "name: \"Base\"\nvalue: 42\n";
+            var yaml2 = "value: 100\n";
+            var yamlList1 = "items:\n  - \"a\"\n";
+            var yamlList2 = "items:\n  - \"b\"\n";
+
+            try (var parser = new YamlParser(features)) {
+                parser.parse(new ByteArrayInputStream(yaml1.getBytes(StandardCharsets.UTF_8)));
+                var stream = new ByteArrayInputStream(yaml2.getBytes(StandardCharsets.UTF_8));
+                assertThrows(YamlParsingException.class, () -> parser.parse(stream));
+            }
+
+            try (var parser = new YamlParser(features)) {
+                parser.parse(new ByteArrayInputStream(yamlList1.getBytes(StandardCharsets.UTF_8)));
+                var stream = new ByteArrayInputStream(yamlList2.getBytes(StandardCharsets.UTF_8));
+                assertThrows(YamlParsingException.class, () -> parser.parse(stream));
+            }
+        }
+
+        @Test
+        @DisplayName("With permitOverride=true and listMerging=false: should override scalars and replace lists")
+        void shouldOverrideScalarsAndReplaceLists() {
+            var features = MergeFeatures.builder().permitOverride(true).listMerging(false).build();
+            var yaml1 = "name: \"Base\"\nvalue: 42\n";
+            var yaml2 = "value: 100\n";
+            var yamlList1 = "items:\n  - \"a\"\n";
+            var yamlList2 = "items:\n  - \"b\"\n";
+
+            try (var parser = new YamlParser(features)) {
+                parser.parse(new ByteArrayInputStream(yaml1.getBytes(StandardCharsets.UTF_8)));
+                parser.parse(new ByteArrayInputStream(yaml2.getBytes(StandardCharsets.UTF_8)));
+                var config = parser.convertTo(TestConfig.class);
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertEquals("Base", config.name()),
+                    () -> assertEquals(100, config.value())
+                );
+            }
+
+            try (var parser = new YamlParser(features)) {
+                parser.parse(new ByteArrayInputStream(yamlList1.getBytes(StandardCharsets.UTF_8)));
+                parser.parse(new ByteArrayInputStream(yamlList2.getBytes(StandardCharsets.UTF_8)));
+                var config = parser.convertTo(TestConfigWithList.class);
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertEquals(List.of("b"), config.items())
+                );
+            }
+        }
+
+        @Test
+        @DisplayName("With permitOverride=false and listMerging=true: should throw on scalar override but append lists")
+        void shouldThrowOnScalarOverrideButAppendLists() {
+            var features = MergeFeatures.builder().permitOverride(false).listMerging(true).build();
+            var yaml1 = "name: \"Base\"\nvalue: 42\n";
+            var yaml2 = "value: 100\n";
+            var yamlList1 = "items:\n  - \"a\"\n";
+            var yamlList2 = "items:\n  - \"b\"\n";
+
+            try (var parser = new YamlParser(features)) {
+                parser.parse(new ByteArrayInputStream(yaml1.getBytes(StandardCharsets.UTF_8)));
+                var stream = new ByteArrayInputStream(yaml2.getBytes(StandardCharsets.UTF_8));
+                assertThrows(YamlParsingException.class, () -> parser.parse(stream));
+            }
+
+            try (var parser = new YamlParser(features)) {
+                parser.parse(new ByteArrayInputStream(yamlList1.getBytes(StandardCharsets.UTF_8)));
+                parser.parse(new ByteArrayInputStream(yamlList2.getBytes(StandardCharsets.UTF_8)));
+                var config = parser.convertTo(TestConfigWithList.class);
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertEquals(List.of("a", "b"), config.items())
+                );
+            }
+        }
+
+        @Test
+        @DisplayName("With permitOverride=true and listMerging=true: should override scalars and append lists")
+        void shouldOverrideScalarsAndAppendLists() {
+            var features = MergeFeatures.builder().permitOverride(true).listMerging(true).build();
+            var yamlScalar1 = "name: \"Base\"\nvalue: 42\n";
+            var yamlScalar2 = "value: 100\n";
+            var yamlList1 = "items:\n  - \"a\"\n";
+            var yamlList2 = "items:\n  - \"b\"\n";
+
+            try (var parser = new YamlParser(features)) {
+                parser.parse(new ByteArrayInputStream(yamlScalar1.getBytes(StandardCharsets.UTF_8)));
+                parser.parse(new ByteArrayInputStream(yamlScalar2.getBytes(StandardCharsets.UTF_8)));
+                var config = parser.convertTo(TestConfig.class);
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertEquals("Base", config.name()),
+                    () -> assertEquals(100, config.value())
+                );
+            }
+
+            try (var parser = new YamlParser(features)) {
+                parser.parse(new ByteArrayInputStream(yamlList1.getBytes(StandardCharsets.UTF_8)));
+                parser.parse(new ByteArrayInputStream(yamlList2.getBytes(StandardCharsets.UTF_8)));
+                var configList = parser.convertTo(TestConfigWithList.class);
+                assertAll(
+                    () -> assertNotNull(configList),
+                    () -> assertEquals(List.of("a", "b"), configList.items())
+                );
+            }
+        }
+
+        @Test
+        @DisplayName("Should merge complex nested objects and lists correctly when merging is allowed")
+        void shouldMergeComplexNestedObjectsAndLists() {
+            var features = MergeFeatures.builder()
+                .permitOverride(true)
+                .listMerging(true)
+                .build();
+
+            var yaml1 = "env: \"dev\"\n" +
+                "database:\n" +
+                "  host: \"localhost\"\n" +
+                "  port: 5432\n" +
+                "  options:\n" +
+                "    - \"ssl=true\"\n" +
+                "replicas:\n" +
+                "  - host: \"replica1\"\n" +
+                "    port: 5433\n" +
+                "    options:\n" +
+                "      - \"readOnly=true\"\n";
+
+            var yaml2 = "env: \"prod\"\n" +
+                "database:\n" +
+                "  host: \"db-prod\"\n" +
+                "  options:\n" +
+                "    - \"timeout=30\"\n" +
+                "replicas:\n" +
+                "  - host: \"replica2\"\n" +
+                "    port: 5434\n" +
+                "    options:\n" +
+                "      - \"readOnly=true\"\n";
+
+            try (var parser = new YamlParser(features)) {
+                parser.parse(new ByteArrayInputStream(yaml1.getBytes(StandardCharsets.UTF_8)));
+                parser.parse(new ByteArrayInputStream(yaml2.getBytes(StandardCharsets.UTF_8)));
+
+                var config = parser.convertTo(ComplexConfig.class);
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertEquals("prod", config.env()),
+                    
+                    // Verify nested database object
+                    () -> assertNotNull(config.database()),
+                    () -> assertEquals("db-prod", config.database().host()),
+                    () -> assertEquals(5432, config.database().port()),
+                    () -> assertEquals(List.of("ssl=true", "timeout=30"), config.database().options()),
+
+                    // Verify replicas list
+                    () -> assertNotNull(config.replicas()),
+                    () -> assertEquals(2, config.replicas().size()),
+                    () -> assertEquals("replica1", config.replicas().get(0).host()),
+                    () -> assertEquals(5433, config.replicas().get(0).port()),
+                    () -> assertEquals(List.of("readOnly=true"), config.replicas().get(0).options()),
+                    
+                    // Verify replica2 was merged/appended
+                    () -> assertEquals("replica2", config.replicas().get(1).host()),
+                    () -> assertEquals(5434, config.replicas().get(1).port()),
+                    () -> assertEquals(List.of("readOnly=true"), config.replicas().get(1).options())
                 );
             }
         }

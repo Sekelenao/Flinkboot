@@ -1,5 +1,6 @@
 package io.github.sekelenao.flinkboot.core.internal.startup;
 
+import io.github.sekelenao.flinkboot.core.internal.parser.MergeFeatures;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -7,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -175,6 +177,54 @@ class StartupEnvironmentTest {
             var resolver = new EnvVarResolver(k -> null);
             var startupEnv = new StartupEnvironment(cmd, resolver);
             assertFalse(startupEnv.flag("my-flag"));
+        }
+    }
+
+    @Nested
+    @DisplayName("MergeFeatures")
+    class MergeFeaturesTest {
+
+        @Test
+        @DisplayName("Should return MergeFeatures with false flags by default when absent")
+        void shouldReturnFalseFlagsByDefault() {
+            var cmd = CommandLine.parse(new String[0]);
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            var features = startupEnv.mergeFeatures();
+            assertAll(
+                () -> assertFalse(features.permitOverride()),
+                () -> assertFalse(features.listMerging())
+            );
+        }
+
+        @Test
+        @DisplayName("Should return MergeFeatures with true flags when flags are present in CommandLine")
+        void shouldReturnTrueFlagsWhenInCommandLine() {
+            var cmd = CommandLine.parse(new String[]{"--flinkboot-configuration-override", "--flinkboot-configuration-list-merging"});
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            var features = startupEnv.mergeFeatures();
+            assertAll(
+                () -> assertTrue(features.permitOverride()),
+                () -> assertTrue(features.listMerging())
+            );
+        }
+
+        @Test
+        @DisplayName("Should return MergeFeatures with true flags when flags are present in env variables")
+        void shouldReturnTrueFlagsWhenInEnv() {
+            var cmd = CommandLine.parse(new String[0]);
+            var env = Map.of(
+                "FLINKBOOT_CONFIGURATION_OVERRIDE", "true",
+                "FLINKBOOT_CONFIGURATION_LIST_MERGING", "true"
+            );
+            var resolver = new EnvVarResolver(env::get);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            var features = startupEnv.mergeFeatures();
+            assertAll(
+                () -> assertTrue(features.permitOverride()),
+                () -> assertTrue(features.listMerging())
+            );
         }
     }
 }

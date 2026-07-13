@@ -2,6 +2,7 @@ package io.github.sekelenao.flinkboot.core.internal.parser;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.ConfigurationValidationException;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.YamlParsingException;
@@ -22,12 +23,15 @@ public final class YamlParser implements AutoCloseable {
 
     private final JsonNode root;
 
-    public YamlParser() {
-        this(additionalConfiguration -> {});
+    private final MergeProcessor mergeProcessor;
+
+    public YamlParser(MergeFeatures features) {
+        this(additionalConfiguration -> {}, Objects.requireNonNull(features));
     }
 
-    public YamlParser(Consumer<YAMLMapper.Builder> additionalConfiguration) {
+    public YamlParser(Consumer<YAMLMapper.Builder> additionalConfiguration, MergeFeatures features) {
         Objects.requireNonNull(additionalConfiguration);
+        Objects.requireNonNull(features);
         var builder = YAMLMapper.builder()
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true)
@@ -35,11 +39,14 @@ public final class YamlParser implements AutoCloseable {
         additionalConfiguration.accept(builder);
         this.mapper = builder.build();
         this.root = mapper.createObjectNode();
+        this.mergeProcessor = new MergeProcessor((ObjectNode) root, features);
     }
 
-    public YamlParser(YAMLMapper mapper){
+    public YamlParser(YAMLMapper mapper, MergeFeatures mergeFeatures){
+        Objects.requireNonNull(mergeFeatures);
         this.mapper = Objects.requireNonNull(mapper);
         this.root = mapper.createObjectNode();
+        this.mergeProcessor = new MergeProcessor((ObjectNode) root, mergeFeatures);
     }
 
     public void parse(InputStream source){
@@ -52,7 +59,7 @@ public final class YamlParser implements AutoCloseable {
             if (!node.isObject()) {
                 throw new YamlParsingException("Configuration source is invalid");
             }
-            mapper.readerForUpdating(root).readValue(node);
+           mergeProcessor.apply((ObjectNode) node);
         } catch (IOException exception) {
             throw new YamlParsingException(exception.getMessage(), exception);
         }

@@ -80,45 +80,38 @@ JobConfig config = Flinkboot.initialize(args)
 
 When multiple files are specified in `-flinkboot-configurations` (e.g. `file:base.yaml,file:override.yaml`), Flinkboot merges them sequentially from left to right.
 
-### Value Overrides
-If a property is present in both files, the value from the later file overrides the earlier one:
-* **`base.yaml`:** `parallelism: 4`
-* **`override.yaml`:** `parallelism: 16`
-* **Result:** `parallelism: 16`
+### Default Behavior: Strict Merging
+By default, Flinkboot enforces strict merging rules to prevent accidental configuration overrides:
+* **Value Overrides:** Overriding an existing scalar key or list is forbidden. If a key is redefined in a later file, a `YamlParsingException` is thrown.
+* **Nested Objects:** Nested objects are merged recursively (deep merge) as long as there are no scalar/list conflicts.
+* **Lists and Arrays:** Re-defining a list key in a later file is treated as a value override and will throw a `YamlParsingException` by default.
 
-### Nested Objects
-Nested objects are merged recursively (deep merge):
-* **`base.yaml`:** 
-  ```yaml
-  database:
-    host: "localhost"
-    port: 5432
-  ```
-* **`override.yaml`:** 
-  ```yaml
-  database:
-    host: "db-prod"
-  ```
-* **Result:**
-  ```yaml
-  database:
-    host: "db-prod"
-    port: 5432
-  ```
+### Customizing Merging Behavior (Flags)
+You can customize the merging behavior using the following command-line flags or environment variables:
 
-### Lists and Arrays
-By default, list elements are **appended** during a merge:
-* **`base.yaml`:**
-  ```yaml
-  topics:
-    - "users"
-  ```
-* **`override.yaml`:**
-  ```yaml
-  topics:
-    - "orders"
-  ```
-* **Result:** `topics: ["users", "orders"]`
+#### A. Permitting Overrides
+Use the flag `--flinkboot-configuration-override` (or environment variable `FLINKBOOT_CONFIGURATION_OVERRIDE=true`) to allow properties to be overwritten.
+* **With override enabled:**
+  * **`base.yaml`:** `parallelism: 4`
+  * **`override.yaml`:** `parallelism: 16`
+  * **Result:** `parallelism: 16` (instead of throwing an exception)
+  * **Lists and Arrays:** The entire list from the later file completely replaces the list from the earlier file.
+
+#### B. Permitting List Merging
+Use the flag `--flinkboot-configuration-list-merging` (or environment variable `FLINKBOOT_CONFIGURATION_LIST_MERGING=true`) to allow list elements to be appended together during a merge instead of being replaced.
+* **With list merging enabled:**
+  * **`base.yaml`:**
+    ```yaml
+    topics:
+      - "users"
+    ```
+  * **`override.yaml`:**
+    ```yaml
+    topics:
+      - "orders"
+    ```
+  * **Result:** `topics: ["users", "orders"]`
+  * *Note:* If list merging is enabled but `--flinkboot-configuration-override` is disabled, scalar overrides will still throw an exception, but list merges (appends) are allowed. If both are enabled, both scalar overrides and list appends are allowed.
 
 ---
 
