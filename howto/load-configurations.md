@@ -90,16 +90,16 @@ By default, Flinkboot enforces strict merging rules to prevent accidental config
 You can customize the merging behavior using the following command-line flags or environment variables:
 
 #### A. Permitting Overrides
-Use the flag `--flinkboot-yaml-property-override` (or environment variable `FLINKBOOT_YAML_PROPERTY_OVERRIDE=true`) to allow properties to be overwritten.
+Use the flag `--flinkboot-configuration-override` (or environment variable `FLINKBOOT_CONFIGURATION_OVERRIDE=true`) to allow properties to be overwritten.
 * **With override enabled:**
   * **`base.yaml`:** `parallelism: 4`
   * **`override.yaml`:** `parallelism: 16`
   * **Result:** `parallelism: 16` (instead of throwing an exception)
   * **Lists and Arrays:** The entire list from the later file completely replaces the list from the earlier file.
 
-#### B. Permitting List Fusion
-Use the flag `--flinkboot-yaml-property-list-fusion` (or environment variable `FLINKBOOT_YAML_PROPERTY_LIST_FUSION=true`) to allow list elements to be appended together during a merge instead of being replaced.
-* **With list fusion enabled:**
+#### B. Permitting List Merging
+Use the flag `--flinkboot-configuration-list-merging` (or environment variable `FLINKBOOT_CONFIGURATION_LIST_MERGING=true`) to allow list elements to be appended together during a merge instead of being replaced.
+* **With list merging enabled:**
   * **`base.yaml`:**
     ```yaml
     topics:
@@ -111,7 +111,7 @@ Use the flag `--flinkboot-yaml-property-list-fusion` (or environment variable `F
       - "orders"
     ```
   * **Result:** `topics: ["users", "orders"]`
-  * *Note:* If list fusion is enabled but `--flinkboot-yaml-property-override` is disabled, scalar overrides will still throw an exception, but list merges (appends) are allowed. If both are enabled, both scalar overrides and list appends are allowed.
+  * *Note:* If list merging is enabled but `--flinkboot-configuration-override` is disabled, scalar overrides will still throw an exception, but list merges (appends) are allowed. If both are enabled, both scalar overrides and list appends are allowed.
 
 ---
 

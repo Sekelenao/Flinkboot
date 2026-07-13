@@ -7,38 +7,38 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-@DisplayName("FusionFeatures")
-class FusionFeaturesTest {
+@DisplayName("MergeFeatures")
+class MergeFeaturesTest {
 
     @Nested
     @DisplayName("Builder")
     class Builder {
 
         @Test
-        @DisplayName("Should successfully build FusionFeatures with true flags")
+        @DisplayName("Should successfully build MergeFeatures with true flags")
         void shouldBuildWithTrueFlags() {
-            var features = FusionFeatures.builder()
+            var features = MergeFeatures.builder()
                 .permitOverride(true)
-                .listFusion(true)
+                .listMerging(true)
                 .build();
 
             assertAll(
                 () -> assertTrue(features.permitOverride()),
-                () -> assertTrue(features.listFusion())
+                () -> assertTrue(features.listMerging())
             );
         }
 
         @Test
-        @DisplayName("Should successfully build FusionFeatures with false flags")
+        @DisplayName("Should successfully build MergeFeatures with false flags")
         void shouldBuildWithFalseFlags() {
-            var features = FusionFeatures.builder()
+            var features = MergeFeatures.builder()
                 .permitOverride(false)
-                .listFusion(false)
+                .listMerging(false)
                 .build();
 
             assertAll(
                 () -> assertFalse(features.permitOverride()),
-                () -> assertFalse(features.listFusion())
+                () -> assertFalse(features.listMerging())
             );
         }
     }

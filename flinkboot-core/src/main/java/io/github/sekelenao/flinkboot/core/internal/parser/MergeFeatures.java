@@ -1,21 +1,21 @@
 package io.github.sekelenao.flinkboot.core.internal.parser;
 
-public final class FusionFeatures {
+public final class MergeFeatures {
 
     private final boolean permitOverride;
-    private final boolean listFusion;
+    private final boolean listMerging;
 
-    private FusionFeatures(boolean permitOverride, boolean listFusion) {
+    private MergeFeatures(boolean permitOverride, boolean listMerging) {
         this.permitOverride = permitOverride;
-        this.listFusion = listFusion;
+        this.listMerging = listMerging;
     }
 
     public boolean permitOverride() {
         return permitOverride;
     }
 
-    public boolean listFusion() {
-        return listFusion;
+    public boolean listMerging() {
+        return listMerging;
     }
 
     public static StepOne builder() {
@@ -27,16 +27,16 @@ public final class FusionFeatures {
     }
 
     public interface StepTwo {
-        Build listFusion(boolean listFusion);
+        Build listMerging(boolean listMerging);
     }
 
     public interface Build {
-        FusionFeatures build();
+        MergeFeatures build();
     }
 
     private static final class Builder implements StepOne, StepTwo, Build {
         private boolean permitOverride;
-        private boolean listFusion;
+        private boolean listMerging;
 
         @Override
         public StepTwo permitOverride(boolean permitOverride) {
@@ -45,14 +45,14 @@ public final class FusionFeatures {
         }
 
         @Override
-        public Build listFusion(boolean listFusion) {
-            this.listFusion = listFusion;
+        public Build listMerging(boolean listMerging) {
+            this.listMerging = listMerging;
             return this;
         }
 
         @Override
-        public FusionFeatures build() {
-            return new FusionFeatures(permitOverride, listFusion);
+        public MergeFeatures build() {
+            return new MergeFeatures(permitOverride, listMerging);
         }
     }
 }

@@ -33,9 +33,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("YamlParser")
 public class YamlParserTest {
 
-    private static final FusionFeatures STANDARD_FEATURES = FusionFeatures.builder()
+    private static final MergeFeatures STANDARD_FEATURES = MergeFeatures.builder()
         .permitOverride(false)
-        .listFusion(false)
+        .listMerging(false)
         .build();
 
     enum JobType {
@@ -188,7 +188,7 @@ public class YamlParserTest {
             var baseYaml = "name: \"BaseApp\"\nvalue: 42\n";
             var overrideYaml = "value: 100\n";
 
-            var features = FusionFeatures.builder().permitOverride(true).listFusion(false).build();
+            var features = MergeFeatures.builder().permitOverride(true).listMerging(false).build();
             try (var parser = new YamlParser(features)) {
                 parser.parse(new ByteArrayInputStream(baseYaml.getBytes(StandardCharsets.UTF_8)));
                 parser.parse(new ByteArrayInputStream(overrideYaml.getBytes(StandardCharsets.UTF_8)));
@@ -308,7 +308,7 @@ public class YamlParserTest {
             var baseYaml = "items:\n  - \"item1\"\n  - \"item2\"\n";
             var overrideYaml = "items:\n  - \"item3\"\n";
 
-            var features = FusionFeatures.builder().permitOverride(false).listFusion(true).build();
+            var features = MergeFeatures.builder().permitOverride(false).listMerging(true).build();
             try (var parser = new YamlParser(features)) {
                 parser.parse(new ByteArrayInputStream(baseYaml.getBytes(StandardCharsets.UTF_8)));
                 parser.parse(new ByteArrayInputStream(overrideYaml.getBytes(StandardCharsets.UTF_8)));
@@ -323,13 +323,13 @@ public class YamlParserTest {
     }
 
     @Nested
-    @DisplayName("FusionFeatures Combinations")
-    class FusionFeaturesCombinations {
+    @DisplayName("MergeFeatures Combinations")
+    class MergeFeaturesCombinations {
 
         @Test
-        @DisplayName("With permitOverride=false and listFusion=false: should throw exception on any override or list merge")
+        @DisplayName("With permitOverride=false and listMerging=false: should throw exception on any override or list merge")
         void shouldThrowExceptionOnAnyOverrideOrListMerge() {
-            var features = FusionFeatures.builder().permitOverride(false).listFusion(false).build();
+            var features = MergeFeatures.builder().permitOverride(false).listMerging(false).build();
             var yaml1 = "name: \"Base\"\nvalue: 42\n";
             var yaml2 = "value: 100\n";
             var yamlList1 = "items:\n  - \"a\"\n";
@@ -349,9 +349,9 @@ public class YamlParserTest {
         }
 
         @Test
-        @DisplayName("With permitOverride=true and listFusion=false: should override scalars and replace lists")
+        @DisplayName("With permitOverride=true and listMerging=false: should override scalars and replace lists")
         void shouldOverrideScalarsAndReplaceLists() {
-            var features = FusionFeatures.builder().permitOverride(true).listFusion(false).build();
+            var features = MergeFeatures.builder().permitOverride(true).listMerging(false).build();
             var yaml1 = "name: \"Base\"\nvalue: 42\n";
             var yaml2 = "value: 100\n";
             var yamlList1 = "items:\n  - \"a\"\n";
@@ -380,9 +380,9 @@ public class YamlParserTest {
         }
 
         @Test
-        @DisplayName("With permitOverride=false and listFusion=true: should throw on scalar override but append lists")
+        @DisplayName("With permitOverride=false and listMerging=true: should throw on scalar override but append lists")
         void shouldThrowOnScalarOverrideButAppendLists() {
-            var features = FusionFeatures.builder().permitOverride(false).listFusion(true).build();
+            var features = MergeFeatures.builder().permitOverride(false).listMerging(true).build();
             var yaml1 = "name: \"Base\"\nvalue: 42\n";
             var yaml2 = "value: 100\n";
             var yamlList1 = "items:\n  - \"a\"\n";
@@ -406,9 +406,9 @@ public class YamlParserTest {
         }
 
         @Test
-        @DisplayName("With permitOverride=true and listFusion=true: should override scalars and append lists")
+        @DisplayName("With permitOverride=true and listMerging=true: should override scalars and append lists")
         void shouldOverrideScalarsAndAppendLists() {
-            var features = FusionFeatures.builder().permitOverride(true).listFusion(true).build();
+            var features = MergeFeatures.builder().permitOverride(true).listMerging(true).build();
             var yamlScalar1 = "name: \"Base\"\nvalue: 42\n";
             var yamlScalar2 = "value: 100\n";
             var yamlList1 = "items:\n  - \"a\"\n";

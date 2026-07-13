@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.Objects;
 
-public final class FusionTask {
+public final class MergeTask {
 
     private final String path;
 
@@ -12,7 +12,7 @@ public final class FusionTask {
 
     private final ObjectNode target;
 
-    public FusionTask(String path, ObjectNode root, ObjectNode target) {
+    public MergeTask(String path, ObjectNode root, ObjectNode target) {
         this.path = Objects.requireNonNull(path);
         this.root = Objects.requireNonNull(root);
         this.target = Objects.requireNonNull(target);

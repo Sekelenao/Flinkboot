@@ -7,28 +7,28 @@ import io.github.sekelenao.flinkboot.core.api.exception.configuration.YamlParsin
 import java.util.ArrayDeque;
 import java.util.Objects;
 
-public final class FusionProcessor {
+public final class MergeProcessor {
 
-    private final ArrayDeque<FusionTask> tasks = new ArrayDeque<>();
+    private final ArrayDeque<MergeTask> tasks = new ArrayDeque<>();
 
     private final ObjectNode root;
 
-    private final FusionFeatures features;
+    private final MergeFeatures features;
 
-    public FusionProcessor(ObjectNode root, FusionFeatures features){
+    public MergeProcessor(ObjectNode root, MergeFeatures features){
         this.root = Objects.requireNonNull(root);
         this.features = Objects.requireNonNull(features);
     }
 
     public void apply(ObjectNode target){
         Objects.requireNonNull(target);
-        tasks.add(new FusionTask("", root, target));
+        tasks.add(new MergeTask("", root, target));
         while (!tasks.isEmpty()){
             processTask(tasks.pop());
         }
     }
 
-    private void processTask(FusionTask task){
+    private void processTask(MergeTask task){
         for (var entry: task.target().properties()){
             var key = entry.getKey();
             var newValue = entry.getValue();
@@ -36,8 +36,8 @@ public final class FusionProcessor {
             if (existingValue == null) {
                 task.root().set(key, newValue);
             } else if (existingValue.isObject() && newValue.isObject()) {
-                tasks.push(new FusionTask(task.pathOf(key), (ObjectNode) existingValue, (ObjectNode) newValue));
-            } else if (existingValue.isArray() && newValue.isArray() && features.listFusion()) {
+                tasks.push(new MergeTask(task.pathOf(key), (ObjectNode) existingValue, (ObjectNode) newValue));
+            } else if (existingValue.isArray() && newValue.isArray() && features.listMerging()) {
                 var existingArray = (ArrayNode) existingValue;
                 var newArray = (ArrayNode) newValue;
                 existingArray.addAll(newArray);

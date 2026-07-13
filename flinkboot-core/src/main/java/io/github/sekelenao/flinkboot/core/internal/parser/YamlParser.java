@@ -23,13 +23,13 @@ public final class YamlParser implements AutoCloseable {
 
     private final JsonNode root;
 
-    private final FusionProcessor fusionProcessor;
+    private final MergeProcessor mergeProcessor;
 
-    public YamlParser(FusionFeatures features) {
+    public YamlParser(MergeFeatures features) {
         this(additionalConfiguration -> {}, Objects.requireNonNull(features));
     }
 
-    public YamlParser(Consumer<YAMLMapper.Builder> additionalConfiguration, FusionFeatures features) {
+    public YamlParser(Consumer<YAMLMapper.Builder> additionalConfiguration, MergeFeatures features) {
         Objects.requireNonNull(additionalConfiguration);
         Objects.requireNonNull(features);
         var builder = YAMLMapper.builder()
@@ -39,14 +39,14 @@ public final class YamlParser implements AutoCloseable {
         additionalConfiguration.accept(builder);
         this.mapper = builder.build();
         this.root = mapper.createObjectNode();
-        this.fusionProcessor = new FusionProcessor((ObjectNode) root, features);
+        this.mergeProcessor = new MergeProcessor((ObjectNode) root, features);
     }
 
-    public YamlParser(YAMLMapper mapper, FusionFeatures fusionFeatures){
-        Objects.requireNonNull(fusionFeatures);
+    public YamlParser(YAMLMapper mapper, MergeFeatures mergeFeatures){
+        Objects.requireNonNull(mergeFeatures);
         this.mapper = Objects.requireNonNull(mapper);
         this.root = mapper.createObjectNode();
-        this.fusionProcessor = new FusionProcessor((ObjectNode) root, fusionFeatures);
+        this.mergeProcessor = new MergeProcessor((ObjectNode) root, mergeFeatures);
     }
 
     public void parse(InputStream source){
@@ -59,7 +59,7 @@ public final class YamlParser implements AutoCloseable {
             if (!node.isObject()) {
                 throw new YamlParsingException("Configuration source is invalid");
             }
-           fusionProcessor.apply((ObjectNode) node);
+           mergeProcessor.apply((ObjectNode) node);
         } catch (IOException exception) {
             throw new YamlParsingException(exception.getMessage(), exception);
         }
