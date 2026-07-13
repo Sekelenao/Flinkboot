@@ -2,7 +2,6 @@ package io.github.sekelenao.flinkboot.core.internal.parser.bool;
 
 import io.github.sekelenao.flinkboot.core.api.exception.parsing.BooleanParsingException;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationTargetException;

@@ -53,12 +53,20 @@ You can also enable a flag using an environment variable. Flinkboot automaticall
 * Flag name in Java code: `dry-run`
 * Corresponding environment variable name: `DRY_RUN`
 
-To enable the `dry-run` flag via the environment, set the variable to `true` (case-insensitive):
+To define the `dry-run` flag via the environment, set the variable to `true` or `false` (case-insensitive):
 
 ```bash
+# Enable the flag
 export DRY_RUN=true
+
+# Disable the flag explicitly
+export DRY_RUN=false
+
 flink run MyJobJar.jar
 ```
+
+> [!CAUTION]
+> Flinkboot enforces strict boolean parsing. If you set the environment variable to an invalid boolean value (e.g., `DRY_RUN=yes`, `DRY_RUN=1`, or any value other than `true` or `false`), Flinkboot will fail fast at startup and throw a `BooleanParsingException`.
 
 ---
 
@@ -67,5 +75,8 @@ flink run MyJobJar.jar
 When resolving a flag's value, Flinkboot applies the following order of precedence (from highest to lowest):
 
 1. **Command Line Option:** If `--debug` is present in the CLI arguments, the flag is `true`.
-2. **Environment Variable:** If the CLI option is absent, Flinkboot looks up the corresponding environment variable (`DEBUG`). If its value is `"true"` (case-insensitive), the flag is `true`.
+2. **Environment Variable:** If the CLI option is absent, Flinkboot looks up the corresponding environment variable (`DEBUG`).
+   * If the value is `"true"` (case-insensitive), the flag is `true`.
+   * If the value is `"false"` (case-insensitive), the flag is `false`.
+   * If the value is anything else, Flinkboot throws a `BooleanParsingException`.
 3. **Default Value:** If the flag is defined neither in the CLI nor in the environment, it defaults to `false`.
