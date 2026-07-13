@@ -5,3 +5,5 @@ The following keys are reserved by Flinkboot. Do not use these names for your cu
 | Command Line Key | Environment Key | Description |
 |------------------|-----------------|-------------|
 | `-flinkboot-configurations` | `FLINKBOOT_CONFIGURATIONS` | Comma-separated list of configuration file paths/URIs to load and merge. |
+| `--flinkboot-yaml-property-override` | `FLINKBOOT_YAML_PROPERTY_OVERRIDE` | Allows overriding configuration values in merged files instead of throwing an exception. |
+| `--flinkboot-yaml-property-list-fusion` | `FLINKBOOT_YAML_PROPERTY_LIST_FUSION` | Appends elements of lists/arrays together during merge instead of replacing them. |
