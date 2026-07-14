@@ -52,10 +52,10 @@
         <java.version>11</java.version>
 
         <!-- Flink version -->
-        <flink.version>1.20.0</flink.version>
+        <flink.version>1.20.5</flink.version>
 
         <!-- Dependencies versions -->
-        <dependency.junit.version>5.11.0</dependency.junit.version>
+        <dependency.junit.version>5.11.4</dependency.junit.version>
         <dependency.jackson.version>2.22.1</dependency.jackson.version>
         <dependency.validation.version>8.0.4.Final</dependency.validation.version>
         <dependency.expressly.version>5.0.0</dependency.expressly.version>
