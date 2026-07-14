@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 public final class YamlParser implements AutoCloseable {
 
-    private final ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
+    private final ValidatorFactory validatorFactory;
 
     private final YAMLMapper mapper;
 
@@ -40,6 +40,7 @@ public final class YamlParser implements AutoCloseable {
         this.mapper = builder.build();
         this.root = mapper.createObjectNode();
         this.mergeProcessor = new MergeProcessor((ObjectNode) root, features);
+        this.validatorFactory = Validation.buildDefaultValidatorFactory();
     }
 
     public YamlParser(YAMLMapper mapper, MergeFeatures mergeFeatures){
@@ -47,6 +48,7 @@ public final class YamlParser implements AutoCloseable {
         this.mapper = Objects.requireNonNull(mapper);
         this.root = mapper.createObjectNode();
         this.mergeProcessor = new MergeProcessor((ObjectNode) root, mergeFeatures);
+        this.validatorFactory = Validation.buildDefaultValidatorFactory();
     }
 
     public void parse(InputStream source){
