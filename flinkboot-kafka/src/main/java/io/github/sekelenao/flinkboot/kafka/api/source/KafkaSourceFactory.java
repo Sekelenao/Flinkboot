@@ -21,15 +21,15 @@ public final class KafkaSourceFactory {
         Objects.requireNonNull(config);
         Objects.requireNonNull(schema);
 
-        var properties = new Properties();
-        config.properties().ifPresent(properties::putAll);
+        var additionalProperties = new Properties();
+        config.properties().ifPresent(additionalProperties::putAll);
 
         return KafkaSource.<T>builder()
             .setBootstrapServers(String.join(",", config.bootstrapServers()))
             .setGroupId(config.groupId())
             .setTopics(config.topics())
             .setStartingOffsets(config.startingOffsets().offsetsInitializer())
-            .setProperties(properties)
+            .setProperties(additionalProperties)
             .setDeserializer(schema)
             .build();
     }
@@ -41,15 +41,15 @@ public final class KafkaSourceFactory {
         Objects.requireNonNull(config);
         Objects.requireNonNull(schema);
 
-        var properties = new Properties();
-        config.properties().ifPresent(properties::putAll);
+        var additionalProperties = new Properties();
+        config.properties().ifPresent(additionalProperties::putAll);
 
         return KafkaSource.<T>builder()
             .setBootstrapServers(String.join(",", config.bootstrapServers()))
             .setGroupId(config.groupId())
             .setTopicPattern(config.topicPattern())
             .setStartingOffsets(config.startingOffsets().offsetsInitializer())
-            .setProperties(properties)
+            .setProperties(additionalProperties)
             .setDeserializer(schema)
             .build();
     }
