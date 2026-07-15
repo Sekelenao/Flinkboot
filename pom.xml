@@ -44,6 +44,7 @@
     <modules>
         <module>flinkboot-core</module>
         <module>flinkboot-test</module>
+        <module>flinkboot-kafka</module>
     </modules>
 
     <properties>
@@ -59,6 +60,7 @@
         <dependency.jackson.version>2.22.1</dependency.jackson.version>
         <dependency.validation.version>8.0.4.Final</dependency.validation.version>
         <dependency.expressly.version>5.0.0</dependency.expressly.version>
+        <dependency.flink-connector-kafka.version>3.4.0-1.20</dependency.flink-connector-kafka.version>
 
         <!-- Plugins versions -->
         <plugin.maven.compiler.version>3.15.0</plugin.maven.compiler.version>
@@ -86,11 +88,21 @@
                 <artifactId>flink-streaming-java</artifactId>
                 <version>${flink.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-connector-kafka</artifactId>
+                <version>${dependency.flink-connector-kafka.version}</version>
+            </dependency>
 
             <!-- Project modules -->
             <dependency>
                 <groupId>io.github.sekelenao</groupId>
                 <artifactId>flinkboot-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.sekelenao</groupId>
+                <artifactId>flinkboot-kafka</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
