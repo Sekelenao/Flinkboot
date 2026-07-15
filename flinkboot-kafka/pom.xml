@@ -20,10 +20,22 @@
 
     <dependencies>
 
-        <!-- Flinkboot Core -->
+        <!-- Jakarta Validation (Hibernate Validator) -->
         <dependency>
-            <groupId>io.github.sekelenao</groupId>
-            <artifactId>flinkboot-core</artifactId>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.expressly</groupId>
+            <artifactId>expressly</artifactId>
+        </dependency>
+
+        <!-- Flink dependencies -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-streaming-java</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Flink Kafka Connector -->
@@ -31,6 +43,13 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kafka</artifactId>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- Kafka Clients -->
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>3.4.0</version>
         </dependency>
 
         <!--   Test   -->
