@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("KafkaOffsetInitializer")
 class KafkaOffsetInitializerTest {
@@ -24,6 +24,15 @@ class KafkaOffsetInitializerTest {
                 () -> assertNotNull(KafkaOffsetInitializer.COMMITTED.offsetsInitializer()),
                 () -> assertNotNull(KafkaOffsetInitializer.COMMITTED_EARLIEST.offsetsInitializer()),
                 () -> assertNotNull(KafkaOffsetInitializer.COMMITTED_LATEST.offsetsInitializer())
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw UnsupportedOperationException for TIMESTAMP and OFFSETS")
+        void shouldThrowExceptionForParameterizedInitializers() {
+            assertAll(
+                () -> assertThrows(UnsupportedOperationException.class, KafkaOffsetInitializer.TIMESTAMP::offsetsInitializer),
+                () -> assertThrows(UnsupportedOperationException.class, KafkaOffsetInitializer.OFFSETS::offsetsInitializer)
             );
         }
     }

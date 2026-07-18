@@ -56,12 +56,107 @@ class KafkaSourceFactoryTest {
                 "test-group",
                 List.of("test-topic"),
                 KafkaOffsetInitializer.EARLIEST,
+                null,
+                null,
                 Map.of("client.id", "test-client")
             );
 
             assertAll(
                 () -> assertNotNull(KafkaSourceFactory.supplyFor(config, TEST_SCHEMA)),
                 () -> assertNotNull(KafkaSourceFactory.supplyBuilderFor(config, TEST_SCHEMA))
+            );
+        }
+
+        @Test
+        @DisplayName("Should successfully build with valid TIMESTAMP offset config")
+        void shouldBuildWithTimestamp() {
+            var config = new KafkaSourceTopicListConfiguration(
+                List.of("localhost:9092"),
+                "test-group",
+                List.of("test-topic"),
+                KafkaOffsetInitializer.TIMESTAMP,
+                1689717600000L,
+                null,
+                null
+            );
+
+            assertNotNull(KafkaSourceFactory.supplyFor(config, TEST_SCHEMA));
+        }
+
+        @Test
+        @DisplayName("Should successfully build with valid OFFSETS offset config")
+        void shouldBuildWithPartitionOffsets() {
+            var config = new KafkaSourceTopicListConfiguration(
+                List.of("localhost:9092"),
+                "test-group",
+                List.of("test-topic"),
+                KafkaOffsetInitializer.OFFSETS,
+                null,
+                Map.of("test-topic-0", 100L),
+                null
+            );
+
+            assertNotNull(KafkaSourceFactory.supplyFor(config, TEST_SCHEMA));
+        }
+
+        @Test
+        @DisplayName("Should throw IllegalArgumentException when TIMESTAMP is used but timestamp is missing")
+        void shouldThrowExceptionWhenTimestampMissing() {
+            var config = new KafkaSourceTopicListConfiguration(
+                List.of("localhost:9092"),
+                "test-group",
+                List.of("test-topic"),
+                KafkaOffsetInitializer.TIMESTAMP,
+                null,
+                null,
+                null
+            );
+
+            assertThrows(IllegalArgumentException.class, () -> KafkaSourceFactory.supplyFor(config, TEST_SCHEMA));
+        }
+
+        @Test
+        @DisplayName("Should throw IllegalArgumentException when OFFSETS is used but partition offsets are missing")
+        void shouldThrowExceptionWhenOffsetsMissing() {
+            var config = new KafkaSourceTopicListConfiguration(
+                List.of("localhost:9092"),
+                "test-group",
+                List.of("test-topic"),
+                KafkaOffsetInitializer.OFFSETS,
+                null,
+                null,
+                null
+            );
+
+            assertThrows(IllegalArgumentException.class, () -> KafkaSourceFactory.supplyFor(config, TEST_SCHEMA));
+        }
+
+        @Test
+        @DisplayName("Should throw IllegalArgumentException when partition offset key has invalid format")
+        void shouldThrowExceptionWhenKeyFormatIsInvalid() {
+            var configNoDash = new KafkaSourceTopicListConfiguration(
+                List.of("localhost:9092"),
+                "test-group",
+                List.of("test-topic"),
+                KafkaOffsetInitializer.OFFSETS,
+                null,
+                Map.of("invalidkey", 100L),
+                null
+            );
+
+            var configNonInteger = new KafkaSourceTopicListConfiguration(
+                List.of("localhost:9092"),
+                "test-group",
+                List.of("test-topic"),
+                KafkaOffsetInitializer.OFFSETS,
+                null,
+                Map.of("test-topic-abc", 100L),
+                null
+            );
+
+            assertAll(
+                () -> assertThrows(IllegalArgumentException.class, () -> KafkaSourceFactory.supplyFor(configNoDash, TEST_SCHEMA)),
+                () -> assertThrows(IllegalArgumentException.class, () -> KafkaSourceFactory.supplyFor(configNonInteger, TEST_SCHEMA))
             );
         }
 
@@ -73,6 +168,8 @@ class KafkaSourceFactoryTest {
                 "test-group",
                 List.of("test-topic"),
                 KafkaOffsetInitializer.EARLIEST,
+                null,
+                null,
                 null
             );
 
@@ -97,6 +194,8 @@ class KafkaSourceFactoryTest {
                 "test-group",
                 Pattern.compile("test-.*"),
                 KafkaOffsetInitializer.LATEST,
+                null,
+                null,
                 Map.of("client.id", "test-client")
             );
 
@@ -107,6 +206,38 @@ class KafkaSourceFactoryTest {
         }
 
         @Test
+        @DisplayName("Should successfully build with valid TIMESTAMP offset config")
+        void shouldBuildWithTimestamp() {
+            var config = new KafkaSourceTopicPatternConfiguration(
+                List.of("localhost:9092"),
+                "test-group",
+                Pattern.compile("test-.*"),
+                KafkaOffsetInitializer.TIMESTAMP,
+                1689717600000L,
+                null,
+                null
+            );
+
+            assertNotNull(KafkaSourceFactory.supplyFor(config, TEST_SCHEMA));
+        }
+
+        @Test
+        @DisplayName("Should successfully build with valid OFFSETS offset config")
+        void shouldBuildWithPartitionOffsets() {
+            var config = new KafkaSourceTopicPatternConfiguration(
+                List.of("localhost:9092"),
+                "test-group",
+                Pattern.compile("test-.*"),
+                KafkaOffsetInitializer.OFFSETS,
+                null,
+                Map.of("test-topic-0", 100L),
+                null
+            );
+
+            assertNotNull(KafkaSourceFactory.supplyFor(config, TEST_SCHEMA));
+        }
+
+        @Test
         @DisplayName("Should throw NullPointerException when parameters are null")
         void shouldThrowExceptionWhenParamsAreNull() {
             var config = new KafkaSourceTopicPatternConfiguration(
@@ -114,6 +245,8 @@ class KafkaSourceFactoryTest {
                 "test-group",
                 Pattern.compile("test-.*"),
                 KafkaOffsetInitializer.LATEST,
+                null,
+                null,
                 null
             );
 

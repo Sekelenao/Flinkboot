@@ -24,6 +24,10 @@ public class KafkaSourceTopicListConfiguration {
     @NotNull
     private final KafkaOffsetInitializer startingOffsets;
 
+    private final Long startingOffsetsTimestamp;
+
+    private final Map<String, Long> startingOffsetsPartitionOffsets;
+
     private final Map<String, String> properties;
 
     @JsonCreator
@@ -32,12 +36,16 @@ public class KafkaSourceTopicListConfiguration {
         @JsonProperty("group-id") String groupId,
         @JsonProperty("topics") List<String> topics,
         @JsonProperty("starting-offsets") KafkaOffsetInitializer startingOffsets,
+        @JsonProperty("starting-offsets-timestamp") Long startingOffsetsTimestamp,
+        @JsonProperty("starting-offsets-partition-offsets") Map<String, Long> startingOffsetsPartitionOffsets,
         @JsonProperty("properties") Map<String, String> properties
     ) {
         this.bootstrapServers = bootstrapServers;
         this.groupId = groupId;
         this.topics = topics;
         this.startingOffsets = startingOffsets;
+        this.startingOffsetsTimestamp = startingOffsetsTimestamp;
+        this.startingOffsetsPartitionOffsets = startingOffsetsPartitionOffsets;
         this.properties = properties;
     }
 
@@ -55,6 +63,14 @@ public class KafkaSourceTopicListConfiguration {
 
     public KafkaOffsetInitializer startingOffsets() {
         return startingOffsets;
+    }
+
+    public Optional<Long> startingOffsetsTimestamp() {
+        return Optional.ofNullable(startingOffsetsTimestamp);
+    }
+
+    public Optional<Map<String, Long>> startingOffsetsPartitionOffsets() {
+        return Optional.ofNullable(startingOffsetsPartitionOffsets);
     }
 
     public Optional<Map<String, String>> properties() {

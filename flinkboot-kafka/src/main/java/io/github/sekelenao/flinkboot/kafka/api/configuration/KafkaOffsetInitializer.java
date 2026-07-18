@@ -33,6 +33,18 @@ public enum KafkaOffsetInitializer {
         public OffsetsInitializer offsetsInitializer() {
             return OffsetsInitializer.committedOffsets(OffsetResetStrategy.LATEST);
         }
+    },
+    TIMESTAMP {
+        @Override
+        public OffsetsInitializer offsetsInitializer() {
+            throw new UnsupportedOperationException("TIMESTAMP offset initializer requires a timestamp parameter");
+        }
+    },
+    OFFSETS {
+        @Override
+        public OffsetsInitializer offsetsInitializer() {
+            throw new UnsupportedOperationException("OFFSETS offset initializer requires partition offsets parameters");
+        }
     };
 
     public abstract OffsetsInitializer offsetsInitializer();

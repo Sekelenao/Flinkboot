@@ -104,6 +104,50 @@ class KafkaSourceTopicListConfigurationTest {
                 () -> assertEquals(KafkaOffsetInitializer.COMMITTED_EARLIEST, config.startingOffsets())
             );
         }
+
+        @Test
+        @DisplayName("Should successfully deserialize TIMESTAMP starting-offsets and starting-offsets-timestamp")
+        void shouldDeserializeTimestampOffsets() throws Exception {
+            var yaml = "bootstrap-servers:\n" +
+                "  - localhost:9092\n" +
+                "group-id: my-group\n" +
+                "topics:\n" +
+                "  - topic-a\n" +
+                "starting-offsets: TIMESTAMP\n" +
+                "starting-offsets-timestamp: 1689717600000\n";
+
+            var config = mapper.readValue(yaml, KafkaSourceTopicListConfiguration.class);
+
+            assertAll(
+                () -> assertNotNull(config),
+                () -> assertEquals(KafkaOffsetInitializer.TIMESTAMP, config.startingOffsets()),
+                () -> assertTrue(config.startingOffsetsTimestamp().isPresent()),
+                () -> assertEquals(1689717600000L, config.startingOffsetsTimestamp().get())
+            );
+        }
+
+        @Test
+        @DisplayName("Should successfully deserialize OFFSETS starting-offsets and starting-offsets-partition-offsets")
+        void shouldDeserializePartitionOffsets() throws Exception {
+            var yaml = "bootstrap-servers:\n" +
+                "  - localhost:9092\n" +
+                "group-id: my-group\n" +
+                "topics:\n" +
+                "  - topic-a\n" +
+                "starting-offsets: OFFSETS\n" +
+                "starting-offsets-partition-offsets:\n" +
+                "  my-topic-0: 12345\n" +
+                "  my-topic-1: 12346\n";
+
+            var config = mapper.readValue(yaml, KafkaSourceTopicListConfiguration.class);
+
+            assertAll(
+                () -> assertNotNull(config),
+                () -> assertEquals(KafkaOffsetInitializer.OFFSETS, config.startingOffsets()),
+                () -> assertTrue(config.startingOffsetsPartitionOffsets().isPresent()),
+                () -> assertEquals(Map.of("my-topic-0", 12345L, "my-topic-1", 12346L), config.startingOffsetsPartitionOffsets().get())
+            );
+        }
     }
 
     @Nested
@@ -118,6 +162,8 @@ class KafkaSourceTopicListConfigurationTest {
                 "my-group",
                 List.of("topic-a"),
                 KafkaOffsetInitializer.LATEST,
+                null,
+                null,
                 null
             );
 
@@ -133,6 +179,8 @@ class KafkaSourceTopicListConfigurationTest {
                 "my-group",
                 List.of("topic-a"),
                 KafkaOffsetInitializer.LATEST,
+                null,
+                null,
                 null
             );
 
@@ -151,6 +199,8 @@ class KafkaSourceTopicListConfigurationTest {
                 "   ",
                 List.of("topic-a"),
                 KafkaOffsetInitializer.LATEST,
+                null,
+                null,
                 null
             );
 
@@ -169,6 +219,8 @@ class KafkaSourceTopicListConfigurationTest {
                 "my-group",
                 List.of(),
                 KafkaOffsetInitializer.LATEST,
+                null,
+                null,
                 null
             );
 
@@ -186,6 +238,8 @@ class KafkaSourceTopicListConfigurationTest {
                 List.of("localhost:9092"),
                 "my-group",
                 List.of("topic-a"),
+                null,
+                null,
                 null,
                 null
             );
