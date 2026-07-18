@@ -2,6 +2,7 @@ package io.github.sekelenao.flinkboot.kafka.api.configuration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.sekelenao.flinkboot.kafka.internal.OffsetInitializerConfiguration;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -11,7 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-public class KafkaSourceTopicPatternConfiguration {
+public class KafkaSourceTopicPatternConfiguration implements OffsetInitializerConfiguration {
 
     @NotEmpty
     private final List<String> bootstrapServers;
@@ -27,7 +28,7 @@ public class KafkaSourceTopicPatternConfiguration {
 
     private final Long startingOffsetsTimestamp;
 
-    private final Map<String, Long> startingOffsetsPartitionOffsets;
+    private final List<TopicPartitionConfiguration> startingOffsetsPartitionOffsets;
 
     private final Map<String, String> properties;
 
@@ -38,7 +39,7 @@ public class KafkaSourceTopicPatternConfiguration {
         @JsonProperty("topic-pattern") Pattern topicPattern,
         @JsonProperty("starting-offsets") KafkaOffsetInitializer startingOffsets,
         @JsonProperty("starting-offsets-timestamp") Long startingOffsetsTimestamp,
-        @JsonProperty("starting-offsets-partition-offsets") Map<String, Long> startingOffsetsPartitionOffsets,
+        @JsonProperty("starting-offsets-partition-offsets") List<TopicPartitionConfiguration> startingOffsetsPartitionOffsets,
         @JsonProperty("properties") Map<String, String> properties
     ) {
         this.bootstrapServers = bootstrapServers;
@@ -70,7 +71,7 @@ public class KafkaSourceTopicPatternConfiguration {
         return Optional.ofNullable(startingOffsetsTimestamp);
     }
 
-    public Optional<Map<String, Long>> startingOffsetsPartitionOffsets() {
+    public Optional<List<TopicPartitionConfiguration>> startingOffsetsPartitionOffsets() {
         return Optional.ofNullable(startingOffsetsPartitionOffsets);
     }
 

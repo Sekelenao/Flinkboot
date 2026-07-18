@@ -114,7 +114,9 @@ class KafkaSourceTopicPatternConfigurationTest {
                 "topic-pattern: \"^my-topic-.*$\"\n" +
                 "starting-offsets: OFFSETS\n" +
                 "starting-offsets-partition-offsets:\n" +
-                "  my-topic-0: 12345\n";
+                "  - topic: \"my-topic\"\n" +
+                "    partition: 0\n" +
+                "    offset: 12345\n";
 
             var config = mapper.readValue(yaml, KafkaSourceTopicPatternConfiguration.class);
 
@@ -122,7 +124,10 @@ class KafkaSourceTopicPatternConfigurationTest {
                 () -> assertNotNull(config),
                 () -> assertEquals(KafkaOffsetInitializer.OFFSETS, config.startingOffsets()),
                 () -> assertTrue(config.startingOffsetsPartitionOffsets().isPresent()),
-                () -> assertEquals(Map.of("my-topic-0", 12345L), config.startingOffsetsPartitionOffsets().get())
+                () -> assertEquals(
+                    List.of(new TopicPartitionConfiguration("my-topic", 0, 12345L)),
+                    config.startingOffsetsPartitionOffsets().get()
+                )
             );
         }
     }

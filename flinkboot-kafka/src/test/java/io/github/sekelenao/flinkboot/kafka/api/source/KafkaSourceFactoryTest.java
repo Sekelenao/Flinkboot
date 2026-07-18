@@ -3,6 +3,7 @@ package io.github.sekelenao.flinkboot.kafka.api.source;
 import io.github.sekelenao.flinkboot.kafka.api.configuration.KafkaOffsetInitializer;
 import io.github.sekelenao.flinkboot.kafka.api.configuration.KafkaSourceTopicListConfiguration;
 import io.github.sekelenao.flinkboot.kafka.api.configuration.KafkaSourceTopicPatternConfiguration;
+import io.github.sekelenao.flinkboot.kafka.api.configuration.TopicPartitionConfiguration;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
@@ -92,7 +93,7 @@ class KafkaSourceFactoryTest {
                 List.of("test-topic"),
                 KafkaOffsetInitializer.OFFSETS,
                 null,
-                Map.of("test-topic-0", 100L),
+                List.of(new TopicPartitionConfiguration("test-topic", 0, 100L)),
                 null
             );
 
@@ -129,35 +130,6 @@ class KafkaSourceFactoryTest {
             );
 
             assertThrows(IllegalArgumentException.class, () -> KafkaSourceFactory.supplyFor(config, TEST_SCHEMA));
-        }
-
-        @Test
-        @DisplayName("Should throw IllegalArgumentException when partition offset key has invalid format")
-        void shouldThrowExceptionWhenKeyFormatIsInvalid() {
-            var configNoDash = new KafkaSourceTopicListConfiguration(
-                List.of("localhost:9092"),
-                "test-group",
-                List.of("test-topic"),
-                KafkaOffsetInitializer.OFFSETS,
-                null,
-                Map.of("invalidkey", 100L),
-                null
-            );
-
-            var configNonInteger = new KafkaSourceTopicListConfiguration(
-                List.of("localhost:9092"),
-                "test-group",
-                List.of("test-topic"),
-                KafkaOffsetInitializer.OFFSETS,
-                null,
-                Map.of("test-topic-abc", 100L),
-                null
-            );
-
-            assertAll(
-                () -> assertThrows(IllegalArgumentException.class, () -> KafkaSourceFactory.supplyFor(configNoDash, TEST_SCHEMA)),
-                () -> assertThrows(IllegalArgumentException.class, () -> KafkaSourceFactory.supplyFor(configNonInteger, TEST_SCHEMA))
-            );
         }
 
         @Test
@@ -230,7 +202,7 @@ class KafkaSourceFactoryTest {
                 Pattern.compile("test-.*"),
                 KafkaOffsetInitializer.OFFSETS,
                 null,
-                Map.of("test-topic-0", 100L),
+                List.of(new TopicPartitionConfiguration("test-topic", 0, 100L)),
                 null
             );
 

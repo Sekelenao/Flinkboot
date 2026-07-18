@@ -136,8 +136,12 @@ class KafkaSourceTopicListConfigurationTest {
                 "  - topic-a\n" +
                 "starting-offsets: OFFSETS\n" +
                 "starting-offsets-partition-offsets:\n" +
-                "  my-topic-0: 12345\n" +
-                "  my-topic-1: 12346\n";
+                "  - topic: \"my-topic\"\n" +
+                "    partition: 0\n" +
+                "    offset: 12345\n" +
+                "  - topic: \"my-topic\"\n" +
+                "    partition: 1\n" +
+                "    offset: 12346\n";
 
             var config = mapper.readValue(yaml, KafkaSourceTopicListConfiguration.class);
 
@@ -145,7 +149,13 @@ class KafkaSourceTopicListConfigurationTest {
                 () -> assertNotNull(config),
                 () -> assertEquals(KafkaOffsetInitializer.OFFSETS, config.startingOffsets()),
                 () -> assertTrue(config.startingOffsetsPartitionOffsets().isPresent()),
-                () -> assertEquals(Map.of("my-topic-0", 12345L, "my-topic-1", 12346L), config.startingOffsetsPartitionOffsets().get())
+                () -> assertEquals(
+                    List.of(
+                        new TopicPartitionConfiguration("my-topic", 0, 12345L),
+                        new TopicPartitionConfiguration("my-topic", 1, 12346L)
+                    ),
+                    config.startingOffsetsPartitionOffsets().get()
+                )
             );
         }
     }
