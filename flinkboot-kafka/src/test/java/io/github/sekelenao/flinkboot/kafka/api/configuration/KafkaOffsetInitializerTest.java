@@ -1,0 +1,30 @@
+package io.github.sekelenao.flinkboot.kafka.api.configuration;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+@DisplayName("KafkaOffsetInitializer")
+class KafkaOffsetInitializerTest {
+
+    @Nested
+    @DisplayName("OffsetsInitializer Resolution")
+    class OffsetsInitializerResolution {
+
+        @Test
+        @DisplayName("Should return non-null offsets initializer for each enum value")
+        void shouldReturnNonNullOffsetsInitializer() {
+            assertAll(
+                () -> assertNotNull(KafkaOffsetInitializer.EARLIEST.offsetsInitializer()),
+                () -> assertNotNull(KafkaOffsetInitializer.LATEST.offsetsInitializer()),
+                () -> assertNotNull(KafkaOffsetInitializer.COMMITTED.offsetsInitializer()),
+                () -> assertNotNull(KafkaOffsetInitializer.COMMITTED_EARLIEST.offsetsInitializer()),
+                () -> assertNotNull(KafkaOffsetInitializer.COMMITTED_LATEST.offsetsInitializer())
+            );
+        }
+    }
+}
