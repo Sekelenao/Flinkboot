@@ -3,6 +3,7 @@ package io.github.sekelenao.flinkboot.kafka.api.source;
 import io.github.sekelenao.flinkboot.kafka.api.configuration.KafkaSourceTopicListConfiguration;
 import io.github.sekelenao.flinkboot.kafka.api.configuration.KafkaSourceTopicPatternConfiguration;
 import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.connector.kafka.source.KafkaSourceBuilder;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 
 import java.util.Objects;
@@ -14,7 +15,7 @@ public final class KafkaSourceFactory {
         throw new AssertionError("You cannot instantiate this class");
     }
 
-    public static <T> KafkaSource<T> supplyFor(
+    public static <T> KafkaSourceBuilder<T> supplyBuilderFor(
         KafkaSourceTopicListConfiguration config,
         KafkaRecordDeserializationSchema<T> schema
     ) {
@@ -30,11 +31,10 @@ public final class KafkaSourceFactory {
             .setTopics(config.topics())
             .setStartingOffsets(config.startingOffsets().offsetsInitializer())
             .setProperties(additionalProperties)
-            .setDeserializer(schema)
-            .build();
+            .setDeserializer(schema);
     }
 
-    public static <T> KafkaSource<T> supplyFor(
+    public static <T> KafkaSourceBuilder<T> supplyBuilderFor(
         KafkaSourceTopicPatternConfiguration config,
         KafkaRecordDeserializationSchema<T> schema
     ) {
@@ -50,8 +50,21 @@ public final class KafkaSourceFactory {
             .setTopicPattern(config.topicPattern())
             .setStartingOffsets(config.startingOffsets().offsetsInitializer())
             .setProperties(additionalProperties)
-            .setDeserializer(schema)
-            .build();
+            .setDeserializer(schema);
+    }
+
+    public static <T> KafkaSource<T> supplyFor(
+        KafkaSourceTopicListConfiguration config,
+        KafkaRecordDeserializationSchema<T> schema
+    ) {
+        return supplyBuilderFor(config, schema).build();
+    }
+
+    public static <T> KafkaSource<T> supplyFor(
+        KafkaSourceTopicPatternConfiguration config,
+        KafkaRecordDeserializationSchema<T> schema
+    ) {
+        return supplyBuilderFor(config, schema).build();
     }
 
 }

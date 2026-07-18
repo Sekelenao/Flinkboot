@@ -45,11 +45,11 @@ class KafkaSourceFactoryTest {
     }
 
     @Nested
-    @DisplayName("supplyFor (Topic List)")
+    @DisplayName("supplyFor & supplyBuilderFor (Topic List)")
     class SupplyForTopicList {
 
         @Test
-        @DisplayName("Should successfully build KafkaSource from topic list config")
+        @DisplayName("Should successfully build KafkaSource and KafkaSourceBuilder from topic list config")
         void shouldBuildKafkaSource() {
             var config = new KafkaSourceTopicListConfiguration(
                 List.of("localhost:9092"),
@@ -59,8 +59,10 @@ class KafkaSourceFactoryTest {
                 Map.of("client.id", "test-client")
             );
 
-            var source = KafkaSourceFactory.supplyFor(config, TEST_SCHEMA);
-            assertNotNull(source);
+            assertAll(
+                () -> assertNotNull(KafkaSourceFactory.supplyFor(config, TEST_SCHEMA)),
+                () -> assertNotNull(KafkaSourceFactory.supplyBuilderFor(config, TEST_SCHEMA))
+            );
         }
 
         @Test
@@ -76,17 +78,19 @@ class KafkaSourceFactoryTest {
 
             assertAll(
                 () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor((KafkaSourceTopicListConfiguration) null, TEST_SCHEMA)),
-                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor(config, null))
+                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor(config, null)),
+                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor((KafkaSourceTopicListConfiguration) null, TEST_SCHEMA)),
+                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor(config, null))
             );
         }
     }
 
     @Nested
-    @DisplayName("supplyFor (Topic Pattern)")
+    @DisplayName("supplyFor & supplyBuilderFor (Topic Pattern)")
     class SupplyForTopicPattern {
 
         @Test
-        @DisplayName("Should successfully build KafkaSource from topic pattern config")
+        @DisplayName("Should successfully build KafkaSource and KafkaSourceBuilder from topic pattern config")
         void shouldBuildKafkaSource() {
             var config = new KafkaSourceTopicPatternConfiguration(
                 List.of("localhost:9092"),
@@ -96,8 +100,10 @@ class KafkaSourceFactoryTest {
                 Map.of("client.id", "test-client")
             );
 
-            var source = KafkaSourceFactory.supplyFor(config, TEST_SCHEMA);
-            assertNotNull(source);
+            assertAll(
+                () -> assertNotNull(KafkaSourceFactory.supplyFor(config, TEST_SCHEMA)),
+                () -> assertNotNull(KafkaSourceFactory.supplyBuilderFor(config, TEST_SCHEMA))
+            );
         }
 
         @Test
@@ -113,7 +119,9 @@ class KafkaSourceFactoryTest {
 
             assertAll(
                 () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor((KafkaSourceTopicPatternConfiguration) null, TEST_SCHEMA)),
-                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor(config, null))
+                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor(config, null)),
+                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor((KafkaSourceTopicPatternConfiguration) null, TEST_SCHEMA)),
+                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor(config, null))
             );
         }
     }
