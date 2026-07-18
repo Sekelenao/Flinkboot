@@ -4,14 +4,14 @@ import io.github.sekelenao.flinkboot.kafka.api.configuration.KafkaOffsetInitiali
 import io.github.sekelenao.flinkboot.kafka.api.configuration.TopicPartitionConfiguration;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.OptionalLong;
 
 public interface OffsetInitializerConfiguration {
 
     KafkaOffsetInitializer startingOffsets();
 
-    Optional<Long> startingOffsetsTimestamp();
+    OptionalLong startingOffsetsTimestamp();
 
-    Optional<List<TopicPartitionConfiguration>> startingOffsetsPartitionOffsets();
+    List<TopicPartitionConfiguration> startingOffsetsPartitionOffsets();
 
 }

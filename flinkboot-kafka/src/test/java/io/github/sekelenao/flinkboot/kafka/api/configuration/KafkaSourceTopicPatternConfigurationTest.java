@@ -101,7 +101,7 @@ class KafkaSourceTopicPatternConfigurationTest {
                 () -> assertNotNull(config),
                 () -> assertEquals(KafkaOffsetInitializer.TIMESTAMP, config.startingOffsets()),
                 () -> assertTrue(config.startingOffsetsTimestamp().isPresent()),
-                () -> assertEquals(1689717600000L, config.startingOffsetsTimestamp().get())
+                () -> assertEquals(1689717600000L, config.startingOffsetsTimestamp().getAsLong())
             );
         }
 
@@ -123,10 +123,9 @@ class KafkaSourceTopicPatternConfigurationTest {
             assertAll(
                 () -> assertNotNull(config),
                 () -> assertEquals(KafkaOffsetInitializer.OFFSETS, config.startingOffsets()),
-                () -> assertTrue(config.startingOffsetsPartitionOffsets().isPresent()),
                 () -> assertEquals(
                     List.of(new TopicPartitionConfiguration("my-topic", 0, 12345L)),
-                    config.startingOffsetsPartitionOffsets().get()
+                    config.startingOffsetsPartitionOffsets()
                 )
             );
         }

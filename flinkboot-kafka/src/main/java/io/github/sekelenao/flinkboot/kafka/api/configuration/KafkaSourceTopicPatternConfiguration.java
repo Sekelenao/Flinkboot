@@ -10,6 +10,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.regex.Pattern;
 
 public class KafkaSourceTopicPatternConfiguration implements OffsetInitializerConfiguration {
@@ -67,12 +68,12 @@ public class KafkaSourceTopicPatternConfiguration implements OffsetInitializerCo
         return startingOffsets;
     }
 
-    public Optional<Long> startingOffsetsTimestamp() {
-        return Optional.ofNullable(startingOffsetsTimestamp);
+    public OptionalLong startingOffsetsTimestamp() {
+        return startingOffsetsTimestamp != null ? OptionalLong.of(startingOffsetsTimestamp) : OptionalLong.empty();
     }
 
-    public Optional<List<TopicPartitionConfiguration>> startingOffsetsPartitionOffsets() {
-        return Optional.ofNullable(startingOffsetsPartitionOffsets);
+    public List<TopicPartitionConfiguration> startingOffsetsPartitionOffsets() {
+        return startingOffsetsPartitionOffsets != null ? startingOffsetsPartitionOffsets : List.of();
     }
 
     public Optional<Map<String, String>> properties() {

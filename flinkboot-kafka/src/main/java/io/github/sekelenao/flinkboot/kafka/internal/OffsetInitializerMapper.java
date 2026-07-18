@@ -26,10 +26,9 @@ public final class OffsetInitializerMapper {
     }
 
     private static OffsetsInitializer offsetsPerPartition(OffsetInitializerConfiguration configuration){
-        var offsetsList = configuration.startingOffsetsPartitionOffsets()
-            .orElseThrow(() -> new IllegalArgumentException("starting-offsets-partition-offsets is required when starting-offsets is OFFSETS"));
+        var offsetsList = configuration.startingOffsetsPartitionOffsets();
         if (offsetsList.isEmpty()) {
-            throw new IllegalArgumentException("starting-offsets-partition-offsets cannot be empty when starting-offsets is OFFSETS");
+            throw new IllegalArgumentException("starting-offsets-partition-offsets is required and cannot be empty when starting-offsets is OFFSETS");
         }
         var offsetInitializerConfiguration = new HashMap<TopicPartition, Long>();
         for (var entry : offsetsList){
@@ -40,9 +39,11 @@ public final class OffsetInitializerMapper {
     }
 
     private static OffsetsInitializer timestampOffsets(OffsetInitializerConfiguration configuration){
-        long timestamp = configuration.startingOffsetsTimestamp()
-            .orElseThrow(() -> new IllegalArgumentException("starting-offsets-timestamp is required when starting-offsets is TIMESTAMP"));
-        return OffsetsInitializer.timestamp(timestamp);
+        var optionalTimestamp = configuration.startingOffsetsTimestamp();
+        if (optionalTimestamp.isEmpty()) {
+            throw new IllegalArgumentException("starting-offsets-timestamp is required when starting-offsets is TIMESTAMP");
+        }
+        return OffsetsInitializer.timestamp(optionalTimestamp.getAsLong());
     }
 
 }
