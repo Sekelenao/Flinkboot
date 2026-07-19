@@ -29,18 +29,28 @@ properties:
   acks: "all"
 ```
 
+### Configuration Parameters Reference
+
+| Property Key              | Type            | Required | Description                                                                                                                                                                           |
+|:--------------------------|:----------------|:---------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `bootstrap-servers`       | List of Strings | **Yes**  | Kafka bootstrap broker hosts/ports (e.g. `localhost:9092`).                                                                                                                           |
+| `topic`                   | String          | **Yes**  | Target Kafka topic to write events to.                                                                                                                                                |
+| `delivery-guarantee`      | Enum            | No       | Delivery guarantee. Supported values: `NONE`, `AT_LEAST_ONCE`, `EXACTLY_ONCE`. Defaults to Flink default if omitted.                                                                  |
+| `transactional-id-prefix` | String          | No       | Transactional ID prefix. **Mandatory** only if `delivery-guarantee` is set to `EXACTLY_ONCE`. Must be blank/absent for other delivery guarantees (causes fail-fast crash if present). |
+| `properties`              | Map             | No       | Custom Kafka client producer properties (e.g. `acks: all`). Keys and values must be non-null.                                                                                         |
+
 ---
 
 ## 2. Delivery Guarantees
 
 Flinkboot supports Flink's delivery guarantee strategies via the `delivery-guarantee` property:
 
-| Value            | Description                                                                     | Required Extra Configuration  |
-|:-----------------|:--------------------------------------------------------------------------------|:------------------------------|
-| `EXACTLY_ONCE`   | Exactly-once delivery semantics.                                                | `transactional-id-prefix`     |
-| `AT_LEAST_ONCE`  | At-least-once delivery semantics.                                               | None                          |
-| `NONE`           | Best-effort delivery semantics.                                                 | None                          |
-| *Omitted (null)* | Let Flink apply its own defaults (leaves configuration builder untouched).       | None                          |
+| Value            | Description                                                                | Required Extra Configuration |
+|:-----------------|:---------------------------------------------------------------------------|:-----------------------------|
+| `EXACTLY_ONCE`   | Exactly-once delivery semantics.                                           | `transactional-id-prefix`    |
+| `AT_LEAST_ONCE`  | At-least-once delivery semantics.                                          | None                         |
+| `NONE`           | Best-effort delivery semantics.                                            | None                         |
+| *Omitted (null)* | Let Flink apply its own defaults (leaves configuration builder untouched). | None                         |
 
 ### Strict Validation Rules
 
