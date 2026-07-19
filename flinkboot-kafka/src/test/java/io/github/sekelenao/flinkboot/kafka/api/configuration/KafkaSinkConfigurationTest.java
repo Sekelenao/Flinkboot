@@ -11,6 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -175,6 +176,26 @@ class KafkaSinkConfigurationTest {
             assertAll(
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("transactionalIdPrefix")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when properties map contains null value")
+        void shouldFailWhenPropertiesHasNullValue() {
+            var properties = new HashMap<String, String>();
+            properties.put("key", null);
+            var config = new KafkaSinkConfiguration(
+                List.of("localhost:9092"),
+                "my-topic",
+                null,
+                null,
+                properties
+            );
+
+            Set<ConstraintViolation<KafkaSinkConfiguration>> violations = validator.validate(config);
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().contains("properties")))
             );
         }
     }

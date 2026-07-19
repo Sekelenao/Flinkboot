@@ -36,7 +36,7 @@ public class KafkaSourceTopicListConfiguration implements OffsetInitializerConfi
 
     private final List<@Valid TopicPartitionOffsetConfiguration> startingOffsetsPartitionOffsets;
 
-    private final Map<String, String> properties;
+    private final Map<@NotNull String, @NotNull String> properties;
 
     @JsonCreator
     public KafkaSourceTopicListConfiguration(
