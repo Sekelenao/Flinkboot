@@ -249,4 +249,56 @@ class KafkaSourceTopicPatternConfigurationTest {
             assertFalse(violations.isEmpty(), "Should fail validation due to invalid nested values");
         }
     }
+
+    @Nested
+    @DisplayName("Getters")
+    class GetterTests {
+
+        @Test
+        @DisplayName("Should return expected values from getters when all parameters are present")
+        void testGettersWithAllParameters() {
+            var pattern = Pattern.compile("^my-topic-.*$");
+            var config = new KafkaSourceTopicPatternConfiguration(
+                List.of("localhost:9092"),
+                "my-group",
+                pattern,
+                KafkaOffsetInitializer.TIMESTAMP,
+                12345L,
+                List.of(new TopicPartitionConfiguration("topic-a", 0, 100L)),
+                Map.of("key", "val")
+            );
+
+            assertAll(
+                () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
+                () -> assertEquals("my-group", config.groupId()),
+                () -> assertEquals(pattern, config.topicPattern()),
+                () -> assertEquals(KafkaOffsetInitializer.TIMESTAMP, config.startingOffsets()),
+                () -> assertTrue(config.startingOffsetsTimestamp().isPresent()),
+                () -> assertEquals(12345L, config.startingOffsetsTimestamp().getAsLong()),
+                () -> assertEquals(List.of(new TopicPartitionConfiguration("topic-a", 0, 100L)), config.startingOffsetsPartitionOffsets()),
+                () -> assertTrue(config.properties().isPresent()),
+                () -> assertEquals(Map.of("key", "val"), config.properties().get())
+            );
+        }
+
+        @Test
+        @DisplayName("Should return empty structures from getters when optional parameters are absent")
+        void testGettersWithAbsentParameters() {
+            var config = new KafkaSourceTopicPatternConfiguration(
+                List.of("localhost:9092"),
+                "my-group",
+                Pattern.compile("^my-topic-.*$"),
+                KafkaOffsetInitializer.EARLIEST,
+                null,
+                null,
+                null
+            );
+
+            assertAll(
+                () -> assertTrue(config.startingOffsetsTimestamp().isEmpty()),
+                () -> assertEquals(List.of(), config.startingOffsetsPartitionOffsets()),
+                () -> assertTrue(config.properties().isEmpty())
+            );
+        }
+    }
 }

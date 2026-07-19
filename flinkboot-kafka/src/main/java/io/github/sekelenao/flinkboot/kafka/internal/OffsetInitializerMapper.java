@@ -1,5 +1,6 @@
 package io.github.sekelenao.flinkboot.kafka.internal;
 
+import io.github.sekelenao.flinkboot.kafka.api.configuration.KafkaOffsetInitializer;
 import io.github.sekelenao.flinkboot.kafka.api.exception.InvalidKafkaSourceConfigurationException;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.kafka.common.TopicPartition;
@@ -14,16 +15,13 @@ public final class OffsetInitializerMapper {
 
     public static OffsetsInitializer map(OffsetInitializerConfiguration configuration){
         var offset = configuration.startingOffsets();
-        switch (offset){
-            case EARLIEST: case LATEST: case COMMITTED: case COMMITTED_EARLIEST: case COMMITTED_LATEST:
-                return offset.offsetsInitializer();
-            case OFFSETS:
-                return offsetsPerPartition(configuration);
-            case TIMESTAMP:
-                return timestampOffsets(configuration);
-            default:
-                throw new IllegalStateException("Unknown offset initializer type: " + offset);
+        if (offset == KafkaOffsetInitializer.OFFSETS) {
+            return offsetsPerPartition(configuration);
         }
+        if (offset == KafkaOffsetInitializer.TIMESTAMP) {
+            return timestampOffsets(configuration);
+        }
+        return offset.offsetsInitializer();
     }
 
     private static OffsetsInitializer offsetsPerPartition(OffsetInitializerConfiguration configuration){

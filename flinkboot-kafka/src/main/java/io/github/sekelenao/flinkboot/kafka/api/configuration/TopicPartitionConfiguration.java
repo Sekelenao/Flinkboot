@@ -42,11 +42,14 @@ public final class TopicPartitionConfiguration {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TopicPartitionConfiguration that = (TopicPartitionConfiguration) o;
-        return partition == that.partition && offset == that.offset && Objects.equals(topic, that.topic);
+    public boolean equals(Object other) {
+        if(!(other instanceof TopicPartitionConfiguration)){
+            return false;
+        }
+        var otherTopicPartitionConfiguration = (TopicPartitionConfiguration) other;
+        return Objects.equals(topic, otherTopicPartitionConfiguration.topic)
+            && partition == otherTopicPartitionConfiguration.partition
+            && offset == otherTopicPartitionConfiguration.offset;
     }
 
     @Override

@@ -5,6 +5,7 @@ import io.github.sekelenao.flinkboot.kafka.api.configuration.KafkaSourceTopicLis
 import io.github.sekelenao.flinkboot.kafka.api.configuration.KafkaSourceTopicPatternConfiguration;
 import io.github.sekelenao.flinkboot.kafka.api.configuration.TopicPartitionConfiguration;
 import io.github.sekelenao.flinkboot.kafka.api.exception.InvalidKafkaSourceConfigurationException;
+import io.github.sekelenao.flinkboot.kafka.internal.OffsetInitializerMapper;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
@@ -41,6 +42,15 @@ class KafkaSourceFactoryTest {
     @DisplayName("Private constructor should throw AssertionError")
     void testConstructorIsPrivate() throws Exception {
         var constructor = KafkaSourceFactory.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        var exception = assertThrows(InvocationTargetException.class, constructor::newInstance);
+        assertInstanceOf(AssertionError.class, exception.getCause());
+    }
+
+    @Test
+    @DisplayName("OffsetInitializerMapper private constructor should throw AssertionError")
+    void testOffsetInitializerMapperConstructorIsPrivate() throws Exception {
+        var constructor = OffsetInitializerMapper.class.getDeclaredConstructor();
         constructor.setAccessible(true);
         var exception = assertThrows(InvocationTargetException.class, constructor::newInstance);
         assertInstanceOf(AssertionError.class, exception.getCause());
