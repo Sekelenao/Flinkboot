@@ -1,7 +1,7 @@
 package io.github.sekelenao.flinkboot.kafka.api.sink;
 
 import io.github.sekelenao.flinkboot.kafka.api.configuration.sink.KafkaSinkConfiguration;
-import io.github.sekelenao.flinkboot.kafka.internal.DeliveryGuaranteeMapper;
+import io.github.sekelenao.flinkboot.kafka.internal.DeliveryGuaranteeCustomizer;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.connector.kafka.sink.KafkaSinkBuilder;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
@@ -31,7 +31,7 @@ public final class KafkaSinkFactory {
             .setRecordSerializer(serializationSchema)
             .setKafkaProducerConfig(additionalProperties);
 
-        Consumer<KafkaSinkBuilder<T>> customizer = DeliveryGuaranteeMapper.map(config);
+        Consumer<KafkaSinkBuilder<T>> customizer = DeliveryGuaranteeCustomizer.supplyFor(config);
         customizer.accept(builder);
 
         return builder;
