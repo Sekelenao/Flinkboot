@@ -1,5 +1,6 @@
 package io.github.sekelenao.flinkboot.kafka.api.configuration;
 
+import io.github.sekelenao.flinkboot.kafka.api.configuration.source.KafkaOffsetInitializer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

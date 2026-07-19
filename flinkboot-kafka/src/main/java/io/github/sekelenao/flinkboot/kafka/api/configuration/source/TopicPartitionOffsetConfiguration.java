@@ -1,4 +1,4 @@
-package io.github.sekelenao.flinkboot.kafka.api.configuration;
+package io.github.sekelenao.flinkboot.kafka.api.configuration.source;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

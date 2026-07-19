@@ -1,4 +1,4 @@
-package io.github.sekelenao.flinkboot.kafka.api.configuration;
+package io.github.sekelenao.flinkboot.kafka.api.configuration.sink;
 
 import org.apache.flink.connector.base.DeliveryGuarantee;
 

@@ -2,6 +2,8 @@ package io.github.sekelenao.flinkboot.kafka.api.configuration;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import io.github.sekelenao.flinkboot.kafka.api.configuration.sink.KafkaDeliveryGuarantee;
+import io.github.sekelenao.flinkboot.kafka.api.configuration.sink.KafkaSinkConfiguration;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;

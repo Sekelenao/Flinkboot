@@ -1,7 +1,7 @@
 package io.github.sekelenao.flinkboot.kafka.api.sink;
 
-import io.github.sekelenao.flinkboot.kafka.api.configuration.KafkaDeliveryGuarantee;
-import io.github.sekelenao.flinkboot.kafka.api.configuration.KafkaSinkConfiguration;
+import io.github.sekelenao.flinkboot.kafka.api.configuration.sink.KafkaDeliveryGuarantee;
+import io.github.sekelenao.flinkboot.kafka.api.configuration.sink.KafkaSinkConfiguration;
 import io.github.sekelenao.flinkboot.kafka.api.exception.InvalidKafkaSinkConfigurationException;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -65,6 +65,40 @@ class KafkaSinkFactoryTest {
                 "my-topic",
                 KafkaDeliveryGuarantee.EXACTLY_ONCE,
                 null,
+                null
+            );
+
+            assertThrows(
+                InvalidKafkaSinkConfigurationException.class,
+                () -> KafkaSinkFactory.supplyFor(config, TEST_SCHEMA)
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw InvalidKafkaSinkConfigurationException when AT_LEAST_ONCE is used but prefix is provided")
+        void shouldThrowExceptionWhenPrefixIsProvidedWithAtLeastOnce() {
+            var config = new KafkaSinkConfiguration(
+                List.of("localhost:9092"),
+                "my-topic",
+                KafkaDeliveryGuarantee.AT_LEAST_ONCE,
+                "some-prefix",
+                null
+            );
+
+            assertThrows(
+                InvalidKafkaSinkConfigurationException.class,
+                () -> KafkaSinkFactory.supplyFor(config, TEST_SCHEMA)
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw InvalidKafkaSinkConfigurationException when default delivery guarantee is used but prefix is provided")
+        void shouldThrowExceptionWhenPrefixIsProvidedWithDefaultGuarantee() {
+            var config = new KafkaSinkConfiguration(
+                List.of("localhost:9092"),
+                "my-topic",
+                null,
+                "some-prefix",
                 null
             );
 
