@@ -62,15 +62,24 @@ public final class CheckpointingConfiguration implements Serializable {
     }
 
     public OptionalLong timeout() {
-        return timeout == null ? OptionalLong.empty() : OptionalLong.of(timeout);
+        if (timeout == null) {
+            return OptionalLong.empty();
+        }
+        return OptionalLong.of(timeout);
     }
 
     public OptionalLong minPause() {
-        return minPause == null ? OptionalLong.empty() : OptionalLong.of(minPause);
+        if (minPause == null) {
+            return OptionalLong.empty();
+        }
+        return OptionalLong.of(minPause);
     }
 
     public OptionalInt maxConcurrent() {
-        return maxConcurrent == null ? OptionalInt.empty() : OptionalInt.of(maxConcurrent);
+        if (maxConcurrent == null) {
+            return OptionalInt.empty();
+        }
+        return OptionalInt.of(maxConcurrent);
     }
 
     public Optional<String> externalizedCleanup() {

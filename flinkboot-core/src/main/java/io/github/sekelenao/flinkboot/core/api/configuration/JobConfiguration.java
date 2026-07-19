@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
 import java.util.Objects;

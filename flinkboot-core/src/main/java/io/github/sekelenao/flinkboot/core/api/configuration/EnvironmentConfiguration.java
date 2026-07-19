@@ -71,15 +71,24 @@ public final class EnvironmentConfiguration implements Serializable {
     }
 
     public OptionalInt localWebUiPort() {
-        return localWebUiPort == null ? OptionalInt.empty() : OptionalInt.of(localWebUiPort);
+        if (localWebUiPort == null) {
+            return OptionalInt.empty();
+        }
+        return OptionalInt.of(localWebUiPort);
     }
 
     public OptionalInt parallelism() {
-        return parallelism == null ? OptionalInt.empty() : OptionalInt.of(parallelism);
+        if (parallelism == null) {
+            return OptionalInt.empty();
+        }
+        return OptionalInt.of(parallelism);
     }
 
     public OptionalInt maxParallelism() {
-        return maxParallelism == null ? OptionalInt.empty() : OptionalInt.of(maxParallelism);
+        if (maxParallelism == null) {
+            return OptionalInt.empty();
+        }
+        return OptionalInt.of(maxParallelism);
     }
 
     public Optional<CheckpointingConfiguration> checkpointing() {
