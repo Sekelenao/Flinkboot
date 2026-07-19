@@ -26,7 +26,7 @@ public class KafkaSinkConfiguration implements Serializable {
 
     private final KafkaDeliveryGuarantee deliveryGuarantee;
 
-    @Pattern(regexp = ".*\\S.*", message = "must not be blank")
+    @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
     private final String transactionalIdPrefix;
 
     private final Map<String, String> properties;
