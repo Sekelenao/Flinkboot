@@ -4,6 +4,7 @@ import io.github.sekelenao.flinkboot.kafka.api.configuration.KafkaOffsetInitiali
 import io.github.sekelenao.flinkboot.kafka.api.configuration.KafkaSourceTopicListConfiguration;
 import io.github.sekelenao.flinkboot.kafka.api.configuration.KafkaSourceTopicPatternConfiguration;
 import io.github.sekelenao.flinkboot.kafka.api.configuration.TopicPartitionConfiguration;
+import io.github.sekelenao.flinkboot.kafka.api.exception.InvalidKafkaSourceConfigurationException;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
@@ -101,7 +102,7 @@ class KafkaSourceFactoryTest {
         }
 
         @Test
-        @DisplayName("Should throw IllegalArgumentException when TIMESTAMP is used but timestamp is missing")
+        @DisplayName("Should throw InvalidKafkaSourceConfigurationException when TIMESTAMP is used but timestamp is missing")
         void shouldThrowExceptionWhenTimestampMissing() {
             var config = new KafkaSourceTopicListConfiguration(
                 List.of("localhost:9092"),
@@ -113,11 +114,11 @@ class KafkaSourceFactoryTest {
                 null
             );
 
-            assertThrows(IllegalArgumentException.class, () -> KafkaSourceFactory.supplyFor(config, TEST_SCHEMA));
+            assertThrows(InvalidKafkaSourceConfigurationException.class, () -> KafkaSourceFactory.supplyFor(config, TEST_SCHEMA));
         }
 
         @Test
-        @DisplayName("Should throw IllegalArgumentException when OFFSETS is used but partition offsets are missing")
+        @DisplayName("Should throw InvalidKafkaSourceConfigurationException when OFFSETS is used but partition offsets are missing")
         void shouldThrowExceptionWhenOffsetsMissing() {
             var config = new KafkaSourceTopicListConfiguration(
                 List.of("localhost:9092"),
@@ -129,7 +130,7 @@ class KafkaSourceFactoryTest {
                 null
             );
 
-            assertThrows(IllegalArgumentException.class, () -> KafkaSourceFactory.supplyFor(config, TEST_SCHEMA));
+            assertThrows(InvalidKafkaSourceConfigurationException.class, () -> KafkaSourceFactory.supplyFor(config, TEST_SCHEMA));
         }
 
         @Test
