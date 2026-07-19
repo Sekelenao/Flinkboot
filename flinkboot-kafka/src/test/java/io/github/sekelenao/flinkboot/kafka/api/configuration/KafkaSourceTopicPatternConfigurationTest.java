@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,7 +57,7 @@ class KafkaSourceTopicPatternConfigurationTest {
                 () -> assertNotNull(config),
                 () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
                 () -> assertEquals("my-group", config.groupId()),
-                () -> assertEquals("^my-topic-.*$", config.topicPattern().pattern()),
+                () -> assertEquals("^my-topic-.*$", config.topicPattern()),
                 () -> assertEquals(KafkaOffsetInitializer.EARLIEST, config.startingOffsets()),
                 () -> assertEquals(Map.of("security.protocol", "PLAINTEXT"), config.properties())
             );
@@ -79,7 +78,7 @@ class KafkaSourceTopicPatternConfigurationTest {
                 () -> assertNotNull(config),
                 () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
                 () -> assertEquals("my-group", config.groupId()),
-                () -> assertEquals("^my-topic-.*$", config.topicPattern().pattern()),
+                () -> assertEquals("^my-topic-.*$", config.topicPattern()),
                 () -> assertEquals(KafkaOffsetInitializer.LATEST, config.startingOffsets()),
                 () -> assertTrue(config.properties().isEmpty())
             );
@@ -141,7 +140,7 @@ class KafkaSourceTopicPatternConfigurationTest {
             var config = new KafkaSourceTopicPatternConfiguration(
                 List.of("localhost:9092"),
                 "my-group",
-                Pattern.compile("^my-topic-.*$"),
+                "^my-topic-.*$",
                 KafkaOffsetInitializer.LATEST,
                 null,
                 null,
@@ -158,7 +157,7 @@ class KafkaSourceTopicPatternConfigurationTest {
             var config = new KafkaSourceTopicPatternConfiguration(
                 List.of(),
                 "my-group",
-                Pattern.compile("^my-topic-.*$"),
+                "^my-topic-.*$",
                 KafkaOffsetInitializer.LATEST,
                 null,
                 null,
@@ -178,7 +177,7 @@ class KafkaSourceTopicPatternConfigurationTest {
             var config = new KafkaSourceTopicPatternConfiguration(
                 List.of("localhost:9092"),
                 "",
-                Pattern.compile("^my-topic-.*$"),
+                "^my-topic-.*$",
                 KafkaOffsetInitializer.LATEST,
                 null,
                 null,
@@ -213,12 +212,32 @@ class KafkaSourceTopicPatternConfigurationTest {
         }
 
         @Test
+        @DisplayName("Should fail validation when topic-pattern is blank")
+        void shouldFailWhenTopicPatternIsBlank() {
+            var config = new KafkaSourceTopicPatternConfiguration(
+                List.of("localhost:9092"),
+                "my-group",
+                "   ",
+                KafkaOffsetInitializer.LATEST,
+                null,
+                null,
+                null
+            );
+
+            Set<ConstraintViolation<KafkaSourceTopicPatternConfiguration>> violations = validator.validate(config);
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("topicPattern")))
+            );
+        }
+
+        @Test
         @DisplayName("Should fail validation when starting-offsets is null")
         void shouldFailWhenStartingOffsetsIsNull() {
             var config = new KafkaSourceTopicPatternConfiguration(
                 List.of("localhost:9092"),
                 "my-group",
-                Pattern.compile("^my-topic-.*$"),
+                "^my-topic-.*$",
                 null,
                 null,
                 null,
@@ -238,7 +257,7 @@ class KafkaSourceTopicPatternConfigurationTest {
             var config = new KafkaSourceTopicPatternConfiguration(
                 List.of("localhost:9092"),
                 "my-group",
-                Pattern.compile("^my-topic-.*$"),
+                "^my-topic-.*$",
                 KafkaOffsetInitializer.OFFSETS,
                 null,
                 List.of(new TopicPartitionOffsetConfiguration("   ", -1, -5L)),
@@ -257,7 +276,7 @@ class KafkaSourceTopicPatternConfigurationTest {
         @Test
         @DisplayName("Should return expected values from getters when all parameters are present")
         void testGettersWithAllParameters() {
-            var pattern = Pattern.compile("^my-topic-.*$");
+            var pattern = "^my-topic-.*$";
             var config = new KafkaSourceTopicPatternConfiguration(
                 List.of("localhost:9092"),
                 "my-group",
@@ -286,7 +305,7 @@ class KafkaSourceTopicPatternConfigurationTest {
             var config = new KafkaSourceTopicPatternConfiguration(
                 List.of("localhost:9092"),
                 "my-group",
-                Pattern.compile("^my-topic-.*$"),
+                "^my-topic-.*$",
                 KafkaOffsetInitializer.EARLIEST,
                 null,
                 null,
@@ -308,7 +327,7 @@ class KafkaSourceTopicPatternConfigurationTest {
         @Test
         @DisplayName("Equals and HashCode should work correctly across all branches")
         void testEqualsAndHashCode() {
-            var pattern = Pattern.compile("^my-topic-.*$");
+            var pattern = "^my-topic-.*$";
             var config1 = new KafkaSourceTopicPatternConfiguration(
                 List.of("localhost:9092"),
                 "my-group",

@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalLong;
-import java.util.regex.Pattern;
 
 public class KafkaSourceTopicPatternConfiguration implements OffsetInitializerConfiguration, Serializable {
 
@@ -27,8 +26,8 @@ public class KafkaSourceTopicPatternConfiguration implements OffsetInitializerCo
     @NotBlank
     private final String groupId;
 
-    @NotNull
-    private final Pattern topicPattern;
+    @NotBlank
+    private final String topicPattern;
 
     @NotNull
     private final KafkaOffsetInitializer startingOffsets;
@@ -43,7 +42,7 @@ public class KafkaSourceTopicPatternConfiguration implements OffsetInitializerCo
     public KafkaSourceTopicPatternConfiguration(
         @JsonProperty("bootstrap-servers") List<String> bootstrapServers,
         @JsonProperty("group-id") String groupId,
-        @JsonProperty("topic-pattern") Pattern topicPattern,
+        @JsonProperty("topic-pattern") String topicPattern,
         @JsonProperty("starting-offsets") KafkaOffsetInitializer startingOffsets,
         @JsonProperty("starting-offsets-timestamp") Long startingOffsetsTimestamp,
         @JsonProperty("starting-offsets-partition-offsets") List<TopicPartitionOffsetConfiguration> startingOffsetsPartitionOffsets,
@@ -66,7 +65,7 @@ public class KafkaSourceTopicPatternConfiguration implements OffsetInitializerCo
         return groupId;
     }
 
-    public Pattern topicPattern() {
+    public String topicPattern() {
         return topicPattern;
     }
 
@@ -124,7 +123,7 @@ public class KafkaSourceTopicPatternConfiguration implements OffsetInitializerCo
         return "KafkaSourceTopicPatternConfiguration{" +
             "bootstrapServers=" + bootstrapServers +
             ", groupId='" + groupId + '\'' +
-            ", topicPattern=" + topicPattern +
+            ", topicPattern='" + topicPattern + '\'' +
             ", startingOffsets=" + startingOffsets +
             ", startingOffsetsTimestamp=" + startingOffsetsTimestamp +
             ", startingOffsetsPartitionOffsets=" + startingOffsetsPartitionOffsets +

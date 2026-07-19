@@ -9,6 +9,7 @@ import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDe
 
 import java.util.Objects;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 public final class KafkaSourceFactory {
 
@@ -57,7 +58,7 @@ public final class KafkaSourceFactory {
         return KafkaSource.<T>builder()
             .setBootstrapServers(String.join(",", config.bootstrapServers()))
             .setGroupId(config.groupId())
-            .setTopicPattern(config.topicPattern())
+            .setTopicPattern(Pattern.compile(config.topicPattern()))
             .setStartingOffsets(startingOffsets)
             .setProperties(additionalProperties)
             .setDeserializer(schema);

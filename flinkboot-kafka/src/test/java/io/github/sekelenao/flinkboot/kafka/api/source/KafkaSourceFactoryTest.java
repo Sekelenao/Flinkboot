@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -175,7 +174,7 @@ class KafkaSourceFactoryTest {
             var config = new KafkaSourceTopicPatternConfiguration(
                 List.of("localhost:9092"),
                 "test-group",
-                Pattern.compile("test-.*"),
+                "test-.*",
                 KafkaOffsetInitializer.LATEST,
                 null,
                 null,
@@ -194,7 +193,7 @@ class KafkaSourceFactoryTest {
             var config = new KafkaSourceTopicPatternConfiguration(
                 List.of("localhost:9092"),
                 "test-group",
-                Pattern.compile("test-.*"),
+                "test-.*",
                 KafkaOffsetInitializer.TIMESTAMP,
                 1689717600000L,
                 null,
@@ -210,7 +209,7 @@ class KafkaSourceFactoryTest {
             var config = new KafkaSourceTopicPatternConfiguration(
                 List.of("localhost:9092"),
                 "test-group",
-                Pattern.compile("test-.*"),
+                "test-.*",
                 KafkaOffsetInitializer.OFFSETS,
                 null,
                 List.of(new TopicPartitionOffsetConfiguration("test-topic", 0, 100L)),
@@ -226,7 +225,7 @@ class KafkaSourceFactoryTest {
             var config = new KafkaSourceTopicPatternConfiguration(
                 List.of("localhost:9092"),
                 "test-group",
-                Pattern.compile("test-.*"),
+                "test-.*",
                 KafkaOffsetInitializer.LATEST,
                 null,
                 null,
