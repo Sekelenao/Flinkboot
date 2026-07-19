@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("KafkaSourceTopicListConfiguration")
@@ -245,22 +246,19 @@ class KafkaSourceTopicListConfigurationTest {
         }
 
         @Test
-        @DisplayName("Should fail validation when starting-offsets is null")
+        @DisplayName("Should throw NullPointerException when starting-offsets is null")
         void shouldFailWhenStartingOffsetsIsNull() {
-            var config = new KafkaSourceTopicListConfiguration(
-                List.of("localhost:9092"),
-                "my-group",
-                List.of("topic-a"),
-                null,
-                null,
-                null,
-                null
-            );
-
-            Set<ConstraintViolation<KafkaSourceTopicListConfiguration>> violations = validator.validate(config);
-            assertAll(
-                () -> assertFalse(violations.isEmpty()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("startingOffsets")))
+            assertThrows(
+                NullPointerException.class,
+                () -> new KafkaSourceTopicListConfiguration(
+                    List.of("localhost:9092"),
+                    "my-group",
+                    List.of("topic-a"),
+                    null,
+                    null,
+                    null,
+                    null
+                )
             );
         }
 

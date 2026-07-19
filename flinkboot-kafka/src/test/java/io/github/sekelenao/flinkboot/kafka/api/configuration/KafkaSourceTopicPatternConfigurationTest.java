@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("KafkaSourceTopicPatternConfiguration")
@@ -195,22 +196,19 @@ class KafkaSourceTopicPatternConfigurationTest {
         }
 
         @Test
-        @DisplayName("Should fail validation when topic-pattern is null")
+        @DisplayName("Should throw NullPointerException when topic-pattern is null")
         void shouldFailWhenTopicPatternIsNull() {
-            var config = new KafkaSourceTopicPatternConfiguration(
-                List.of("localhost:9092"),
-                "my-group",
-                null,
-                KafkaOffsetInitializer.LATEST,
-                null,
-                null,
-                null
-            );
-
-            Set<ConstraintViolation<KafkaSourceTopicPatternConfiguration>> violations = validator.validate(config);
-            assertAll(
-                () -> assertFalse(violations.isEmpty()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("topicPattern")))
+            assertThrows(
+                NullPointerException.class,
+                () -> new KafkaSourceTopicPatternConfiguration(
+                    List.of("localhost:9092"),
+                    "my-group",
+                    null,
+                    KafkaOffsetInitializer.LATEST,
+                    null,
+                    null,
+                    null
+                )
             );
         }
 
@@ -235,22 +233,19 @@ class KafkaSourceTopicPatternConfigurationTest {
         }
 
         @Test
-        @DisplayName("Should fail validation when starting-offsets is null")
+        @DisplayName("Should throw NullPointerException when starting-offsets is null")
         void shouldFailWhenStartingOffsetsIsNull() {
-            var config = new KafkaSourceTopicPatternConfiguration(
-                List.of("localhost:9092"),
-                "my-group",
-                "^my-topic-.*$",
-                null,
-                null,
-                null,
-                null
-            );
-
-            Set<ConstraintViolation<KafkaSourceTopicPatternConfiguration>> violations = validator.validate(config);
-            assertAll(
-                () -> assertFalse(violations.isEmpty()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("startingOffsets")))
+            assertThrows(
+                NullPointerException.class,
+                () -> new KafkaSourceTopicPatternConfiguration(
+                    List.of("localhost:9092"),
+                    "my-group",
+                    "^my-topic-.*$",
+                    null,
+                    null,
+                    null,
+                    null
+                )
             );
         }
 
