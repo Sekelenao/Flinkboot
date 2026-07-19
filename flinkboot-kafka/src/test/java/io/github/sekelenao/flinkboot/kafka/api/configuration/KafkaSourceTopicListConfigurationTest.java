@@ -61,8 +61,8 @@ class KafkaSourceTopicListConfigurationTest {
                 () -> assertEquals("my-group", config.groupId()),
                 () -> assertEquals(List.of("topic-a", "topic-b"), config.topics()),
                 () -> assertEquals(KafkaOffsetInitializer.EARLIEST, config.startingOffsets()),
-                () -> assertTrue(config.properties().isPresent()),
-                () -> assertEquals(Map.of("security.protocol", "PLAINTEXT"), config.properties().get())
+                () -> assertEquals(Map.of("security.protocol", "PLAINTEXT"), config.properties())
+
             );
         }
 
@@ -304,8 +304,7 @@ class KafkaSourceTopicListConfigurationTest {
                 () -> assertTrue(config.startingOffsetsTimestamp().isPresent()),
                 () -> assertEquals(12345L, config.startingOffsetsTimestamp().getAsLong()),
                 () -> assertEquals(List.of(new TopicPartitionOffsetConfiguration("topic-a", 0, 100L)), config.startingOffsetsPartitionOffsets()),
-                () -> assertTrue(config.properties().isPresent()),
-                () -> assertEquals(Map.of("key", "val"), config.properties().get())
+                () -> assertEquals(Map.of("key", "val"), config.properties())
             );
         }
 

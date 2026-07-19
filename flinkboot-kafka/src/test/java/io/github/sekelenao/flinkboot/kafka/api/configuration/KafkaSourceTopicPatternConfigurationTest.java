@@ -60,8 +60,7 @@ class KafkaSourceTopicPatternConfigurationTest {
                 () -> assertEquals("my-group", config.groupId()),
                 () -> assertEquals("^my-topic-.*$", config.topicPattern().pattern()),
                 () -> assertEquals(KafkaOffsetInitializer.EARLIEST, config.startingOffsets()),
-                () -> assertTrue(config.properties().isPresent()),
-                () -> assertEquals(Map.of("security.protocol", "PLAINTEXT"), config.properties().get())
+                () -> assertEquals(Map.of("security.protocol", "PLAINTEXT"), config.properties())
             );
         }
 
@@ -277,8 +276,7 @@ class KafkaSourceTopicPatternConfigurationTest {
                 () -> assertTrue(config.startingOffsetsTimestamp().isPresent()),
                 () -> assertEquals(12345L, config.startingOffsetsTimestamp().getAsLong()),
                 () -> assertEquals(List.of(new TopicPartitionOffsetConfiguration("topic-a", 0, 100L)), config.startingOffsetsPartitionOffsets()),
-                () -> assertTrue(config.properties().isPresent()),
-                () -> assertEquals(Map.of("key", "val"), config.properties().get())
+                () -> assertEquals(Map.of("key", "val"), config.properties())
             );
         }
 

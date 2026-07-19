@@ -89,12 +89,13 @@ public class KafkaSourceTopicListConfiguration implements OffsetInitializerConfi
         return Collections.unmodifiableList(startingOffsetsPartitionOffsets);
     }
 
-    public Optional<Map<String, String>> properties() {
+    public Map<String, String> properties() {
         if (properties == null) {
-            return Optional.empty();
+            return Collections.emptyMap();
         }
-        return Optional.of(Collections.unmodifiableMap(properties));
+        return Collections.unmodifiableMap(properties);
     }
+
 
     @Override
     @Generated

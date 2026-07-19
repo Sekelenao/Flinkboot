@@ -24,7 +24,7 @@ public final class KafkaSourceFactory {
         Objects.requireNonNull(schema);
 
         var additionalProperties = new Properties();
-        config.properties().ifPresent(additionalProperties::putAll);
+        additionalProperties.putAll(config.properties());
         var startingOffsets = OffsetInitializerMapper.map(config);
 
         return KafkaSource.<T>builder()
@@ -51,7 +51,7 @@ public final class KafkaSourceFactory {
         Objects.requireNonNull(schema);
 
         var additionalProperties = new Properties();
-        config.properties().ifPresent(additionalProperties::putAll);
+        additionalProperties.putAll(config.properties());
         var startingOffsets = OffsetInitializerMapper.map(config);
 
         return KafkaSource.<T>builder()
