@@ -262,6 +262,27 @@ class KafkaSourceTopicPatternConfigurationTest {
             Set<ConstraintViolation<KafkaSourceTopicPatternConfiguration>> violations = validator.validate(config);
             assertFalse(violations.isEmpty(), "Should fail validation due to invalid nested values");
         }
+
+        @Test
+        @DisplayName("Should fail validation when starting-offsets-timestamp is negative")
+        void shouldFailWhenStartingOffsetsTimestampIsNegative() {
+            var config = new KafkaSourceTopicPatternConfiguration(
+                List.of("localhost:9092"),
+                "my-group",
+                "^my-topic-.*$",
+                KafkaOffsetInitializer.TIMESTAMP,
+                -100L,
+                null,
+                null
+            );
+
+            Set<ConstraintViolation<KafkaSourceTopicPatternConfiguration>> violations = validator.validate(config);
+            assertAll(
+                // Should have validation violations
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("startingOffsetsTimestamp")))
+            );
+        }
     }
 
     @Nested
