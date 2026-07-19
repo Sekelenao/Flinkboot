@@ -4,7 +4,7 @@ When deploying Apache Flink jobs to a production cluster, classpath conflicts (e
 
 Flink uses a `child-first` classloader strategy by default, meaning it attempts to load classes from the user's fat JAR before falling back to Flink's parent classloader. If the user's JAR contains overlapping or incompatible versions of libraries already provided by Flink, it can lead to `LinkageError`, `NoSuchMethodError`, or class casting exceptions.
 
-Flinkboot is designed as a **good classpath citizen**—it declares Flink and Jackson as `provided` to avoid polluting your transitive dependencies. However, you must still configure your job's packaging correctly.
+Flinkboot is designed as a **good classpath citizen**—it declares Flink as `provided` to avoid polluting your cluster dependencies, but transitively bundles Jackson in `compile` scope to simplify your packaging. However, you must still configure your job's packaging correctly.
 
 ---
 
@@ -39,7 +39,7 @@ This includes:
 
 ## Best Practice 2: Shading and Relocating Jackson
 
-Flink's runtime internally uses Jackson and bundles its own shaded versions. If your job uses a different version of Jackson (either directly or via libraries like Flinkboot), packaging standard Jackson directly into your fat JAR can cause conflicts.
+Flink's runtime internally uses Jackson and bundles its own shaded versions. Because Flinkboot transitively includes Jackson in `compile` scope, standard Jackson will automatically be packaged into your fat JAR. To prevent conflicts with the Flink runtime version, you must relocate (shade) it.
 
 The safest solution is to **relocate (shade)** Jackson classes into a unique namespace inside your fat JAR using the `maven-shade-plugin`.
 
