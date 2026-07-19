@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -52,7 +53,7 @@ public class KafkaSourceTopicListConfiguration implements OffsetInitializerConfi
     }
 
     public List<String> bootstrapServers() {
-        return bootstrapServers;
+        return Collections.unmodifiableList(bootstrapServers);
     }
 
     public String groupId() {
@@ -60,7 +61,7 @@ public class KafkaSourceTopicListConfiguration implements OffsetInitializerConfi
     }
 
     public List<String> topics() {
-        return topics;
+        return Collections.unmodifiableList(topics);
     }
 
     public KafkaOffsetInitializer startingOffsets() {
@@ -68,14 +69,23 @@ public class KafkaSourceTopicListConfiguration implements OffsetInitializerConfi
     }
 
     public OptionalLong startingOffsetsTimestamp() {
-        return startingOffsetsTimestamp != null ? OptionalLong.of(startingOffsetsTimestamp) : OptionalLong.empty();
+        if (startingOffsetsTimestamp == null) {
+            return OptionalLong.empty();
+        }
+        return OptionalLong.of(startingOffsetsTimestamp);
     }
 
     public List<TopicPartitionConfiguration> startingOffsetsPartitionOffsets() {
-        return startingOffsetsPartitionOffsets != null ? startingOffsetsPartitionOffsets : List.of();
+        if (startingOffsetsPartitionOffsets == null) {
+            return Collections.emptyList();
+        }
+        return Collections.unmodifiableList(startingOffsetsPartitionOffsets);
     }
 
     public Optional<Map<String, String>> properties() {
-        return Optional.ofNullable(properties);
+        if (properties == null) {
+            return Optional.empty();
+        }
+        return Optional.of(Collections.unmodifiableMap(properties));
     }
 }
