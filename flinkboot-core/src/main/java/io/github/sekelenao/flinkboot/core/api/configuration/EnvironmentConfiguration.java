@@ -6,8 +6,6 @@ import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Pattern;
-
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
@@ -17,8 +15,7 @@ public final class EnvironmentConfiguration implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Pattern(regexp = "STREAMING|BATCH|AUTOMATIC")
-    private final String runtimeMode;
+    private final FlinkRuntimeMode runtimeMode;
 
     private final Boolean localWebUi;
 
@@ -43,7 +40,7 @@ public final class EnvironmentConfiguration implements Serializable {
 
     @JsonCreator
     public EnvironmentConfiguration(
-        @JsonProperty("runtimeMode") String runtimeMode,
+        @JsonProperty("runtimeMode") FlinkRuntimeMode runtimeMode,
         @JsonProperty("localWebUi") Boolean localWebUi,
         @JsonProperty("localWebUiPort") Integer localWebUiPort,
         @JsonProperty("parallelism") Integer parallelism,
@@ -62,7 +59,7 @@ public final class EnvironmentConfiguration implements Serializable {
         this.restartStrategy = restartStrategy;
     }
 
-    public Optional<String> runtimeMode() {
+    public Optional<FlinkRuntimeMode> runtimeMode() {
         return Optional.ofNullable(runtimeMode);
     }
 

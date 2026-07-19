@@ -4,8 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -15,9 +14,8 @@ public final class RestartStrategyConfiguration implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @NotBlank
-    @Pattern(regexp = "none|fixed-delay|failure-rate|exponential-delay")
-    private final String type;
+    @NotNull
+    private final FlinkRestartStrategyType type;
 
     @Valid
     private final FixedDelayRestartConfiguration fixedDelay;
@@ -30,7 +28,7 @@ public final class RestartStrategyConfiguration implements Serializable {
 
     @JsonCreator
     public RestartStrategyConfiguration(
-        @JsonProperty("type") String type,
+        @JsonProperty("type") FlinkRestartStrategyType type,
         @JsonProperty("fixedDelay") FixedDelayRestartConfiguration fixedDelay,
         @JsonProperty("failureRate") FailureRateRestartConfiguration failureRate,
         @JsonProperty("exponentialDelay") ExponentialDelayRestartConfiguration exponentialDelay
@@ -41,7 +39,7 @@ public final class RestartStrategyConfiguration implements Serializable {
         this.exponentialDelay = exponentialDelay;
     }
 
-    public String type() {
+    public FlinkRestartStrategyType type() {
         return type;
     }
 

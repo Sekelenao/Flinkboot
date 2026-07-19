@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
@@ -21,8 +19,7 @@ public final class CheckpointingConfiguration implements Serializable {
     @Min(1)
     private final Long interval;
 
-    @Pattern(regexp = "EXACTLY_ONCE|AT_LEAST_ONCE")
-    private final String mode;
+    private final FlinkCheckpointingMode mode;
 
     @Min(1)
     private final Long timeout;
@@ -33,17 +30,16 @@ public final class CheckpointingConfiguration implements Serializable {
     @Min(1)
     private final Integer maxConcurrent;
 
-    @Pattern(regexp = "RETAIN_ON_CANCELLATION|DELETE_ON_CANCELLATION")
-    private final String externalizedCleanup;
+    private final FlinkExternalizedCleanup externalizedCleanup;
 
     @JsonCreator
     public CheckpointingConfiguration(
         @JsonProperty("interval") Long interval,
-        @JsonProperty("mode") String mode,
+        @JsonProperty("mode") FlinkCheckpointingMode mode,
         @JsonProperty("timeout") Long timeout,
         @JsonProperty("minPause") Long minPause,
         @JsonProperty("maxConcurrent") Integer maxConcurrent,
-        @JsonProperty("externalizedCleanup") String externalizedCleanup
+        @JsonProperty("externalizedCleanup") FlinkExternalizedCleanup externalizedCleanup
     ) {
         this.interval = Objects.requireNonNull(interval);
         this.mode = mode;
@@ -57,7 +53,7 @@ public final class CheckpointingConfiguration implements Serializable {
         return interval;
     }
 
-    public Optional<String> mode() {
+    public Optional<FlinkCheckpointingMode> mode() {
         return Optional.ofNullable(mode);
     }
 
@@ -82,7 +78,7 @@ public final class CheckpointingConfiguration implements Serializable {
         return OptionalInt.of(maxConcurrent);
     }
 
-    public Optional<String> externalizedCleanup() {
+    public Optional<FlinkExternalizedCleanup> externalizedCleanup() {
         return Optional.ofNullable(externalizedCleanup);
     }
 
