@@ -8,16 +8,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @DisplayName("TopicPartitionConfiguration")
-class TopicPartitionConfigurationTest {
+class TopicPartitionOffsetConfigurationTest {
 
     @Test
     @DisplayName("Equals and HashCode should work correctly across all branches")
     void testEqualsAndHashCode() {
-        var config1 = new TopicPartitionConfiguration("topic-a", 0, 100L);
-        var config2 = new TopicPartitionConfiguration("topic-a", 0, 100L);
-        var configDifferentPartition = new TopicPartitionConfiguration("topic-a", 1, 100L);
-        var configDifferentOffset = new TopicPartitionConfiguration("topic-a", 0, 200L);
-        var configDifferentTopic = new TopicPartitionConfiguration("topic-b", 0, 100L);
+        var config1 = new TopicPartitionOffsetConfiguration("topic-a", 0, 100L);
+        var config2 = new TopicPartitionOffsetConfiguration("topic-a", 0, 100L);
+        var configDifferentPartition = new TopicPartitionOffsetConfiguration("topic-a", 1, 100L);
+        var configDifferentOffset = new TopicPartitionOffsetConfiguration("topic-a", 0, 200L);
+        var configDifferentTopic = new TopicPartitionOffsetConfiguration("topic-b", 0, 100L);
 
         assertAll(
             // Same instance
@@ -41,7 +41,8 @@ class TopicPartitionConfigurationTest {
     @Test
     @DisplayName("ToString should return the formatted string representation")
     void testToString() {
-        var config = new TopicPartitionConfiguration("topic-a", 2, 500L);
-        assertEquals("topic-a-2:500", config.toString());
+        var config = new TopicPartitionOffsetConfiguration("topic-a", 2, 500L);
+        assertEquals("TopicPartitionConfiguration{topic='topic-a', partition=2, offset=500}", config.toString());
     }
+
 }

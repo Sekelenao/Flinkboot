@@ -125,7 +125,7 @@ class KafkaSourceTopicPatternConfigurationTest {
                 () -> assertNotNull(config),
                 () -> assertEquals(KafkaOffsetInitializer.OFFSETS, config.startingOffsets()),
                 () -> assertEquals(
-                    List.of(new TopicPartitionConfiguration("my-topic", 0, 12345L)),
+                    List.of(new TopicPartitionOffsetConfiguration("my-topic", 0, 12345L)),
                     config.startingOffsetsPartitionOffsets()
                 )
             );
@@ -242,7 +242,7 @@ class KafkaSourceTopicPatternConfigurationTest {
                 Pattern.compile("^my-topic-.*$"),
                 KafkaOffsetInitializer.OFFSETS,
                 null,
-                List.of(new TopicPartitionConfiguration("   ", -1, -5L)),
+                List.of(new TopicPartitionOffsetConfiguration("   ", -1, -5L)),
                 null
             );
 
@@ -265,7 +265,7 @@ class KafkaSourceTopicPatternConfigurationTest {
                 pattern,
                 KafkaOffsetInitializer.TIMESTAMP,
                 12345L,
-                List.of(new TopicPartitionConfiguration("topic-a", 0, 100L)),
+                List.of(new TopicPartitionOffsetConfiguration("topic-a", 0, 100L)),
                 Map.of("key", "val")
             );
 
@@ -276,7 +276,7 @@ class KafkaSourceTopicPatternConfigurationTest {
                 () -> assertEquals(KafkaOffsetInitializer.TIMESTAMP, config.startingOffsets()),
                 () -> assertTrue(config.startingOffsetsTimestamp().isPresent()),
                 () -> assertEquals(12345L, config.startingOffsetsTimestamp().getAsLong()),
-                () -> assertEquals(List.of(new TopicPartitionConfiguration("topic-a", 0, 100L)), config.startingOffsetsPartitionOffsets()),
+                () -> assertEquals(List.of(new TopicPartitionOffsetConfiguration("topic-a", 0, 100L)), config.startingOffsetsPartitionOffsets()),
                 () -> assertTrue(config.properties().isPresent()),
                 () -> assertEquals(Map.of("key", "val"), config.properties().get())
             );

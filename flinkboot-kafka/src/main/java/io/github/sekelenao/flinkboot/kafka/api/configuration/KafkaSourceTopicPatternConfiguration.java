@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,10 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.regex.Pattern;
 
-public class KafkaSourceTopicPatternConfiguration implements OffsetInitializerConfiguration {
+public class KafkaSourceTopicPatternConfiguration implements OffsetInitializerConfiguration, Serializable {
+
+    private static final long serialVersionUID = 1L;
+
 
     @NotEmpty
     private final List<String> bootstrapServers;
@@ -33,7 +37,7 @@ public class KafkaSourceTopicPatternConfiguration implements OffsetInitializerCo
 
     private final Long startingOffsetsTimestamp;
 
-    private final List<@Valid TopicPartitionConfiguration> startingOffsetsPartitionOffsets;
+    private final List<@Valid TopicPartitionOffsetConfiguration> startingOffsetsPartitionOffsets;
 
     private final Map<String, String> properties;
 
@@ -44,7 +48,7 @@ public class KafkaSourceTopicPatternConfiguration implements OffsetInitializerCo
         @JsonProperty("topic-pattern") Pattern topicPattern,
         @JsonProperty("starting-offsets") KafkaOffsetInitializer startingOffsets,
         @JsonProperty("starting-offsets-timestamp") Long startingOffsetsTimestamp,
-        @JsonProperty("starting-offsets-partition-offsets") List<TopicPartitionConfiguration> startingOffsetsPartitionOffsets,
+        @JsonProperty("starting-offsets-partition-offsets") List<TopicPartitionOffsetConfiguration> startingOffsetsPartitionOffsets,
         @JsonProperty("properties") Map<String, String> properties
     ) {
         this.bootstrapServers = bootstrapServers;
@@ -79,7 +83,7 @@ public class KafkaSourceTopicPatternConfiguration implements OffsetInitializerCo
         return OptionalLong.of(startingOffsetsTimestamp);
     }
 
-    public List<TopicPartitionConfiguration> startingOffsetsPartitionOffsets() {
+    public List<TopicPartitionOffsetConfiguration> startingOffsetsPartitionOffsets() {
         if (startingOffsetsPartitionOffsets == null) {
             return Collections.emptyList();
         }

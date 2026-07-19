@@ -151,8 +151,8 @@ class KafkaSourceTopicListConfigurationTest {
                 () -> assertEquals(KafkaOffsetInitializer.OFFSETS, config.startingOffsets()),
                 () -> assertEquals(
                     List.of(
-                        new TopicPartitionConfiguration("my-topic", 0, 12345L),
-                        new TopicPartitionConfiguration("my-topic", 1, 12346L)
+                        new TopicPartitionOffsetConfiguration("my-topic", 0, 12345L),
+                        new TopicPartitionOffsetConfiguration("my-topic", 1, 12346L)
                     ),
                     config.startingOffsetsPartitionOffsets()
                 )
@@ -270,7 +270,7 @@ class KafkaSourceTopicListConfigurationTest {
                 List.of("topic-a"),
                 KafkaOffsetInitializer.OFFSETS,
                 null,
-                List.of(new TopicPartitionConfiguration("   ", -1, -5L)),
+                List.of(new TopicPartitionOffsetConfiguration("   ", -1, -5L)),
                 null
             );
 
@@ -292,7 +292,7 @@ class KafkaSourceTopicListConfigurationTest {
                 List.of("topic-a"),
                 KafkaOffsetInitializer.TIMESTAMP,
                 12345L,
-                List.of(new TopicPartitionConfiguration("topic-a", 0, 100L)),
+                List.of(new TopicPartitionOffsetConfiguration("topic-a", 0, 100L)),
                 Map.of("key", "val")
             );
 
@@ -303,7 +303,7 @@ class KafkaSourceTopicListConfigurationTest {
                 () -> assertEquals(KafkaOffsetInitializer.TIMESTAMP, config.startingOffsets()),
                 () -> assertTrue(config.startingOffsetsTimestamp().isPresent()),
                 () -> assertEquals(12345L, config.startingOffsetsTimestamp().getAsLong()),
-                () -> assertEquals(List.of(new TopicPartitionConfiguration("topic-a", 0, 100L)), config.startingOffsetsPartitionOffsets()),
+                () -> assertEquals(List.of(new TopicPartitionOffsetConfiguration("topic-a", 0, 100L)), config.startingOffsetsPartitionOffsets()),
                 () -> assertTrue(config.properties().isPresent()),
                 () -> assertEquals(Map.of("key", "val"), config.properties().get())
             );
