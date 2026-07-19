@@ -5,6 +5,17 @@ In Flinkboot, a **parameter** is a key-value pair where the value is a string. P
 > [!IMPORTANT]
 > Before defining your custom parameters, please check the [Reserved Keys](reserved-keys.md) page to avoid naming collisions with Flinkboot's built-in configuration keys.
 
+## Maven Dependency
+
+To use this feature, import the core Flinkboot dependency:
+
+```xml
+<dependency>
+    <groupId>io.github.sekelenao</groupId>
+    <artifactId>flinkboot-core</artifactId>
+</dependency>
+```
+
 ---
 
 ## 1. Usage in Java Code

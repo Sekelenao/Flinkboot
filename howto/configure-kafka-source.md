@@ -2,6 +2,17 @@
 
 Flinkboot provides typed configuration models and a factory to easily initialize Apache Flink's `KafkaSource` from YAML configuration files.
 
+## Maven Dependency
+
+To use this feature, import the Kafka Flinkboot dependency:
+
+```xml
+<dependency>
+    <groupId>io.github.sekelenao</groupId>
+    <artifactId>flinkboot-kafka</artifactId>
+</dependency>
+```
+
 ---
 
 ## 1. YAML Configuration Structure

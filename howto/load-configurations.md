@@ -2,6 +2,17 @@
 
 Flinkboot allows you to load and recursively merge multiple configuration files into a single, validated Java configuration object at startup.
 
+## Maven Dependency
+
+To use this feature, import the core Flinkboot dependency:
+
+```xml
+<dependency>
+    <groupId>io.github.sekelenao</groupId>
+    <artifactId>flinkboot-core</artifactId>
+</dependency>
+```
+
 ---
 
 ## 1. Usage in Java Code

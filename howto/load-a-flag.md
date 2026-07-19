@@ -5,6 +5,17 @@ In Flinkboot, a **flag** is a simple boolean switch. It allows you to enable or 
 > [!IMPORTANT]
 > Before defining your custom flags, please check the [Reserved Keys](reserved-keys.md) page to avoid naming collisions with Flinkboot's built-in parameters.
 
+## Maven Dependency
+
+To use this feature, import the core Flinkboot dependency:
+
+```xml
+<dependency>
+    <groupId>io.github.sekelenao</groupId>
+    <artifactId>flinkboot-core</artifactId>
+</dependency>
+```
+
 ---
 
 ## 1. Usage in Java Code
