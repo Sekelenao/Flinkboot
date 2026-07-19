@@ -49,15 +49,15 @@ starting-offsets: "LATEST"
 
 Flinkboot supports all native Flink consumption strategies via the `starting-offsets` property:
 
-| Value | Description | Required Extra Configuration |
-| :--- | :--- | :--- |
-| `EARLIEST` | Start consuming from the earliest offset. | None |
-| `LATEST` | Start consuming from the latest offset. | None |
-| `COMMITTED` | Start from committed offsets. Defaults to latest if none found. | None |
-| `COMMITTED_EARLIEST` | Start from committed offsets. Fallback to earliest. | None |
-| `COMMITTED_LATEST` | Start from committed offsets. Fallback to latest. | None |
-| `TIMESTAMP` | Start from a specific epoch timestamp. | `starting-offsets-timestamp` |
-| `OFFSETS` | Start from custom offsets specified per partition. | `starting-offsets-partition-offsets` |
+| Value                | Description                                                     | Required Extra Configuration         |
+|:---------------------|:----------------------------------------------------------------|:-------------------------------------|
+| `EARLIEST`           | Start consuming from the earliest offset.                       | None                                 |
+| `LATEST`             | Start consuming from the latest offset.                         | None                                 |
+| `COMMITTED`          | Start from committed offsets. Defaults to latest if none found. | None                                 |
+| `COMMITTED_EARLIEST` | Start from committed offsets. Fallback to earliest.             | None                                 |
+| `COMMITTED_LATEST`   | Start from committed offsets. Fallback to latest.               | None                                 |
+| `TIMESTAMP`          | Start from a specific epoch timestamp.                          | `starting-offsets-timestamp`         |
+| `OFFSETS`            | Start from custom offsets specified per partition.              | `starting-offsets-partition-offsets` |
 
 ### Configuring Timestamp-based Starting Offsets
 
@@ -81,13 +81,58 @@ starting-offsets-partition-offsets:
 
 ---
 
-## 3. Java Integration
+## 3. Java Integration & Real-world Usage
 
-To use the Kafka Source in your job, parse the configuration using Flinkboot and construct it using `KafkaSourceFactory`.
+In a typical production setup, you define a custom `JobConfig` class representing the full application configuration. You embed the `KafkaSourceTopicListConfiguration` inside it.
+
+### Step 1: Define the Root Job Configuration Class
+
+```java
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.sekelenao.flinkboot.kafka.api.configuration.KafkaSourceTopicListConfiguration;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+public final class JobConfig {
+
+    @NotBlank
+    private final String jobName;
+
+    @Min(1)
+    private final int parallelism;
+
+    @Valid
+    @NotNull
+    private final KafkaSourceTopicListConfiguration kafka;
+
+    @JsonCreator
+    public JobConfig(
+        @JsonProperty("jobName") String jobName,
+        @JsonProperty("parallelism") int parallelism,
+        @JsonProperty("kafka") KafkaSourceTopicListConfiguration kafka
+    ) {
+        this.jobName = jobName;
+        this.parallelism = parallelism;
+        this.kafka = kafka;
+    }
+
+    public String jobName() { return jobName; }
+    public int parallelism() { return parallelism; }
+    
+    // Returns the nested Kafka configuration
+    public KafkaSourceTopicListConfiguration kafka() { return kafka; }
+}
+```
+
+### Step 2: Use in Flink Application
+
+Initialize Flinkboot, retrieve the root `JobConfig`, and build your `KafkaSource` from the nested configuration object:
 
 ```java
 import io.github.sekelenao.flinkboot.core.api.Flinkboot;
-import io.github.sekelenao.flinkboot.kafka.api.configuration.KafkaSourceTopicListConfiguration;
 import io.github.sekelenao.flinkboot.kafka.api.source.KafkaSourceFactory;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
@@ -97,30 +142,32 @@ public class KafkaConsumerJob {
     public static void main(String[] args) throws Exception {
         Flinkboot boot = Flinkboot.initialize(args);
         
-        // 1. Load the configuration
-        KafkaSourceTopicListConfiguration config = boot.configuration(KafkaSourceTopicListConfiguration.class);
+        // 1. Load the full nested configuration
+        JobConfig config = boot.configuration(JobConfig.class);
         
         // 2. Define your deserialization schema
-        KafkaRecordDeserializationSchema<String> schema = KafkaRecordDeserializationSchema.valueOnly(new SimpleStringSchema());
+        KafkaRecordDeserializationSchema<String> schema = 
+            KafkaRecordDeserializationSchema.valueOnly(new SimpleStringSchema());
         
-        // 3. Create the Flink Kafka Source
-        KafkaSource<String> kafkaSource = KafkaSourceFactory.supplyFor(config, schema);
+        // 3. Create the Flink Kafka Source from the nested config
+        KafkaSource<String> kafkaSource = KafkaSourceFactory.supplyFor(config.kafka(), schema);
         
-        // ... build your Flink pipeline
+        // ... build and run your Flink pipeline
     }
 }
 ```
 
 ### Programmatic Customization
 
-If you need to add custom properties or configure features not mapped in the YAML file (e.g. client ID prefix), you can retrieve the builder instead of the constructed source:
+If you need to customize Flink's builder (e.g. client ID prefix, custom properties) before building:
 
 ```java
-KafkaSource<String> customKafkaSource = KafkaSourceFactory.supplyBuilderFor(config, schema)
+KafkaSource<String> customKafkaSource = KafkaSourceFactory.supplyBuilderFor(config.kafka(), schema)
     .setClientIdPrefix("custom-client-id")
     .setProperty("kafka.custom.property", "value")
     .build();
 ```
+
 
 ---
 
