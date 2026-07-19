@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -25,6 +26,7 @@ public class KafkaSinkConfiguration implements Serializable {
 
     private final KafkaDeliveryGuarantee deliveryGuarantee;
 
+    @Pattern(regexp = ".*\\S.*", message = "must not be blank")
     private final String transactionalIdPrefix;
 
     private final Map<String, String> properties;

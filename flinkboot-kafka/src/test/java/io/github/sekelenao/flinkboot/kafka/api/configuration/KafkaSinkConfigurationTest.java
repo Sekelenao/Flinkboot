@@ -141,6 +141,42 @@ class KafkaSinkConfigurationTest {
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("topic")))
             );
         }
+
+        @Test
+        @DisplayName("Should fail validation when transactional-id-prefix is blank")
+        void shouldFailWhenTransactionalIdPrefixIsBlank() {
+            var config = new KafkaSinkConfiguration(
+                List.of("localhost:9092"),
+                "my-topic",
+                KafkaDeliveryGuarantee.EXACTLY_ONCE,
+                "   ",
+                null
+            );
+
+            Set<ConstraintViolation<KafkaSinkConfiguration>> violations = validator.validate(config);
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("transactionalIdPrefix")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when transactional-id-prefix is empty")
+        void shouldFailWhenTransactionalIdPrefixIsEmpty() {
+            var config = new KafkaSinkConfiguration(
+                List.of("localhost:9092"),
+                "my-topic",
+                KafkaDeliveryGuarantee.EXACTLY_ONCE,
+                "",
+                null
+            );
+
+            Set<ConstraintViolation<KafkaSinkConfiguration>> violations = validator.validate(config);
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("transactionalIdPrefix")))
+            );
+        }
     }
 
     @Nested
