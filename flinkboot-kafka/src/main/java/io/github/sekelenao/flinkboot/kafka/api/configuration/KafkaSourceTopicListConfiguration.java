@@ -14,13 +14,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.OptionalLong;
 
 public class KafkaSourceTopicListConfiguration implements OffsetInitializerConfiguration, Serializable {
 
     private static final long serialVersionUID = 1L;
-
 
     @NotEmpty
     private final List<String> bootstrapServers;
@@ -120,7 +118,6 @@ public class KafkaSourceTopicListConfiguration implements OffsetInitializerConfi
     }
 
     @Override
-    @Generated
     public String toString() {
         return "KafkaSourceTopicListConfiguration{" +
             "bootstrapServers=" + bootstrapServers +

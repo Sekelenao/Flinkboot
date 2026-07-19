@@ -14,14 +14,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.regex.Pattern;
 
 public class KafkaSourceTopicPatternConfiguration implements OffsetInitializerConfiguration, Serializable {
 
     private static final long serialVersionUID = 1L;
-
 
     @NotEmpty
     private final List<String> bootstrapServers;
@@ -105,14 +103,9 @@ public class KafkaSourceTopicPatternConfiguration implements OffsetInitializerCo
             return false;
         }
         var o = (KafkaSourceTopicPatternConfiguration) other;
-        boolean patternEquals = (topicPattern == o.topicPattern) ||
-            (topicPattern != null && o.topicPattern != null
-             && Objects.equals(topicPattern.pattern(), o.topicPattern.pattern())
-             && topicPattern.flags() == o.topicPattern.flags());
-
         return Objects.equals(bootstrapServers, o.bootstrapServers)
             && Objects.equals(groupId, o.groupId)
-            && patternEquals
+            && Objects.equals(topicPattern, o.topicPattern)
             && startingOffsets == o.startingOffsets
             && Objects.equals(startingOffsetsTimestamp, o.startingOffsetsTimestamp)
             && Objects.equals(startingOffsetsPartitionOffsets, o.startingOffsetsPartitionOffsets)
@@ -122,9 +115,7 @@ public class KafkaSourceTopicPatternConfiguration implements OffsetInitializerCo
     @Override
     @Generated
     public int hashCode() {
-        String patternStr = topicPattern != null ? topicPattern.pattern() : null;
-        int patternFlags = topicPattern != null ? topicPattern.flags() : 0;
-        return Objects.hash(bootstrapServers, groupId, patternStr, patternFlags, startingOffsets, startingOffsetsTimestamp, startingOffsetsPartitionOffsets, properties);
+        return Objects.hash(bootstrapServers, groupId, topicPattern, startingOffsets, startingOffsetsTimestamp, startingOffsetsPartitionOffsets, properties);
     }
 
     @Override
