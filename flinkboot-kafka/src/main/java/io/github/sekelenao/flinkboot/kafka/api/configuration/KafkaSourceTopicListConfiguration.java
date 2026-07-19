@@ -2,6 +2,7 @@ package io.github.sekelenao.flinkboot.kafka.api.configuration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import io.github.sekelenao.flinkboot.kafka.internal.OffsetInitializerConfiguration;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -11,6 +12,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
 
@@ -88,5 +90,41 @@ public class KafkaSourceTopicListConfiguration implements OffsetInitializerConfi
             return Optional.empty();
         }
         return Optional.of(Collections.unmodifiableMap(properties));
+    }
+
+    @Override
+    @Generated
+    public boolean equals(Object other) {
+        if (!(other instanceof KafkaSourceTopicListConfiguration)) {
+            return false;
+        }
+        var o = (KafkaSourceTopicListConfiguration) other;
+        return Objects.equals(bootstrapServers, o.bootstrapServers)
+            && Objects.equals(groupId, o.groupId)
+            && Objects.equals(topics, o.topics)
+            && startingOffsets == o.startingOffsets
+            && Objects.equals(startingOffsetsTimestamp, o.startingOffsetsTimestamp)
+            && Objects.equals(startingOffsetsPartitionOffsets, o.startingOffsetsPartitionOffsets)
+            && Objects.equals(properties, o.properties);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(bootstrapServers, groupId, topics, startingOffsets, startingOffsetsTimestamp, startingOffsetsPartitionOffsets, properties);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return "KafkaSourceTopicListConfiguration{" +
+            "bootstrapServers=" + bootstrapServers +
+            ", groupId='" + groupId + '\'' +
+            ", topics=" + topics +
+            ", startingOffsets=" + startingOffsets +
+            ", startingOffsetsTimestamp=" + startingOffsetsTimestamp +
+            ", startingOffsetsPartitionOffsets=" + startingOffsetsPartitionOffsets +
+            ", properties=" + properties +
+            '}';
     }
 }

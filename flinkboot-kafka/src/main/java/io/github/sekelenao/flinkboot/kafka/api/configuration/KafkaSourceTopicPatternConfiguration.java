@@ -2,6 +2,7 @@ package io.github.sekelenao.flinkboot.kafka.api.configuration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import io.github.sekelenao.flinkboot.kafka.internal.OffsetInitializerConfiguration;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -11,6 +12,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.regex.Pattern;
@@ -89,5 +91,48 @@ public class KafkaSourceTopicPatternConfiguration implements OffsetInitializerCo
             return Optional.empty();
         }
         return Optional.of(Collections.unmodifiableMap(properties));
+    }
+
+    @Override
+    @Generated
+    public boolean equals(Object other) {
+        if (!(other instanceof KafkaSourceTopicPatternConfiguration)) {
+            return false;
+        }
+        var o = (KafkaSourceTopicPatternConfiguration) other;
+        boolean patternEquals = (topicPattern == o.topicPattern) ||
+            (topicPattern != null && o.topicPattern != null
+             && Objects.equals(topicPattern.pattern(), o.topicPattern.pattern())
+             && topicPattern.flags() == o.topicPattern.flags());
+
+        return Objects.equals(bootstrapServers, o.bootstrapServers)
+            && Objects.equals(groupId, o.groupId)
+            && patternEquals
+            && startingOffsets == o.startingOffsets
+            && Objects.equals(startingOffsetsTimestamp, o.startingOffsetsTimestamp)
+            && Objects.equals(startingOffsetsPartitionOffsets, o.startingOffsetsPartitionOffsets)
+            && Objects.equals(properties, o.properties);
+    }
+
+    @Override
+    @Generated
+    public int hashCode() {
+        String patternStr = topicPattern != null ? topicPattern.pattern() : null;
+        int patternFlags = topicPattern != null ? topicPattern.flags() : 0;
+        return Objects.hash(bootstrapServers, groupId, patternStr, patternFlags, startingOffsets, startingOffsetsTimestamp, startingOffsetsPartitionOffsets, properties);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return "KafkaSourceTopicPatternConfiguration{" +
+            "bootstrapServers=" + bootstrapServers +
+            ", groupId='" + groupId + '\'' +
+            ", topicPattern=" + topicPattern +
+            ", startingOffsets=" + startingOffsets +
+            ", startingOffsetsTimestamp=" + startingOffsetsTimestamp +
+            ", startingOffsetsPartitionOffsets=" + startingOffsetsPartitionOffsets +
+            ", properties=" + properties +
+            '}';
     }
 }

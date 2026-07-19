@@ -16,6 +16,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -325,6 +326,53 @@ class KafkaSourceTopicListConfigurationTest {
                 () -> assertTrue(config.startingOffsetsTimestamp().isEmpty()),
                 () -> assertEquals(List.of(), config.startingOffsetsPartitionOffsets()),
                 () -> assertTrue(config.properties().isEmpty())
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("Equals and HashCode")
+    class EqualsHashCodeTests {
+
+        @Test
+        @DisplayName("Equals and HashCode should work correctly across all branches")
+        void testEqualsAndHashCode() {
+            var config1 = new KafkaSourceTopicListConfiguration(
+                List.of("localhost:9092"),
+                "my-group",
+                List.of("topic-a"),
+                KafkaOffsetInitializer.LATEST,
+                null,
+                null,
+                null
+            );
+            var config2 = new KafkaSourceTopicListConfiguration(
+                List.of("localhost:9092"),
+                "my-group",
+                List.of("topic-a"),
+                KafkaOffsetInitializer.LATEST,
+                null,
+                null,
+                null
+            );
+            var configDiffGroup = new KafkaSourceTopicListConfiguration(
+                List.of("localhost:9092"),
+                "other-group",
+                List.of("topic-a"),
+                KafkaOffsetInitializer.LATEST,
+                null,
+                null,
+                null
+            );
+
+            assertAll(
+                () -> assertEquals(config1, config1),
+                () -> assertEquals(config1, config2),
+                () -> assertEquals(config1.hashCode(), config2.hashCode()),
+                () -> assertNotEquals(config1, null),
+                () -> assertNotEquals(config1, "string-object"),
+                () -> assertNotEquals(config1, configDiffGroup),
+                () -> assertNotNull(config1.toString())
             );
         }
     }

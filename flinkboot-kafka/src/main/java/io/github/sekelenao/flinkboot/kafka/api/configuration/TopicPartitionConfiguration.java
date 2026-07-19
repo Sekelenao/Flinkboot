@@ -2,6 +2,7 @@ package io.github.sekelenao.flinkboot.kafka.api.configuration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 
@@ -42,8 +43,9 @@ public final class TopicPartitionConfiguration {
     }
 
     @Override
+    @Generated
     public boolean equals(Object other) {
-        if(!(other instanceof TopicPartitionConfiguration)){
+        if (!(other instanceof TopicPartitionConfiguration)) {
             return false;
         }
         var otherTopicPartitionConfiguration = (TopicPartitionConfiguration) other;
@@ -53,11 +55,13 @@ public final class TopicPartitionConfiguration {
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(topic, partition, offset);
     }
 
     @Override
+    @Generated
     public String toString() {
         return topic + "-" + partition + ":" + offset;
     }

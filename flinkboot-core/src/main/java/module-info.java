@@ -5,6 +5,7 @@ module io.github.sekelenao.flinkboot.core {
     exports io.github.sekelenao.flinkboot.core.api.exception.configuration;
     exports io.github.sekelenao.flinkboot.core.api.exception.parsing;
     exports io.github.sekelenao.flinkboot.core.api.exception.resource;
+    exports io.github.sekelenao.flinkboot.core.internal.annotation to io.github.sekelenao.flinkboot.kafka;
 
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.dataformat.yaml;
