@@ -65,6 +65,7 @@ Add the following configuration to your application's `pom.xml` build section:
                         <shadedArtifactAttached>false</shadedArtifactAttached>
                         
                         <!-- Relocate Jackson to prevent version clashes with Flink runtime -->
+                        <!-- You can customize the shadedPattern namespace to match your project's packaging if preferred -->
                         <relocations>
                             <relocation>
                                 <pattern>com.fasterxml.jackson</pattern>
