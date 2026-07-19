@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Optional;
 
 public final class JobConfiguration implements Serializable {
 
@@ -18,7 +19,6 @@ public final class JobConfiguration implements Serializable {
     private final String name;
 
     @Valid
-    @NotNull
     private final EnvironmentConfiguration environment;
 
     @JsonCreator
@@ -27,15 +27,15 @@ public final class JobConfiguration implements Serializable {
         @JsonProperty("environment") EnvironmentConfiguration environment
     ) {
         this.name = Objects.requireNonNull(name);
-        this.environment = Objects.requireNonNull(environment);
+        this.environment = environment;
     }
 
     public String name() {
         return name;
     }
 
-    public EnvironmentConfiguration environment() {
-        return environment;
+    public Optional<EnvironmentConfiguration> environment() {
+        return Optional.ofNullable(environment);
     }
 
     @Override
