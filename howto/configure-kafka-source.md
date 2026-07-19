@@ -90,7 +90,7 @@ In a typical production setup, you define a custom `JobConfig` class representin
 ```java
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.github.sekelenao.flinkboot.kafka.api.configuration.KafkaSourceTopicListConfiguration;
+import io.github.sekelenao.flinkboot.kafka.api.configuration.source.KafkaSourceTopicListConfiguration;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

@@ -1,7 +1,7 @@
 package io.github.sekelenao.flinkboot.kafka.api.source;
 
-import io.github.sekelenao.flinkboot.kafka.api.configuration.KafkaSourceTopicListConfiguration;
-import io.github.sekelenao.flinkboot.kafka.api.configuration.KafkaSourceTopicPatternConfiguration;
+import io.github.sekelenao.flinkboot.kafka.api.configuration.source.KafkaSourceTopicListConfiguration;
+import io.github.sekelenao.flinkboot.kafka.api.configuration.source.KafkaSourceTopicPatternConfiguration;
 import io.github.sekelenao.flinkboot.kafka.internal.OffsetInitializerMapper;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.KafkaSourceBuilder;

@@ -1,4 +1,4 @@
-package io.github.sekelenao.flinkboot.kafka.api.configuration;
+package io.github.sekelenao.flinkboot.kafka.api.configuration.source;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -16,7 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalLong;
 
-public class KafkaSourceTopicListConfiguration implements OffsetInitializerConfiguration, Serializable {
+public class KafkaSourceTopicPatternConfiguration implements OffsetInitializerConfiguration, Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -26,32 +27,33 @@ public class KafkaSourceTopicListConfiguration implements OffsetInitializerConfi
     @NotBlank
     private final String groupId;
 
-    @NotEmpty
-    private final List<String> topics;
+    @NotBlank
+    private final String topicPattern;
 
     @NotNull
     private final KafkaOffsetInitializer startingOffsets;
 
+    @PositiveOrZero
     private final Long startingOffsetsTimestamp;
 
     private final List<@Valid TopicPartitionOffsetConfiguration> startingOffsetsPartitionOffsets;
 
-    private final Map<String, String> properties;
+    private final Map<@NotNull String, @NotNull String> properties;
 
     @JsonCreator
-    public KafkaSourceTopicListConfiguration(
+    public KafkaSourceTopicPatternConfiguration(
         @JsonProperty("bootstrap-servers") List<String> bootstrapServers,
         @JsonProperty("group-id") String groupId,
-        @JsonProperty("topics") List<String> topics,
+        @JsonProperty("topic-pattern") String topicPattern,
         @JsonProperty("starting-offsets") KafkaOffsetInitializer startingOffsets,
         @JsonProperty("starting-offsets-timestamp") Long startingOffsetsTimestamp,
         @JsonProperty("starting-offsets-partition-offsets") List<TopicPartitionOffsetConfiguration> startingOffsetsPartitionOffsets,
         @JsonProperty("properties") Map<String, String> properties
     ) {
-        this.bootstrapServers = bootstrapServers;
-        this.groupId = groupId;
-        this.topics = topics;
-        this.startingOffsets = startingOffsets;
+        this.bootstrapServers = Objects.requireNonNull(bootstrapServers);
+        this.groupId = Objects.requireNonNull(groupId);
+        this.topicPattern = Objects.requireNonNull(topicPattern);
+        this.startingOffsets = Objects.requireNonNull(startingOffsets);
         this.startingOffsetsTimestamp = startingOffsetsTimestamp;
         this.startingOffsetsPartitionOffsets = startingOffsetsPartitionOffsets;
         this.properties = properties;
@@ -65,8 +67,8 @@ public class KafkaSourceTopicListConfiguration implements OffsetInitializerConfi
         return groupId;
     }
 
-    public List<String> topics() {
-        return Collections.unmodifiableList(topics);
+    public String topicPattern() {
+        return topicPattern;
     }
 
     public KafkaOffsetInitializer startingOffsets() {
@@ -98,13 +100,13 @@ public class KafkaSourceTopicListConfiguration implements OffsetInitializerConfi
     @Override
     @Generated
     public boolean equals(Object other) {
-        if (!(other instanceof KafkaSourceTopicListConfiguration)) {
+        if (!(other instanceof KafkaSourceTopicPatternConfiguration)) {
             return false;
         }
-        var o = (KafkaSourceTopicListConfiguration) other;
+        var o = (KafkaSourceTopicPatternConfiguration) other;
         return Objects.equals(bootstrapServers, o.bootstrapServers)
             && Objects.equals(groupId, o.groupId)
-            && Objects.equals(topics, o.topics)
+            && Objects.equals(topicPattern, o.topicPattern)
             && startingOffsets == o.startingOffsets
             && Objects.equals(startingOffsetsTimestamp, o.startingOffsetsTimestamp)
             && Objects.equals(startingOffsetsPartitionOffsets, o.startingOffsetsPartitionOffsets)
@@ -114,15 +116,16 @@ public class KafkaSourceTopicListConfiguration implements OffsetInitializerConfi
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(bootstrapServers, groupId, topics, startingOffsets, startingOffsetsTimestamp, startingOffsetsPartitionOffsets, properties);
+        return Objects.hash(bootstrapServers, groupId, topicPattern, startingOffsets, startingOffsetsTimestamp, startingOffsetsPartitionOffsets, properties);
     }
 
     @Override
+    @Generated
     public String toString() {
-        return "KafkaSourceTopicListConfiguration{" +
+        return "KafkaSourceTopicPatternConfiguration{" +
             "bootstrapServers=" + bootstrapServers +
             ", groupId='" + groupId + '\'' +
-            ", topics=" + topics +
+            ", topicPattern='" + topicPattern + '\'' +
             ", startingOffsets=" + startingOffsets +
             ", startingOffsetsTimestamp=" + startingOffsetsTimestamp +
             ", startingOffsetsPartitionOffsets=" + startingOffsetsPartitionOffsets +

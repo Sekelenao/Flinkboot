@@ -1,6 +1,6 @@
 package io.github.sekelenao.flinkboot.kafka.internal;
 
-import io.github.sekelenao.flinkboot.kafka.api.configuration.KafkaOffsetInitializer;
+import io.github.sekelenao.flinkboot.kafka.api.configuration.source.KafkaOffsetInitializer;
 import io.github.sekelenao.flinkboot.kafka.api.exception.InvalidKafkaSourceConfigurationException;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.kafka.common.TopicPartition;

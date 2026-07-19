@@ -1,4 +1,4 @@
-package io.github.sekelenao.flinkboot.kafka.api.configuration;
+package io.github.sekelenao.flinkboot.kafka.api.configuration.source;
 
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;

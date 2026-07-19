@@ -1,4 +1,4 @@
-package io.github.sekelenao.flinkboot.kafka.api.configuration;
+package io.github.sekelenao.flinkboot.kafka.api.configuration.source;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

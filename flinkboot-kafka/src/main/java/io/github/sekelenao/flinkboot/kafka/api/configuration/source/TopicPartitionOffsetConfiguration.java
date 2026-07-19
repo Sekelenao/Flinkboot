@@ -1,4 +1,4 @@
-package io.github.sekelenao.flinkboot.kafka.api.configuration;
+package io.github.sekelenao.flinkboot.kafka.api.configuration.source;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -28,7 +28,7 @@ public final class TopicPartitionOffsetConfiguration implements Serializable {
         @JsonProperty("partition") int partition,
         @JsonProperty("offset") long offset
     ) {
-        this.topic = topic;
+        this.topic = Objects.requireNonNull(topic);
         this.partition = partition;
         this.offset = offset;
     }
