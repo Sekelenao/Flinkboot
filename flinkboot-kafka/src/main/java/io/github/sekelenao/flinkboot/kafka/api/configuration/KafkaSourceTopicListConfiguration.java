@@ -30,8 +30,7 @@ public class KafkaSourceTopicListConfiguration implements OffsetInitializerConfi
 
     private final Long startingOffsetsTimestamp;
 
-    @Valid
-    private final List<TopicPartitionConfiguration> startingOffsetsPartitionOffsets;
+    private final List<@Valid TopicPartitionConfiguration> startingOffsetsPartitionOffsets;
 
     private final Map<String, String> properties;
 
