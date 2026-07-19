@@ -231,5 +231,22 @@ class KafkaSourceTopicPatternConfigurationTest {
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("startingOffsets")))
             );
         }
+
+        @Test
+        @DisplayName("Should fail validation when nested partition offset has invalid properties")
+        void shouldFailWhenNestedPartitionOffsetIsInvalid() {
+            var config = new KafkaSourceTopicPatternConfiguration(
+                List.of("localhost:9092"),
+                "my-group",
+                Pattern.compile("^my-topic-.*$"),
+                KafkaOffsetInitializer.OFFSETS,
+                null,
+                List.of(new TopicPartitionConfiguration("   ", -1, -5L)),
+                null
+            );
+
+            Set<ConstraintViolation<KafkaSourceTopicPatternConfiguration>> violations = validator.validate(config);
+            assertFalse(violations.isEmpty(), "Should fail validation due to invalid nested values");
+        }
     }
 }
