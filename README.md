@@ -1,93 +1,46 @@
 # Flinkboot
 
-> **Speed & Safety by design.** Zero-boilerplate configuration that fails fast to keep your Flink pipelines running.
+> **Speed & Safety by design.** Zero-boilerplate configuration that fails fast to keep your Apache Flink pipelines running.
 
 [![Java](https://img.shields.io/badge/Java_11-%23ED8B00.svg?logo=openjdk&logoColor=white)](https://docs.oracle.com/en/java/javase/11/docs/api/index.html)
 [![Flink](https://img.shields.io/badge/Flink_1.20-%23E6526F.svg?logo=apacheflink&logoColor=white)](https://flink.apache.org/)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.sekelenao/flinkboot-core?label=Maven%20central&logo=apachemaven&logoColor=white&color=E6526F&labelColor=E6526F)](https://central.sonatype.com/artifact/io.github.sekelenao/flinkboot-core)
 
-### 📖 How-To Guides
-- [How-To Index](howto/README.md)
-
 ---
 
 ## What is Flinkboot?
 
-**Flinkboot** is a lightweight, high-performance configuration utility designed to get your Apache Flink applications up and running in seconds. It unifies command-line arguments, environment variables, and hierarchical YAML configuration files into a single, validated Java model with **zero boilerplate**.
+**Flinkboot** is a lightweight, high-performance configuration utility designed to bootstrap Apache Flink applications. It unifies command-line arguments, environment variables, and hierarchical YAML configuration files into a single, strongly-typed Java model with **zero boilerplate**.
 
-By combining clean Java configuration POJOs and Jakarta Bean Validation (JSR-380), Flinkboot allows you to configure your jobs instantly while guaranteeing **fail-early safety**: typos, missing keys, or out-of-range parameters are caught on the JobManager immediately at startup, preventing jobs from failing mid-execution on the cluster.
-
----
-
-## Key Features
-
-- **Instant Setup** — Define your configuration as a simple Java class and load it with a single line of code.
-- **Fail-Fast Validation** — Catch typos and invalid values at startup, before Flink resources are allocated.
-- **Fail-Safe Merge Semantics** — By default, Flinkboot prevents accidental overrides during merges (throws an exception on key conflicts) unless explicit permission is granted.
-- **Layered Overrides & List Merging** — Optionally allow property overrides (`--flinkboot-configuration-override`) and list merging/appending (`--flinkboot-configuration-list-merging`) when resolving multiple configurations.
-- **Flexible Sources** — Automatically resolves configuration file locations from command-line options (`-flinkboot-configurations`) or environment variables (`FLINKBOOT_CONFIGURATIONS`).
+By combining clean Java configuration models and Jakarta Bean Validation (JSR-380), Flinkboot guarantees **fail-early safety**: typos, missing keys, or out-of-range parameters are caught on the JobManager immediately at startup, preventing jobs from failing mid-execution on the cluster.
 
 ---
 
-## Quick Start Example
+## Key Capabilities
 
-Define your configuration as an immutable Java class with Jakarta validation constraints:
-
-```java
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-
-public final class JobConfig {
-
-    @NotBlank 
-    private final String jobName;
-
-    @Min(1) 
-    private final int parallelism;
-
-    @JsonCreator
-    public JobConfig(
-        @JsonProperty("jobName") String jobName,
-        @JsonProperty("parallelism") int parallelism
-    ) {
-        this.jobName = jobName;
-        this.parallelism = parallelism;
-    }
-
-    public String jobName() { return jobName; }
-    public int parallelism() { return parallelism; }
-}
-```
-
-Then, load and validate your configuration with a single line of code in your job's main class:
-
-```java
-import io.github.sekelenao.flinkboot.core.api.Flinkboot;
-
-public class UserActivityJob {
-    public static void main(String[] args) throws Exception {
-        // Load, merge, and validate configurations in one step
-        JobConfig config = Flinkboot.initialize(args).configuration(JobConfig.class);
-
-        System.out.println("Running Flink Job: " + config.jobName());
-    }
-}
-```
+* **Unified Configuration Loading** — Parse and merge multiple YAML configuration files, CLI arguments, and environment variables into immutable Java classes/records.
+* **Fail-Fast Validation** — Enforce constraints (non-blank strings, numeric ranges, non-null properties maps, regex validation) before Flink resources are allocated.
+* **Safe Merge Semantics** — Detect and prevent accidental property overrides during configuration merges unless explicit override options are passed.
+* **Auto-configured Connectors** — Boostrap Apache Flink sources and sinks (e.g. Apache Kafka) directly from configuration files with built-in validation rules and customizers.
 
 ---
 
-## Command Line Usage
+## 🚀 Must-Read Guides (Getting Started)
 
-To run your job with custom configuration locations and options:
-```bash
-flink run -c MyJobJar.jar \
-  -flinkboot-configurations file:/etc/configs/base-config.yaml,file:/etc/configs/prod-config.yaml \
-  --flinkboot-configuration-override
-```
+Before building your first Flinkboot application, we highly recommend reading these guides in order:
 
-For advanced CLI options, environment variables configuration, and detailed merging semantics, refer to the [How-To Index](howto/README.md).
+1. **[Avoid Classpath & Dependency Conflicts](howto/avoid-dependency-conflicts.md) (MUST READ)**  
+   *Learn how to configure your project's Maven pom.xml and shading settings to avoid typical Flink runtime conflicts with Jackson and Log4j.*
+2. **[How to Load & Merge Configurations](howto/load-configurations.md)**  
+   *Understand how to define your configuration models, run Flinkboot initialization in your job's main class, and use CLI overrides.*
+3. **[How to Configure a Kafka Source](howto/configure-kafka-source.md) / [Sink](howto/configure-kafka-sink.md)**  
+   *Learn how to configure Kafka consumers and producers, handle delivery guarantees (Exactly-Once, At-Least-Once), and customize offset strategies.*
+
+---
+
+## 📖 All Guides
+
+For all other specific configurations and detailed features (flags, parameters, POJO compliance), please refer to the complete **[How-To Guides Index](howto/README.md)**.
 
 ---
 
