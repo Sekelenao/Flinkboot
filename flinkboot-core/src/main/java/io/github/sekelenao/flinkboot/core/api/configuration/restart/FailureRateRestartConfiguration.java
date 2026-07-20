@@ -27,8 +27,8 @@ public final class FailureRateRestartConfiguration implements Serializable {
 
     @JsonCreator
     public FailureRateRestartConfiguration(
-        @JsonProperty("maxFailuresPerInterval") Integer maxFailuresPerInterval,
-        @JsonProperty("failureRateInterval") Long failureRateInterval,
+        @JsonProperty("max-failures-per-interval") Integer maxFailuresPerInterval,
+        @JsonProperty("failure-rate-interval") Long failureRateInterval,
         @JsonProperty("delay") Long delay
     ) {
         this.maxFailuresPerInterval = Objects.requireNonNull(maxFailuresPerInterval);

@@ -29,9 +29,9 @@ public final class RestartStrategyConfiguration implements Serializable {
     @JsonCreator
     public RestartStrategyConfiguration(
         @JsonProperty("type") FlinkRestartStrategyType type,
-        @JsonProperty("fixedDelay") FixedDelayRestartConfiguration fixedDelay,
-        @JsonProperty("failureRate") FailureRateRestartConfiguration failureRate,
-        @JsonProperty("exponentialDelay") ExponentialDelayRestartConfiguration exponentialDelay
+        @JsonProperty("fixed-delay") FixedDelayRestartConfiguration fixedDelay,
+        @JsonProperty("failure-rate") FailureRateRestartConfiguration failureRate,
+        @JsonProperty("exponential-delay") ExponentialDelayRestartConfiguration exponentialDelay
     ) {
         this.type = Objects.requireNonNull(type);
         this.fixedDelay = fixedDelay;

@@ -37,9 +37,9 @@ public final class CheckpointingConfiguration implements Serializable {
         @JsonProperty("interval") Long interval,
         @JsonProperty("mode") FlinkCheckpointingMode mode,
         @JsonProperty("timeout") Long timeout,
-        @JsonProperty("minPause") Long minPause,
-        @JsonProperty("maxConcurrent") Integer maxConcurrent,
-        @JsonProperty("externalizedCleanup") FlinkExternalizedCleanup externalizedCleanup
+        @JsonProperty("min-pause") Long minPause,
+        @JsonProperty("max-concurrent") Integer maxConcurrent,
+        @JsonProperty("externalized-cleanup") FlinkExternalizedCleanup externalizedCleanup
     ) {
         this.interval = Objects.requireNonNull(interval);
         this.mode = mode;

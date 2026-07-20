@@ -43,14 +43,14 @@ public final class EnvironmentConfiguration implements Serializable {
 
     @JsonCreator
     public EnvironmentConfiguration(
-        @JsonProperty("runtimeMode") FlinkRuntimeMode runtimeMode,
-        @JsonProperty("localWebUi") Boolean localWebUi,
-        @JsonProperty("localWebUiPort") Integer localWebUiPort,
+        @JsonProperty("runtime-mode") FlinkRuntimeMode runtimeMode,
+        @JsonProperty("local-web-ui") Boolean localWebUi,
+        @JsonProperty("local-web-ui-port") Integer localWebUiPort,
         @JsonProperty("parallelism") Integer parallelism,
-        @JsonProperty("maxParallelism") Integer maxParallelism,
+        @JsonProperty("max-parallelism") Integer maxParallelism,
         @JsonProperty("checkpointing") CheckpointingConfiguration checkpointing,
-        @JsonProperty("stateBackend") StateBackendConfiguration stateBackend,
-        @JsonProperty("restartStrategy") RestartStrategyConfiguration restartStrategy
+        @JsonProperty("state-backend") StateBackendConfiguration stateBackend,
+        @JsonProperty("restart-strategy") RestartStrategyConfiguration restartStrategy
     ) {
         this.runtimeMode = runtimeMode;
         this.localWebUi = localWebUi;

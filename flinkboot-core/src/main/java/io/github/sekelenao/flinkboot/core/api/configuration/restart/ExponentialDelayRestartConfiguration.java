@@ -27,9 +27,9 @@ public final class ExponentialDelayRestartConfiguration implements Serializable 
 
     @JsonCreator
     public ExponentialDelayRestartConfiguration(
-        @JsonProperty("initialBackoff") Long initialBackoff,
-        @JsonProperty("maxBackoff") Long maxBackoff,
-        @JsonProperty("backoffMultiplier") Double backoffMultiplier
+        @JsonProperty("initial-backoff") Long initialBackoff,
+        @JsonProperty("max-backoff") Long maxBackoff,
+        @JsonProperty("backoff-multiplier") Double backoffMultiplier
     ) {
         this.initialBackoff = Objects.requireNonNull(initialBackoff);
         this.maxBackoff = Objects.requireNonNull(maxBackoff);
