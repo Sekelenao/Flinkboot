@@ -1,7 +1,10 @@
-package io.github.sekelenao.flinkboot.core.api.configuration;
+package io.github.sekelenao.flinkboot.core.api.configuration.environment;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.sekelenao.flinkboot.core.api.configuration.checkpointing.CheckpointingConfiguration;
+import io.github.sekelenao.flinkboot.core.api.configuration.restart.RestartStrategyConfiguration;
+import io.github.sekelenao.flinkboot.core.api.configuration.statebackend.StateBackendConfiguration;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;

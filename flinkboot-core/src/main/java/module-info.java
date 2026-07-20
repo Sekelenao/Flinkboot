@@ -2,12 +2,17 @@ module io.github.sekelenao.flinkboot.core {
 
     exports io.github.sekelenao.flinkboot.core.api;
     exports io.github.sekelenao.flinkboot.core.api.configuration;
+    exports io.github.sekelenao.flinkboot.core.api.configuration.checkpointing;
+    exports io.github.sekelenao.flinkboot.core.api.configuration.environment;
+    exports io.github.sekelenao.flinkboot.core.api.configuration.restart;
+    exports io.github.sekelenao.flinkboot.core.api.configuration.statebackend;
     exports io.github.sekelenao.flinkboot.core.api.exception;
     exports io.github.sekelenao.flinkboot.core.api.exception.configuration;
     exports io.github.sekelenao.flinkboot.core.api.exception.parsing;
     exports io.github.sekelenao.flinkboot.core.api.exception.resource;
     exports io.github.sekelenao.flinkboot.core.internal.annotation to io.github.sekelenao.flinkboot.kafka;
 
+    requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.dataformat.yaml;
     requires jakarta.validation;
@@ -18,5 +23,9 @@ module io.github.sekelenao.flinkboot.core {
 
     opens io.github.sekelenao.flinkboot.core.api to com.fasterxml.jackson.databind, org.hibernate.validator;
     opens io.github.sekelenao.flinkboot.core.api.configuration to com.fasterxml.jackson.databind, org.hibernate.validator;
+    opens io.github.sekelenao.flinkboot.core.api.configuration.checkpointing to com.fasterxml.jackson.databind, org.hibernate.validator;
+    opens io.github.sekelenao.flinkboot.core.api.configuration.environment to com.fasterxml.jackson.databind, org.hibernate.validator;
+    opens io.github.sekelenao.flinkboot.core.api.configuration.restart to com.fasterxml.jackson.databind, org.hibernate.validator;
+    opens io.github.sekelenao.flinkboot.core.api.configuration.statebackend to com.fasterxml.jackson.databind, org.hibernate.validator;
     opens io.github.sekelenao.flinkboot.core.internal.parser.yaml to com.fasterxml.jackson.databind, org.hibernate.validator;
 }

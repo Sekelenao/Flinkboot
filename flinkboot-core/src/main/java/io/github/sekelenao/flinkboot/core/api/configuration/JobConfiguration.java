@@ -2,6 +2,7 @@ package io.github.sekelenao.flinkboot.core.api.configuration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.sekelenao.flinkboot.core.api.configuration.environment.EnvironmentConfiguration;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;

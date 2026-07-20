@@ -1,4 +1,4 @@
-package io.github.sekelenao.flinkboot.core.api.configuration;
+package io.github.sekelenao.flinkboot.core.api.configuration.checkpointing;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

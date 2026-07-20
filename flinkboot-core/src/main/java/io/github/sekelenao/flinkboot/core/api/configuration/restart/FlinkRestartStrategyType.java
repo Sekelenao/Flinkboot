@@ -1,4 +1,4 @@
-package io.github.sekelenao.flinkboot.core.api.configuration;
+package io.github.sekelenao.flinkboot.core.api.configuration.restart;
 
 public enum FlinkRestartStrategyType {
     NONE,
