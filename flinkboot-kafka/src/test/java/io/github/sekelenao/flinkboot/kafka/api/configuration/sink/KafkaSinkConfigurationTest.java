@@ -14,11 +14,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import io.github.sekelenao.flinkboot.kafka.api.exception.InvalidKafkaSinkConfigurationException;
+
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("KafkaSinkConfiguration")
@@ -144,36 +147,30 @@ class KafkaSinkConfigurationTest {
         @Test
         @DisplayName("Should fail validation when transactional-id-prefix is blank")
         void shouldFailWhenTransactionalIdPrefixIsBlank() {
-            var config = new KafkaSinkConfiguration(
-                List.of("localhost:9092"),
-                "my-topic",
-                KafkaDeliveryGuarantee.EXACTLY_ONCE,
-                "   ",
-                null
-            );
-
-            Set<ConstraintViolation<KafkaSinkConfiguration>> violations = validator.validate(config);
-            assertAll(
-                () -> assertFalse(violations.isEmpty()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("transactionalIdPrefix")))
+            assertThrows(
+                InvalidKafkaSinkConfigurationException.class,
+                () -> new KafkaSinkConfiguration(
+                    List.of("localhost:9092"),
+                    "my-topic",
+                    KafkaDeliveryGuarantee.EXACTLY_ONCE,
+                    "   ",
+                    null
+                )
             );
         }
 
         @Test
         @DisplayName("Should fail validation when transactional-id-prefix is empty")
         void shouldFailWhenTransactionalIdPrefixIsEmpty() {
-            var config = new KafkaSinkConfiguration(
-                List.of("localhost:9092"),
-                "my-topic",
-                KafkaDeliveryGuarantee.EXACTLY_ONCE,
-                "",
-                null
-            );
-
-            Set<ConstraintViolation<KafkaSinkConfiguration>> violations = validator.validate(config);
-            assertAll(
-                () -> assertFalse(violations.isEmpty()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("transactionalIdPrefix")))
+            assertThrows(
+                InvalidKafkaSinkConfigurationException.class,
+                () -> new KafkaSinkConfiguration(
+                    List.of("localhost:9092"),
+                    "my-topic",
+                    KafkaDeliveryGuarantee.EXACTLY_ONCE,
+                    "",
+                    null
+                )
             );
         }
 
@@ -185,7 +182,7 @@ class KafkaSinkConfigurationTest {
             var config = new KafkaSinkConfiguration(
                 List.of("localhost:9092"),
                 "my-topic",
-                null,
+                KafkaDeliveryGuarantee.AT_LEAST_ONCE,
                 null,
                 properties
             );
@@ -208,7 +205,7 @@ class KafkaSinkConfigurationTest {
             var config = new KafkaSinkConfiguration(
                 List.of("localhost:9092"),
                 "my-topic",
-                KafkaDeliveryGuarantee.NONE,
+                KafkaDeliveryGuarantee.EXACTLY_ONCE,
                 "prefix",
                 Map.of("key", "val")
             );
@@ -217,7 +214,7 @@ class KafkaSinkConfigurationTest {
                 () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
                 () -> assertEquals("my-topic", config.topic()),
                 () -> assertTrue(config.deliveryGuarantee().isPresent()),
-                () -> assertEquals(KafkaDeliveryGuarantee.NONE, config.deliveryGuarantee().get()),
+                () -> assertEquals(KafkaDeliveryGuarantee.EXACTLY_ONCE, config.deliveryGuarantee().get()),
                 () -> assertTrue(config.transactionalIdPrefix().isPresent()),
                 () -> assertEquals("prefix", config.transactionalIdPrefix().get()),
                 () -> assertEquals(Map.of("key", "val"), config.properties())

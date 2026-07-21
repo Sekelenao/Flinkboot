@@ -3,6 +3,7 @@ package io.github.sekelenao.flinkboot.kafka.api.configuration.source;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
+import io.github.sekelenao.flinkboot.kafka.api.exception.InvalidKafkaSourceConfigurationException;
 import io.github.sekelenao.flinkboot.kafka.internal.OffsetInitializerConfiguration;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -57,6 +58,32 @@ public class KafkaSourceTopicListConfiguration implements OffsetInitializerConfi
         this.startingOffsetsTimestamp = startingOffsetsTimestamp;
         this.startingOffsetsPartitionOffsets = startingOffsetsPartitionOffsets;
         this.properties = properties;
+        validate();
+    }
+
+    private void validate() {
+        if (startingOffsets == KafkaOffsetInitializer.TIMESTAMP) {
+            if (startingOffsetsTimestamp == null) {
+                throw new InvalidKafkaSourceConfigurationException("starting-offsets-timestamp is required when starting-offsets is TIMESTAMP");
+            }
+            if (startingOffsetsPartitionOffsets != null && !startingOffsetsPartitionOffsets.isEmpty()) {
+                throw new InvalidKafkaSourceConfigurationException("starting-offsets-partition-offsets must not be specified when starting-offsets is TIMESTAMP");
+            }
+        } else if (startingOffsets == KafkaOffsetInitializer.OFFSETS) {
+            if (startingOffsetsPartitionOffsets == null || startingOffsetsPartitionOffsets.isEmpty()) {
+                throw new InvalidKafkaSourceConfigurationException("starting-offsets-partition-offsets is required and cannot be empty when starting-offsets is OFFSETS");
+            }
+            if (startingOffsetsTimestamp != null) {
+                throw new InvalidKafkaSourceConfigurationException("starting-offsets-timestamp must not be specified when starting-offsets is OFFSETS");
+            }
+        } else if (startingOffsets != null) {
+            if (startingOffsetsTimestamp != null) {
+                throw new InvalidKafkaSourceConfigurationException("starting-offsets-timestamp must not be specified when starting-offsets is " + startingOffsets);
+            }
+            if (startingOffsetsPartitionOffsets != null && !startingOffsetsPartitionOffsets.isEmpty()) {
+                throw new InvalidKafkaSourceConfigurationException("starting-offsets-partition-offsets must not be specified when starting-offsets is " + startingOffsets);
+            }
+        }
     }
 
     public List<String> bootstrapServers() {
@@ -95,7 +122,6 @@ public class KafkaSourceTopicListConfiguration implements OffsetInitializerConfi
         }
         return Collections.unmodifiableMap(properties);
     }
-
 
     @Override
     @Generated

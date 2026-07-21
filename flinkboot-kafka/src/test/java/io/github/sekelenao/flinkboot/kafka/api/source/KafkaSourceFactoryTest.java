@@ -113,33 +113,35 @@ class KafkaSourceFactoryTest {
         @Test
         @DisplayName("Should throw InvalidKafkaSourceConfigurationException when TIMESTAMP is used but timestamp is missing")
         void shouldThrowExceptionWhenTimestampMissing() {
-            var config = new KafkaSourceTopicListConfiguration(
-                List.of("localhost:9092"),
-                "test-group",
-                List.of("test-topic"),
-                KafkaOffsetInitializer.TIMESTAMP,
-                null,
-                null,
-                null
-            );
-
-            assertThrows(InvalidKafkaSourceConfigurationException.class, () -> KafkaSourceFactory.supplyFor(config, TEST_SCHEMA));
+            assertThrows(InvalidKafkaSourceConfigurationException.class, () -> {
+                var config = new KafkaSourceTopicListConfiguration(
+                    List.of("localhost:9092"),
+                    "test-group",
+                    List.of("test-topic"),
+                    KafkaOffsetInitializer.TIMESTAMP,
+                    null,
+                    null,
+                    null
+                );
+                KafkaSourceFactory.supplyFor(config, TEST_SCHEMA);
+            });
         }
 
         @Test
         @DisplayName("Should throw InvalidKafkaSourceConfigurationException when OFFSETS is used but partition offsets are missing")
         void shouldThrowExceptionWhenOffsetsMissing() {
-            var config = new KafkaSourceTopicListConfiguration(
-                List.of("localhost:9092"),
-                "test-group",
-                List.of("test-topic"),
-                KafkaOffsetInitializer.OFFSETS,
-                null,
-                null,
-                null
-            );
-
-            assertThrows(InvalidKafkaSourceConfigurationException.class, () -> KafkaSourceFactory.supplyFor(config, TEST_SCHEMA));
+            assertThrows(InvalidKafkaSourceConfigurationException.class, () -> {
+                var config = new KafkaSourceTopicListConfiguration(
+                    List.of("localhost:9092"),
+                    "test-group",
+                    List.of("test-topic"),
+                    KafkaOffsetInitializer.OFFSETS,
+                    null,
+                    null,
+                    null
+                );
+                KafkaSourceFactory.supplyFor(config, TEST_SCHEMA);
+            });
         }
 
         @Test

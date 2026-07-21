@@ -60,51 +60,54 @@ class KafkaSinkFactoryTest {
         @Test
         @DisplayName("Should throw InvalidKafkaSinkConfigurationException when EXACTLY_ONCE is requested but prefix is missing")
         void shouldThrowExceptionWhenPrefixIsMissing() {
-            var config = new KafkaSinkConfiguration(
-                List.of("localhost:9092"),
-                "my-topic",
-                KafkaDeliveryGuarantee.EXACTLY_ONCE,
-                null,
-                null
-            );
-
             assertThrows(
                 InvalidKafkaSinkConfigurationException.class,
-                () -> KafkaSinkFactory.supplyFor(config, TEST_SCHEMA)
+                () -> {
+                    var config = new KafkaSinkConfiguration(
+                        List.of("localhost:9092"),
+                        "my-topic",
+                        KafkaDeliveryGuarantee.EXACTLY_ONCE,
+                        null,
+                        null
+                    );
+                    KafkaSinkFactory.supplyFor(config, TEST_SCHEMA);
+                }
             );
         }
 
         @Test
         @DisplayName("Should throw InvalidKafkaSinkConfigurationException when AT_LEAST_ONCE is used but prefix is provided")
         void shouldThrowExceptionWhenPrefixIsProvidedWithAtLeastOnce() {
-            var config = new KafkaSinkConfiguration(
-                List.of("localhost:9092"),
-                "my-topic",
-                KafkaDeliveryGuarantee.AT_LEAST_ONCE,
-                "some-prefix",
-                null
-            );
-
             assertThrows(
                 InvalidKafkaSinkConfigurationException.class,
-                () -> KafkaSinkFactory.supplyFor(config, TEST_SCHEMA)
+                () -> {
+                    var config = new KafkaSinkConfiguration(
+                        List.of("localhost:9092"),
+                        "my-topic",
+                        KafkaDeliveryGuarantee.AT_LEAST_ONCE,
+                        "some-prefix",
+                        null
+                    );
+                    KafkaSinkFactory.supplyFor(config, TEST_SCHEMA);
+                }
             );
         }
 
         @Test
         @DisplayName("Should throw InvalidKafkaSinkConfigurationException when default delivery guarantee is used but prefix is provided")
         void shouldThrowExceptionWhenPrefixIsProvidedWithDefaultGuarantee() {
-            var config = new KafkaSinkConfiguration(
-                List.of("localhost:9092"),
-                "my-topic",
-                null,
-                "some-prefix",
-                null
-            );
-
             assertThrows(
                 InvalidKafkaSinkConfigurationException.class,
-                () -> KafkaSinkFactory.supplyFor(config, TEST_SCHEMA)
+                () -> {
+                    var config = new KafkaSinkConfiguration(
+                        List.of("localhost:9092"),
+                        "my-topic",
+                        null,
+                        "some-prefix",
+                        null
+                    );
+                    KafkaSinkFactory.supplyFor(config, TEST_SCHEMA);
+                }
             );
         }
 

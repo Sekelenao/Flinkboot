@@ -3,6 +3,7 @@ package io.github.sekelenao.flinkboot.kafka.api.configuration.sink;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
+import io.github.sekelenao.flinkboot.kafka.api.exception.InvalidKafkaSinkConfigurationException;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -45,6 +46,20 @@ public class KafkaSinkConfiguration implements Serializable {
         this.deliveryGuarantee = deliveryGuarantee;
         this.transactionalIdPrefix = transactionalIdPrefix;
         this.properties = properties;
+        validate();
+    }
+
+    private void validate() {
+        boolean exactlyOnce = deliveryGuarantee == KafkaDeliveryGuarantee.EXACTLY_ONCE;
+        boolean hasPrefix = transactionalIdPrefix != null && !transactionalIdPrefix.isBlank();
+
+        if (exactlyOnce && !hasPrefix) {
+            throw new InvalidKafkaSinkConfigurationException("transactional-id-prefix is required and cannot be empty when delivery-guarantee is EXACTLY_ONCE");
+        }
+
+        if (!exactlyOnce && hasPrefix) {
+            throw new InvalidKafkaSinkConfigurationException("transactional-id-prefix can only be specified when delivery-guarantee is EXACTLY_ONCE");
+        }
     }
 
     public List<String> bootstrapServers() {
@@ -101,7 +116,7 @@ public class KafkaSinkConfiguration implements Serializable {
     public String toString() {
         return "KafkaSinkConfiguration{" +
             "bootstrapServers=" + bootstrapServers +
-            ", topic='" + topic + '\'' +
+            ", groupId='" + topic + '\'' +
             ", deliveryGuarantee=" + deliveryGuarantee +
             ", transactionalIdPrefix='" + transactionalIdPrefix + '\'' +
             ", properties=" + properties +

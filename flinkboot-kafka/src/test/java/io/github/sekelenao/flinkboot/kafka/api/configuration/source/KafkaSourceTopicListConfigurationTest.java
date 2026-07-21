@@ -311,7 +311,7 @@ class KafkaSourceTopicListConfigurationTest {
                 List.of("topic-a"),
                 KafkaOffsetInitializer.TIMESTAMP,
                 12345L,
-                List.of(new TopicPartitionOffsetConfiguration("topic-a", 0, 100L)),
+                null,
                 Map.of("key", "val")
             );
 
@@ -322,7 +322,7 @@ class KafkaSourceTopicListConfigurationTest {
                 () -> assertEquals(KafkaOffsetInitializer.TIMESTAMP, config.startingOffsets()),
                 () -> assertTrue(config.startingOffsetsTimestamp().isPresent()),
                 () -> assertEquals(12345L, config.startingOffsetsTimestamp().getAsLong()),
-                () -> assertEquals(List.of(new TopicPartitionOffsetConfiguration("topic-a", 0, 100L)), config.startingOffsetsPartitionOffsets()),
+                () -> assertTrue(config.startingOffsetsPartitionOffsets().isEmpty()),
                 () -> assertEquals(Map.of("key", "val"), config.properties())
             );
         }

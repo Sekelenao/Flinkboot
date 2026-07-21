@@ -1,14 +1,12 @@
 package io.github.sekelenao.flinkboot.kafka.api.sink;
 
 import io.github.sekelenao.flinkboot.kafka.api.configuration.sink.KafkaSinkConfiguration;
-import io.github.sekelenao.flinkboot.kafka.internal.DeliveryGuaranteeCustomizer;
+import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.connector.kafka.sink.KafkaSinkBuilder;
-import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 
 import java.util.Objects;
 import java.util.Properties;
-import java.util.function.Consumer;
 
 public final class KafkaSinkFactory {
 
@@ -31,8 +29,8 @@ public final class KafkaSinkFactory {
             .setRecordSerializer(serializationSchema)
             .setKafkaProducerConfig(additionalProperties);
 
-        Consumer<KafkaSinkBuilder<T>> customizer = DeliveryGuaranteeCustomizer.supplyFor(config);
-        customizer.accept(builder);
+        config.deliveryGuarantee().ifPresent(guarantee -> builder.setDeliveryGuarantee(guarantee.deliveryGuarantee()));
+        config.transactionalIdPrefix().ifPresent(builder::setTransactionalIdPrefix);
 
         return builder;
     }

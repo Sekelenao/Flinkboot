@@ -292,25 +292,24 @@ class KafkaSourceTopicPatternConfigurationTest {
         @Test
         @DisplayName("Should return expected values from getters when all parameters are present")
         void testGettersWithAllParameters() {
-            var pattern = "^my-topic-.*$";
             var config = new KafkaSourceTopicPatternConfiguration(
                 List.of("localhost:9092"),
                 "my-group",
-                pattern,
+                "topic-.*",
                 KafkaOffsetInitializer.TIMESTAMP,
                 12345L,
-                List.of(new TopicPartitionOffsetConfiguration("topic-a", 0, 100L)),
+                null,
                 Map.of("key", "val")
             );
 
             assertAll(
                 () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
                 () -> assertEquals("my-group", config.groupId()),
-                () -> assertEquals(pattern, config.topicPattern()),
+                () -> assertEquals("topic-.*", config.topicPattern()),
                 () -> assertEquals(KafkaOffsetInitializer.TIMESTAMP, config.startingOffsets()),
                 () -> assertTrue(config.startingOffsetsTimestamp().isPresent()),
                 () -> assertEquals(12345L, config.startingOffsetsTimestamp().getAsLong()),
-                () -> assertEquals(List.of(new TopicPartitionOffsetConfiguration("topic-a", 0, 100L)), config.startingOffsetsPartitionOffsets()),
+                () -> assertTrue(config.startingOffsetsPartitionOffsets().isEmpty()),
                 () -> assertEquals(Map.of("key", "val"), config.properties())
             );
         }
