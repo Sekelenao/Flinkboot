@@ -7,6 +7,7 @@ import io.github.sekelenao.flinkboot.core.internal.startup.StartupEnvironment;
 
 import io.github.sekelenao.flinkboot.core.api.configuration.JobConfiguration;
 import io.github.sekelenao.flinkboot.core.internal.execution.ExecutionEnvironmentFactory;
+import io.github.sekelenao.flinkboot.core.internal.execution.provider.ClusterExecutionEnvironmentProvider;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import java.io.IOException;
@@ -72,7 +73,8 @@ public final class Flinkboot {
 
     public StreamExecutionEnvironment executionEnvironment(JobConfiguration jobConfiguration) {
         Objects.requireNonNull(jobConfiguration);
-        return new ExecutionEnvironmentFactory().createExecutionEnvironment(jobConfiguration);
+        return new ExecutionEnvironmentFactory(new ClusterExecutionEnvironmentProvider())
+            .createExecutionEnvironment(jobConfiguration);
     }
 
 }

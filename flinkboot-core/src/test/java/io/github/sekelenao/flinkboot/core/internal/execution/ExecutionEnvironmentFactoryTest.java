@@ -4,6 +4,7 @@ import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironment
 import io.github.sekelenao.flinkboot.core.api.configuration.JobConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.execution.ExecutionConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.execution.ExecutionRuntimeMode;
+import io.github.sekelenao.flinkboot.core.internal.execution.provider.ClusterExecutionEnvironmentProvider;
 import io.github.sekelenao.flinkboot.core.internal.execution.provider.ExecutionEnvironmentProvider;
 import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.apache.flink.configuration.Configuration;
@@ -33,7 +34,7 @@ class ExecutionEnvironmentFactoryTest {
         @Test
         @DisplayName("Should throw NullPointerException when jobConfiguration is null")
         void shouldThrowNpeWhenJobConfigurationIsNull() {
-            var factory = new ExecutionEnvironmentFactory();
+            var factory = new ExecutionEnvironmentFactory(new ClusterExecutionEnvironmentProvider());
             assertThrows(NullPointerException.class, () -> factory.createFlinkConfiguration(null));
         }
 
@@ -51,7 +52,7 @@ class ExecutionEnvironmentFactoryTest {
             var envConfig = new ExecutionEnvironmentConfiguration(execConfig);
             var jobConfig = new JobConfiguration("my-test-job", envConfig);
 
-            var factory = new ExecutionEnvironmentFactory();
+            var factory = new ExecutionEnvironmentFactory(new ClusterExecutionEnvironmentProvider());
             Configuration flinkConfig = factory.createFlinkConfiguration(jobConfig);
 
             assertAll(
