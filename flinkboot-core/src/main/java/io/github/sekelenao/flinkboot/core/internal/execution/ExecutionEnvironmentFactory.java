@@ -4,6 +4,10 @@ import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironment
 import io.github.sekelenao.flinkboot.core.api.configuration.JobConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.checkpointing.CheckpointingConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.execution.ExecutionConfiguration;
+import io.github.sekelenao.flinkboot.core.api.configuration.restart.ExponentialDelayRestartConfiguration;
+import io.github.sekelenao.flinkboot.core.api.configuration.restart.FailureRateRestartConfiguration;
+import io.github.sekelenao.flinkboot.core.api.configuration.restart.FixedDelayRestartConfiguration;
+import io.github.sekelenao.flinkboot.core.api.configuration.restart.RestartStrategyConfiguration;
 import io.github.sekelenao.flinkboot.core.internal.execution.provider.ExecutionEnvironmentProvider;
 import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.apache.flink.configuration.CheckpointingOptions;
@@ -12,6 +16,7 @@ import org.apache.flink.configuration.CoreOptions;
 import org.apache.flink.configuration.ExecutionOptions;
 import org.apache.flink.configuration.ExternalizedCheckpointRetention;
 import org.apache.flink.configuration.PipelineOptions;
+import org.apache.flink.configuration.RestartStrategyOptions;
 import org.apache.flink.core.execution.CheckpointingMode;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
@@ -37,6 +42,9 @@ public final class ExecutionEnvironmentFactory {
         jobConfiguration.environment()
             .flatMap(ExecutionEnvironmentConfiguration::checkpointing)
             .ifPresent(this::apply);
+        jobConfiguration.environment()
+            .flatMap(ExecutionEnvironmentConfiguration::restartStrategy)
+            .ifPresent(this::apply);
         return provider.createEnvironment(configuration);
     }
 
@@ -59,5 +67,48 @@ public final class ExecutionEnvironmentFactory {
         checkpointingConfig.unalignedCheckpoints().ifPresent(unaligned -> configuration.set(CheckpointingOptions.ENABLE_UNALIGNED, unaligned));
         checkpointingConfig.alignedCheckpointTimeoutMs().ifPresent(timeout -> configuration.set(CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT, Duration.ofMillis(timeout)));
         checkpointingConfig.storageUri().ifPresent(uri -> configuration.set(CheckpointingOptions.CHECKPOINTS_DIRECTORY, uri));
+    }
+
+    private void apply(RestartStrategyConfiguration restartConfig) {
+        restartConfig.type().ifPresent(type -> {
+            switch (type) {
+                case NO_RESTART:
+                    configuration.set(RestartStrategyOptions.RESTART_STRATEGY, "none");
+                    break;
+                case FIXED_DELAY:
+                    configuration.set(RestartStrategyOptions.RESTART_STRATEGY, "fixed-delay");
+                    restartConfig.fixedDelay().ifPresent(this::apply);
+                    break;
+                case FAILURE_RATE:
+                    configuration.set(RestartStrategyOptions.RESTART_STRATEGY, "failure-rate");
+                    restartConfig.failureRate().ifPresent(this::apply);
+                    break;
+                case EXPONENTIAL_DELAY:
+                    configuration.set(RestartStrategyOptions.RESTART_STRATEGY, "exponential-delay");
+                    restartConfig.exponentialDelay().ifPresent(this::apply);
+                    break;
+                case FALLBACK:
+                    break;
+            }
+        });
+    }
+
+    private void apply(FixedDelayRestartConfiguration config) {
+        config.attempts().ifPresent(attempts -> configuration.set(RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS, attempts));
+        config.delayMs().ifPresent(delay -> configuration.set(RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_DELAY, Duration.ofMillis(delay)));
+    }
+
+    private void apply(FailureRateRestartConfiguration config) {
+        config.maxFailuresPerInterval().ifPresent(max -> configuration.set(RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_MAX_FAILURES_PER_INTERVAL, max));
+        config.failureIntervalMs().ifPresent(interval -> configuration.set(RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_FAILURE_RATE_INTERVAL, Duration.ofMillis(interval)));
+        config.delayMs().ifPresent(delay -> configuration.set(RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_DELAY, Duration.ofMillis(delay)));
+    }
+
+    private void apply(ExponentialDelayRestartConfiguration config) {
+        config.initialBackoffMs().ifPresent(initial -> configuration.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_INITIAL_BACKOFF, Duration.ofMillis(initial)));
+        config.maxBackoffMs().ifPresent(max -> configuration.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_MAX_BACKOFF, Duration.ofMillis(max)));
+        config.backoffMultiplier().ifPresent(multiplier -> configuration.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_BACKOFF_MULTIPLIER, multiplier));
+        config.resetBackoffThresholdMs().ifPresent(threshold -> configuration.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_RESET_BACKOFF_THRESHOLD, Duration.ofMillis(threshold)));
+        config.jitterFactor().ifPresent(jitter -> configuration.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_JITTER_FACTOR, jitter));
     }
 }

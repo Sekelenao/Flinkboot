@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.api.configuration.checkpointing.CheckpointingConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.execution.ExecutionConfiguration;
+import io.github.sekelenao.flinkboot.core.api.configuration.restart.RestartStrategyConfiguration;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.Valid;
 
@@ -21,13 +22,18 @@ public final class ExecutionEnvironmentConfiguration implements Serializable {
     @Valid
     private final CheckpointingConfiguration checkpointing;
 
+    @Valid
+    private final RestartStrategyConfiguration restartStrategy;
+
     @JsonCreator
     public ExecutionEnvironmentConfiguration(
         @JsonProperty("execution") ExecutionConfiguration execution,
-        @JsonProperty("checkpointing") CheckpointingConfiguration checkpointing
+        @JsonProperty("checkpointing") CheckpointingConfiguration checkpointing,
+        @JsonProperty("restart-strategy") RestartStrategyConfiguration restartStrategy
     ) {
         this.execution = execution;
         this.checkpointing = checkpointing;
+        this.restartStrategy = restartStrategy;
     }
 
     public Optional<ExecutionConfiguration> execution() {
@@ -38,6 +44,10 @@ public final class ExecutionEnvironmentConfiguration implements Serializable {
         return Optional.ofNullable(checkpointing);
     }
 
+    public Optional<RestartStrategyConfiguration> restartStrategy() {
+        return Optional.ofNullable(restartStrategy);
+    }
+
     @Override
     @Generated
     public boolean equals(Object other) {
@@ -46,13 +56,14 @@ public final class ExecutionEnvironmentConfiguration implements Serializable {
         }
         var o = (ExecutionEnvironmentConfiguration) other;
         return Objects.equals(execution, o.execution) &&
-            Objects.equals(checkpointing, o.checkpointing);
+            Objects.equals(checkpointing, o.checkpointing) &&
+            Objects.equals(restartStrategy, o.restartStrategy);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(execution, checkpointing);
+        return Objects.hash(execution, checkpointing, restartStrategy);
     }
 
     @Override
@@ -61,6 +72,7 @@ public final class ExecutionEnvironmentConfiguration implements Serializable {
         return "ExecutionEnvironmentConfiguration{" +
             "execution=" + execution +
             ", checkpointing=" + checkpointing +
+            ", restartStrategy=" + restartStrategy +
             '}';
     }
 }
