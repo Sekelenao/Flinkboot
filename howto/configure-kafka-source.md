@@ -45,16 +45,16 @@ starting-offsets: "LATEST"
 
 ### Configuration Parameters Reference
 
-| Property Key                         | Type            | Required                    | Description                                                                                                                                         |
-|:-------------------------------------|:----------------|:----------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `bootstrap-servers`                  | List of Strings | **Yes**                     | Kafka bootstrap broker hosts/ports (e.g. `localhost:9092`).                                                                                         |
-| `group-id`                           | String          | **Yes**                     | Consumer group ID.                                                                                                                                  |
-| `topics`                             | List of Strings | **Yes** (Only for Option A) | Static list of topics to subscribe to.                                                                                                              |
-| `topic-pattern`                      | String          | **Yes** (Only for Option B) | Regex pattern to match topic subscriptions.                                                                                                         |
-| `starting-offsets`                   | Enum            | **Yes**                     | Strategy to start consuming. Supported values: `EARLIEST`, `LATEST`, `COMMITTED`, `COMMITTED_EARLIEST`, `COMMITTED_LATEST`, `TIMESTAMP`, `OFFSETS`. |
-| `starting-offsets-timestamp`         | Long            | No                          | Timestamp in epoch milliseconds. **Mandatory** only if `starting-offsets` is set to `TIMESTAMP` (otherwise ignored). Must be positive or zero.      |
-| `starting-offsets-partition-offsets` | List            | No                          | Specific partition offset offsets mapping. **Mandatory** only if `starting-offsets` is set to `OFFSETS` (otherwise ignored).                        |
-| `properties`                         | Map             | No                          | Custom Kafka client consumer properties (e.g. `session.timeout.ms`). Keys and values must be non-null.                                              |
+| Property Key                         | Type            | Required                    | Validation                        | Description                                                                                                                                         |
+|:-------------------------------------|:----------------|:----------------------------|:----------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `bootstrap-servers`                  | List of Strings | **Yes**                     | `@NotEmpty`, items `@NotBlank`     | Kafka bootstrap broker hosts/ports (e.g. `localhost:9092`).                                                                                         |
+| `group-id`                           | String          | **Yes**                     | `@NotBlank`                       | Consumer group ID.                                                                                                                                  |
+| `topics`                             | List of Strings | **Yes** (Only for Option A) | `@NotEmpty`, items `@NotBlank`     | Static list of topics to subscribe to.                                                                                                              |
+| `topic-pattern`                      | String          | **Yes** (Only for Option B) | `@NotBlank`                       | Regex pattern to match topic subscriptions.                                                                                                         |
+| `starting-offsets`                   | Enum            | **Yes**                     | `@NotNull` Enum                   | Strategy to start consuming. Supported values: `EARLIEST`, `LATEST`, `COMMITTED`, `COMMITTED_EARLIEST`, `COMMITTED_LATEST`, `TIMESTAMP`, `OFFSETS`. |
+| `starting-offsets-timestamp`         | Long            | No                          | `@PositiveOrZero`                 | Timestamp in epoch milliseconds. **Mandatory** only if `starting-offsets` is set to `TIMESTAMP` (otherwise ignored). Must be positive or zero.      |
+| `starting-offsets-partition-offsets` | List            | No                          | `@Valid` list items               | Specific partition offset offsets mapping. **Mandatory** only if `starting-offsets` is set to `OFFSETS` (otherwise ignored).                        |
+| `properties`                         | Map             | No                          | Keys/values `@NotBlank`           | Custom Kafka client consumer properties (e.g. `session.timeout.ms`). Keys and values must be non-null.                                              |
 
 ---
 
