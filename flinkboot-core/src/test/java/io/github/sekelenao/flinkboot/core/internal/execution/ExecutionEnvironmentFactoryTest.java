@@ -75,6 +75,34 @@ class ExecutionEnvironmentFactoryTest {
                 () -> assertTrue(flinkConfig.get(PipelineOptions.OBJECT_REUSE))
             );
         }
+
+        @Test
+        @DisplayName("Should return StreamExecutionEnvironment holding the configured parameters")
+        void shouldReturnStreamExecutionEnvironmentWithConfiguredParameters() {
+            var execConfig = new ExecutionConfiguration(
+                ExecutionRuntimeMode.STREAMING,
+                4,
+                32,
+                50L,
+                150L,
+                true
+            );
+            var envConfig = new ExecutionEnvironmentConfiguration(execConfig);
+            var jobConfig = new JobConfiguration("environment-test-job", envConfig);
+
+            var factory = new ExecutionEnvironmentFactory(new ClusterExecutionEnvironmentProvider());
+            StreamExecutionEnvironment env = factory.create(jobConfig);
+
+            assertAll(
+                () -> assertEquals("environment-test-job", env.getConfiguration().get(PipelineOptions.NAME)),
+                () -> assertEquals(RuntimeExecutionMode.STREAMING, env.getConfiguration().get(ExecutionOptions.RUNTIME_MODE)),
+                () -> assertEquals(4, env.getParallelism()),
+                () -> assertEquals(32, env.getMaxParallelism()),
+                () -> assertEquals(50L, env.getBufferTimeout()),
+                () -> assertEquals(Duration.ofMillis(150), env.getConfiguration().get(PipelineOptions.AUTO_WATERMARK_INTERVAL)),
+                () -> assertTrue(env.getConfig().isObjectReuseEnabled())
+            );
+        }
     }
 
     @Nested
