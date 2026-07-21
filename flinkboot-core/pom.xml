@@ -19,6 +19,23 @@
         Core configuration and parsing logic for Flinkboot
     </description>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${plugin.maven.compiler.version}</version>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-Xlint:-module</arg>
+                        <arg>--add-reads</arg>
+                        <arg>io.github.sekelenao.flinkboot.core=ALL-UNNAMED</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
 
         <!-- Jackson YAML -->
@@ -31,6 +48,11 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-streaming-java</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-core</artifactId>
             <scope>provided</scope>
         </dependency>
 

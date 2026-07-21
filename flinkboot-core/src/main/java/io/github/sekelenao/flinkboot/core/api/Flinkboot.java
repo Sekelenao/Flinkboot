@@ -5,6 +5,10 @@ import io.github.sekelenao.flinkboot.core.internal.parser.yaml.YamlParser;
 import io.github.sekelenao.flinkboot.core.internal.resource.Resource;
 import io.github.sekelenao.flinkboot.core.internal.startup.StartupEnvironment;
 
+import io.github.sekelenao.flinkboot.core.api.configuration.JobConfiguration;
+import io.github.sekelenao.flinkboot.core.internal.execution.ExecutionEnvironmentFactory;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
@@ -66,4 +70,10 @@ public final class Flinkboot {
         }
     }
 
+    public StreamExecutionEnvironment executionEnvironment(JobConfiguration jobConfiguration) {
+        Objects.requireNonNull(jobConfiguration);
+        return new ExecutionEnvironmentFactory().createExecutionEnvironment(jobConfiguration);
+    }
+
 }
+
