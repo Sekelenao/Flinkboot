@@ -8,6 +8,7 @@ import io.github.sekelenao.flinkboot.core.api.configuration.restart.ExponentialD
 import io.github.sekelenao.flinkboot.core.api.configuration.restart.FailureRateRestartConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.restart.FixedDelayRestartConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.restart.RestartStrategyConfiguration;
+import io.github.sekelenao.flinkboot.core.api.configuration.state.StateBackendConfiguration;
 import io.github.sekelenao.flinkboot.core.internal.execution.provider.ExecutionEnvironmentProvider;
 import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.apache.flink.configuration.CheckpointingOptions;
@@ -17,6 +18,7 @@ import org.apache.flink.configuration.ExecutionOptions;
 import org.apache.flink.configuration.ExternalizedCheckpointRetention;
 import org.apache.flink.configuration.PipelineOptions;
 import org.apache.flink.configuration.RestartStrategyOptions;
+import org.apache.flink.configuration.StateBackendOptions;
 import org.apache.flink.core.execution.CheckpointingMode;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
@@ -44,6 +46,9 @@ public final class ExecutionEnvironmentFactory {
             .ifPresent(this::apply);
         jobConfiguration.environment()
             .flatMap(ExecutionEnvironmentConfiguration::restartStrategy)
+            .ifPresent(this::apply);
+        jobConfiguration.environment()
+            .flatMap(ExecutionEnvironmentConfiguration::stateBackend)
             .ifPresent(this::apply);
         return provider.createEnvironment(configuration);
     }
@@ -110,5 +115,28 @@ public final class ExecutionEnvironmentFactory {
         config.backoffMultiplier().ifPresent(multiplier -> configuration.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_BACKOFF_MULTIPLIER, multiplier));
         config.resetBackoffThresholdMs().ifPresent(threshold -> configuration.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_RESET_BACKOFF_THRESHOLD, Duration.ofMillis(threshold)));
         config.jitterFactor().ifPresent(jitter -> configuration.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_JITTER_FACTOR, jitter));
+    }
+
+    private void apply(StateBackendConfiguration stateConfig) {
+        stateConfig.type().ifPresent(type -> {
+            switch (type) {
+                case HASHMAP:
+                    configuration.set(StateBackendOptions.STATE_BACKEND, "hashmap");
+                    break;
+                case ROCKSDB:
+                    configuration.set(StateBackendOptions.STATE_BACKEND, "rocksdb");
+                    break;
+                case CHANGELOG:
+                    configuration.set(StateBackendOptions.STATE_BACKEND, "changelog");
+                    break;
+                case CUSTOM:
+                    stateConfig.customClass().ifPresent(customClass -> configuration.set(StateBackendOptions.STATE_BACKEND, customClass));
+                    break;
+            }
+        });
+        stateConfig.checkpointStorage().ifPresent(storage -> configuration.set(CheckpointingOptions.CHECKPOINT_STORAGE, storage.name().toLowerCase()));
+        stateConfig.storagePath().ifPresent(path -> configuration.set(CheckpointingOptions.CHECKPOINTS_DIRECTORY, path));
+        stateConfig.incremental().ifPresent(incremental -> configuration.set(CheckpointingOptions.INCREMENTAL_CHECKPOINTS, incremental));
+        stateConfig.latencyTracking().ifPresent(tracking -> configuration.set(StateBackendOptions.LATENCY_TRACK_ENABLED, tracking));
     }
 }

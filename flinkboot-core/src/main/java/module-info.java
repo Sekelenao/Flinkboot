@@ -5,6 +5,7 @@ module io.github.sekelenao.flinkboot.core {
     exports io.github.sekelenao.flinkboot.core.api.configuration.checkpointing;
     exports io.github.sekelenao.flinkboot.core.api.configuration.execution;
     exports io.github.sekelenao.flinkboot.core.api.configuration.restart;
+    exports io.github.sekelenao.flinkboot.core.api.configuration.state;
     exports io.github.sekelenao.flinkboot.core.api.exception;
     exports io.github.sekelenao.flinkboot.core.api.exception.configuration;
     exports io.github.sekelenao.flinkboot.core.api.exception.parsing;
@@ -25,5 +26,6 @@ module io.github.sekelenao.flinkboot.core {
     opens io.github.sekelenao.flinkboot.core.api.configuration.checkpointing to com.fasterxml.jackson.databind, org.hibernate.validator;
     opens io.github.sekelenao.flinkboot.core.api.configuration.execution to com.fasterxml.jackson.databind, org.hibernate.validator;
     opens io.github.sekelenao.flinkboot.core.api.configuration.restart to com.fasterxml.jackson.databind, org.hibernate.validator;
+    opens io.github.sekelenao.flinkboot.core.api.configuration.state to com.fasterxml.jackson.databind, org.hibernate.validator;
     opens io.github.sekelenao.flinkboot.core.internal.parser.yaml to com.fasterxml.jackson.databind, org.hibernate.validator;
 }
