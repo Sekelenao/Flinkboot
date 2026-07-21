@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,7 +36,7 @@ class ExecutionEnvironmentFactoryTest {
         @DisplayName("Should throw NullPointerException when jobConfiguration is null")
         void shouldThrowNpeWhenJobConfigurationIsNull() {
             var factory = new ExecutionEnvironmentFactory(new ClusterExecutionEnvironmentProvider());
-            assertThrows(NullPointerException.class, () -> factory.createFlinkConfiguration(null));
+            assertThrows(NullPointerException.class, () -> factory.create(null));
         }
 
         @Test
@@ -52,8 +53,17 @@ class ExecutionEnvironmentFactoryTest {
             var envConfig = new ExecutionEnvironmentConfiguration(execConfig);
             var jobConfig = new JobConfiguration("my-test-job", envConfig);
 
-            var factory = new ExecutionEnvironmentFactory(new ClusterExecutionEnvironmentProvider());
-            Configuration flinkConfig = factory.createFlinkConfiguration(jobConfig);
+            AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
+            ExecutionEnvironmentProvider provider = config -> {
+                capturedConfig.set(config);
+                return StreamExecutionEnvironment.getExecutionEnvironment(config);
+            };
+
+            var factory = new ExecutionEnvironmentFactory(provider);
+            factory.create(jobConfig);
+
+            Configuration flinkConfig = capturedConfig.get();
+            assertNotNull(flinkConfig);
 
             assertAll(
                 () -> assertEquals("my-test-job", flinkConfig.get(PipelineOptions.NAME)),
@@ -86,7 +96,7 @@ class ExecutionEnvironmentFactoryTest {
             var factory = new ExecutionEnvironmentFactory(customProvider);
             var jobConfig = new JobConfiguration("my-test-job", null);
 
-            StreamExecutionEnvironment env = factory.createExecutionEnvironment(jobConfig);
+            StreamExecutionEnvironment env = factory.create(jobConfig);
 
             assertNotNull(env);
             assertEquals(dummyEnv, env);

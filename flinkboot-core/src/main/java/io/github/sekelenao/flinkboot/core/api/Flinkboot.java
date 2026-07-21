@@ -74,7 +74,7 @@ public final class Flinkboot {
     public StreamExecutionEnvironment executionEnvironment(JobConfiguration jobConfiguration) {
         Objects.requireNonNull(jobConfiguration);
         return new ExecutionEnvironmentFactory(new ClusterExecutionEnvironmentProvider())
-            .createExecutionEnvironment(jobConfiguration);
+            .create(jobConfiguration);
     }
 
 }

@@ -24,41 +24,24 @@ public final class ExecutionEnvironmentFactory {
         this.provider = Objects.requireNonNull(provider);
     }
 
-    public Configuration createFlinkConfiguration(JobConfiguration jobConfiguration) {
+    public StreamExecutionEnvironment create(JobConfiguration jobConfiguration) {
         Objects.requireNonNull(jobConfiguration);
+
         configuration.set(PipelineOptions.NAME, jobConfiguration.name());
+
         jobConfiguration.environment()
             .flatMap(ExecutionEnvironmentConfiguration::execution)
             .ifPresent(this::applyExecutionConfiguration);
-        return configuration;
-    }
 
-    public StreamExecutionEnvironment createExecutionEnvironment(JobConfiguration jobConfiguration) {
-        Configuration flinkConfig = createFlinkConfiguration(jobConfiguration);
-        return provider.createEnvironment(flinkConfig);
+        return provider.createEnvironment(configuration);
     }
 
     private void applyExecutionConfiguration(ExecutionConfiguration execConfig) {
-        execConfig.runtimeMode().ifPresent(mode ->
-            configuration.set(ExecutionOptions.RUNTIME_MODE, RuntimeExecutionMode.valueOf(mode.name()))
-        );
-
+        execConfig.runtimeMode().ifPresent(mode -> configuration.set(ExecutionOptions.RUNTIME_MODE, RuntimeExecutionMode.valueOf(mode.name())));
         execConfig.parallelism().ifPresent(parallelism -> configuration.set(CoreOptions.DEFAULT_PARALLELISM, parallelism));
-
-        execConfig.maxParallelism().ifPresent(maxParallelism ->
-            configuration.set(PipelineOptions.MAX_PARALLELISM, maxParallelism)
-        );
-
-        execConfig.bufferTimeoutMs().ifPresent(timeout ->
-            configuration.set(ExecutionOptions.BUFFER_TIMEOUT, Duration.ofMillis(timeout))
-        );
-
-        execConfig.autoWatermarkIntervalMs().ifPresent(interval ->
-            configuration.set(PipelineOptions.AUTO_WATERMARK_INTERVAL, Duration.ofMillis(interval))
-        );
-
-        execConfig.objectReuse().ifPresent(objectReuse ->
-            configuration.set(PipelineOptions.OBJECT_REUSE, objectReuse)
-        );
+        execConfig.maxParallelism().ifPresent(maxParallelism -> configuration.set(PipelineOptions.MAX_PARALLELISM, maxParallelism));
+        execConfig.bufferTimeoutMs().ifPresent(timeout -> configuration.set(ExecutionOptions.BUFFER_TIMEOUT, Duration.ofMillis(timeout)));
+        execConfig.autoWatermarkIntervalMs().ifPresent(interval -> configuration.set(PipelineOptions.AUTO_WATERMARK_INTERVAL, Duration.ofMillis(interval)));
+        execConfig.objectReuse().ifPresent(objectReuse -> configuration.set(PipelineOptions.OBJECT_REUSE, objectReuse));
     }
 }
