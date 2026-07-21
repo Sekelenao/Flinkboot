@@ -26,17 +26,14 @@ public final class ExecutionEnvironmentFactory {
 
     public StreamExecutionEnvironment create(JobConfiguration jobConfiguration) {
         Objects.requireNonNull(jobConfiguration);
-
         configuration.set(PipelineOptions.NAME, jobConfiguration.name());
-
         jobConfiguration.environment()
             .flatMap(ExecutionEnvironmentConfiguration::execution)
-            .ifPresent(this::applyExecutionConfiguration);
-
+            .ifPresent(this::apply);
         return provider.createEnvironment(configuration);
     }
 
-    private void applyExecutionConfiguration(ExecutionConfiguration execConfig) {
+    private void apply(ExecutionConfiguration execConfig) {
         execConfig.runtimeMode().ifPresent(mode -> configuration.set(ExecutionOptions.RUNTIME_MODE, RuntimeExecutionMode.valueOf(mode.name())));
         execConfig.parallelism().ifPresent(parallelism -> configuration.set(CoreOptions.DEFAULT_PARALLELISM, parallelism));
         execConfig.maxParallelism().ifPresent(maxParallelism -> configuration.set(PipelineOptions.MAX_PARALLELISM, maxParallelism));
