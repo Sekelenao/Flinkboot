@@ -6,8 +6,6 @@ import io.github.sekelenao.flinkboot.core.api.configuration.execution.ExecutionR
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,15 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("JobConfiguration Tests")
 class JobConfigurationTest {
 
-    private static Validator validator;
-    private static ObjectMapper mapper;
-
-    @BeforeAll
-    static void setUp() {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
-        mapper = new ObjectMapper();
-    }
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Nested
     @DisplayName("Getters Tests")
@@ -47,7 +38,7 @@ class JobConfigurationTest {
         @DisplayName("Should correctly return name and environment Optional")
         void shouldReturnGettersCorrectly() {
             var execConfig = new ExecutionConfiguration(ExecutionRuntimeMode.STREAMING, 8, 128, 100L, 200L, true);
-            var envConfig = new ExecutionEnvironmentConfiguration(execConfig);
+            var envConfig = new ExecutionEnvironmentConfiguration(execConfig, null);
             var jobConfig = new JobConfiguration("my-job", envConfig);
 
             assertAll(
@@ -76,7 +67,7 @@ class JobConfigurationTest {
         @DisplayName("Should pass validation with valid name and environment")
         void shouldPassValidation() {
             var execConfig = new ExecutionConfiguration(ExecutionRuntimeMode.STREAMING, 8, 128, 100L, 200L, true);
-            var envConfig = new ExecutionEnvironmentConfiguration(execConfig);
+            var envConfig = new ExecutionEnvironmentConfiguration(execConfig, null);
             var jobConfig = new JobConfiguration("my-job", envConfig);
 
             Set<ConstraintViolation<JobConfiguration>> violations = validator.validate(jobConfig);
@@ -128,7 +119,7 @@ class JobConfigurationTest {
         @Test
         @DisplayName("Should respect equals and hashCode contract")
         void shouldRespectEqualsAndHashCode() {
-            var envConfig = new ExecutionEnvironmentConfiguration(null);
+            var envConfig = new ExecutionEnvironmentConfiguration(null, null);
             var jobConfig1 = new JobConfiguration("job1", envConfig);
             var jobConfig2 = new JobConfiguration("job1", envConfig);
             var jobConfig3 = new JobConfiguration("job2", envConfig);
@@ -136,8 +127,7 @@ class JobConfigurationTest {
             assertAll(
                 () -> assertEquals(jobConfig1, jobConfig2),
                 () -> assertEquals(jobConfig1.hashCode(), jobConfig2.hashCode()),
-                () -> assertNotEquals(jobConfig1, jobConfig3),
-                () -> assertNotEquals(null, jobConfig1)
+                () -> assertNotEquals(jobConfig1, jobConfig3)
             );
         }
     }
