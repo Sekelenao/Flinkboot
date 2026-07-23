@@ -38,7 +38,7 @@ class JobConfigurationTest {
         @DisplayName("Should correctly return name and environment Optional")
         void shouldReturnGettersCorrectly() {
             var execConfig = new ExecutionConfiguration(ExecutionRuntimeMode.STREAMING, 8, 128, 100L, 200L, true);
-            var envConfig = new ExecutionEnvironmentConfiguration(execConfig, null, null, null);
+            var envConfig = new ExecutionEnvironmentConfiguration(execConfig, null, null, null, null);
             var jobConfig = new JobConfiguration("my-job", envConfig);
 
             assertAll(
@@ -67,7 +67,7 @@ class JobConfigurationTest {
         @DisplayName("Should pass validation with valid name and environment")
         void shouldPassValidation() {
             var execConfig = new ExecutionConfiguration(ExecutionRuntimeMode.STREAMING, 8, 128, 100L, 200L, true);
-            var envConfig = new ExecutionEnvironmentConfiguration(execConfig, null, null, null);
+            var envConfig = new ExecutionEnvironmentConfiguration(execConfig, null, null, null, null);
             var jobConfig = new JobConfiguration("my-job", envConfig);
 
             Set<ConstraintViolation<JobConfiguration>> violations = validator.validate(jobConfig);
@@ -119,7 +119,7 @@ class JobConfigurationTest {
         @Test
         @DisplayName("Should respect equals and hashCode contract")
         void shouldRespectEqualsAndHashCode() {
-            var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null);
+            var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null);
             var jobConfig1 = new JobConfiguration("job1", envConfig);
             var jobConfig2 = new JobConfiguration("job1", envConfig);
             var jobConfig3 = new JobConfiguration("job2", envConfig);

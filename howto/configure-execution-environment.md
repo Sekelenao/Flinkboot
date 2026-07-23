@@ -54,6 +54,10 @@ environment:
     storage-path: "s3://my-flink-bucket/checkpoints"
     incremental: true
     latency-tracking: true
+  savepoint-restore:
+    savepoint-path: "/tmp/savepoints/savepoint-1"
+    allow-non-restored-state: true
+    restore-mode: "CLAIM"
 ```
 
 ---
@@ -144,6 +148,14 @@ The `restart-strategy` block accepts a `type` property (`NO_RESTART`, `FIXED_DEL
 | `incremental`        | Boolean | No                           | Boolean    | Enable incremental checkpoints for RocksDB (`CheckpointingOptions.INCREMENTAL_CHECKPOINTS`).                                          |
 | `latency-tracking`   | Boolean | No                           | Boolean    | Enable latency tracking metrics for state access (`StateBackendOptions.LATENCY_TRACK_ENABLED`).                                       |
 | `custom-class`       | String  | **Yes** (if `type == CUSTOM`)| String     | Fully qualified class name for custom state backend. Allowed **only** when `type: CUSTOM`.                                            |
+
+### Savepoint Restore Settings (`SavepointRestoreConfiguration`)
+
+| Property Key               | Type    | Required | Validation  | Description                                                                                                                           |
+|:---------------------------|:--------|:---------|:------------|:--------------------------------------------------------------------------------------------------------------------------------------|
+| `savepoint-path`           | String  | **Yes**  | `@NotBlank` | Path to savepoint or initial checkpoint directory (`StateRecoveryOptions.SAVEPOINT_PATH`).                                            |
+| `allow-non-restored-state` | Boolean | No       | Boolean     | Allow job to start even if state contains subtasks that cannot be restored (`StateRecoveryOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE`).  |
+| `restore-mode`             | Enum    | No       | Enum        | Savepoint restore mode: `CLAIM`, `NO_CLAIM`, or `LEGACY` (`StateRecoveryOptions.RESTORE_MODE`).                                        |
 
 ---
 

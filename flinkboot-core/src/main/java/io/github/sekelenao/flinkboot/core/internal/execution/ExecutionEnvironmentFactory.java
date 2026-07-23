@@ -8,6 +8,7 @@ import io.github.sekelenao.flinkboot.core.api.configuration.restart.ExponentialD
 import io.github.sekelenao.flinkboot.core.api.configuration.restart.FailureRateRestartConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.restart.FixedDelayRestartConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.restart.RestartStrategyConfiguration;
+import io.github.sekelenao.flinkboot.core.api.configuration.savepoint.SavepointRestoreConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.state.StateBackendConfiguration;
 import io.github.sekelenao.flinkboot.core.internal.execution.provider.ExecutionEnvironmentProvider;
 import org.apache.flink.api.common.RuntimeExecutionMode;
@@ -19,7 +20,9 @@ import org.apache.flink.configuration.ExternalizedCheckpointRetention;
 import org.apache.flink.configuration.PipelineOptions;
 import org.apache.flink.configuration.RestartStrategyOptions;
 import org.apache.flink.configuration.StateBackendOptions;
+import org.apache.flink.configuration.StateRecoveryOptions;
 import org.apache.flink.core.execution.CheckpointingMode;
+import org.apache.flink.core.execution.RestoreMode;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import java.time.Duration;
@@ -50,11 +53,14 @@ public final class ExecutionEnvironmentFactory {
         jobConfiguration.environment()
             .flatMap(ExecutionEnvironmentConfiguration::stateBackend)
             .ifPresent(this::apply);
+        jobConfiguration.environment()
+            .flatMap(ExecutionEnvironmentConfiguration::savepointRestore)
+            .ifPresent(this::apply);
         return provider.createEnvironment(configuration);
     }
 
     private void apply(ExecutionConfiguration execConfig) {
-        execConfig.runtimeMode().ifPresent(mode -> configuration.set(ExecutionOptions.RUNTIME_MODE, RuntimeExecutionMode.valueOf(mode.name())));
+        execConfig.runtimeMode().ifPresent(mode -> configuration.set(ExecutionOptions.RUNTIME_MODE, RuntimeExecutionMode.valueOf(mode.toString())));
         execConfig.parallelism().ifPresent(parallelism -> configuration.set(CoreOptions.DEFAULT_PARALLELISM, parallelism));
         execConfig.maxParallelism().ifPresent(maxParallelism -> configuration.set(PipelineOptions.MAX_PARALLELISM, maxParallelism));
         execConfig.bufferTimeoutMs().ifPresent(timeout -> configuration.set(ExecutionOptions.BUFFER_TIMEOUT, Duration.ofMillis(timeout)));
@@ -64,11 +70,11 @@ public final class ExecutionEnvironmentFactory {
 
     private void apply(CheckpointingConfiguration checkpointingConfig) {
         checkpointingConfig.intervalMs().ifPresent(interval -> configuration.set(CheckpointingOptions.CHECKPOINTING_INTERVAL, Duration.ofMillis(interval)));
-        checkpointingConfig.mode().ifPresent(mode -> configuration.set(CheckpointingOptions.CHECKPOINTING_CONSISTENCY_MODE, CheckpointingMode.valueOf(mode.name())));
+        checkpointingConfig.mode().ifPresent(mode -> configuration.set(CheckpointingOptions.CHECKPOINTING_CONSISTENCY_MODE, CheckpointingMode.valueOf(mode.toString())));
         checkpointingConfig.timeoutMs().ifPresent(timeout -> configuration.set(CheckpointingOptions.CHECKPOINTING_TIMEOUT, Duration.ofMillis(timeout)));
         checkpointingConfig.minPauseBetweenCheckpointsMs().ifPresent(pause -> configuration.set(CheckpointingOptions.MIN_PAUSE_BETWEEN_CHECKPOINTS, Duration.ofMillis(pause)));
         checkpointingConfig.maxConcurrentCheckpoints().ifPresent(max -> configuration.set(CheckpointingOptions.MAX_CONCURRENT_CHECKPOINTS, max));
-        checkpointingConfig.externalizedCheckpointCleanup().ifPresent(cleanup -> configuration.set(CheckpointingOptions.EXTERNALIZED_CHECKPOINT_RETENTION, ExternalizedCheckpointRetention.valueOf(cleanup.name())));
+        checkpointingConfig.externalizedCheckpointCleanup().ifPresent(cleanup -> configuration.set(CheckpointingOptions.EXTERNALIZED_CHECKPOINT_RETENTION, ExternalizedCheckpointRetention.valueOf(cleanup.toString())));
         checkpointingConfig.unalignedCheckpoints().ifPresent(unaligned -> configuration.set(CheckpointingOptions.ENABLE_UNALIGNED, unaligned));
         checkpointingConfig.alignedCheckpointTimeoutMs().ifPresent(timeout -> configuration.set(CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT, Duration.ofMillis(timeout)));
         checkpointingConfig.storageUri().ifPresent(uri -> configuration.set(CheckpointingOptions.CHECKPOINTS_DIRECTORY, uri));
@@ -134,9 +140,15 @@ public final class ExecutionEnvironmentFactory {
                     break;
             }
         });
-        stateConfig.checkpointStorage().ifPresent(storage -> configuration.set(CheckpointingOptions.CHECKPOINT_STORAGE, storage.name().toLowerCase()));
+        stateConfig.checkpointStorage().ifPresent(storage -> configuration.set(CheckpointingOptions.CHECKPOINT_STORAGE, storage.toString().toLowerCase()));
         stateConfig.storagePath().ifPresent(path -> configuration.set(CheckpointingOptions.CHECKPOINTS_DIRECTORY, path));
         stateConfig.incremental().ifPresent(incremental -> configuration.set(CheckpointingOptions.INCREMENTAL_CHECKPOINTS, incremental));
         stateConfig.latencyTracking().ifPresent(tracking -> configuration.set(StateBackendOptions.LATENCY_TRACK_ENABLED, tracking));
+    }
+
+    private void apply(SavepointRestoreConfiguration savepointConfig) {
+        configuration.set(StateRecoveryOptions.SAVEPOINT_PATH, savepointConfig.savepointPath());
+        savepointConfig.allowNonRestoredState().ifPresent(allow -> configuration.set(StateRecoveryOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE, allow));
+        savepointConfig.restoreMode().ifPresent(mode -> configuration.set(StateRecoveryOptions.RESTORE_MODE, RestoreMode.valueOf(mode.toString())));
     }
 }
