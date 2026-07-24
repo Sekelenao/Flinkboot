@@ -62,7 +62,8 @@ public final class RestartStrategyCustomizer implements EnvironmentCustomizer {
     }
 
     private void applyFixedDelayDelayMs(long delayMs) {
-        toConfigure.set(RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_DELAY, Duration.ofMillis(delayMs));
+        var duration = Duration.ofMillis(delayMs);
+        toConfigure.set(RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_DELAY, duration);
     }
 
     private void applyFailureRate(FailureRateRestartConfiguration config) {
@@ -76,11 +77,13 @@ public final class RestartStrategyCustomizer implements EnvironmentCustomizer {
     }
 
     private void applyFailureRateFailureIntervalMs(long failureIntervalMs) {
-        toConfigure.set(RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_FAILURE_RATE_INTERVAL, Duration.ofMillis(failureIntervalMs));
+        var duration = Duration.ofMillis(failureIntervalMs);
+        toConfigure.set(RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_FAILURE_RATE_INTERVAL, duration);
     }
 
     private void applyFailureRateDelayMs(long delayMs) {
-        toConfigure.set(RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_DELAY, Duration.ofMillis(delayMs));
+        var duration = Duration.ofMillis(delayMs);
+        toConfigure.set(RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_DELAY, duration);
     }
 
     private void applyExponentialDelay(ExponentialDelayRestartConfiguration config) {
@@ -92,11 +95,13 @@ public final class RestartStrategyCustomizer implements EnvironmentCustomizer {
     }
 
     private void applyExponentialDelayInitialBackoffMs(long initialBackoffMs) {
-        toConfigure.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_INITIAL_BACKOFF, Duration.ofMillis(initialBackoffMs));
+        var duration = Duration.ofMillis(initialBackoffMs);
+        toConfigure.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_INITIAL_BACKOFF, duration);
     }
 
     private void applyExponentialDelayMaxBackoffMs(long maxBackoffMs) {
-        toConfigure.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_MAX_BACKOFF, Duration.ofMillis(maxBackoffMs));
+        var duration = Duration.ofMillis(maxBackoffMs);
+        toConfigure.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_MAX_BACKOFF, duration);
     }
 
     private void applyExponentialDelayBackoffMultiplier(double backoffMultiplier) {
@@ -104,7 +109,8 @@ public final class RestartStrategyCustomizer implements EnvironmentCustomizer {
     }
 
     private void applyExponentialDelayResetBackoffThresholdMs(long resetBackoffThresholdMs) {
-        toConfigure.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_RESET_BACKOFF_THRESHOLD, Duration.ofMillis(resetBackoffThresholdMs));
+        var duration = Duration.ofMillis(resetBackoffThresholdMs);
+        toConfigure.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_RESET_BACKOFF_THRESHOLD, duration);
     }
 
     private void applyExponentialDelayJitterFactor(double jitterFactor) {

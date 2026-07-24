@@ -50,12 +50,9 @@ public final class StateBackendCustomizer implements EnvironmentCustomizer {
         }
     }
 
-    private void applyCustomClass(String customClass) {
-        toConfigure.set(StateBackendOptions.STATE_BACKEND, customClass);
-    }
-
     private void applyCheckpointStorage(CheckpointStorageType checkpointStorage) {
-        toConfigure.set(CheckpointingOptions.CHECKPOINT_STORAGE, checkpointStorage.toString().toLowerCase());
+        var storageName = checkpointStorage.toString().toLowerCase();
+        toConfigure.set(CheckpointingOptions.CHECKPOINT_STORAGE, storageName);
     }
 
     private void applyStoragePath(String storagePath) {
@@ -68,5 +65,9 @@ public final class StateBackendCustomizer implements EnvironmentCustomizer {
 
     private void applyLatencyTracking(boolean latencyTracking) {
         toConfigure.set(StateLatencyTrackOptions.LATENCY_TRACK_ENABLED, latencyTracking);
+    }
+
+    private void applyCustomClass(String customClass) {
+        toConfigure.set(StateBackendOptions.STATE_BACKEND, customClass);
     }
 }

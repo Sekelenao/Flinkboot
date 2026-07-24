@@ -2,6 +2,7 @@ package io.github.sekelenao.flinkboot.core.internal.execution.customizer;
 
 import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironmentConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.execution.ExecutionConfiguration;
+import io.github.sekelenao.flinkboot.core.api.configuration.execution.ExecutionRuntimeMode;
 import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.CoreOptions;
@@ -26,7 +27,7 @@ public final class ExecutionCustomizer implements EnvironmentCustomizer {
     }
 
     private void apply(ExecutionConfiguration execConfig) {
-        this.applyRuntimeMode(execConfig);
+        execConfig.runtimeMode().ifPresent(this::applyRuntimeMode);
         execConfig.parallelism().ifPresent(this::applyParallelism);
         execConfig.maxParallelism().ifPresent(this::applyMaxParallelism);
         execConfig.bufferTimeoutMs().ifPresent(this::applyBufferTimeoutMs);
@@ -34,10 +35,9 @@ public final class ExecutionCustomizer implements EnvironmentCustomizer {
         execConfig.objectReuse().ifPresent(this::applyObjectReuse);
     }
 
-    private void applyRuntimeMode(ExecutionConfiguration execConfig) {
-        execConfig.runtimeMode().ifPresent(mode ->
-            toConfigure.set(ExecutionOptions.RUNTIME_MODE, RuntimeExecutionMode.valueOf(mode.toString()))
-        );
+    private void applyRuntimeMode(ExecutionRuntimeMode runtimeMode) {
+        var mode = RuntimeExecutionMode.valueOf(runtimeMode.toString());
+        toConfigure.set(ExecutionOptions.RUNTIME_MODE, mode);
     }
 
     private void applyParallelism(int parallelism) {
@@ -49,11 +49,13 @@ public final class ExecutionCustomizer implements EnvironmentCustomizer {
     }
 
     private void applyBufferTimeoutMs(long bufferTimeoutMs) {
-        toConfigure.set(ExecutionOptions.BUFFER_TIMEOUT, Duration.ofMillis(bufferTimeoutMs));
+        var duration = Duration.ofMillis(bufferTimeoutMs);
+        toConfigure.set(ExecutionOptions.BUFFER_TIMEOUT, duration);
     }
 
     private void applyAutoWatermarkIntervalMs(long autoWatermarkIntervalMs) {
-        toConfigure.set(PipelineOptions.AUTO_WATERMARK_INTERVAL, Duration.ofMillis(autoWatermarkIntervalMs));
+        var duration = Duration.ofMillis(autoWatermarkIntervalMs);
+        toConfigure.set(PipelineOptions.AUTO_WATERMARK_INTERVAL, duration);
     }
 
     private void applyObjectReuse(boolean objectReuse) {
