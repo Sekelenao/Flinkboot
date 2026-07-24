@@ -23,6 +23,7 @@ import org.apache.flink.configuration.PipelineOptions;
 import org.apache.flink.configuration.RestartStrategyOptions;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.configuration.StateBackendOptions;
+import org.apache.flink.configuration.StateLatencyTrackOptions;
 import org.apache.flink.configuration.StateRecoveryOptions;
 import org.apache.flink.core.execution.CheckpointingMode;
 import org.apache.flink.core.execution.RestoreMode;
@@ -161,7 +162,7 @@ public final class ExecutionEnvironmentFactory {
         stateConfig.checkpointStorage().ifPresent(storage -> configuration.set(CheckpointingOptions.CHECKPOINT_STORAGE, storage.toString().toLowerCase()));
         stateConfig.storagePath().ifPresent(path -> configuration.set(CheckpointingOptions.CHECKPOINTS_DIRECTORY, path));
         stateConfig.incremental().ifPresent(incremental -> configuration.set(CheckpointingOptions.INCREMENTAL_CHECKPOINTS, incremental));
-        stateConfig.latencyTracking().ifPresent(tracking -> configuration.set(StateBackendOptions.LATENCY_TRACK_ENABLED, tracking));
+        stateConfig.latencyTracking().ifPresent(tracking -> configuration.set(StateLatencyTrackOptions.LATENCY_TRACK_ENABLED, tracking));
     }
 
     private void apply(SavepointRestoreConfiguration savepointConfig) {
