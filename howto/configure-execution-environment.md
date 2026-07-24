@@ -58,6 +58,13 @@ environment:
     savepoint-path: "/tmp/savepoints/savepoint-1"
     allow-non-restored-state: true
     restore-mode: "CLAIM"
+  local-web-ui:
+    enabled: true
+    port: 8081
+    bind-address: "localhost"
+  properties:
+    taskmanager.memory.managed.fraction: "0.4"
+    pipeline.operator-chaining.enabled: "true"
 ```
 
 ---
@@ -156,6 +163,25 @@ The `restart-strategy` block accepts a `type` property (`NO_RESTART`, `FIXED_DEL
 | `savepoint-path`           | String  | **Yes**  | `@NotBlank` | Path to savepoint or initial checkpoint directory (`StateRecoveryOptions.SAVEPOINT_PATH`).                                            |
 | `allow-non-restored-state` | Boolean | No       | Boolean     | Allow job to start even if state contains subtasks that cannot be restored (`StateRecoveryOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE`).  |
 | `restore-mode`             | Enum    | No       | Enum        | Savepoint restore mode: `CLAIM`, `NO_CLAIM`, or `LEGACY` (`StateRecoveryOptions.RESTORE_MODE`).                                        |
+
+### Local Dev WebUI Settings (`LocalWebUiConfiguration`)
+
+| Property Key   | Type    | Required | Validation  | Description                                                                                                                           |
+|:---------------|:--------|:---------|:------------|:--------------------------------------------------------------------------------------------------------------------------------------|
+| `enabled`      | Boolean | No       | Boolean     | Enable local execution with Flink WebUI dashboard (`StreamExecutionEnvironment.createLocalEnvironmentWithWebUI`).                     |
+| `port`         | Integer | No       | `@Positive` | Port for local WebUI REST server (`RestOptions.PORT`). Defaults to 8081 in Flink.                                                     |
+| `bind-address` | String  | No       | String      | Local WebUI REST server bind address (`RestOptions.BIND_ADDRESS`). Defaults to `localhost`.                                           |
+
+### Custom Escape-Hatch Properties (`properties`)
+
+Arbitrary Flink configuration key-value pairs (`Map<String, String>`) applied directly onto Flink's `Configuration` via `configuration.setString(key, value)`.
+
+```yaml
+environment:
+  properties:
+    taskmanager.memory.managed.fraction: "0.4"
+    pipeline.operator-chaining.enabled: "true"
+```
 
 ---
 

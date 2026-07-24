@@ -4,6 +4,7 @@ import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironment
 import io.github.sekelenao.flinkboot.core.api.configuration.JobConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.checkpointing.CheckpointingConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.execution.ExecutionConfiguration;
+import io.github.sekelenao.flinkboot.core.api.configuration.local.LocalWebUiConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.restart.ExponentialDelayRestartConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.restart.FailureRateRestartConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.restart.FixedDelayRestartConfiguration;
@@ -11,6 +12,7 @@ import io.github.sekelenao.flinkboot.core.api.configuration.restart.RestartStrat
 import io.github.sekelenao.flinkboot.core.api.configuration.savepoint.SavepointRestoreConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.state.StateBackendConfiguration;
 import io.github.sekelenao.flinkboot.core.internal.execution.provider.ExecutionEnvironmentProvider;
+import io.github.sekelenao.flinkboot.core.internal.execution.provider.LocalExecutionEnvironmentProvider;
 import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
@@ -19,6 +21,7 @@ import org.apache.flink.configuration.ExecutionOptions;
 import org.apache.flink.configuration.ExternalizedCheckpointRetention;
 import org.apache.flink.configuration.PipelineOptions;
 import org.apache.flink.configuration.RestartStrategyOptions;
+import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.configuration.StateBackendOptions;
 import org.apache.flink.configuration.StateRecoveryOptions;
 import org.apache.flink.core.execution.CheckpointingMode;
@@ -56,7 +59,22 @@ public final class ExecutionEnvironmentFactory {
         jobConfiguration.environment()
             .flatMap(ExecutionEnvironmentConfiguration::savepointRestore)
             .ifPresent(this::apply);
-        return provider.createEnvironment(configuration);
+        jobConfiguration.environment()
+            .flatMap(ExecutionEnvironmentConfiguration::localWebUi)
+            .ifPresent(this::apply);
+        jobConfiguration.environment()
+            .ifPresent(envConfig -> envConfig.properties().forEach(configuration::setString));
+
+        boolean useLocalWebUi = jobConfiguration.environment()
+            .flatMap(ExecutionEnvironmentConfiguration::localWebUi)
+            .flatMap(LocalWebUiConfiguration::enabled)
+            .orElse(false);
+
+        ExecutionEnvironmentProvider effectiveProvider = useLocalWebUi
+            ? new LocalExecutionEnvironmentProvider()
+            : this.provider;
+
+        return effectiveProvider.createEnvironment(configuration);
     }
 
     private void apply(ExecutionConfiguration execConfig) {
@@ -150,5 +168,10 @@ public final class ExecutionEnvironmentFactory {
         configuration.set(StateRecoveryOptions.SAVEPOINT_PATH, savepointConfig.savepointPath());
         savepointConfig.allowNonRestoredState().ifPresent(allow -> configuration.set(StateRecoveryOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE, allow));
         savepointConfig.restoreMode().ifPresent(mode -> configuration.set(StateRecoveryOptions.RESTORE_MODE, RestoreMode.valueOf(mode.toString())));
+    }
+
+    private void apply(LocalWebUiConfiguration localWebUiConfig) {
+        localWebUiConfig.port().ifPresent(port -> configuration.set(RestOptions.PORT, port));
+        localWebUiConfig.bindAddress().ifPresent(address -> configuration.set(RestOptions.BIND_ADDRESS, address));
     }
 }

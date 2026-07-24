@@ -7,6 +7,7 @@ import io.github.sekelenao.flinkboot.core.api.configuration.checkpointing.Checkp
 import io.github.sekelenao.flinkboot.core.api.configuration.checkpointing.ExternalizedCheckpointCleanupMode;
 import io.github.sekelenao.flinkboot.core.api.configuration.execution.ExecutionConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.execution.ExecutionRuntimeMode;
+import io.github.sekelenao.flinkboot.core.api.configuration.local.LocalWebUiConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.restart.ExponentialDelayRestartConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.restart.FailureRateRestartConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.restart.FixedDelayRestartConfiguration;
@@ -27,12 +28,15 @@ import org.apache.flink.configuration.ExecutionOptions;
 import org.apache.flink.configuration.ExternalizedCheckpointRetention;
 import org.apache.flink.configuration.PipelineOptions;
 import org.apache.flink.configuration.RestartStrategyOptions;
+import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.configuration.StateBackendOptions;
 import org.apache.flink.configuration.StateRecoveryOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
@@ -68,7 +72,7 @@ class ExecutionEnvironmentFactoryTest {
                 200L,
                 true
             );
-            var envConfig = new ExecutionEnvironmentConfiguration(execConfig, null, null, null, null);
+            var envConfig = new ExecutionEnvironmentConfiguration(execConfig, null, null, null, null, null, null);
             var jobConfig = new JobConfiguration("my-test-job", envConfig);
 
             AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
@@ -109,7 +113,7 @@ class ExecutionEnvironmentFactoryTest {
                 1000L,
                 "s3://my-bucket/checkpoints"
             );
-            var envConfig = new ExecutionEnvironmentConfiguration(null, chkConfig, null, null, null);
+            var envConfig = new ExecutionEnvironmentConfiguration(null, chkConfig, null, null, null, null, null);
             var jobConfig = new JobConfiguration("checkpoint-job", envConfig);
 
             AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
@@ -142,7 +146,7 @@ class ExecutionEnvironmentFactoryTest {
         void shouldMapFixedDelayRestartStrategyToFlinkConfiguration() {
             var fixed = new FixedDelayRestartConfiguration(3, 5000L);
             var restartConfig = new RestartStrategyConfiguration(RestartStrategyType.FIXED_DELAY, fixed, null, null);
-            var envConfig = new ExecutionEnvironmentConfiguration(null, null, restartConfig, null, null);
+            var envConfig = new ExecutionEnvironmentConfiguration(null, null, restartConfig, null, null, null, null);
             var jobConfig = new JobConfiguration("restart-job", envConfig);
 
             AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
@@ -169,7 +173,7 @@ class ExecutionEnvironmentFactoryTest {
         void shouldMapFailureRateRestartStrategyToFlinkConfiguration() {
             var failure = new FailureRateRestartConfiguration(3, 60000L, 1000L);
             var restartConfig = new RestartStrategyConfiguration(RestartStrategyType.FAILURE_RATE, null, failure, null);
-            var envConfig = new ExecutionEnvironmentConfiguration(null, null, restartConfig, null, null);
+            var envConfig = new ExecutionEnvironmentConfiguration(null, null, restartConfig, null, null, null, null);
             var jobConfig = new JobConfiguration("restart-failure-job", envConfig);
 
             AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
@@ -197,7 +201,7 @@ class ExecutionEnvironmentFactoryTest {
         void shouldMapExponentialDelayRestartStrategyToFlinkConfiguration() {
             var expo = new ExponentialDelayRestartConfiguration(1000L, 60000L, 2.0, 3600000L, 0.1);
             var restartConfig = new RestartStrategyConfiguration(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
-            var envConfig = new ExecutionEnvironmentConfiguration(null, null, restartConfig, null, null);
+            var envConfig = new ExecutionEnvironmentConfiguration(null, null, restartConfig, null, null, null, null);
             var jobConfig = new JobConfiguration("restart-expo-job", envConfig);
 
             AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
@@ -226,7 +230,7 @@ class ExecutionEnvironmentFactoryTest {
         @DisplayName("Should correctly map NoRestart RestartStrategyConfiguration into Flink Configuration")
         void shouldMapNoRestartToFlinkConfiguration() {
             var restartConfig = new RestartStrategyConfiguration(RestartStrategyType.NO_RESTART, null, null, null);
-            var envConfig = new ExecutionEnvironmentConfiguration(null, null, restartConfig, null, null);
+            var envConfig = new ExecutionEnvironmentConfiguration(null, null, restartConfig, null, null, null, null);
             var jobConfig = new JobConfiguration("no-restart-job", envConfig);
 
             AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
@@ -254,7 +258,7 @@ class ExecutionEnvironmentFactoryTest {
                 true,
                 null
             );
-            var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, stateConfig, null);
+            var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, stateConfig, null, null, null);
             var jobConfig = new JobConfiguration("state-backend-job", envConfig);
 
             AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
@@ -286,7 +290,7 @@ class ExecutionEnvironmentFactoryTest {
                 true,
                 RestoreMode.CLAIM
             );
-            var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, savepointConfig);
+            var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, savepointConfig, null, null);
             var jobConfig = new JobConfiguration("savepoint-job", envConfig);
 
             AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
@@ -309,6 +313,48 @@ class ExecutionEnvironmentFactoryTest {
         }
 
         @Test
+        @DisplayName("Should correctly map LocalWebUiConfiguration into Flink Configuration")
+        void shouldMapLocalWebUiConfigurationToFlinkConfiguration() {
+            var localWebUiConfig = new LocalWebUiConfiguration(true, 8081, "127.0.0.1");
+            var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null, localWebUiConfig, null);
+            var jobConfig = new JobConfiguration("local-webui-job", envConfig);
+
+            var factory = new ExecutionEnvironmentFactory(new ClusterExecutionEnvironmentProvider());
+            StreamExecutionEnvironment env = factory.create(jobConfig);
+
+            assertAll(
+                () -> assertNotNull(env),
+                () -> assertEquals(8081, env.getConfiguration().get(RestOptions.PORT)),
+                () -> assertEquals("127.0.0.1", env.getConfiguration().get(RestOptions.BIND_ADDRESS))
+            );
+        }
+
+        @Test
+        @DisplayName("Should correctly map custom properties into Flink Configuration")
+        void shouldMapPropertiesToFlinkConfiguration() {
+            var props = Map.of("taskmanager.memory.managed.fraction", "0.4", "pipeline.operator-chaining.enabled", "true");
+            var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null, null, props);
+            var jobConfig = new JobConfiguration("properties-job", envConfig);
+
+            AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
+            ExecutionEnvironmentProvider provider = config -> {
+                capturedConfig.set(config);
+                return StreamExecutionEnvironment.getExecutionEnvironment(config);
+            };
+
+            var factory = new ExecutionEnvironmentFactory(provider);
+            factory.create(jobConfig);
+
+            Configuration flinkConfig = capturedConfig.get();
+            assertNotNull(flinkConfig);
+
+            assertAll(
+                () -> assertEquals("0.4", flinkConfig.getString("taskmanager.memory.managed.fraction", null)),
+                () -> assertEquals("true", flinkConfig.getString("pipeline.operator-chaining.enabled", null))
+            );
+        }
+
+        @Test
         @DisplayName("Should return StreamExecutionEnvironment holding the configured parameters")
         void shouldReturnStreamExecutionEnvironmentWithConfiguredParameters() {
             var execConfig = new ExecutionConfiguration(
@@ -319,7 +365,7 @@ class ExecutionEnvironmentFactoryTest {
                 150L,
                 true
             );
-            var envConfig = new ExecutionEnvironmentConfiguration(execConfig, null, null, null, null);
+            var envConfig = new ExecutionEnvironmentConfiguration(execConfig, null, null, null, null, null, null);
             var jobConfig = new JobConfiguration("environment-test-job", envConfig);
 
             var factory = new ExecutionEnvironmentFactory(new ClusterExecutionEnvironmentProvider());
