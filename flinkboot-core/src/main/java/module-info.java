@@ -12,9 +12,8 @@ module io.github.sekelenao.flinkboot.core {
     exports io.github.sekelenao.flinkboot.core.api.exception.configuration;
     exports io.github.sekelenao.flinkboot.core.api.exception.parsing;
     exports io.github.sekelenao.flinkboot.core.api.exception.resource;
+    // Internal annotation exported specifically to flinkboot-kafka for code generation metadata
     exports io.github.sekelenao.flinkboot.core.internal.annotation to io.github.sekelenao.flinkboot.kafka;
-    exports io.github.sekelenao.flinkboot.core.internal.execution;
-    exports io.github.sekelenao.flinkboot.core.internal.execution.provider;
 
     requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.databind;
