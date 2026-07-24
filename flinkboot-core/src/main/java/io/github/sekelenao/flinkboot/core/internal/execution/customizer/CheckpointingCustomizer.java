@@ -2,11 +2,11 @@ package io.github.sekelenao.flinkboot.core.internal.execution.customizer;
 
 import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironmentConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.checkpointing.CheckpointingConfiguration;
+import io.github.sekelenao.flinkboot.core.api.configuration.checkpointing.CheckpointingMode;
 import io.github.sekelenao.flinkboot.core.api.configuration.checkpointing.ExternalizedCheckpointCleanupMode;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.ExternalizedCheckpointRetention;
-import org.apache.flink.core.execution.CheckpointingMode;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -27,7 +27,7 @@ public final class CheckpointingCustomizer implements EnvironmentCustomizer {
 
     private void apply(CheckpointingConfiguration checkpointingConfig) {
         checkpointingConfig.intervalMs().ifPresent(this::applyIntervalMs);
-        this.applyMode(checkpointingConfig);
+        checkpointingConfig.mode().ifPresent(this::applyMode);
         checkpointingConfig.timeoutMs().ifPresent(this::applyTimeoutMs);
         checkpointingConfig.minPauseBetweenCheckpointsMs().ifPresent(this::applyMinPauseBetweenCheckpointsMs);
         checkpointingConfig.maxConcurrentCheckpoints().ifPresent(this::applyMaxConcurrentCheckpoints);
@@ -41,10 +41,8 @@ public final class CheckpointingCustomizer implements EnvironmentCustomizer {
         toConfigure.set(CheckpointingOptions.CHECKPOINTING_INTERVAL, Duration.ofMillis(intervalMs));
     }
 
-    private void applyMode(CheckpointingConfiguration checkpointingConfig) {
-        checkpointingConfig.mode().ifPresent(mode ->
-            toConfigure.set(CheckpointingOptions.CHECKPOINTING_CONSISTENCY_MODE, CheckpointingMode.valueOf(mode.toString()))
-        );
+    private void applyMode(CheckpointingMode mode) {
+        toConfigure.set(CheckpointingOptions.CHECKPOINTING_CONSISTENCY_MODE, org.apache.flink.core.execution.CheckpointingMode.valueOf(mode.toString()));
     }
 
     private void applyTimeoutMs(long timeoutMs) {
