@@ -5,10 +5,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidRestartStrategyConfigurationException;
 import jakarta.validation.Valid;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class RestartStrategyConfiguration {
+public final class RestartStrategyConfiguration implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final RestartStrategyType type;
 

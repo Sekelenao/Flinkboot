@@ -5,12 +5,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 
-public final class CheckpointingConfiguration {
+public final class CheckpointingConfiguration implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final Boolean enabled;
 

@@ -5,11 +5,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 
-public final class FixedDelayRestartConfiguration {
+public final class FixedDelayRestartConfiguration implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Positive
     private final Integer attempts;

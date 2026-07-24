@@ -6,12 +6,15 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Positive;
 
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
 
-public final class ExponentialDelayRestartConfiguration {
+public final class ExponentialDelayRestartConfiguration implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Positive
     private final Long initialBackoffMs;
