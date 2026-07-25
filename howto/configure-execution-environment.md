@@ -169,8 +169,8 @@ The `restart-strategy` block accepts a `type` property (`NO_RESTART`, `FIXED_DEL
 | Property Key   | Type    | Required | Validation  | Description                                                                                                                           |
 |:---------------|:--------|:---------|:------------|:--------------------------------------------------------------------------------------------------------------------------------------|
 | `enabled`      | Boolean | No       | Boolean     | Enable local execution with Flink WebUI dashboard (`StreamExecutionEnvironment.createLocalEnvironmentWithWebUI`).                     |
-| `port`         | Integer | No       | `@Positive` | Port for local WebUI REST server (`RestOptions.PORT`). Defaults to 8081 in Flink.                                                     |
-| `bind-address` | String  | No       | String      | Local WebUI REST server bind address (`RestOptions.BIND_ADDRESS`). Defaults to `localhost`.                                           |
+| `port`         | Integer | No       | `@Positive` | Port for local WebUI REST server (`RestOptions.PORT`). Defaults to 8081 in Flink. Applied **only** when `enabled: true`.              |
+| `bind-address` | String  | No       | String      | Local WebUI REST server bind address (`RestOptions.BIND_ADDRESS`). Defaults to `localhost`. Applied **only** when `enabled: true`.    |
 
 ### Custom Escape-Hatch Properties (`properties`)
 
@@ -185,7 +185,41 @@ environment:
 
 ---
 
-## 3. Java Integration & Usage
+## 3. Customizer Execution Order & Contract
+
+`ExecutionEnvironmentFactory` delegates configuration mapping to a chain of specialized `EnvironmentCustomizer` implementations in a strict order:
+
+1. **`ExecutionCustomizer`**: Runtime execution mode, parallelism, buffer timeout, object reuse, etc.
+2. **`CheckpointingCustomizer`**: Checkpoint interval, mode, timeout, unaligned checkpoints, storage URI.
+3. **`RestartStrategyCustomizer`**: Fixed delay, failure rate, or exponential delay restart options.
+4. **`StateBackendCustomizer`**: RocksDB / HashMap type, checkpoint storage, incremental checkpoints.
+5. **`SavepointRestoreCustomizer`**: Savepoint restore path, unclaimed state handling, restore mode.
+6. **`LocalWebUiCustomizer`**: REST port and bind address (applied only if `local-web-ui.enabled: true`).
+7. **`PropertiesCustomizer`**: Raw key-value string properties escape-hatch.
+
+> [!IMPORTANT]
+> **Properties Override Contract**: `PropertiesCustomizer` is executed **last**. Any property specified in the `properties` map will overwrite any typed setting previously set by earlier customizers if a key conflict occurs.
+
+---
+
+## 4. Local WebUI vs Cluster Environment Resolution
+
+`ExecutionEnvironmentFactory` automatically selects the appropriate Flink environment provider prior to creating the `StreamExecutionEnvironment`:
+
+- **Local WebUI Mode (`local-web-ui.enabled: true`)**:
+  Resolves to `LocalWebUiExecutionEnvironmentProvider`, calling `StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(configuration)`.
+  This starts an embedded Flink MiniCluster with the WebUI dashboard active during local IDE development.
+  
+  > [!NOTE]
+  > Using `local-web-ui.enabled: true` requires `org.apache.flink:flink-runtime-web` to be present on your project classpath (typically with `provided` or `test` scope).
+
+- **Standard Cluster Mode (`local-web-ui.enabled: false` or omitted)**:
+  Resolves to `ClusterExecutionEnvironmentProvider`, calling `StreamExecutionEnvironment.getExecutionEnvironment(configuration)`.
+  This allows Flink to dynamically determine the runtime context (e.g. standalone cluster, YARN, Kubernetes, or standard local environment).
+
+---
+
+## 5. Java Integration & Usage
 
 ### Step 1: Load Configuration and Instantiate Environment
 
@@ -216,7 +250,7 @@ public class MyFlinkJob {
 
 ---
 
-## 4. Validation & Exception Handling
+## 6. Validation & Exception Handling
 
 All configuration models enforce Jakarta Bean Validation rules at startup:
 * `RestartStrategyConfiguration`: Validates that sub-blocks match the chosen `type` (*fail-fast* via `InvalidRestartStrategyConfigurationException`).
