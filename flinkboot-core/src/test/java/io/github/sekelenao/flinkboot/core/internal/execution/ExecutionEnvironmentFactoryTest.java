@@ -19,7 +19,6 @@ import io.github.sekelenao.flinkboot.core.api.configuration.state.CheckpointStor
 import io.github.sekelenao.flinkboot.core.api.configuration.state.StateBackendConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.state.StateBackendType;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidLocalWebUiConfigurationException;
-import io.github.sekelenao.flinkboot.core.internal.execution.provider.ClusterExecutionEnvironmentProvider;
 import io.github.sekelenao.flinkboot.core.internal.execution.provider.ExecutionEnvironmentProvider;
 import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.apache.flink.configuration.CheckpointingOptions;
@@ -58,7 +57,7 @@ class ExecutionEnvironmentFactoryTest {
         @Test
         @DisplayName("Should throw NullPointerException when jobConfiguration is null")
         void shouldThrowNpeWhenJobConfigurationIsNull() {
-            var factory = new ExecutionEnvironmentFactory(new ClusterExecutionEnvironmentProvider());
+            var factory = new ExecutionEnvironmentFactory();
             assertThrows(NullPointerException.class, () -> factory.create(null));
         }
 
@@ -320,7 +319,7 @@ class ExecutionEnvironmentFactoryTest {
             var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null, localWebUiConfig, null);
             var jobConfig = new JobConfiguration("local-webui-job", envConfig);
 
-            var factory = new ExecutionEnvironmentFactory(new ClusterExecutionEnvironmentProvider());
+            var factory = new ExecutionEnvironmentFactory();
             StreamExecutionEnvironment env = factory.create(jobConfig);
 
             assertAll(
@@ -382,7 +381,7 @@ class ExecutionEnvironmentFactoryTest {
             var envConfig = new ExecutionEnvironmentConfiguration(execConfig, null, null, null, null, null, null);
             var jobConfig = new JobConfiguration("environment-test-job", envConfig);
 
-            var factory = new ExecutionEnvironmentFactory(new ClusterExecutionEnvironmentProvider());
+            var factory = new ExecutionEnvironmentFactory();
             StreamExecutionEnvironment env = factory.create(jobConfig);
 
             assertAll(

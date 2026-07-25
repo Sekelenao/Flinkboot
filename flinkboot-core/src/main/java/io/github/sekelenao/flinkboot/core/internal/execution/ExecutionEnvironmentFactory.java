@@ -4,6 +4,7 @@ import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironment
 import io.github.sekelenao.flinkboot.core.api.configuration.JobConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.local.LocalWebUiConfiguration;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidLocalWebUiConfigurationException;
+import io.github.sekelenao.flinkboot.core.internal.annotation.VisibleForTesting;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.CheckpointingCustomizer;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.EnvironmentCustomizer;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.ExecutionCustomizer;
@@ -12,6 +13,7 @@ import io.github.sekelenao.flinkboot.core.internal.execution.customizer.Properti
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.RestartStrategyCustomizer;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.SavepointRestoreCustomizer;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.StateBackendCustomizer;
+import io.github.sekelenao.flinkboot.core.internal.execution.provider.ClusterExecutionEnvironmentProvider;
 import io.github.sekelenao.flinkboot.core.internal.execution.provider.ExecutionEnvironmentProvider;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.PipelineOptions;
@@ -26,7 +28,12 @@ public final class ExecutionEnvironmentFactory {
     private final ExecutionEnvironmentProvider provider;
     private final List<EnvironmentCustomizer> customizers;
 
-    public ExecutionEnvironmentFactory(ExecutionEnvironmentProvider provider) {
+    public ExecutionEnvironmentFactory() {
+        this(new ClusterExecutionEnvironmentProvider());
+    }
+
+    @VisibleForTesting
+    ExecutionEnvironmentFactory(ExecutionEnvironmentProvider provider) {
         this.configuration = new Configuration();
         this.provider = Objects.requireNonNull(provider);
         this.customizers = List.of(
