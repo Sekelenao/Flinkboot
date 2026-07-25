@@ -18,8 +18,6 @@ import io.github.sekelenao.flinkboot.core.api.configuration.savepoint.SavepointR
 import io.github.sekelenao.flinkboot.core.api.configuration.state.CheckpointStorageType;
 import io.github.sekelenao.flinkboot.core.api.configuration.state.StateBackendConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.state.StateBackendType;
-
-import io.github.sekelenao.flinkboot.core.internal.execution.provider.ExecutionEnvironmentProvider;
 import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
@@ -32,6 +30,7 @@ import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.configuration.StateBackendOptions;
 import org.apache.flink.configuration.StateLatencyTrackOptions;
 import org.apache.flink.configuration.StateRecoveryOptions;
+import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -39,11 +38,9 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -76,17 +73,9 @@ class ExecutionEnvironmentFactoryTest {
             var envConfig = new ExecutionEnvironmentConfiguration(execConfig, null, null, null, null, null, null);
             var jobConfig = new JobConfiguration("my-test-job", envConfig);
 
-            AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
-            ExecutionEnvironmentProvider provider = config -> {
-                capturedConfig.set(config);
-                return StreamExecutionEnvironment.getExecutionEnvironment(config);
-            };
-
-            var factory = new ExecutionEnvironmentFactory(provider);
-            factory.create(jobConfig);
-
-            Configuration flinkConfig = capturedConfig.get();
-            assertNotNull(flinkConfig);
+            var factory = new ExecutionEnvironmentFactory();
+            var env = factory.create(jobConfig);
+            var flinkConfig = env.getConfiguration();
 
             assertAll(
                 () -> assertEquals("my-test-job", flinkConfig.get(PipelineOptions.NAME)),
@@ -117,17 +106,9 @@ class ExecutionEnvironmentFactoryTest {
             var envConfig = new ExecutionEnvironmentConfiguration(null, chkConfig, null, null, null, null, null);
             var jobConfig = new JobConfiguration("checkpoint-job", envConfig);
 
-            AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
-            ExecutionEnvironmentProvider provider = config -> {
-                capturedConfig.set(config);
-                return StreamExecutionEnvironment.getExecutionEnvironment(config);
-            };
-
-            var factory = new ExecutionEnvironmentFactory(provider);
-            factory.create(jobConfig);
-
-            Configuration flinkConfig = capturedConfig.get();
-            assertNotNull(flinkConfig);
+            var factory = new ExecutionEnvironmentFactory();
+            var env = factory.create(jobConfig);
+            var flinkConfig = env.getConfiguration();
 
             assertAll(
                 () -> assertEquals(Duration.ofMillis(10000), flinkConfig.get(CheckpointingOptions.CHECKPOINTING_INTERVAL)),
@@ -150,17 +131,9 @@ class ExecutionEnvironmentFactoryTest {
             var envConfig = new ExecutionEnvironmentConfiguration(null, null, restartConfig, null, null, null, null);
             var jobConfig = new JobConfiguration("restart-job", envConfig);
 
-            AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
-            ExecutionEnvironmentProvider provider = config -> {
-                capturedConfig.set(config);
-                return StreamExecutionEnvironment.getExecutionEnvironment(config);
-            };
-
-            var factory = new ExecutionEnvironmentFactory(provider);
-            factory.create(jobConfig);
-
-            Configuration flinkConfig = capturedConfig.get();
-            assertNotNull(flinkConfig);
+            var factory = new ExecutionEnvironmentFactory();
+            var env = factory.create(jobConfig);
+            var flinkConfig = env.getConfiguration();
 
             assertAll(
                 () -> assertEquals("fixed-delay", flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY)),
@@ -177,17 +150,9 @@ class ExecutionEnvironmentFactoryTest {
             var envConfig = new ExecutionEnvironmentConfiguration(null, null, restartConfig, null, null, null, null);
             var jobConfig = new JobConfiguration("restart-failure-job", envConfig);
 
-            AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
-            ExecutionEnvironmentProvider provider = config -> {
-                capturedConfig.set(config);
-                return StreamExecutionEnvironment.getExecutionEnvironment(config);
-            };
-
-            var factory = new ExecutionEnvironmentFactory(provider);
-            factory.create(jobConfig);
-
-            Configuration flinkConfig = capturedConfig.get();
-            assertNotNull(flinkConfig);
+            var factory = new ExecutionEnvironmentFactory();
+            var env = factory.create(jobConfig);
+            var flinkConfig = env.getConfiguration();
 
             assertAll(
                 () -> assertEquals("failure-rate", flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY)),
@@ -205,17 +170,9 @@ class ExecutionEnvironmentFactoryTest {
             var envConfig = new ExecutionEnvironmentConfiguration(null, null, restartConfig, null, null, null, null);
             var jobConfig = new JobConfiguration("restart-expo-job", envConfig);
 
-            AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
-            ExecutionEnvironmentProvider provider = config -> {
-                capturedConfig.set(config);
-                return StreamExecutionEnvironment.getExecutionEnvironment(config);
-            };
-
-            var factory = new ExecutionEnvironmentFactory(provider);
-            factory.create(jobConfig);
-
-            Configuration flinkConfig = capturedConfig.get();
-            assertNotNull(flinkConfig);
+            var factory = new ExecutionEnvironmentFactory();
+            var env = factory.create(jobConfig);
+            var flinkConfig = env.getConfiguration();
 
             assertAll(
                 () -> assertEquals("exponential-delay", flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY)),
@@ -234,17 +191,10 @@ class ExecutionEnvironmentFactoryTest {
             var envConfig = new ExecutionEnvironmentConfiguration(null, null, restartConfig, null, null, null, null);
             var jobConfig = new JobConfiguration("no-restart-job", envConfig);
 
-            AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
-            ExecutionEnvironmentProvider provider = config -> {
-                capturedConfig.set(config);
-                return StreamExecutionEnvironment.getExecutionEnvironment(config);
-            };
+            var factory = new ExecutionEnvironmentFactory();
+            var env = factory.create(jobConfig);
+            var flinkConfig = env.getConfiguration();
 
-            var factory = new ExecutionEnvironmentFactory(provider);
-            factory.create(jobConfig);
-
-            Configuration flinkConfig = capturedConfig.get();
-            assertNotNull(flinkConfig);
             assertEquals("none", flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY));
         }
 
@@ -262,17 +212,9 @@ class ExecutionEnvironmentFactoryTest {
             var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, stateConfig, null, null, null);
             var jobConfig = new JobConfiguration("state-backend-job", envConfig);
 
-            AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
-            ExecutionEnvironmentProvider provider = config -> {
-                capturedConfig.set(config);
-                return StreamExecutionEnvironment.getExecutionEnvironment(config);
-            };
-
-            var factory = new ExecutionEnvironmentFactory(provider);
-            factory.create(jobConfig);
-
-            Configuration flinkConfig = capturedConfig.get();
-            assertNotNull(flinkConfig);
+            var factory = new ExecutionEnvironmentFactory();
+            var env = factory.create(jobConfig);
+            var flinkConfig = env.getConfiguration();
 
             assertAll(
                 () -> assertEquals("rocksdb", flinkConfig.get(StateBackendOptions.STATE_BACKEND)),
@@ -294,17 +236,9 @@ class ExecutionEnvironmentFactoryTest {
             var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, savepointConfig, null, null);
             var jobConfig = new JobConfiguration("savepoint-job", envConfig);
 
-            AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
-            ExecutionEnvironmentProvider provider = config -> {
-                capturedConfig.set(config);
-                return StreamExecutionEnvironment.getExecutionEnvironment(config);
-            };
-
-            var factory = new ExecutionEnvironmentFactory(provider);
-            factory.create(jobConfig);
-
-            Configuration flinkConfig = capturedConfig.get();
-            assertNotNull(flinkConfig);
+            var factory = new ExecutionEnvironmentFactory();
+            var env = factory.create(jobConfig);
+            var flinkConfig = env.getConfiguration();
 
             assertAll(
                 () -> assertEquals("/tmp/savepoint-1", flinkConfig.get(StateRecoveryOptions.SAVEPOINT_PATH)),
@@ -314,7 +248,7 @@ class ExecutionEnvironmentFactoryTest {
         }
 
         @Test
-        @DisplayName("Should correctly map LocalWebUiConfiguration into Flink Configuration")
+        @DisplayName("Should correctly map LocalWebUiConfiguration into Flink Configuration and create LocalStreamEnvironment")
         void shouldMapLocalWebUiConfigurationToFlinkConfiguration() {
             var localWebUiConfig = new LocalWebUiConfiguration(true, 8081, "127.0.0.1");
             var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null, localWebUiConfig, null);
@@ -325,7 +259,7 @@ class ExecutionEnvironmentFactoryTest {
 
             assertAll(
                 () -> assertNotNull(env),
-                () -> assertTrue(env instanceof org.apache.flink.streaming.api.environment.LocalStreamEnvironment),
+                () -> assertTrue(env instanceof LocalStreamEnvironment),
                 () -> assertEquals(8081, env.getConfiguration().get(RestOptions.PORT)),
                 () -> assertEquals("127.0.0.1", env.getConfiguration().get(RestOptions.BIND_ADDRESS))
             );
@@ -338,43 +272,13 @@ class ExecutionEnvironmentFactoryTest {
             var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null, localWebUiConfig, null);
             var jobConfig = new JobConfiguration("disabled-webui-job", envConfig);
 
-            AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
-            ExecutionEnvironmentProvider provider = config -> {
-                capturedConfig.set(config);
-                return StreamExecutionEnvironment.getExecutionEnvironment(config);
-            };
-
-            var factory = new ExecutionEnvironmentFactory(provider);
-            factory.create(jobConfig);
-
-            Configuration flinkConfig = capturedConfig.get();
-            assertNotNull(flinkConfig);
+            var factory = new ExecutionEnvironmentFactory();
+            var env = factory.create(jobConfig);
+            var flinkConfig = env.getConfiguration();
 
             assertAll(
                 () -> assertEquals(RestOptions.PORT.defaultValue(), flinkConfig.get(RestOptions.PORT)),
                 () -> assertEquals(RestOptions.BIND_ADDRESS.defaultValue(), flinkConfig.get(RestOptions.BIND_ADDRESS))
-            );
-        }
-
-        @Test
-        @DisplayName("Should bypass injected provider when localWebUi is enabled")
-        void shouldBypassInjectedProviderWhenLocalWebUiEnabled() {
-            var localWebUiConfig = new LocalWebUiConfiguration(true, 8081, "127.0.0.1");
-            var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null, localWebUiConfig, null);
-            var jobConfig = new JobConfiguration("local-webui-bypass-job", envConfig);
-
-            var providerCalled = new java.util.concurrent.atomic.AtomicBoolean(false);
-            ExecutionEnvironmentProvider injectedProvider = config -> {
-                providerCalled.set(true);
-                return StreamExecutionEnvironment.getExecutionEnvironment(config);
-            };
-
-            var factory = new ExecutionEnvironmentFactory(injectedProvider);
-            StreamExecutionEnvironment env = factory.create(jobConfig);
-
-            assertAll(
-                () -> assertNotNull(env),
-                () -> assertFalse(providerCalled.get())
             );
         }
 
@@ -385,17 +289,9 @@ class ExecutionEnvironmentFactoryTest {
             var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null, null, props);
             var jobConfig = new JobConfiguration("properties-job", envConfig);
 
-            AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
-            ExecutionEnvironmentProvider provider = config -> {
-                capturedConfig.set(config);
-                return StreamExecutionEnvironment.getExecutionEnvironment(config);
-            };
-
-            var factory = new ExecutionEnvironmentFactory(provider);
-            factory.create(jobConfig);
-
-            Configuration flinkConfig = capturedConfig.get();
-            assertNotNull(flinkConfig);
+            var factory = new ExecutionEnvironmentFactory();
+            var env = factory.create(jobConfig);
+            var flinkConfig = (Configuration) env.getConfiguration();
 
             assertAll(
                 () -> assertEquals("0.4", flinkConfig.getString("taskmanager.memory.managed.fraction", null)),
@@ -431,31 +327,4 @@ class ExecutionEnvironmentFactoryTest {
             );
         }
     }
-
-    @Nested
-    @DisplayName("Provider Delegation Tests")
-    class ProviderDelegationTests {
-
-        @Test
-        @DisplayName("Should throw NullPointerException when provider is null in constructor")
-        void shouldThrowNpeWhenProviderIsNull() {
-            assertThrows(NullPointerException.class, () -> new ExecutionEnvironmentFactory(null));
-        }
-
-        @Test
-        @DisplayName("Should delegate environment creation to the configured provider")
-        void shouldDelegateToProvider() {
-            var dummyEnv = StreamExecutionEnvironment.getExecutionEnvironment();
-            ExecutionEnvironmentProvider customProvider = config -> dummyEnv;
-
-            var factory = new ExecutionEnvironmentFactory(customProvider);
-            var jobConfig = new JobConfiguration("my-test-job", null);
-
-            StreamExecutionEnvironment env = factory.create(jobConfig);
-
-            assertNotNull(env);
-            assertEquals(dummyEnv, env);
-        }
-    }
-
 }

@@ -3,7 +3,6 @@ package io.github.sekelenao.flinkboot.core.internal.execution;
 import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironmentConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.JobConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.local.LocalWebUiConfiguration;
-import io.github.sekelenao.flinkboot.core.internal.annotation.VisibleForTesting;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.CheckpointingCustomizer;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.EnvironmentCustomizer;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.ExecutionCustomizer;
@@ -25,17 +24,10 @@ import java.util.Objects;
 public final class ExecutionEnvironmentFactory {
 
     private final Configuration configuration;
-    private final ExecutionEnvironmentProvider provider;
     private final List<EnvironmentCustomizer> customizers;
 
     public ExecutionEnvironmentFactory() {
-        this(new ClusterExecutionEnvironmentProvider());
-    }
-
-    @VisibleForTesting
-    ExecutionEnvironmentFactory(ExecutionEnvironmentProvider provider) {
         this.configuration = new Configuration();
-        this.provider = Objects.requireNonNull(provider);
         this.customizers = List.of(
             new ExecutionCustomizer(configuration),
             new CheckpointingCustomizer(configuration),
@@ -54,20 +46,16 @@ public final class ExecutionEnvironmentFactory {
             customizers.forEach(customizer -> customizer.configure(envConfig))
         );
 
-        ExecutionEnvironmentProvider resolvedProvider = resolveProvider(jobConfiguration);
-        return resolvedProvider.createEnvironment(configuration);
-    }
-
-    private ExecutionEnvironmentProvider resolveProvider(JobConfiguration jobConfiguration) {
-        boolean useLocalWebUi = jobConfiguration.environment()
+        var useLocalWebUi = jobConfiguration.environment()
             .flatMap(ExecutionEnvironmentConfiguration::localWebUi)
             .flatMap(LocalWebUiConfiguration::enabled)
             .orElse(false);
 
-        if (useLocalWebUi) {
-            return new LocalWebUiExecutionEnvironmentProvider();
-        }
-        return provider;
+        ExecutionEnvironmentProvider provider = useLocalWebUi
+            ? new LocalWebUiExecutionEnvironmentProvider()
+            : new ClusterExecutionEnvironmentProvider();
+
+        return provider.createEnvironment(configuration);
     }
 }
 
