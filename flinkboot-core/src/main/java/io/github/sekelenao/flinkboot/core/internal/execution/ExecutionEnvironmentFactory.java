@@ -24,6 +24,7 @@ import java.util.Objects;
 public final class ExecutionEnvironmentFactory {
 
     private final Configuration configuration;
+
     private final List<EnvironmentCustomizer> customizers;
 
     public ExecutionEnvironmentFactory() {
@@ -46,7 +47,7 @@ public final class ExecutionEnvironmentFactory {
             customizers.forEach(customizer -> customizer.configure(envConfig))
         );
 
-        var useLocalWebUi = jobConfiguration.environment()
+        boolean useLocalWebUi = jobConfiguration.environment()
             .flatMap(ExecutionEnvironmentConfiguration::localWebUi)
             .flatMap(LocalWebUiConfiguration::enabled)
             .orElse(false);
