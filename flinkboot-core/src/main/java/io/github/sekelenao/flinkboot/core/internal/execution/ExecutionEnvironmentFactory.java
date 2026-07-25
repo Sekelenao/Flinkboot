@@ -13,7 +13,6 @@ import io.github.sekelenao.flinkboot.core.internal.execution.customizer.RestartS
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.SavepointRestoreCustomizer;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.StateBackendCustomizer;
 import io.github.sekelenao.flinkboot.core.internal.execution.provider.ExecutionEnvironmentProvider;
-import io.github.sekelenao.flinkboot.core.internal.execution.provider.LocalExecutionEnvironmentProvider;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.PipelineOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -48,20 +47,17 @@ public final class ExecutionEnvironmentFactory {
             customizers.forEach(customizer -> customizer.configure(envConfig))
         );
 
+        StreamExecutionEnvironment env = provider.createEnvironment(configuration);
+
         boolean useLocalWebUi = jobConfiguration.environment()
             .flatMap(ExecutionEnvironmentConfiguration::localWebUi)
             .flatMap(LocalWebUiConfiguration::enabled)
             .orElse(false);
 
-        StreamExecutionEnvironment env = provider.createEnvironment(configuration);
-
-        if (useLocalWebUi) {
-            if (isClusterEnvironment(env)) {
-                throw new InvalidLocalWebUiConfigurationException(
-                    "Local WebUI configuration (local-web-ui.enabled=true) cannot be used when running on a Flink cluster environment."
-                );
-            }
-            return new LocalExecutionEnvironmentProvider().createEnvironment(configuration);
+        if (useLocalWebUi && isClusterEnvironment(env)) {
+            throw new InvalidLocalWebUiConfigurationException(
+                "Local WebUI configuration (local-web-ui.enabled=true) cannot be used when running on a Flink cluster environment."
+            );
         }
 
         return env;
