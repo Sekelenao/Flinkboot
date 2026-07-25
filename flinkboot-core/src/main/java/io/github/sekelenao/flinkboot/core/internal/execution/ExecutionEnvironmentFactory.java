@@ -17,6 +17,7 @@ import io.github.sekelenao.flinkboot.core.internal.execution.provider.ClusterExe
 import io.github.sekelenao.flinkboot.core.internal.execution.provider.ExecutionEnvironmentProvider;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.PipelineOptions;
+import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import java.util.List;
@@ -61,17 +62,12 @@ public final class ExecutionEnvironmentFactory {
             .flatMap(LocalWebUiConfiguration::enabled)
             .orElse(false);
 
-        if (useLocalWebUi && isClusterEnvironment(env)) {
+        if (useLocalWebUi && !(env instanceof LocalStreamEnvironment)) {
             throw new InvalidLocalWebUiConfigurationException(
                 "Local WebUI configuration (local-web-ui.enabled=true) cannot be used when running on a Flink cluster environment."
             );
         }
 
         return env;
-    }
-
-    private boolean isClusterEnvironment(StreamExecutionEnvironment env) {
-        String className = env.getClass().getName();
-        return className.contains("ContextEnvironment") || className.contains("RemoteStreamEnvironment");
     }
 }
