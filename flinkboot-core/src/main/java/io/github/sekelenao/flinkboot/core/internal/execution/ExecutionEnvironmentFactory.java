@@ -3,7 +3,6 @@ package io.github.sekelenao.flinkboot.core.internal.execution;
 import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironmentConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.JobConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.local.LocalWebUiConfiguration;
-import io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidLocalWebUiConfigurationException;
 import io.github.sekelenao.flinkboot.core.internal.annotation.VisibleForTesting;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.CheckpointingCustomizer;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.EnvironmentCustomizer;
@@ -15,9 +14,9 @@ import io.github.sekelenao.flinkboot.core.internal.execution.customizer.Savepoin
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.StateBackendCustomizer;
 import io.github.sekelenao.flinkboot.core.internal.execution.provider.ClusterExecutionEnvironmentProvider;
 import io.github.sekelenao.flinkboot.core.internal.execution.provider.ExecutionEnvironmentProvider;
+import io.github.sekelenao.flinkboot.core.internal.execution.provider.LocalWebUiExecutionEnvironmentProvider;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.PipelineOptions;
-import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import java.util.List;
@@ -55,19 +54,20 @@ public final class ExecutionEnvironmentFactory {
             customizers.forEach(customizer -> customizer.configure(envConfig))
         );
 
-        StreamExecutionEnvironment env = provider.createEnvironment(configuration);
+        ExecutionEnvironmentProvider resolvedProvider = resolveProvider(jobConfiguration);
+        return resolvedProvider.createEnvironment(configuration);
+    }
 
+    private ExecutionEnvironmentProvider resolveProvider(JobConfiguration jobConfiguration) {
         boolean useLocalWebUi = jobConfiguration.environment()
             .flatMap(ExecutionEnvironmentConfiguration::localWebUi)
             .flatMap(LocalWebUiConfiguration::enabled)
             .orElse(false);
 
-        if (useLocalWebUi && !(env instanceof LocalStreamEnvironment)) {
-            throw new InvalidLocalWebUiConfigurationException(
-                "Local WebUI configuration (local-web-ui.enabled=true) cannot be used when running on a Flink cluster environment."
-            );
+        if (useLocalWebUi) {
+            return new LocalWebUiExecutionEnvironmentProvider();
         }
-
-        return env;
+        return provider;
     }
 }
+

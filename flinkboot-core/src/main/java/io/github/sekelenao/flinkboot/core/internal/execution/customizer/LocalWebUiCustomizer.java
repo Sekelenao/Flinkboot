@@ -22,6 +22,9 @@ public final class LocalWebUiCustomizer implements EnvironmentCustomizer {
     }
 
     private void apply(LocalWebUiConfiguration localWebUiConfig) {
+        if (!localWebUiConfig.enabled().orElse(false)) {
+            return;
+        }
         localWebUiConfig.port().ifPresent(this::applyPort);
         localWebUiConfig.bindAddress().ifPresent(this::applyBindAddress);
     }

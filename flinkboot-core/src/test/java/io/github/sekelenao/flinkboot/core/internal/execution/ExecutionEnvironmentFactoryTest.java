@@ -18,7 +18,7 @@ import io.github.sekelenao.flinkboot.core.api.configuration.savepoint.SavepointR
 import io.github.sekelenao.flinkboot.core.api.configuration.state.CheckpointStorageType;
 import io.github.sekelenao.flinkboot.core.api.configuration.state.StateBackendConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.state.StateBackendType;
-import io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidLocalWebUiConfigurationException;
+
 import io.github.sekelenao.flinkboot.core.internal.execution.provider.ExecutionEnvironmentProvider;
 import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.apache.flink.configuration.CheckpointingOptions;
@@ -43,6 +43,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -313,8 +314,8 @@ class ExecutionEnvironmentFactoryTest {
         }
 
         @Test
-        @DisplayName("Should correctly map LocalWebUiConfiguration in local environment")
-        void shouldMapLocalWebUiConfigurationInLocalEnvironment() {
+        @DisplayName("Should correctly map LocalWebUiConfiguration into Flink Configuration")
+        void shouldMapLocalWebUiConfigurationToFlinkConfiguration() {
             var localWebUiConfig = new LocalWebUiConfiguration(true, 8081, "127.0.0.1");
             var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null, localWebUiConfig, null);
             var jobConfig = new JobConfiguration("local-webui-job", envConfig);
@@ -324,22 +325,57 @@ class ExecutionEnvironmentFactoryTest {
 
             assertAll(
                 () -> assertNotNull(env),
+                () -> assertTrue(env instanceof org.apache.flink.streaming.api.environment.LocalStreamEnvironment),
                 () -> assertEquals(8081, env.getConfiguration().get(RestOptions.PORT)),
                 () -> assertEquals("127.0.0.1", env.getConfiguration().get(RestOptions.BIND_ADDRESS))
             );
         }
 
         @Test
-        @DisplayName("Should throw InvalidLocalWebUiConfigurationException when localWebUi is enabled on a cluster environment")
-        void shouldThrowExceptionWhenLocalWebUiEnabledOnClusterEnvironment() {
+        @DisplayName("Should not configure local WebUI options when enabled is false")
+        void shouldNotConfigureLocalWebUiOptionsWhenDisabled() {
+            var localWebUiConfig = new LocalWebUiConfiguration(false, 9090, "0.0.0.0");
+            var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null, localWebUiConfig, null);
+            var jobConfig = new JobConfiguration("disabled-webui-job", envConfig);
+
+            AtomicReference<Configuration> capturedConfig = new AtomicReference<>();
+            ExecutionEnvironmentProvider provider = config -> {
+                capturedConfig.set(config);
+                return StreamExecutionEnvironment.getExecutionEnvironment(config);
+            };
+
+            var factory = new ExecutionEnvironmentFactory(provider);
+            factory.create(jobConfig);
+
+            Configuration flinkConfig = capturedConfig.get();
+            assertNotNull(flinkConfig);
+
+            assertAll(
+                () -> assertEquals(RestOptions.PORT.defaultValue(), flinkConfig.get(RestOptions.PORT)),
+                () -> assertEquals(RestOptions.BIND_ADDRESS.defaultValue(), flinkConfig.get(RestOptions.BIND_ADDRESS))
+            );
+        }
+
+        @Test
+        @DisplayName("Should bypass injected provider when localWebUi is enabled")
+        void shouldBypassInjectedProviderWhenLocalWebUiEnabled() {
             var localWebUiConfig = new LocalWebUiConfiguration(true, 8081, "127.0.0.1");
             var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null, localWebUiConfig, null);
-            var jobConfig = new JobConfiguration("local-webui-cluster-job", envConfig);
+            var jobConfig = new JobConfiguration("local-webui-bypass-job", envConfig);
 
-            ExecutionEnvironmentProvider clusterProvider = config -> new DummyContextEnvironment(config);
-            var factory = new ExecutionEnvironmentFactory(clusterProvider);
+            var providerCalled = new java.util.concurrent.atomic.AtomicBoolean(false);
+            ExecutionEnvironmentProvider injectedProvider = config -> {
+                providerCalled.set(true);
+                return StreamExecutionEnvironment.getExecutionEnvironment(config);
+            };
 
-            assertThrows(InvalidLocalWebUiConfigurationException.class, () -> factory.create(jobConfig));
+            var factory = new ExecutionEnvironmentFactory(injectedProvider);
+            StreamExecutionEnvironment env = factory.create(jobConfig);
+
+            assertAll(
+                () -> assertNotNull(env),
+                () -> assertFalse(providerCalled.get())
+            );
         }
 
         @Test
@@ -422,9 +458,4 @@ class ExecutionEnvironmentFactoryTest {
         }
     }
 
-    private static class DummyContextEnvironment extends StreamExecutionEnvironment {
-        public DummyContextEnvironment(Configuration config) {
-            super(config);
-        }
-    }
 }
