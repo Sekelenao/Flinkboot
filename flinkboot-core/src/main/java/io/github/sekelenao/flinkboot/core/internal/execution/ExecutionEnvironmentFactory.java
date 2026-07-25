@@ -3,6 +3,7 @@ package io.github.sekelenao.flinkboot.core.internal.execution;
 import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironmentConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.JobConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.local.LocalWebUiConfiguration;
+import io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidLocalWebUiConfigurationException;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.CheckpointingCustomizer;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.EnvironmentCustomizer;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.ExecutionCustomizer;
@@ -52,10 +53,22 @@ public final class ExecutionEnvironmentFactory {
             .flatMap(LocalWebUiConfiguration::enabled)
             .orElse(false);
 
-        ExecutionEnvironmentProvider effectiveProvider = useLocalWebUi
-            ? new LocalExecutionEnvironmentProvider()
-            : this.provider;
+        StreamExecutionEnvironment env = provider.createEnvironment(configuration);
 
-        return effectiveProvider.createEnvironment(configuration);
+        if (useLocalWebUi) {
+            if (isClusterEnvironment(env)) {
+                throw new InvalidLocalWebUiConfigurationException(
+                    "Local WebUI configuration (local-web-ui.enabled=true) cannot be used when running on a Flink cluster environment."
+                );
+            }
+            return new LocalExecutionEnvironmentProvider().createEnvironment(configuration);
+        }
+
+        return env;
+    }
+
+    private boolean isClusterEnvironment(StreamExecutionEnvironment env) {
+        String className = env.getClass().getName();
+        return className.contains("ContextEnvironment") || className.contains("RemoteStreamEnvironment");
     }
 }

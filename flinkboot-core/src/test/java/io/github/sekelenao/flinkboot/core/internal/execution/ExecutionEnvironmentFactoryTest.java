@@ -18,6 +18,7 @@ import io.github.sekelenao.flinkboot.core.api.configuration.savepoint.SavepointR
 import io.github.sekelenao.flinkboot.core.api.configuration.state.CheckpointStorageType;
 import io.github.sekelenao.flinkboot.core.api.configuration.state.StateBackendConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.state.StateBackendType;
+import io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidLocalWebUiConfigurationException;
 import io.github.sekelenao.flinkboot.core.internal.execution.provider.ClusterExecutionEnvironmentProvider;
 import io.github.sekelenao.flinkboot.core.internal.execution.provider.ExecutionEnvironmentProvider;
 import org.apache.flink.api.common.RuntimeExecutionMode;
@@ -37,9 +38,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-
 import java.time.Duration;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -314,8 +314,8 @@ class ExecutionEnvironmentFactoryTest {
         }
 
         @Test
-        @DisplayName("Should correctly map LocalWebUiConfiguration into Flink Configuration")
-        void shouldMapLocalWebUiConfigurationToFlinkConfiguration() {
+        @DisplayName("Should correctly map LocalWebUiConfiguration in local environment")
+        void shouldMapLocalWebUiConfigurationInLocalEnvironment() {
             var localWebUiConfig = new LocalWebUiConfiguration(true, 8081, "127.0.0.1");
             var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null, localWebUiConfig, null);
             var jobConfig = new JobConfiguration("local-webui-job", envConfig);
@@ -328,6 +328,19 @@ class ExecutionEnvironmentFactoryTest {
                 () -> assertEquals(8081, env.getConfiguration().get(RestOptions.PORT)),
                 () -> assertEquals("127.0.0.1", env.getConfiguration().get(RestOptions.BIND_ADDRESS))
             );
+        }
+
+        @Test
+        @DisplayName("Should throw InvalidLocalWebUiConfigurationException when localWebUi is enabled on a cluster environment")
+        void shouldThrowExceptionWhenLocalWebUiEnabledOnClusterEnvironment() {
+            var localWebUiConfig = new LocalWebUiConfiguration(true, 8081, "127.0.0.1");
+            var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null, localWebUiConfig, null);
+            var jobConfig = new JobConfiguration("local-webui-cluster-job", envConfig);
+
+            ExecutionEnvironmentProvider clusterProvider = config -> new DummyContextEnvironment(config);
+            var factory = new ExecutionEnvironmentFactory(clusterProvider);
+
+            assertThrows(InvalidLocalWebUiConfigurationException.class, () -> factory.create(jobConfig));
         }
 
         @Test
@@ -407,6 +420,12 @@ class ExecutionEnvironmentFactoryTest {
 
             assertNotNull(env);
             assertEquals(dummyEnv, env);
+        }
+    }
+
+    private static class DummyContextEnvironment extends StreamExecutionEnvironment {
+        public DummyContextEnvironment(Configuration config) {
+            super(config);
         }
     }
 }
