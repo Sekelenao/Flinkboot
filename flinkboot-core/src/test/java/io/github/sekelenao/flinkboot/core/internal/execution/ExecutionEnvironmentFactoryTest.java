@@ -283,6 +283,23 @@ class ExecutionEnvironmentFactoryTest {
         }
 
         @Test
+        @DisplayName("Should throw InvalidLocalWebUiConfigurationException when localWebUi is enabled on a cluster environment")
+        void shouldThrowExceptionWhenLocalWebUiEnabledOnClusterEnvironment() {
+            var localWebUiConfig = new LocalWebUiConfiguration(true, 8081, "127.0.0.1");
+            var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null, localWebUiConfig, null);
+            var jobConfig = new JobConfiguration("local-webui-cluster-job", envConfig);
+
+            var mockClusterEnv = org.mockito.Mockito.mock(StreamExecutionEnvironment.class);
+            try (var mockedStatic = org.mockito.Mockito.mockStatic(StreamExecutionEnvironment.class)) {
+                mockedStatic.when(StreamExecutionEnvironment::getExecutionEnvironment).thenReturn(mockClusterEnv);
+
+                var factory = new ExecutionEnvironmentFactory();
+                assertThrows(io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidLocalWebUiConfigurationException.class,
+                    () -> factory.create(jobConfig));
+            }
+        }
+
+        @Test
         @DisplayName("Should correctly map custom properties into Flink Configuration")
         void shouldMapPropertiesToFlinkConfiguration() {
             var props = Map.of("taskmanager.memory.managed.fraction", "0.4", "pipeline.operator-chaining.enabled", "true");

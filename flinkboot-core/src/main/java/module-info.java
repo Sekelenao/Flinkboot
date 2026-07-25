@@ -21,6 +21,7 @@ module io.github.sekelenao.flinkboot.core {
     requires jakarta.validation;
     requires org.hibernate.validator;
     requires org.glassfish.expressly;
+    requires flink.streaming.java;
 
     opens io.github.sekelenao.flinkboot.core.api to com.fasterxml.jackson.databind, org.hibernate.validator;
     opens io.github.sekelenao.flinkboot.core.api.configuration to com.fasterxml.jackson.databind, org.hibernate.validator;

@@ -3,6 +3,7 @@ package io.github.sekelenao.flinkboot.core.internal.execution;
 import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironmentConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.JobConfiguration;
 import io.github.sekelenao.flinkboot.core.api.configuration.local.LocalWebUiConfiguration;
+import io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidLocalWebUiConfigurationException;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.CheckpointingCustomizer;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.EnvironmentCustomizer;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.ExecutionCustomizer;
@@ -16,6 +17,7 @@ import io.github.sekelenao.flinkboot.core.internal.execution.provider.ExecutionE
 import io.github.sekelenao.flinkboot.core.internal.execution.provider.LocalWebUiExecutionEnvironmentProvider;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.PipelineOptions;
+import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import java.util.List;
@@ -24,7 +26,6 @@ import java.util.Objects;
 public final class ExecutionEnvironmentFactory {
 
     private final Configuration configuration;
-
     private final List<EnvironmentCustomizer> customizers;
 
     public ExecutionEnvironmentFactory() {
@@ -52,11 +53,6 @@ public final class ExecutionEnvironmentFactory {
             .flatMap(LocalWebUiConfiguration::enabled)
             .orElse(false);
 
-        ExecutionEnvironmentProvider provider = useLocalWebUi
-            ? new LocalWebUiExecutionEnvironmentProvider()
-            : new ClusterExecutionEnvironmentProvider();
-
-        return provider.createEnvironment(configuration);
+        return ExecutionEnvironmentProvider.get(useLocalWebUi).createEnvironment(configuration);
     }
 }
-
