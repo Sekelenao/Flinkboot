@@ -103,7 +103,6 @@
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-connector-kafka</artifactId>
                 <version>${dependency.flink-connector-kafka.version}</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.kafka</groupId>
@@ -120,7 +119,6 @@
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-connector-base</artifactId>
                 <version>${flink.version}</version>
-                <scope>provided</scope>
             </dependency>
 
             <!-- Logging dependencies (Provided by Flink cluster) -->
