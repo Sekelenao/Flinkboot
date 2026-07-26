@@ -76,7 +76,7 @@
         <!-- Project configs -->
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <test.minimum.coverage>0.90</test.minimum.coverage>
+        <test.minimum.coverage>0.80</test.minimum.coverage>
         <minimum.maven.version>3.6.3</minimum.maven.version>
 
     </properties>

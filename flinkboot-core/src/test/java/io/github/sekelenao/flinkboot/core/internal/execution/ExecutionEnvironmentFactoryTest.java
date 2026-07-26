@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("ExecutionEnvironmentFactory Tests")
-class ExecutionEnvironmentFactoryTest {
+public class ExecutionEnvironmentFactoryTest {
 
     @Nested
     @DisplayName("Configuration Mapping Tests")

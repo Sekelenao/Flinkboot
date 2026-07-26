@@ -111,6 +111,23 @@ class KafkaSourceFactoryTest {
         }
 
         @Test
+        @DisplayName("Should successfully build with LATEST, COMMITTED, COMMITTED_EARLIEST, COMMITTED_LATEST offset configs")
+        void shouldBuildWithOtherOffsetInitializers() {
+            for (var initializer : List.of(KafkaOffsetInitializer.LATEST, KafkaOffsetInitializer.COMMITTED, KafkaOffsetInitializer.COMMITTED_EARLIEST, KafkaOffsetInitializer.COMMITTED_LATEST)) {
+                var config = new KafkaSourceTopicListConfiguration(
+                    List.of("localhost:9092"),
+                    "test-group",
+                    List.of("test-topic"),
+                    initializer,
+                    null,
+                    null,
+                    null
+                );
+                assertNotNull(KafkaSourceFactory.supplyFor(config, TEST_SCHEMA));
+            }
+        }
+
+        @Test
         @DisplayName("Should throw InvalidKafkaSourceConfigurationException when TIMESTAMP is used but timestamp is missing")
         void shouldThrowExceptionWhenTimestampMissing() {
             assertThrows(InvalidKafkaSourceConfigurationException.class, () -> {
@@ -142,6 +159,32 @@ class KafkaSourceFactoryTest {
                 );
                 KafkaSourceFactory.supplyFor(config, TEST_SCHEMA);
             });
+        }
+
+        @Test
+        @DisplayName("Should throw InvalidKafkaSourceConfigurationException when TIMESTAMP is used with partition offsets")
+        void shouldThrowExceptionWhenTimestampUsedWithPartitionOffsets() {
+            assertThrows(InvalidKafkaSourceConfigurationException.class, () -> new KafkaSourceTopicListConfiguration(
+                List.of("localhost:9092"), "test-group", List.of("test-topic"), KafkaOffsetInitializer.TIMESTAMP, 1000L,
+                List.of(new TopicPartitionOffsetConfiguration("test-topic", 0, 100L)), null));
+        }
+
+        @Test
+        @DisplayName("Should throw InvalidKafkaSourceConfigurationException when OFFSETS is used with timestamp")
+        void shouldThrowExceptionWhenOffsetsUsedWithTimestamp() {
+            assertThrows(InvalidKafkaSourceConfigurationException.class, () -> new KafkaSourceTopicListConfiguration(
+                List.of("localhost:9092"), "test-group", List.of("test-topic"), KafkaOffsetInitializer.OFFSETS, 1000L,
+                List.of(new TopicPartitionOffsetConfiguration("test-topic", 0, 100L)), null));
+        }
+
+        @Test
+        @DisplayName("Should throw InvalidKafkaSourceConfigurationException when EARLIEST is used with timestamp or partition offsets")
+        void shouldThrowExceptionWhenEarliestUsedWithExtraConfigs() {
+            assertThrows(InvalidKafkaSourceConfigurationException.class, () -> new KafkaSourceTopicListConfiguration(
+                List.of("localhost:9092"), "test-group", List.of("test-topic"), KafkaOffsetInitializer.EARLIEST, 1000L, null, null));
+            assertThrows(InvalidKafkaSourceConfigurationException.class, () -> new KafkaSourceTopicListConfiguration(
+                List.of("localhost:9092"), "test-group", List.of("test-topic"), KafkaOffsetInitializer.EARLIEST, null,
+                List.of(new TopicPartitionOffsetConfiguration("test-topic", 0, 100L)), null));
         }
 
         @Test

@@ -23,13 +23,16 @@ module io.github.sekelenao.flinkboot.core {
     requires org.glassfish.expressly;
     requires flink.streaming.java;
 
-    opens io.github.sekelenao.flinkboot.core.api to com.fasterxml.jackson.databind, org.hibernate.validator;
-    opens io.github.sekelenao.flinkboot.core.api.configuration to com.fasterxml.jackson.databind, org.hibernate.validator;
-    opens io.github.sekelenao.flinkboot.core.api.configuration.checkpointing to com.fasterxml.jackson.databind, org.hibernate.validator;
-    opens io.github.sekelenao.flinkboot.core.api.configuration.execution to com.fasterxml.jackson.databind, org.hibernate.validator;
-    opens io.github.sekelenao.flinkboot.core.api.configuration.local to com.fasterxml.jackson.databind, org.hibernate.validator;
-    opens io.github.sekelenao.flinkboot.core.api.configuration.restart to com.fasterxml.jackson.databind, org.hibernate.validator;
-    opens io.github.sekelenao.flinkboot.core.api.configuration.savepoint to com.fasterxml.jackson.databind, org.hibernate.validator;
-    opens io.github.sekelenao.flinkboot.core.api.configuration.state to com.fasterxml.jackson.databind, org.hibernate.validator;
-    opens io.github.sekelenao.flinkboot.core.internal.parser.yaml to com.fasterxml.jackson.databind, org.hibernate.validator;
+    opens io.github.sekelenao.flinkboot.core.api to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.api.configuration to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.api.configuration.checkpointing to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.api.configuration.execution to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.api.configuration.local to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.api.configuration.restart to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.api.configuration.savepoint to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.api.configuration.state to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.internal.parser.yaml to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.internal.execution to org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.internal.execution.customizer to org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.internal.execution.provider to org.junit.platform.commons;
 }

@@ -58,6 +58,21 @@ class KafkaSinkFactoryTest {
         }
 
         @Test
+        @DisplayName("Should successfully build with NONE and AT_LEAST_ONCE delivery guarantees")
+        void shouldBuildWithOtherGuarantees() {
+            for (var guarantee : List.of(KafkaDeliveryGuarantee.NONE, KafkaDeliveryGuarantee.AT_LEAST_ONCE)) {
+                var config = new KafkaSinkConfiguration(
+                    List.of("localhost:9092"),
+                    "my-topic",
+                    guarantee,
+                    null,
+                    null
+                );
+                assertNotNull(KafkaSinkFactory.supplyFor(config, TEST_SCHEMA));
+            }
+        }
+
+        @Test
         @DisplayName("Should throw InvalidKafkaSinkConfigurationException when EXACTLY_ONCE is requested but prefix is missing")
         void shouldThrowExceptionWhenPrefixIsMissing() {
             assertThrows(
