@@ -5,15 +5,36 @@ In Flinkboot, a **parameter** is a key-value pair where the value is a string. P
 > [!IMPORTANT]
 > Before defining your custom parameters, please check the [Reserved Keys](reserved-keys.md) page to avoid naming collisions with Flinkboot's built-in configuration keys.
 
-## Maven Dependency
+## Maven Dependencies
 
-To use this feature, import the core Flinkboot dependency:
+Import the Flinkboot BOM in your `<dependencyManagement>` and add the core Flinkboot dependency along with Flink APIs:
 
 ```xml
-<dependency>
-    <groupId>io.github.sekelenao</groupId>
-    <artifactId>flinkboot-core</artifactId>
-</dependency>
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>io.github.sekelenao</groupId>
+            <artifactId>flinkboot</artifactId>
+            <version>0.1.0-1.20</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+
+<dependencies>
+    <!-- Flinkboot Core -->
+    <dependency>
+        <groupId>io.github.sekelenao</groupId>
+        <artifactId>flinkboot-core</artifactId>
+    </dependency>
+
+    <!-- Flink Streaming API (Provided by Flink cluster) -->
+    <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-streaming-java</artifactId>
+    </dependency>
+</dependencies>
 ```
 
 ---

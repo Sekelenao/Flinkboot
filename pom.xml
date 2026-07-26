@@ -88,21 +88,25 @@
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-streaming-java</artifactId>
                 <version>${flink.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-core</artifactId>
                 <version>${flink.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-connector-kafka</artifactId>
                 <version>${dependency.flink-connector-kafka.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-connector-base</artifactId>
                 <version>${flink.version}</version>
+                <scope>provided</scope>
             </dependency>
 
             <!-- Project modules -->
@@ -115,6 +119,12 @@
                 <groupId>io.github.sekelenao</groupId>
                 <artifactId>flinkboot-kafka</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.sekelenao</groupId>
+                <artifactId>flinkboot-test</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <!-- Jackson YAML -->

@@ -22,16 +22,37 @@ To be recognized as a POJO by Flink's `TypeExtractor`, a class must meet the fol
 
 ---
 
-## 2. Maven Dependency
+## 2. Maven Dependencies
 
-To write compliance tests, import the Flinkboot Test utility in your `pom.xml` with `test` scope:
+To write compliance tests, import the Flinkboot BOM in your `<dependencyManagement>` and add `flinkboot-test` alongside Flink APIs in your `pom.xml`:
 
 ```xml
-<dependency>
-    <groupId>io.github.sekelenao</groupId>
-    <artifactId>flinkboot-test</artifactId>
-    <scope>test</scope>
-</dependency>
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>io.github.sekelenao</groupId>
+            <artifactId>flinkboot</artifactId>
+            <version>0.1.0-1.20</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+
+<dependencies>
+    <!-- Flinkboot Test Utility -->
+    <dependency>
+        <groupId>io.github.sekelenao</groupId>
+        <artifactId>flinkboot-test</artifactId>
+        <scope>test</scope>
+    </dependency>
+
+    <!-- Flink Streaming API (Provided by Flink cluster) -->
+    <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-streaming-java</artifactId>
+    </dependency>
+</dependencies>
 ```
 
 ---

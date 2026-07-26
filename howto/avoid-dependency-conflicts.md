@@ -8,29 +8,37 @@ Flinkboot is designed as a **good classpath citizen**—it declares Flink as `pr
 
 ---
 
-## Best Practice 1: Mark Cluster Dependencies as `provided`
+## Best Practice 1: Import Flinkboot BOM and Mark Cluster Dependencies as `provided`
 
-Any dependency that is already provided in the Flink cluster's `lib/` directory **must** be marked with `<scope>provided</scope>` in your root `pom.xml`. 
+Any dependency that is already provided in the Flink cluster's `lib/` directory (like Flink Core APIs and Connectors) must not be packaged inside your Fat JAR.
 
-This includes:
-* **Flink Core APIs**: `flink-streaming-java`, `flink-clients`, `flink-runtime`, etc.
-* **Flink Connectors** (if installed on the cluster): `flink-connector-kafka`, `flink-connector-files`, etc.
+By importing `flinkboot` in your `<dependencyManagement>` section (BOM pattern), you get managed versions **and** automatic `provided` scopes for all Flink dependencies. You don't need to specify `<version>` or `<scope>` manually for Flink components!
 
 ```xml
+<dependencyManagement>
+    <dependencies>
+        <!-- Flinkboot BOM -->
+        <dependency>
+            <groupId>io.github.sekelenao</groupId>
+            <artifactId>flinkboot</artifactId>
+            <version>0.1.0-1.20</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+
 <dependencies>
-    <!-- Flink Core (Provided by the cluster) -->
+    <!-- Flink Core (Provided by cluster - version & scope provided managed by BOM) -->
     <dependency>
         <groupId>org.apache.flink</groupId>
         <artifactId>flink-streaming-java</artifactId>
-        <version>${flink.version}</version>
-        <scope>provided</scope>
     </dependency>
 
-    <!-- Flinkboot (Must be bundled inside your JAR) -->
+    <!-- Flinkboot Connector (Bundled inside your Fat JAR) -->
     <dependency>
         <groupId>io.github.sekelenao</groupId>
         <artifactId>flinkboot-kafka</artifactId>
-        <version>${flinkboot.version}</version>
     </dependency>
 </dependencies>
 ```
