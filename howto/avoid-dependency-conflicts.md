@@ -35,6 +35,12 @@ By importing `flinkboot` in your `<dependencyManagement>` section (BOM pattern),
         <artifactId>flink-streaming-java</artifactId>
     </dependency>
 
+    <!-- Flink Clients (Required for running/debugging jobs locally in IDE) -->
+    <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-clients</artifactId>
+    </dependency>
+
     <!-- Flinkboot Connector (Bundled inside your Fat JAR) -->
     <dependency>
         <groupId>io.github.sekelenao</groupId>
