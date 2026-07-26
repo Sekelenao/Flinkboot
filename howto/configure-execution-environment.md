@@ -181,7 +181,17 @@ environment:
   properties:
     taskmanager.memory.managed.fraction: "0.4"
     pipeline.operator-chaining.enabled: "true"
+    execution.checkpointing.interval: "5 s"
+    pipeline.auto-watermark-interval: "200 ms"
+    taskmanager.numberOfTaskSlots: "4"
 ```
+
+> [!TIP]
+> **Automatic Type Parsing (Numbers, Durations, Memory Sizes & Booleans)**:
+> Apache Flink's native `Configuration` system automatically parses string values from `properties` into their required target Java types:
+> - **Numbers & Booleans**: Raw numbers and booleans are parsed automatically (e.g. `"4"` for Integer, `"10000"` for Long, `"0.4"` for Double, `"true"` for Boolean).
+> - **Durations**: Must include explicit time units (e.g. `"500 ms"`, `"5 s"`, `"10 min"`, `"1 h"`, `"2 d"`).
+> - **Memory Sizes**: Can include memory units (e.g. `"512 mb"`, `"2 gb"`, `"1024 kb"`).
 
 ---
 
