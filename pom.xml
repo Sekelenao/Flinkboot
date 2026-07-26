@@ -6,7 +6,7 @@
 
     <groupId>io.github.sekelenao</groupId>
     <artifactId>flinkboot</artifactId>
-    <version>0.0.1</version>
+    <version>0.1.0</version>
     <packaging>pom</packaging>
 
     <name>Flinkboot</name>
@@ -57,7 +57,7 @@
 
         <!-- Dependencies versions -->
         <dependency.junit.version>5.11.4</dependency.junit.version>
-        <dependency.mockito.version>5.15.2</dependency.mockito.version>
+        <dependency.mockito.version>5.23.0</dependency.mockito.version>
         <dependency.jackson.version>2.22.1</dependency.jackson.version>
         <dependency.validation.version>8.0.4.Final</dependency.validation.version>
         <dependency.expressly.version>5.0.0</dependency.expressly.version>
