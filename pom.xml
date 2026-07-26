@@ -183,6 +183,11 @@
                 <artifactId>jackson-core</artifactId>
                 <version>${dependency.jackson.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-jsr310</artifactId>
+                <version>${dependency.jackson.version}</version>
+            </dependency>
 
             <!-- Jakarta Validation (Hibernate Validator) -->
             <dependency>
