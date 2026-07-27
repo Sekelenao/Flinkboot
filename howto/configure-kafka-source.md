@@ -1,52 +1,16 @@
 # How to Configure a Kafka Source
 
-Flinkboot provides typed configuration models and a factory to easily initialize Apache Flink's `KafkaSource` from YAML configuration files.
-
-## Maven Dependencies
-
-Import the Flinkboot BOM in your `<dependencyManagement>` and add the Kafka Flinkboot module along with the Flink Streaming API and Flink Kafka Connector:
-
-```xml
-<dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>io.github.sekelenao</groupId>
-            <artifactId>flinkboot</artifactId>
-            <version>0.1.0-1.20</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
-    </dependencies>
-</dependencyManagement>
-
-<dependencies>
-    <!-- Flinkboot Kafka -->
-    <dependency>
-        <groupId>io.github.sekelenao</groupId>
-        <artifactId>flinkboot-kafka</artifactId>
-    </dependency>
-
-    <!-- Flink Streaming API (Provided by Flink cluster) -->
-    <dependency>
-        <groupId>org.apache.flink</groupId>
-        <artifactId>flink-streaming-java</artifactId>
-    </dependency>
-
-    <!-- Flink Kafka Connector (Provided by Flink cluster) -->
-    <dependency>
-        <groupId>org.apache.flink</groupId>
-        <artifactId>flink-connector-kafka</artifactId>
-    </dependency>
-</dependencies>
-```
+Flinkboot provides typed configuration models and a factory to easily initialize Apache Flink's `KafkaSource` directly from YAML configuration files.
 
 ---
 
-## 1. YAML Configuration Structure
+## 1. YAML Configuration Properties & Structure
 
-You can configure your Kafka Source using either a static list of topics or a topic pattern regex.
+By default, Flinkboot loads configuration properties from `file:job-configuration.yaml` in the current directory (or custom paths specified via `-flinkboot-configurations`).
 
-### Option A: Static List of Topics (`KafkaSourceTopicListConfiguration`)
+You can configure your Kafka Source using either a static list of topics or a topic pattern regex:
+
+### Option A: Static List of Topics (`KafkaSourceTopicListProperties`)
 
 ```yaml
 bootstrap-servers:
@@ -60,7 +24,7 @@ properties:
   session.timeout.ms: "45000"
 ```
 
-### Option B: Topic Pattern Regex (`KafkaSourceTopicPatternConfiguration`)
+### Option B: Topic Pattern Regex (`KafkaSourceTopicPatternProperties`)
 
 ```yaml
 bootstrap-servers:
@@ -70,7 +34,9 @@ topic-pattern: "^my-topic-.*$"
 starting-offsets: "LATEST"
 ```
 
-### Configuration Parameters Reference
+---
+
+## 2. Configuration Parameters Reference
 
 | Property Key                         | Type            | Required                    | Validation                        | Description                                                                                                                                         |
 |:-------------------------------------|:----------------|:----------------------------|:----------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -85,7 +51,7 @@ starting-offsets: "LATEST"
 
 ---
 
-## 2. Advanced Starting Offsets Strategies
+## 3. Starting Offsets Strategies
 
 Flinkboot supports all native Flink consumption strategies via the `starting-offsets` property:
 
@@ -99,15 +65,13 @@ Flinkboot supports all native Flink consumption strategies via the `starting-off
 | `TIMESTAMP`          | Start from a specific epoch timestamp.                          | `starting-offsets-timestamp`         |
 | `OFFSETS`            | Start from custom offsets specified per partition.              | `starting-offsets-partition-offsets` |
 
-### Configuring Timestamp-based Starting Offsets
-
+### Timestamp-based Consumption
 ```yaml
 starting-offsets: "TIMESTAMP"
 starting-offsets-timestamp: 1689717600000 # Epoch millisecond timestamp
 ```
 
-### Configuring Partition-specific Starting Offsets
-
+### Partition-specific Consumption
 ```yaml
 starting-offsets: "OFFSETS"
 starting-offsets-partition-offsets:
@@ -121,55 +85,35 @@ starting-offsets-partition-offsets:
 
 ---
 
-## 3. Java Integration & Real-world Usage
+## 4. Java Integration
 
-In a typical production setup, you define a custom `JobConfig` class representing the full application configuration. You embed the `KafkaSourceTopicListConfiguration` inside it.
+Embed `KafkaSourceTopicListProperties` inside your application's root configuration class:
 
-### Step 1: Define the Root Job Configuration Class
+### Step 1: Define Root Configuration POJO
 
 ```java
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.github.sekelenao.flinkboot.kafka.api.configuration.source.KafkaSourceTopicListConfiguration;
+import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceTopicListProperties;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public final class JobConfig {
-
-    @NotBlank
-    private final String jobName;
-
-    @Min(1)
-    private final int parallelism;
+public final class MyJobConfig {
 
     @Valid
     @NotNull
-    private final KafkaSourceTopicListConfiguration kafka;
+    private final KafkaSourceTopicListProperties kafka;
 
     @JsonCreator
-    public JobConfig(
-        @JsonProperty("jobName") String jobName,
-        @JsonProperty("parallelism") int parallelism,
-        @JsonProperty("kafka") KafkaSourceTopicListConfiguration kafka
-    ) {
-        this.jobName = jobName;
-        this.parallelism = parallelism;
+    public MyJobConfig(@JsonProperty("kafka") KafkaSourceTopicListProperties kafka) {
         this.kafka = kafka;
     }
 
-    public String jobName() { return jobName; }
-    public int parallelism() { return parallelism; }
-    
-    // Returns the nested Kafka configuration
-    public KafkaSourceTopicListConfiguration kafka() { return kafka; }
+    public KafkaSourceTopicListProperties kafka() { return kafka; }
 }
 ```
 
-### Step 2: Use in Flink Application
-
-Initialize Flinkboot, retrieve the root `JobConfig`, and build your `KafkaSource` from the nested configuration object:
+### Step 2: Build KafkaSource in Flink Application
 
 ```java
 import io.github.sekelenao.flinkboot.core.api.Flinkboot;
@@ -182,45 +126,33 @@ public class KafkaConsumerJob {
     public static void main(String[] args) throws Exception {
         Flinkboot boot = Flinkboot.initialize(args);
         
-        // 1. Load the full nested configuration
-        JobConfig config = boot.configuration(JobConfig.class);
+        // 1. Load configuration from job-configuration.yaml
+        MyJobConfig config = boot.configuration(MyJobConfig.class);
         
         // 2. Define your deserialization schema
         KafkaRecordDeserializationSchema<String> schema = 
             KafkaRecordDeserializationSchema.valueOnly(new SimpleStringSchema());
         
-        // 3. Create the Flink Kafka Source from the nested config
+        // 3. Instantiate Flink Kafka Source from properties
         KafkaSource<String> kafkaSource = KafkaSourceFactory.supplyFor(config.kafka(), schema);
         
-        // ... build and run your Flink pipeline
+        // ... build your Flink pipeline
     }
 }
 ```
 
 ### Programmatic Customization
-
 If you need to customize Flink's builder (e.g. client ID prefix, custom properties) before building:
 
 ```java
 KafkaSource<String> customKafkaSource = KafkaSourceFactory.supplyBuilderFor(config.kafka(), schema)
     .setClientIdPrefix("custom-client-id")
-    .setProperty("kafka.custom.property", "value")
     .build();
 ```
 
-
 ---
 
-## 4. Validation & Exception Handling
+## 5. Fail-Fast Validation & Exceptions
 
-### Automatic Nested Validation
-
-The configuration parameters are validated using Jakarta Bean Validation. If any parameter violates constraints (e.g. a negative partition or blank topic in the partition offsets list), a `ConfigurationValidationException` is thrown at startup.
-
-### Exception Hierarchy
-
-If you configure `starting-offsets` to `TIMESTAMP` or `OFFSETS` but fail to specify the required timestamp or partition offsets list, Flinkboot will throw an:
-
-* **`InvalidKafkaSourceConfigurationException`** (inheriting from `FlinkbootException`).
-
-This ensures self-descriptive error messages and enables you to catch all Flinkboot-related runtime errors under a unified class.
+- **Nested Bean Validation:** If any property violates constraints (e.g. negative partition or blank topic), a `PropertiesValidationException` is thrown at startup.
+- **Invalid Offset Strategy:** If `starting-offsets` is set to `TIMESTAMP` or `OFFSETS` without providing the required timestamp or partition offset list, Flinkboot fails fast with an `InvalidKafkaSourcePropertiesException`.

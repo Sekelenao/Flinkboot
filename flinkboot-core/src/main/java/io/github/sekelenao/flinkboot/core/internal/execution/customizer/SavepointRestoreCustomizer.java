@@ -1,8 +1,8 @@
 package io.github.sekelenao.flinkboot.core.internal.execution.customizer;
 
-import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironmentConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.savepoint.RestoreMode;
-import io.github.sekelenao.flinkboot.core.api.configuration.savepoint.SavepointRestoreConfiguration;
+import io.github.sekelenao.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.savepoint.RestoreMode;
+import io.github.sekelenao.flinkboot.core.api.properties.savepoint.SavepointRestoreProperties;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.StateRecoveryOptions;
 
@@ -17,12 +17,12 @@ public final class SavepointRestoreCustomizer implements EnvironmentCustomizer {
     }
 
     @Override
-    public void configure(ExecutionEnvironmentConfiguration configuration) {
+    public void configure(ExecutionEnvironmentProperties configuration) {
         Objects.requireNonNull(configuration);
         configuration.savepointRestore().ifPresent(this::apply);
     }
 
-    private void apply(SavepointRestoreConfiguration savepointConfig) {
+    private void apply(SavepointRestoreProperties savepointConfig) {
         this.applySavepointPath(savepointConfig.savepointPath());
         savepointConfig.allowNonRestoredState().ifPresent(this::applyAllowNonRestoredState);
         savepointConfig.restoreMode().ifPresent(this::applyRestoreMode);

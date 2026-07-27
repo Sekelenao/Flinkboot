@@ -1,8 +1,8 @@
 package io.github.sekelenao.flinkboot.kafka.api.sink;
 
-import io.github.sekelenao.flinkboot.kafka.api.configuration.sink.KafkaDeliveryGuarantee;
-import io.github.sekelenao.flinkboot.kafka.api.configuration.sink.KafkaSinkConfiguration;
-import io.github.sekelenao.flinkboot.kafka.api.exception.InvalidKafkaSinkConfigurationException;
+import io.github.sekelenao.flinkboot.kafka.api.properties.sink.KafkaDeliveryGuarantee;
+import io.github.sekelenao.flinkboot.kafka.api.properties.sink.KafkaSinkProperties;
+import io.github.sekelenao.flinkboot.kafka.api.exception.InvalidKafkaSinkPropertiesException;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.DisplayName;
@@ -29,7 +29,7 @@ class KafkaSinkFactoryTest {
         @Test
         @DisplayName("Should successfully build KafkaSink and KafkaSinkBuilder with default configuration")
         void shouldBuildKafkaSink() {
-            var config = new KafkaSinkConfiguration(
+            var config = new KafkaSinkProperties(
                 List.of("localhost:9092"),
                 "my-topic",
                 null,
@@ -46,7 +46,7 @@ class KafkaSinkFactoryTest {
         @Test
         @DisplayName("Should successfully build with EXACTLY_ONCE and transactional ID prefix")
         void shouldBuildWithExactlyOnce() {
-            var config = new KafkaSinkConfiguration(
+            var config = new KafkaSinkProperties(
                 List.of("localhost:9092"),
                 "my-topic",
                 KafkaDeliveryGuarantee.EXACTLY_ONCE,
@@ -61,7 +61,7 @@ class KafkaSinkFactoryTest {
         @DisplayName("Should successfully build with NONE and AT_LEAST_ONCE delivery guarantees")
         void shouldBuildWithOtherGuarantees() {
             for (var guarantee : List.of(KafkaDeliveryGuarantee.NONE, KafkaDeliveryGuarantee.AT_LEAST_ONCE)) {
-                var config = new KafkaSinkConfiguration(
+                var config = new KafkaSinkProperties(
                     List.of("localhost:9092"),
                     "my-topic",
                     guarantee,
@@ -73,12 +73,12 @@ class KafkaSinkFactoryTest {
         }
 
         @Test
-        @DisplayName("Should throw InvalidKafkaSinkConfigurationException when EXACTLY_ONCE is requested but prefix is missing")
+        @DisplayName("Should throw InvalidKafkaSinkPropertiesException when EXACTLY_ONCE is requested but prefix is missing")
         void shouldThrowExceptionWhenPrefixIsMissing() {
             assertThrows(
-                InvalidKafkaSinkConfigurationException.class,
+                InvalidKafkaSinkPropertiesException.class,
                 () -> {
-                    var config = new KafkaSinkConfiguration(
+                    var config = new KafkaSinkProperties(
                         List.of("localhost:9092"),
                         "my-topic",
                         KafkaDeliveryGuarantee.EXACTLY_ONCE,
@@ -91,12 +91,12 @@ class KafkaSinkFactoryTest {
         }
 
         @Test
-        @DisplayName("Should throw InvalidKafkaSinkConfigurationException when AT_LEAST_ONCE is used but prefix is provided")
+        @DisplayName("Should throw InvalidKafkaSinkPropertiesException when AT_LEAST_ONCE is used but prefix is provided")
         void shouldThrowExceptionWhenPrefixIsProvidedWithAtLeastOnce() {
             assertThrows(
-                InvalidKafkaSinkConfigurationException.class,
+                InvalidKafkaSinkPropertiesException.class,
                 () -> {
-                    var config = new KafkaSinkConfiguration(
+                    var config = new KafkaSinkProperties(
                         List.of("localhost:9092"),
                         "my-topic",
                         KafkaDeliveryGuarantee.AT_LEAST_ONCE,
@@ -109,12 +109,12 @@ class KafkaSinkFactoryTest {
         }
 
         @Test
-        @DisplayName("Should throw InvalidKafkaSinkConfigurationException when default delivery guarantee is used but prefix is provided")
+        @DisplayName("Should throw InvalidKafkaSinkPropertiesException when default delivery guarantee is used but prefix is provided")
         void shouldThrowExceptionWhenPrefixIsProvidedWithDefaultGuarantee() {
             assertThrows(
-                InvalidKafkaSinkConfigurationException.class,
+                InvalidKafkaSinkPropertiesException.class,
                 () -> {
-                    var config = new KafkaSinkConfiguration(
+                    var config = new KafkaSinkProperties(
                         List.of("localhost:9092"),
                         "my-topic",
                         null,
@@ -129,7 +129,7 @@ class KafkaSinkFactoryTest {
         @Test
         @DisplayName("Should throw NullPointerException when parameters are null")
         void shouldThrowExceptionWhenParamsAreNull() {
-            var config = new KafkaSinkConfiguration(
+            var config = new KafkaSinkProperties(
                 List.of("localhost:9092"),
                 "my-topic",
                 KafkaDeliveryGuarantee.AT_LEAST_ONCE,
@@ -138,9 +138,9 @@ class KafkaSinkFactoryTest {
             );
 
             assertAll(
-                () -> assertThrows(NullPointerException.class, () -> KafkaSinkFactory.supplyFor((KafkaSinkConfiguration) null, TEST_SCHEMA)),
+                () -> assertThrows(NullPointerException.class, () -> KafkaSinkFactory.supplyFor((KafkaSinkProperties) null, TEST_SCHEMA)),
                 () -> assertThrows(NullPointerException.class, () -> KafkaSinkFactory.supplyFor(config, null)),
-                () -> assertThrows(NullPointerException.class, () -> KafkaSinkFactory.supplyBuilderFor((KafkaSinkConfiguration) null, TEST_SCHEMA)),
+                () -> assertThrows(NullPointerException.class, () -> KafkaSinkFactory.supplyBuilderFor((KafkaSinkProperties) null, TEST_SCHEMA)),
                 () -> assertThrows(NullPointerException.class, () -> KafkaSinkFactory.supplyBuilderFor(config, null))
             );
         }

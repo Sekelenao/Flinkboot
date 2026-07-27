@@ -1,8 +1,8 @@
 package io.github.sekelenao.flinkboot.core.internal.execution;
 
-import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironmentConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.JobConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.local.LocalWebUiConfiguration;
+import io.github.sekelenao.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.JobProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.local.LocalWebUiProperties;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.CheckpointingCustomizer;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.EnvironmentCustomizer;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.ExecutionCustomizer;
@@ -37,16 +37,16 @@ public final class ExecutionEnvironmentFactory {
         );
     }
 
-    public StreamExecutionEnvironment create(JobConfiguration jobConfiguration) {
-        Objects.requireNonNull(jobConfiguration);
-        configuration.set(PipelineOptions.NAME, jobConfiguration.name());
-        jobConfiguration.environment().ifPresent(envConfig ->
-            customizers.forEach(customizer -> customizer.configure(envConfig))
+    public StreamExecutionEnvironment create(JobProperties jobProperties) {
+        Objects.requireNonNull(jobProperties);
+        configuration.set(PipelineOptions.NAME, jobProperties.name());
+        jobProperties.environment().ifPresent(envProps ->
+            customizers.forEach(customizer -> customizer.configure(envProps))
         );
 
-        boolean useLocalWebUi = jobConfiguration.environment()
-            .flatMap(ExecutionEnvironmentConfiguration::localWebUi)
-            .flatMap(LocalWebUiConfiguration::enabled)
+        boolean useLocalWebUi = jobProperties.environment()
+            .flatMap(ExecutionEnvironmentProperties::localWebUi)
+            .flatMap(LocalWebUiProperties::enabled)
             .orElse(false);
 
         return ExecutionEnvironmentProvider.get(useLocalWebUi).createEnvironment(configuration);

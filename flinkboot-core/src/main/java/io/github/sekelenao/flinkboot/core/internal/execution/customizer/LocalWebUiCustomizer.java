@@ -1,7 +1,7 @@
 package io.github.sekelenao.flinkboot.core.internal.execution.customizer;
 
-import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironmentConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.local.LocalWebUiConfiguration;
+import io.github.sekelenao.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.local.LocalWebUiProperties;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.RestOptions;
 
@@ -16,12 +16,12 @@ public final class LocalWebUiCustomizer implements EnvironmentCustomizer {
     }
 
     @Override
-    public void configure(ExecutionEnvironmentConfiguration configuration) {
+    public void configure(ExecutionEnvironmentProperties configuration) {
         Objects.requireNonNull(configuration);
         configuration.localWebUi().ifPresent(this::apply);
     }
 
-    private void apply(LocalWebUiConfiguration localWebUiConfig) {
+    private void apply(LocalWebUiProperties localWebUiConfig) {
         if (!localWebUiConfig.enabled().orElse(false)) {
             return;
         }

@@ -1,7 +1,7 @@
 package io.github.sekelenao.flinkboot.core.api;
 
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import io.github.sekelenao.flinkboot.core.api.configuration.JobConfiguration;
+import io.github.sekelenao.flinkboot.core.api.properties.JobProperties;
 import io.github.sekelenao.flinkboot.core.internal.execution.ExecutionEnvironmentFactory;
 import io.github.sekelenao.flinkboot.core.internal.parser.yaml.YamlParser;
 import io.github.sekelenao.flinkboot.core.internal.resource.Resource;
@@ -69,9 +69,9 @@ public final class Flinkboot {
         }
     }
 
-    public StreamExecutionEnvironment executionEnvironment(JobConfiguration jobConfiguration) {
-        Objects.requireNonNull(jobConfiguration);
-        return new ExecutionEnvironmentFactory().create(jobConfiguration);
+    public StreamExecutionEnvironment executionEnvironment(JobProperties jobProperties) {
+        Objects.requireNonNull(jobProperties);
+        return new ExecutionEnvironmentFactory().create(jobProperties);
     }
 
 }

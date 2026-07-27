@@ -1,48 +1,55 @@
 # How to Load & Merge Configurations
 
-Flinkboot allows you to load and recursively merge multiple configuration files into a single, validated Java configuration object at startup.
+Flinkboot allows you to load, merge, and validate YAML configuration files into strongly-typed Java models at startup.
 
-## Maven Dependencies
+---
 
-Import the Flinkboot BOM in your `<dependencyManagement>` and add the core Flinkboot dependency along with Flink APIs:
+## 1. Default Configuration Location & YAML Structure
 
-```xml
-<dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>io.github.sekelenao</groupId>
-            <artifactId>flinkboot</artifactId>
-            <version>0.1.0-1.20</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
-    </dependencies>
-</dependencyManagement>
+### Default File Location
+By default, when you initialize Flinkboot, it looks for a configuration file located at:
 
-<dependencies>
-    <!-- Flinkboot Core -->
-    <dependency>
-        <groupId>io.github.sekelenao</groupId>
-        <artifactId>flinkboot-core</artifactId>
-    </dependency>
+```text
+file:job-configuration.yaml
+```
 
-    <!-- Flink Streaming API (Provided by Flink cluster) -->
-    <dependency>
-        <groupId>org.apache.flink</groupId>
-        <artifactId>flink-streaming-java</artifactId>
-    </dependency>
-</dependencies>
+*(i.e., a file named `job-configuration.yaml` in your application's current working directory).*
+
+### Specifying Custom or Multiple Files
+You can override the default location or supply multiple comma-separated configuration files using the `-flinkboot-configurations` command-line argument or the `FLINKBOOT_CONFIGURATIONS` environment variable:
+
+```bash
+# Via Command Line (CLI)
+flink run MyJob.jar -flinkboot-configurations "file:base.yaml,file:override.yaml"
+
+# Via Environment Variable
+export FLINKBOOT_CONFIGURATIONS="file:base.yaml,file:override.yaml"
+flink run MyJob.jar
+```
+
+*Supported location URI schemes:*
+- `file:<path>` — Path on the local filesystem (e.g., `file:job-configuration.yaml` or `file:/etc/flink/job.yaml`).
+- `classpath:<path>` — Resource file inside the JAR classpath (e.g., `classpath:job-configuration.yaml`).
+
+---
+
+## 2. YAML Properties & Structure
+
+Define your configuration properties in your YAML file (`job-configuration.yaml`):
+
+```yaml
+jobName: "my-analytics-pipeline"
+parallelism: 8
+bufferTimeoutMs: 100
 ```
 
 ---
 
-## 1. Usage in Java Code
+## 3. Java Model & Loading
 
-Use the `configuration(Class<C> configurationClass)` method of the [Flinkboot](file:///home/haine/Documents/Programmation/Flinkboot/flinkboot-core/src/main/java/io/github/sekelenao/flinkboot/core/api/Flinkboot.java) instance to load your configuration:
+### Defining Your Configuration Model
 
-### Defining the Configuration Model
-
-Define your configuration as an immutable Java class with fluent accessor methods and a Jackson creator constructor:
+Define your configuration model as an immutable Java class (or Record) annotated with Jackson and Jakarta Bean Validation annotations:
 
 ```java
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -50,119 +57,118 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
-public final class JobConfig {
+public final class MyJobConfig {
 
-    @NotBlank 
+    @NotBlank
     private final String jobName;
 
-    @Min(1) 
+    @Min(1)
     private final int parallelism;
 
+    private final long bufferTimeoutMs;
+
     @JsonCreator
-    public JobConfig(
+    public MyJobConfig(
         @JsonProperty("jobName") String jobName,
-        @JsonProperty("parallelism") int parallelism
+        @JsonProperty("parallelism") int parallelism,
+        @JsonProperty("bufferTimeoutMs") long bufferTimeoutMs
     ) {
         this.jobName = jobName;
         this.parallelism = parallelism;
+        this.bufferTimeoutMs = bufferTimeoutMs;
     }
 
     public String jobName() { return jobName; }
     public int parallelism() { return parallelism; }
+    public long bufferTimeoutMs() { return bufferTimeoutMs; }
 }
 ```
 
-### Loading the Configuration
+### Loading in Java
 
-Use the `configuration(Class<C> configurationClass)` method to load, merge, and validate your configuration:
+Use `Flinkboot.initialize(args).configuration(...)` in your main class to load, merge, and validate your configuration:
 
 ```java
 import io.github.sekelenao.flinkboot.core.api.Flinkboot;
 
 public class MyFlinkJob {
     public static void main(String[] args) throws Exception {
-        // Load and validate configurations
-        JobConfig config = Flinkboot.initialize(args).configuration(JobConfig.class);
-        
-        System.out.println("Loaded job: " + config.jobName());
+        // Initialize Flinkboot with CLI args
+        Flinkboot boot = Flinkboot.initialize(args);
+
+        // Load configuration (defaults to file:job-configuration.yaml)
+        MyJobConfig config = boot.configuration(MyJobConfig.class);
+
+        System.out.println("Loaded Job: " + config.jobName());
     }
 }
 ```
 
-### Customizing the YAML Mapper
+### Customizing the Jackson YAML Mapper
 
-If you need to customize Jackson's deserialization settings, you can pass a customizer `Consumer<YAMLMapper.Builder>` or a pre-configured `YAMLMapper` directly:
+If you need custom Jackson deserialization features, pass a customizer `Consumer<YAMLMapper.Builder>` or a pre-configured `YAMLMapper`:
 
 ```java
 // Option A: Using a builder customizer
-JobConfig config = Flinkboot.initialize(args)
-    .configuration(JobConfig.class, builder -> {
-        builder.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
-    });
+MyJobConfig config = boot.configuration(MyJobConfig.class, builder -> {
+    builder.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
+});
 
 // Option B: Using a pre-configured mapper
 YAMLMapper customMapper = new YAMLMapper();
-JobConfig config = Flinkboot.initialize(args)
-    .configuration(JobConfig.class, customMapper);
+MyJobConfig config = boot.configuration(MyJobConfig.class, customMapper);
 ```
 
 ---
 
-## 2. Merging Semantics
+## 4. Merging Semantics & CLI Flags
 
-When multiple files are specified in `-flinkboot-configurations` (e.g. `file:base.yaml,file:override.yaml`), Flinkboot merges them sequentially from left to right.
+When multiple files are specified (e.g. `file:base.yaml,file:override.yaml`), Flinkboot merges them sequentially from left to right.
 
 ### Default Behavior: Strict Merging
 By default, Flinkboot enforces strict merging rules to prevent accidental configuration overrides:
-* **Value Overrides:** Overriding an existing scalar key or list is forbidden. If a key is redefined in a later file, a `YamlParsingException` is thrown.
-* **Nested Objects:** Nested objects are merged recursively (deep merge) as long as there are no scalar/list conflicts.
-* **Lists and Arrays:** Re-defining a list key in a later file is treated as a value override and will throw a `YamlParsingException` by default.
+- **Scalar Overrides:** Overriding an existing key is forbidden by default. If a key is redefined in a later file, a `YamlParsingException` is thrown.
+- **Nested Objects:** Nested objects are merged recursively (deep merge).
+- **Lists and Arrays:** Redefining a list key in a later file is treated as a scalar override and throws a `YamlParsingException` by default.
 
-### Customizing Merging Behavior (Flags)
-You can customize the merging behavior using the following command-line flags or environment variables:
+### Merge Control Flags
 
-#### A. Permitting Overrides
-Use the flag `--flinkboot-configuration-override` (or environment variable `FLINKBOOT_CONFIGURATION_OVERRIDE=true`) to allow properties to be overwritten.
-* **With override enabled:**
-  * **`base.yaml`:** `parallelism: 4`
-  * **`override.yaml`:** `parallelism: 16`
-  * **Result:** `parallelism: 16` (instead of throwing an exception)
-  * **Lists and Arrays:** The entire list from the later file completely replaces the list from the earlier file.
+You can customize the merging behavior using command-line flags or environment variables:
 
-#### B. Permitting List Merging
-Use the flag `--flinkboot-configuration-list-merging` (or environment variable `FLINKBOOT_CONFIGURATION_LIST_MERGING=true`) to allow list elements to be appended together during a merge instead of being replaced.
-* **With list merging enabled:**
-  * **`base.yaml`:**
-    ```yaml
-    topics:
-      - "users"
-    ```
-  * **`override.yaml`:**
-    ```yaml
-    topics:
-      - "orders"
-    ```
-  * **Result:** `topics: ["users", "orders"]`
-  * *Note:* If list merging is enabled but `--flinkboot-configuration-override` is disabled, scalar overrides will still throw an exception, but list merges (appends) are allowed. If both are enabled, both scalar overrides and list appends are allowed.
-  * *Strict Boolean Rule:* Just like any other Flinkboot flags, if you set `FLINKBOOT_CONFIGURATION_OVERRIDE` or `FLINKBOOT_CONFIGURATION_LIST_MERGING` via environment variables, their values must be strictly `"true"` or `"false"`. Any other value will cause Flinkboot to fail fast with a `BooleanParsingException`.
+#### A. Permitting Property Overrides
+Use `--flinkboot-configuration-override` (or `FLINKBOOT_CONFIGURATION_OVERRIDE=true`) to allow properties to be overwritten by subsequent files:
 
----
+```bash
+flink run MyJob.jar -flinkboot-configurations "file:base.yaml,file:env-override.yaml" --flinkboot-configuration-override
+```
 
-## 3. Strict Validation
+* **`base.yaml`:** `parallelism: 4`
+* **`env-override.yaml`:** `parallelism: 16`
+* **Result:** `parallelism: 16`
 
-After all configurations have been merged, Flinkboot validates the final object against Jakarta Bean Validation constraints (e.g., `@NotBlank`, `@Min`, `@NotNull`).
+#### B. Permitting List Merging (Appends)
+Use `--flinkboot-configuration-list-merging` (or `FLINKBOOT_CONFIGURATION_LIST_MERGING=true`) to append list items from subsequent files together:
 
-- If validation fails, Flinkboot throws a `ConfigurationValidationException` listing up to 3 violation details.
-- If a file is completely empty or contains only comments, it is safely ignored during merging.
-- If the configuration source is non-empty but does not resolve to a root YAML object (e.g., a YAML list or primitive value), a `YamlParsingException` is thrown.
+```yaml
+# base.yaml
+topics:
+  - "users"
+
+# override.yaml
+topics:
+  - "orders"
+```
+
+* **Result with list merging enabled:** `topics: ["users", "orders"]`
+
+> [!CAUTION]
+> If you set boolean flags via environment variables (e.g. `FLINKBOOT_CONFIGURATION_OVERRIDE=true`), values must strictly be `"true"` or `"false"`. Any other string (e.g., `"yes"` or `"1"`) will fail fast at startup with a `BooleanParsingException`.
 
 ---
 
-## 4. Default Parser Settings
+## 5. Validation & Parsing Behaviors
 
-By default, Flinkboot's parser configures the underlying `YAMLMapper` with the following behaviors:
-
-- **Strict Property Parsing** — Any property defined in your YAML that is not declared in your Java class will cause a `YamlParsingException`. This helps catch spelling mistakes immediately at startup.
-- **Case-Insensitive Properties** — Property keys in YAML are resolved case-insensitively (e.g., `parallelism` and `PARALLELISM` both map to the class field `parallelism`).
-- **Case-Insensitive Enums** — Deserialized enum values are matched case-insensitively (e.g., the string `"streaming"` maps to `JobType.STREAMING`).
-- **Automatic Module Discovery** — Flinkboot calls `.findAndAddModules()` on the mapper builder. Any Jackson modules available on the classpath (e.g., for Java 8 date/time libraries, parameter names, or custom types) are automatically registered.
+- **Fail-Fast Validation:** After loading and merging files, Flinkboot validates the root object against Jakarta Bean Validation annotations. If validation fails, a `PropertiesValidationException` is thrown detailing the errors.
+- **Strict Property Parsing:** Any property in your YAML file that does not match a field in your Java class will cause a `YamlParsingException`. This catches typos immediately.
+- **Case-Insensitive Keys & Enums:** Property names and Enum values are matched case-insensitively.
+- **Jackson Module Auto-Discovery:** Jackson modules on the classpath (e.g. Java 8 date/time) are automatically registered.

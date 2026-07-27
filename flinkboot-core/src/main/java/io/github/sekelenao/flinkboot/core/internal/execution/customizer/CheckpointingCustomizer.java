@@ -1,9 +1,9 @@
 package io.github.sekelenao.flinkboot.core.internal.execution.customizer;
 
-import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironmentConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.checkpointing.CheckpointingConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.checkpointing.CheckpointingMode;
-import io.github.sekelenao.flinkboot.core.api.configuration.checkpointing.ExternalizedCheckpointCleanupMode;
+import io.github.sekelenao.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.CheckpointingProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.CheckpointingMode;
+import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.ExternalizedCheckpointCleanupMode;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.ExternalizedCheckpointRetention;
@@ -20,12 +20,12 @@ public final class CheckpointingCustomizer implements EnvironmentCustomizer {
     }
 
     @Override
-    public void configure(ExecutionEnvironmentConfiguration configuration) {
+    public void configure(ExecutionEnvironmentProperties configuration) {
         Objects.requireNonNull(configuration);
         configuration.checkpointing().ifPresent(this::apply);
     }
 
-    private void apply(CheckpointingConfiguration checkpointingConfig) {
+    private void apply(CheckpointingProperties checkpointingConfig) {
         checkpointingConfig.intervalMs().ifPresent(this::applyIntervalMs);
         checkpointingConfig.mode().ifPresent(this::applyMode);
         checkpointingConfig.timeoutMs().ifPresent(this::applyTimeoutMs);

@@ -1,8 +1,8 @@
 package io.github.sekelenao.flinkboot.core.internal.execution.customizer;
 
-import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironmentConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.execution.ExecutionConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.execution.ExecutionRuntimeMode;
+import io.github.sekelenao.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.execution.ExecutionProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.execution.ExecutionRuntimeMode;
 import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.CoreOptions;
@@ -21,12 +21,12 @@ public final class ExecutionCustomizer implements EnvironmentCustomizer {
     }
 
     @Override
-    public void configure(ExecutionEnvironmentConfiguration configuration) {
+    public void configure(ExecutionEnvironmentProperties configuration) {
         Objects.requireNonNull(configuration);
         configuration.execution().ifPresent(this::apply);
     }
 
-    private void apply(ExecutionConfiguration execConfig) {
+    private void apply(ExecutionProperties execConfig) {
         execConfig.runtimeMode().ifPresent(this::applyRuntimeMode);
         execConfig.parallelism().ifPresent(this::applyParallelism);
         execConfig.maxParallelism().ifPresent(this::applyMaxParallelism);

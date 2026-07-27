@@ -1,7 +1,7 @@
 package io.github.sekelenao.flinkboot.kafka.api.source;
 
-import io.github.sekelenao.flinkboot.kafka.api.configuration.source.KafkaSourceTopicListConfiguration;
-import io.github.sekelenao.flinkboot.kafka.api.configuration.source.KafkaSourceTopicPatternConfiguration;
+import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceTopicListProperties;
+import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceTopicPatternProperties;
 import io.github.sekelenao.flinkboot.kafka.internal.OffsetInitializerMapper;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.KafkaSourceBuilder;
@@ -18,7 +18,7 @@ public final class KafkaSourceFactory {
     }
 
     public static <T> KafkaSourceBuilder<T> supplyBuilderFor(
-        KafkaSourceTopicListConfiguration config,
+        KafkaSourceTopicListProperties config,
         KafkaRecordDeserializationSchema<T> schema
     ) {
         Objects.requireNonNull(config);
@@ -38,14 +38,14 @@ public final class KafkaSourceFactory {
     }
 
     public static <T> KafkaSource<T> supplyFor(
-        KafkaSourceTopicListConfiguration config,
+        KafkaSourceTopicListProperties config,
         KafkaRecordDeserializationSchema<T> schema
     ) {
         return supplyBuilderFor(config, schema).build();
     }
 
     public static <T> KafkaSourceBuilder<T> supplyBuilderFor(
-        KafkaSourceTopicPatternConfiguration config,
+        KafkaSourceTopicPatternProperties config,
         KafkaRecordDeserializationSchema<T> schema
     ) {
         Objects.requireNonNull(config);
@@ -65,7 +65,7 @@ public final class KafkaSourceFactory {
     }
 
     public static <T> KafkaSource<T> supplyFor(
-        KafkaSourceTopicPatternConfiguration config,
+        KafkaSourceTopicPatternProperties config,
         KafkaRecordDeserializationSchema<T> schema
     ) {
         return supplyBuilderFor(config, schema).build();

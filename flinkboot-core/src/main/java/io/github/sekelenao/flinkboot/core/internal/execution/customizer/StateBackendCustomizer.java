@@ -1,9 +1,9 @@
 package io.github.sekelenao.flinkboot.core.internal.execution.customizer;
 
-import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironmentConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.state.CheckpointStorageType;
-import io.github.sekelenao.flinkboot.core.api.configuration.state.StateBackendConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.state.StateBackendType;
+import io.github.sekelenao.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.state.CheckpointStorageType;
+import io.github.sekelenao.flinkboot.core.api.properties.state.StateBackendProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.state.StateBackendType;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.StateBackendOptions;
@@ -20,12 +20,12 @@ public final class StateBackendCustomizer implements EnvironmentCustomizer {
     }
 
     @Override
-    public void configure(ExecutionEnvironmentConfiguration configuration) {
+    public void configure(ExecutionEnvironmentProperties configuration) {
         Objects.requireNonNull(configuration);
         configuration.stateBackend().ifPresent(this::apply);
     }
 
-    private void apply(StateBackendConfiguration stateConfig) {
+    private void apply(StateBackendProperties stateConfig) {
         stateConfig.type().ifPresent(type -> this.applyType(type, stateConfig));
         stateConfig.checkpointStorage().ifPresent(this::applyCheckpointStorage);
         stateConfig.storagePath().ifPresent(this::applyStoragePath);
@@ -33,7 +33,7 @@ public final class StateBackendCustomizer implements EnvironmentCustomizer {
         stateConfig.latencyTracking().ifPresent(this::applyLatencyTracking);
     }
 
-    private void applyType(StateBackendType type, StateBackendConfiguration stateConfig) {
+    private void applyType(StateBackendType type, StateBackendProperties stateConfig) {
         switch (type) {
             case HASHMAP:
                 toConfigure.set(StateBackendOptions.STATE_BACKEND, "hashmap");

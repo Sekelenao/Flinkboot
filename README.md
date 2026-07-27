@@ -21,26 +21,28 @@ By combining clean Java configuration models and Jakarta Bean Validation (JSR-38
 * **Unified Configuration Loading** — Parse and merge multiple YAML configuration files, CLI arguments, and environment variables into immutable Java classes/records.
 * **Fail-Fast Validation** — Enforce constraints (non-blank strings, numeric ranges, non-null properties maps, regex validation) before Flink resources are allocated.
 * **Safe Merge Semantics** — Detect and prevent accidental property overrides during configuration merges unless explicit override options are passed.
-* **Auto-configured Connectors** — Boostrap Apache Flink sources and sinks (e.g. Apache Kafka) directly from configuration files with built-in validation rules and customizers.
+* **Auto-configured Connectors** — Bootstrap Apache Flink sources and sinks (e.g. Apache Kafka) directly from configuration files with built-in validation rules.
 
 ---
 
-## 🚀 Must-Read Guides (Getting Started)
+## 🚀 Getting Started
 
-Before building your first Flinkboot application, we highly recommend reading these guides in order:
+Follow these 3 essential steps to get started with Flinkboot:
 
-1. **[Avoid Classpath & Dependency Conflicts](howto/avoid-dependency-conflicts.md) (MUST READ)**  
-   *Learn how to configure your project's Maven pom.xml and shading settings to avoid typical Flink runtime conflicts with Jackson and Log4j.*
-2. **[How to Load & Merge Configurations](howto/load-configurations.md)**  
-   *Understand how to define your configuration models, run Flinkboot initialization in your job's main class, and use CLI overrides.*
-3. **[How to Configure a Kafka Source](howto/configure-kafka-source.md) / [Sink](howto/configure-kafka-sink.md)**  
-   *Learn how to configure Kafka consumers and producers, handle delivery guarantees (Exactly-Once, At-Least-Once), and customize offset strategies.*
+1. **[Setup POM & Avoid Conflicts](howto/avoid-dependency-conflicts.md) (MUST READ)**  
+   *Configure your project's Maven POM, BOM dependencies, and shading relocations to prevent Jackson/Log4j runtime conflicts on your Flink cluster.*
+
+2. **[Configure Your Jobs (Load & Merge Configurations)](howto/load-configurations.md)**  
+   *Define your YAML configurations (defaults to `file:job-configuration.yaml`), load them into strongly-typed Java models, and apply CLI/environment overrides.*
+
+3. **[Create an Execution Environment](howto/configure-execution-environment.md)**  
+   *Configure execution modes, checkpointing, restart strategies, and RocksDB state backends to instantiate Flink's `StreamExecutionEnvironment` with zero boilerplate.*
 
 ---
 
-## 📖 All Guides
+## 📖 How-To Guides
 
-For all other specific configurations and detailed features (flags, parameters, POJO compliance), please refer to the complete **[How-To Guides Index](howto/README.md)**.
+For all specific guides (connector integrations, parameters, flags, POJO compliance), please refer to the complete **[How-To Guides Index](howto/README.md)**.
 
 ---
 

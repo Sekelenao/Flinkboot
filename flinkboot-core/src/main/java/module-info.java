@@ -1,13 +1,13 @@
 module io.github.sekelenao.flinkboot.core {
 
     exports io.github.sekelenao.flinkboot.core.api;
-    exports io.github.sekelenao.flinkboot.core.api.configuration;
-    exports io.github.sekelenao.flinkboot.core.api.configuration.checkpointing;
-    exports io.github.sekelenao.flinkboot.core.api.configuration.execution;
-    exports io.github.sekelenao.flinkboot.core.api.configuration.local;
-    exports io.github.sekelenao.flinkboot.core.api.configuration.restart;
-    exports io.github.sekelenao.flinkboot.core.api.configuration.savepoint;
-    exports io.github.sekelenao.flinkboot.core.api.configuration.state;
+    exports io.github.sekelenao.flinkboot.core.api.properties;
+    exports io.github.sekelenao.flinkboot.core.api.properties.checkpointing;
+    exports io.github.sekelenao.flinkboot.core.api.properties.execution;
+    exports io.github.sekelenao.flinkboot.core.api.properties.local;
+    exports io.github.sekelenao.flinkboot.core.api.properties.restart;
+    exports io.github.sekelenao.flinkboot.core.api.properties.savepoint;
+    exports io.github.sekelenao.flinkboot.core.api.properties.state;
     exports io.github.sekelenao.flinkboot.core.api.exception;
     exports io.github.sekelenao.flinkboot.core.api.exception.configuration;
     exports io.github.sekelenao.flinkboot.core.api.exception.parsing;
@@ -24,13 +24,13 @@ module io.github.sekelenao.flinkboot.core {
     requires flink.streaming.java;
 
     opens io.github.sekelenao.flinkboot.core.api to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
-    opens io.github.sekelenao.flinkboot.core.api.configuration to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
-    opens io.github.sekelenao.flinkboot.core.api.configuration.checkpointing to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
-    opens io.github.sekelenao.flinkboot.core.api.configuration.execution to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
-    opens io.github.sekelenao.flinkboot.core.api.configuration.local to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
-    opens io.github.sekelenao.flinkboot.core.api.configuration.restart to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
-    opens io.github.sekelenao.flinkboot.core.api.configuration.savepoint to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
-    opens io.github.sekelenao.flinkboot.core.api.configuration.state to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.api.properties to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.api.properties.checkpointing to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.api.properties.execution to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.api.properties.local to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.api.properties.restart to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.api.properties.savepoint to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.api.properties.state to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
     opens io.github.sekelenao.flinkboot.core.internal.parser.yaml to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
     opens io.github.sekelenao.flinkboot.core.internal.execution to org.junit.platform.commons;
     opens io.github.sekelenao.flinkboot.core.internal.execution.customizer to org.junit.platform.commons;

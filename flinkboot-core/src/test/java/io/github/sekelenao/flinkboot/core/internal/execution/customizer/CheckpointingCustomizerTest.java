@@ -1,9 +1,9 @@
 package io.github.sekelenao.flinkboot.core.internal.execution.customizer;
 
-import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironmentConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.checkpointing.CheckpointingConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.checkpointing.CheckpointingMode;
-import io.github.sekelenao.flinkboot.core.api.configuration.checkpointing.ExternalizedCheckpointCleanupMode;
+import io.github.sekelenao.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.CheckpointingProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.CheckpointingMode;
+import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.ExternalizedCheckpointCleanupMode;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.ExternalizedCheckpointRetention;
@@ -22,11 +22,11 @@ class CheckpointingCustomizerTest {
 
     @Test
     @DisplayName("Should apply checkpointing configuration onto Flink configuration")
-    void shouldApplyCheckpointingConfiguration() {
+    void shouldApplyCheckpointingProperties() {
         Configuration flinkConfig = new Configuration();
         var customizer = new CheckpointingCustomizer(flinkConfig);
 
-        var checkpointConfig = new CheckpointingConfiguration(
+        var checkpointConfig = new CheckpointingProperties(
             true,
             10000L,
             CheckpointingMode.EXACTLY_ONCE,
@@ -38,9 +38,9 @@ class CheckpointingCustomizerTest {
             1000L,
             "s3://bucket/checkpoints"
         );
-        var envConfig = new ExecutionEnvironmentConfiguration(null, checkpointConfig, null, null, null, null, null);
+        var envProps = new ExecutionEnvironmentProperties(null, checkpointConfig, null, null, null, null, null);
 
-        customizer.configure(envConfig);
+        customizer.configure(envProps);
 
         assertAll(
             () -> assertEquals(Duration.ofMillis(10000L), flinkConfig.get(CheckpointingOptions.CHECKPOINTING_INTERVAL)),
@@ -60,9 +60,9 @@ class CheckpointingCustomizerTest {
     void shouldDoNothingWhenEmpty() {
         Configuration flinkConfig = new Configuration();
         var customizer = new CheckpointingCustomizer(flinkConfig);
-        var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null, null, null);
+        var envProps = new ExecutionEnvironmentProperties(null, null, null, null, null, null, null);
 
-        customizer.configure(envConfig);
+        customizer.configure(envProps);
 
         assertNull(flinkConfig.get(CheckpointingOptions.CHECKPOINTING_INTERVAL));
     }

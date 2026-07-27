@@ -1,11 +1,11 @@
 package io.github.sekelenao.flinkboot.core.internal.execution.customizer;
 
-import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironmentConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.restart.ExponentialDelayRestartConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.restart.FailureRateRestartConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.restart.FixedDelayRestartConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.restart.RestartStrategyConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.restart.RestartStrategyType;
+import io.github.sekelenao.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.restart.ExponentialDelayRestartProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.restart.FailureRateRestartProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.restart.FixedDelayRestartProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.restart.RestartStrategyProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.restart.RestartStrategyType;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.RestartStrategyOptions;
 
@@ -21,16 +21,16 @@ public final class RestartStrategyCustomizer implements EnvironmentCustomizer {
     }
 
     @Override
-    public void configure(ExecutionEnvironmentConfiguration configuration) {
+    public void configure(ExecutionEnvironmentProperties configuration) {
         Objects.requireNonNull(configuration);
         configuration.restartStrategy().ifPresent(this::apply);
     }
 
-    private void apply(RestartStrategyConfiguration restartConfig) {
+    private void apply(RestartStrategyProperties restartConfig) {
         restartConfig.type().ifPresent(type -> this.applyType(type, restartConfig));
     }
 
-    private void applyType(RestartStrategyType type, RestartStrategyConfiguration restartConfig) {
+    private void applyType(RestartStrategyType type, RestartStrategyProperties restartConfig) {
         switch (type) {
             case NO_RESTART:
                 toConfigure.set(RestartStrategyOptions.RESTART_STRATEGY, "none");
@@ -52,7 +52,7 @@ public final class RestartStrategyCustomizer implements EnvironmentCustomizer {
         }
     }
 
-    private void applyFixedDelay(FixedDelayRestartConfiguration config) {
+    private void applyFixedDelay(FixedDelayRestartProperties config) {
         config.attempts().ifPresent(this::applyFixedDelayAttempts);
         config.delayMs().ifPresent(this::applyFixedDelayDelayMs);
     }
@@ -66,7 +66,7 @@ public final class RestartStrategyCustomizer implements EnvironmentCustomizer {
         toConfigure.set(RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_DELAY, duration);
     }
 
-    private void applyFailureRate(FailureRateRestartConfiguration config) {
+    private void applyFailureRate(FailureRateRestartProperties config) {
         config.maxFailuresPerInterval().ifPresent(this::applyFailureRateMaxFailuresPerInterval);
         config.failureIntervalMs().ifPresent(this::applyFailureRateFailureIntervalMs);
         config.delayMs().ifPresent(this::applyFailureRateDelayMs);
@@ -86,7 +86,7 @@ public final class RestartStrategyCustomizer implements EnvironmentCustomizer {
         toConfigure.set(RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_DELAY, duration);
     }
 
-    private void applyExponentialDelay(ExponentialDelayRestartConfiguration config) {
+    private void applyExponentialDelay(ExponentialDelayRestartProperties config) {
         config.initialBackoffMs().ifPresent(this::applyExponentialDelayInitialBackoffMs);
         config.maxBackoffMs().ifPresent(this::applyExponentialDelayMaxBackoffMs);
         config.backoffMultiplier().ifPresent(this::applyExponentialDelayBackoffMultiplier);

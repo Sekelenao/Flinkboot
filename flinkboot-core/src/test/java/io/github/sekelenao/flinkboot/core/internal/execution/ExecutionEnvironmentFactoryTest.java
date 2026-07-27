@@ -1,23 +1,23 @@
 package io.github.sekelenao.flinkboot.core.internal.execution;
 
-import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironmentConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.JobConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.checkpointing.CheckpointingConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.checkpointing.CheckpointingMode;
-import io.github.sekelenao.flinkboot.core.api.configuration.checkpointing.ExternalizedCheckpointCleanupMode;
-import io.github.sekelenao.flinkboot.core.api.configuration.execution.ExecutionConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.execution.ExecutionRuntimeMode;
-import io.github.sekelenao.flinkboot.core.api.configuration.local.LocalWebUiConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.restart.ExponentialDelayRestartConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.restart.FailureRateRestartConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.restart.FixedDelayRestartConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.restart.RestartStrategyConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.restart.RestartStrategyType;
-import io.github.sekelenao.flinkboot.core.api.configuration.savepoint.RestoreMode;
-import io.github.sekelenao.flinkboot.core.api.configuration.savepoint.SavepointRestoreConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.state.CheckpointStorageType;
-import io.github.sekelenao.flinkboot.core.api.configuration.state.StateBackendConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.state.StateBackendType;
+import io.github.sekelenao.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.JobProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.CheckpointingProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.CheckpointingMode;
+import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.ExternalizedCheckpointCleanupMode;
+import io.github.sekelenao.flinkboot.core.api.properties.execution.ExecutionProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.execution.ExecutionRuntimeMode;
+import io.github.sekelenao.flinkboot.core.api.properties.local.LocalWebUiProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.restart.ExponentialDelayRestartProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.restart.FailureRateRestartProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.restart.FixedDelayRestartProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.restart.RestartStrategyProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.restart.RestartStrategyType;
+import io.github.sekelenao.flinkboot.core.api.properties.savepoint.RestoreMode;
+import io.github.sekelenao.flinkboot.core.api.properties.savepoint.SavepointRestoreProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.state.CheckpointStorageType;
+import io.github.sekelenao.flinkboot.core.api.properties.state.StateBackendProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.state.StateBackendType;
 import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
@@ -53,16 +53,16 @@ public class ExecutionEnvironmentFactoryTest {
     class ConfigurationMappingTests {
 
         @Test
-        @DisplayName("Should throw NullPointerException when jobConfiguration is null")
-        void shouldThrowNpeWhenJobConfigurationIsNull() {
+        @DisplayName("Should throw NullPointerException when jobProperties is null")
+        void shouldThrowNpeWhenJobPropertiesIsNull() {
             var factory = new ExecutionEnvironmentFactory();
             assertThrows(NullPointerException.class, () -> factory.create(null));
         }
 
         @Test
-        @DisplayName("Should correctly map JobConfiguration into Flink Configuration")
-        void shouldMapJobConfigurationToFlinkConfiguration() {
-            var execConfig = new ExecutionConfiguration(
+        @DisplayName("Should correctly map JobProperties into Flink Configuration")
+        void shouldMapJobPropertiesToFlinkConfiguration() {
+            var execConfig = new ExecutionProperties(
                 ExecutionRuntimeMode.STREAMING,
                 8,
                 128,
@@ -70,8 +70,8 @@ public class ExecutionEnvironmentFactoryTest {
                 200L,
                 true
             );
-            var envConfig = new ExecutionEnvironmentConfiguration(execConfig, null, null, null, null, null, null);
-            var jobConfig = new JobConfiguration("my-test-job", envConfig);
+            var envProps = new ExecutionEnvironmentProperties(execConfig, null, null, null, null, null, null);
+            var jobConfig = new JobProperties("my-test-job", envProps);
 
             var factory = new ExecutionEnvironmentFactory();
             var env = factory.create(jobConfig);
@@ -89,9 +89,9 @@ public class ExecutionEnvironmentFactoryTest {
         }
 
         @Test
-        @DisplayName("Should correctly map CheckpointingConfiguration into Flink Configuration")
-        void shouldMapCheckpointingConfigurationToFlinkConfiguration() {
-            var chkConfig = new CheckpointingConfiguration(
+        @DisplayName("Should correctly map CheckpointingProperties into Flink Configuration")
+        void shouldMapCheckpointingPropertiesToFlinkConfiguration() {
+            var chkConfig = new CheckpointingProperties(
                 true,
                 10000L,
                 CheckpointingMode.EXACTLY_ONCE,
@@ -103,8 +103,8 @@ public class ExecutionEnvironmentFactoryTest {
                 1000L,
                 "s3://my-bucket/checkpoints"
             );
-            var envConfig = new ExecutionEnvironmentConfiguration(null, chkConfig, null, null, null, null, null);
-            var jobConfig = new JobConfiguration("checkpoint-job", envConfig);
+            var envProps = new ExecutionEnvironmentProperties(null, chkConfig, null, null, null, null, null);
+            var jobConfig = new JobProperties("checkpoint-job", envProps);
 
             var factory = new ExecutionEnvironmentFactory();
             var env = factory.create(jobConfig);
@@ -124,12 +124,12 @@ public class ExecutionEnvironmentFactoryTest {
         }
 
         @Test
-        @DisplayName("Should correctly map FixedDelay RestartStrategyConfiguration into Flink Configuration")
+        @DisplayName("Should correctly map FixedDelay RestartStrategyProperties into Flink Configuration")
         void shouldMapFixedDelayRestartStrategyToFlinkConfiguration() {
-            var fixed = new FixedDelayRestartConfiguration(3, 5000L);
-            var restartConfig = new RestartStrategyConfiguration(RestartStrategyType.FIXED_DELAY, fixed, null, null);
-            var envConfig = new ExecutionEnvironmentConfiguration(null, null, restartConfig, null, null, null, null);
-            var jobConfig = new JobConfiguration("restart-job", envConfig);
+            var fixed = new FixedDelayRestartProperties(3, 5000L);
+            var restartConfig = new RestartStrategyProperties(RestartStrategyType.FIXED_DELAY, fixed, null, null);
+            var envProps = new ExecutionEnvironmentProperties(null, null, restartConfig, null, null, null, null);
+            var jobConfig = new JobProperties("restart-job", envProps);
 
             var factory = new ExecutionEnvironmentFactory();
             var env = factory.create(jobConfig);
@@ -143,12 +143,12 @@ public class ExecutionEnvironmentFactoryTest {
         }
 
         @Test
-        @DisplayName("Should correctly map FailureRate RestartStrategyConfiguration into Flink Configuration")
+        @DisplayName("Should correctly map FailureRate RestartStrategyProperties into Flink Configuration")
         void shouldMapFailureRateRestartStrategyToFlinkConfiguration() {
-            var failure = new FailureRateRestartConfiguration(3, 60000L, 1000L);
-            var restartConfig = new RestartStrategyConfiguration(RestartStrategyType.FAILURE_RATE, null, failure, null);
-            var envConfig = new ExecutionEnvironmentConfiguration(null, null, restartConfig, null, null, null, null);
-            var jobConfig = new JobConfiguration("restart-failure-job", envConfig);
+            var failure = new FailureRateRestartProperties(3, 60000L, 1000L);
+            var restartConfig = new RestartStrategyProperties(RestartStrategyType.FAILURE_RATE, null, failure, null);
+            var envProps = new ExecutionEnvironmentProperties(null, null, restartConfig, null, null, null, null);
+            var jobConfig = new JobProperties("restart-failure-job", envProps);
 
             var factory = new ExecutionEnvironmentFactory();
             var env = factory.create(jobConfig);
@@ -163,12 +163,12 @@ public class ExecutionEnvironmentFactoryTest {
         }
 
         @Test
-        @DisplayName("Should correctly map ExponentialDelay RestartStrategyConfiguration into Flink Configuration")
+        @DisplayName("Should correctly map ExponentialDelay RestartStrategyProperties into Flink Configuration")
         void shouldMapExponentialDelayRestartStrategyToFlinkConfiguration() {
-            var expo = new ExponentialDelayRestartConfiguration(1000L, 60000L, 2.0, 3600000L, 0.1);
-            var restartConfig = new RestartStrategyConfiguration(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
-            var envConfig = new ExecutionEnvironmentConfiguration(null, null, restartConfig, null, null, null, null);
-            var jobConfig = new JobConfiguration("restart-expo-job", envConfig);
+            var expo = new ExponentialDelayRestartProperties(1000L, 60000L, 2.0, 3600000L, 0.1);
+            var restartConfig = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
+            var envProps = new ExecutionEnvironmentProperties(null, null, restartConfig, null, null, null, null);
+            var jobConfig = new JobProperties("restart-expo-job", envProps);
 
             var factory = new ExecutionEnvironmentFactory();
             var env = factory.create(jobConfig);
@@ -185,11 +185,11 @@ public class ExecutionEnvironmentFactoryTest {
         }
 
         @Test
-        @DisplayName("Should correctly map NoRestart RestartStrategyConfiguration into Flink Configuration")
+        @DisplayName("Should correctly map NoRestart RestartStrategyProperties into Flink Configuration")
         void shouldMapNoRestartToFlinkConfiguration() {
-            var restartConfig = new RestartStrategyConfiguration(RestartStrategyType.NO_RESTART, null, null, null);
-            var envConfig = new ExecutionEnvironmentConfiguration(null, null, restartConfig, null, null, null, null);
-            var jobConfig = new JobConfiguration("no-restart-job", envConfig);
+            var restartConfig = new RestartStrategyProperties(RestartStrategyType.NO_RESTART, null, null, null);
+            var envProps = new ExecutionEnvironmentProperties(null, null, restartConfig, null, null, null, null);
+            var jobConfig = new JobProperties("no-restart-job", envProps);
 
             var factory = new ExecutionEnvironmentFactory();
             var env = factory.create(jobConfig);
@@ -199,9 +199,9 @@ public class ExecutionEnvironmentFactoryTest {
         }
 
         @Test
-        @DisplayName("Should correctly map StateBackendConfiguration into Flink Configuration")
-        void shouldMapStateBackendConfigurationToFlinkConfiguration() {
-            var stateConfig = new StateBackendConfiguration(
+        @DisplayName("Should correctly map StateBackendProperties into Flink Configuration")
+        void shouldMapStateBackendPropertiesToFlinkConfiguration() {
+            var stateConfig = new StateBackendProperties(
                 StateBackendType.ROCKSDB,
                 CheckpointStorageType.FILESYSTEM,
                 "s3://my-bucket/checkpoints",
@@ -209,8 +209,8 @@ public class ExecutionEnvironmentFactoryTest {
                 true,
                 null
             );
-            var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, stateConfig, null, null, null);
-            var jobConfig = new JobConfiguration("state-backend-job", envConfig);
+            var envProps = new ExecutionEnvironmentProperties(null, null, null, stateConfig, null, null, null);
+            var jobConfig = new JobProperties("state-backend-job", envProps);
 
             var factory = new ExecutionEnvironmentFactory();
             var env = factory.create(jobConfig);
@@ -226,15 +226,15 @@ public class ExecutionEnvironmentFactoryTest {
         }
 
         @Test
-        @DisplayName("Should correctly map SavepointRestoreConfiguration into Flink Configuration")
-        void shouldMapSavepointRestoreConfigurationToFlinkConfiguration() {
-            var savepointConfig = new SavepointRestoreConfiguration(
+        @DisplayName("Should correctly map SavepointRestoreProperties into Flink Configuration")
+        void shouldMapSavepointRestorePropertiesToFlinkConfiguration() {
+            var savepointConfig = new SavepointRestoreProperties(
                 "/tmp/savepoint-1",
                 true,
                 RestoreMode.CLAIM
             );
-            var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, savepointConfig, null, null);
-            var jobConfig = new JobConfiguration("savepoint-job", envConfig);
+            var envProps = new ExecutionEnvironmentProperties(null, null, null, null, savepointConfig, null, null);
+            var jobConfig = new JobProperties("savepoint-job", envProps);
 
             var factory = new ExecutionEnvironmentFactory();
             var env = factory.create(jobConfig);
@@ -248,11 +248,11 @@ public class ExecutionEnvironmentFactoryTest {
         }
 
         @Test
-        @DisplayName("Should correctly map LocalWebUiConfiguration into Flink Configuration and create LocalStreamEnvironment")
-        void shouldMapLocalWebUiConfigurationToFlinkConfiguration() {
-            var localWebUiConfig = new LocalWebUiConfiguration(true, 8081, "127.0.0.1");
-            var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null, localWebUiConfig, null);
-            var jobConfig = new JobConfiguration("local-webui-job", envConfig);
+        @DisplayName("Should correctly map LocalWebUiProperties into Flink Configuration and create LocalStreamEnvironment")
+        void shouldMapLocalWebUiPropertiesToFlinkConfiguration() {
+            var localWebUiConfig = new LocalWebUiProperties(true, 8081, "127.0.0.1");
+            var envProps = new ExecutionEnvironmentProperties(null, null, null, null, null, localWebUiConfig, null);
+            var jobConfig = new JobProperties("local-webui-job", envProps);
 
             var factory = new ExecutionEnvironmentFactory();
             StreamExecutionEnvironment env = factory.create(jobConfig);
@@ -268,9 +268,9 @@ public class ExecutionEnvironmentFactoryTest {
         @Test
         @DisplayName("Should not configure local WebUI options when enabled is false")
         void shouldNotConfigureLocalWebUiOptionsWhenDisabled() {
-            var localWebUiConfig = new LocalWebUiConfiguration(false, 9090, "0.0.0.0");
-            var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null, localWebUiConfig, null);
-            var jobConfig = new JobConfiguration("disabled-webui-job", envConfig);
+            var localWebUiConfig = new LocalWebUiProperties(false, 9090, "0.0.0.0");
+            var envProps = new ExecutionEnvironmentProperties(null, null, null, null, null, localWebUiConfig, null);
+            var jobConfig = new JobProperties("disabled-webui-job", envProps);
 
             var factory = new ExecutionEnvironmentFactory();
             var env = factory.create(jobConfig);
@@ -283,18 +283,18 @@ public class ExecutionEnvironmentFactoryTest {
         }
 
         @Test
-        @DisplayName("Should throw InvalidLocalWebUiConfigurationException when localWebUi is enabled on a cluster environment")
+        @DisplayName("Should throw InvalidLocalWebUiPropertiesException when localWebUi is enabled on a cluster environment")
         void shouldThrowExceptionWhenLocalWebUiEnabledOnClusterEnvironment() {
-            var localWebUiConfig = new LocalWebUiConfiguration(true, 8081, "127.0.0.1");
-            var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null, localWebUiConfig, null);
-            var jobConfig = new JobConfiguration("local-webui-cluster-job", envConfig);
+            var localWebUiConfig = new LocalWebUiProperties(true, 8081, "127.0.0.1");
+            var envProps = new ExecutionEnvironmentProperties(null, null, null, null, null, localWebUiConfig, null);
+            var jobConfig = new JobProperties("local-webui-cluster-job", envProps);
 
             var mockClusterEnv = org.mockito.Mockito.mock(StreamExecutionEnvironment.class);
             try (var mockedStatic = org.mockito.Mockito.mockStatic(StreamExecutionEnvironment.class)) {
                 mockedStatic.when(StreamExecutionEnvironment::getExecutionEnvironment).thenReturn(mockClusterEnv);
 
                 var factory = new ExecutionEnvironmentFactory();
-                assertThrows(io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidLocalWebUiConfigurationException.class,
+                assertThrows(io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidLocalWebUiPropertiesException.class,
                     () -> factory.create(jobConfig));
             }
         }
@@ -303,8 +303,8 @@ public class ExecutionEnvironmentFactoryTest {
         @DisplayName("Should correctly map custom properties into Flink Configuration")
         void shouldMapPropertiesToFlinkConfiguration() {
             var props = Map.of("taskmanager.memory.managed.fraction", "0.4", "pipeline.operator-chaining.enabled", "true");
-            var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null, null, props);
-            var jobConfig = new JobConfiguration("properties-job", envConfig);
+            var envProps = new ExecutionEnvironmentProperties(null, null, null, null, null, null, props);
+            var jobConfig = new JobProperties("properties-job", envProps);
 
             var factory = new ExecutionEnvironmentFactory();
             var env = factory.create(jobConfig);
@@ -319,7 +319,7 @@ public class ExecutionEnvironmentFactoryTest {
         @Test
         @DisplayName("Should return StreamExecutionEnvironment holding the configured parameters")
         void shouldReturnStreamExecutionEnvironmentWithConfiguredParameters() {
-            var execConfig = new ExecutionConfiguration(
+            var execConfig = new ExecutionProperties(
                 ExecutionRuntimeMode.STREAMING,
                 4,
                 32,
@@ -327,8 +327,8 @@ public class ExecutionEnvironmentFactoryTest {
                 150L,
                 true
             );
-            var envConfig = new ExecutionEnvironmentConfiguration(execConfig, null, null, null, null, null, null);
-            var jobConfig = new JobConfiguration("environment-test-job", envConfig);
+            var envProps = new ExecutionEnvironmentProperties(execConfig, null, null, null, null, null, null);
+            var jobConfig = new JobProperties("environment-test-job", envProps);
 
             var factory = new ExecutionEnvironmentFactory();
             StreamExecutionEnvironment env = factory.create(jobConfig);

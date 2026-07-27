@@ -1,6 +1,6 @@
 package io.github.sekelenao.flinkboot.core.internal.execution.customizer;
 
-import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironmentConfiguration;
+import io.github.sekelenao.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
 import org.apache.flink.configuration.Configuration;
 
 import java.util.Objects;
@@ -14,7 +14,7 @@ public final class PropertiesCustomizer implements EnvironmentCustomizer {
     }
 
     @Override
-    public void configure(ExecutionEnvironmentConfiguration configuration) {
+    public void configure(ExecutionEnvironmentProperties configuration) {
         Objects.requireNonNull(configuration);
         configuration.properties().forEach(this::applyProperty);
     }

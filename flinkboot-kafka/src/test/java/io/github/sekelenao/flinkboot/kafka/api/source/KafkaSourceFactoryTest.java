@@ -1,10 +1,10 @@
 package io.github.sekelenao.flinkboot.kafka.api.source;
 
-import io.github.sekelenao.flinkboot.kafka.api.configuration.source.KafkaOffsetInitializer;
-import io.github.sekelenao.flinkboot.kafka.api.configuration.source.KafkaSourceTopicListConfiguration;
-import io.github.sekelenao.flinkboot.kafka.api.configuration.source.KafkaSourceTopicPatternConfiguration;
-import io.github.sekelenao.flinkboot.kafka.api.configuration.source.TopicPartitionOffsetConfiguration;
-import io.github.sekelenao.flinkboot.kafka.api.exception.InvalidKafkaSourceConfigurationException;
+import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaOffsetInitializer;
+import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceTopicListProperties;
+import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceTopicPatternProperties;
+import io.github.sekelenao.flinkboot.kafka.api.properties.source.TopicPartitionOffsetProperties;
+import io.github.sekelenao.flinkboot.kafka.api.exception.InvalidKafkaSourcePropertiesException;
 import io.github.sekelenao.flinkboot.kafka.internal.OffsetInitializerMapper;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
@@ -62,7 +62,7 @@ class KafkaSourceFactoryTest {
         @Test
         @DisplayName("Should successfully build KafkaSource and KafkaSourceBuilder from topic list config")
         void shouldBuildKafkaSource() {
-            var config = new KafkaSourceTopicListConfiguration(
+            var config = new KafkaSourceTopicListProperties(
                 List.of("localhost:9092"),
                 "test-group",
                 List.of("test-topic"),
@@ -81,7 +81,7 @@ class KafkaSourceFactoryTest {
         @Test
         @DisplayName("Should successfully build with valid TIMESTAMP offset config")
         void shouldBuildWithTimestamp() {
-            var config = new KafkaSourceTopicListConfiguration(
+            var config = new KafkaSourceTopicListProperties(
                 List.of("localhost:9092"),
                 "test-group",
                 List.of("test-topic"),
@@ -97,13 +97,13 @@ class KafkaSourceFactoryTest {
         @Test
         @DisplayName("Should successfully build with valid OFFSETS offset config")
         void shouldBuildWithPartitionOffsets() {
-            var config = new KafkaSourceTopicListConfiguration(
+            var config = new KafkaSourceTopicListProperties(
                 List.of("localhost:9092"),
                 "test-group",
                 List.of("test-topic"),
                 KafkaOffsetInitializer.OFFSETS,
                 null,
-                List.of(new TopicPartitionOffsetConfiguration("test-topic", 0, 100L)),
+                List.of(new TopicPartitionOffsetProperties("test-topic", 0, 100L)),
                 null
             );
 
@@ -114,7 +114,7 @@ class KafkaSourceFactoryTest {
         @DisplayName("Should successfully build with LATEST, COMMITTED, COMMITTED_EARLIEST, COMMITTED_LATEST offset configs")
         void shouldBuildWithOtherOffsetInitializers() {
             for (var initializer : List.of(KafkaOffsetInitializer.LATEST, KafkaOffsetInitializer.COMMITTED, KafkaOffsetInitializer.COMMITTED_EARLIEST, KafkaOffsetInitializer.COMMITTED_LATEST)) {
-                var config = new KafkaSourceTopicListConfiguration(
+                var config = new KafkaSourceTopicListProperties(
                     List.of("localhost:9092"),
                     "test-group",
                     List.of("test-topic"),
@@ -128,10 +128,10 @@ class KafkaSourceFactoryTest {
         }
 
         @Test
-        @DisplayName("Should throw InvalidKafkaSourceConfigurationException when TIMESTAMP is used but timestamp is missing")
+        @DisplayName("Should throw InvalidKafkaSourcePropertiesException when TIMESTAMP is used but timestamp is missing")
         void shouldThrowExceptionWhenTimestampMissing() {
-            assertThrows(InvalidKafkaSourceConfigurationException.class, () -> {
-                var config = new KafkaSourceTopicListConfiguration(
+            assertThrows(InvalidKafkaSourcePropertiesException.class, () -> {
+                var config = new KafkaSourceTopicListProperties(
                     List.of("localhost:9092"),
                     "test-group",
                     List.of("test-topic"),
@@ -145,10 +145,10 @@ class KafkaSourceFactoryTest {
         }
 
         @Test
-        @DisplayName("Should throw InvalidKafkaSourceConfigurationException when OFFSETS is used but partition offsets are missing")
+        @DisplayName("Should throw InvalidKafkaSourcePropertiesException when OFFSETS is used but partition offsets are missing")
         void shouldThrowExceptionWhenOffsetsMissing() {
-            assertThrows(InvalidKafkaSourceConfigurationException.class, () -> {
-                var config = new KafkaSourceTopicListConfiguration(
+            assertThrows(InvalidKafkaSourcePropertiesException.class, () -> {
+                var config = new KafkaSourceTopicListProperties(
                     List.of("localhost:9092"),
                     "test-group",
                     List.of("test-topic"),
@@ -162,35 +162,35 @@ class KafkaSourceFactoryTest {
         }
 
         @Test
-        @DisplayName("Should throw InvalidKafkaSourceConfigurationException when TIMESTAMP is used with partition offsets")
+        @DisplayName("Should throw InvalidKafkaSourcePropertiesException when TIMESTAMP is used with partition offsets")
         void shouldThrowExceptionWhenTimestampUsedWithPartitionOffsets() {
-            assertThrows(InvalidKafkaSourceConfigurationException.class, () -> new KafkaSourceTopicListConfiguration(
+            assertThrows(InvalidKafkaSourcePropertiesException.class, () -> new KafkaSourceTopicListProperties(
                 List.of("localhost:9092"), "test-group", List.of("test-topic"), KafkaOffsetInitializer.TIMESTAMP, 1000L,
-                List.of(new TopicPartitionOffsetConfiguration("test-topic", 0, 100L)), null));
+                List.of(new TopicPartitionOffsetProperties("test-topic", 0, 100L)), null));
         }
 
         @Test
-        @DisplayName("Should throw InvalidKafkaSourceConfigurationException when OFFSETS is used with timestamp")
+        @DisplayName("Should throw InvalidKafkaSourcePropertiesException when OFFSETS is used with timestamp")
         void shouldThrowExceptionWhenOffsetsUsedWithTimestamp() {
-            assertThrows(InvalidKafkaSourceConfigurationException.class, () -> new KafkaSourceTopicListConfiguration(
+            assertThrows(InvalidKafkaSourcePropertiesException.class, () -> new KafkaSourceTopicListProperties(
                 List.of("localhost:9092"), "test-group", List.of("test-topic"), KafkaOffsetInitializer.OFFSETS, 1000L,
-                List.of(new TopicPartitionOffsetConfiguration("test-topic", 0, 100L)), null));
+                List.of(new TopicPartitionOffsetProperties("test-topic", 0, 100L)), null));
         }
 
         @Test
-        @DisplayName("Should throw InvalidKafkaSourceConfigurationException when EARLIEST is used with timestamp or partition offsets")
+        @DisplayName("Should throw InvalidKafkaSourcePropertiesException when EARLIEST is used with timestamp or partition offsets")
         void shouldThrowExceptionWhenEarliestUsedWithExtraConfigs() {
-            assertThrows(InvalidKafkaSourceConfigurationException.class, () -> new KafkaSourceTopicListConfiguration(
+            assertThrows(InvalidKafkaSourcePropertiesException.class, () -> new KafkaSourceTopicListProperties(
                 List.of("localhost:9092"), "test-group", List.of("test-topic"), KafkaOffsetInitializer.EARLIEST, 1000L, null, null));
-            assertThrows(InvalidKafkaSourceConfigurationException.class, () -> new KafkaSourceTopicListConfiguration(
+            assertThrows(InvalidKafkaSourcePropertiesException.class, () -> new KafkaSourceTopicListProperties(
                 List.of("localhost:9092"), "test-group", List.of("test-topic"), KafkaOffsetInitializer.EARLIEST, null,
-                List.of(new TopicPartitionOffsetConfiguration("test-topic", 0, 100L)), null));
+                List.of(new TopicPartitionOffsetProperties("test-topic", 0, 100L)), null));
         }
 
         @Test
         @DisplayName("Should throw NullPointerException when parameters are null")
         void shouldThrowExceptionWhenParamsAreNull() {
-            var config = new KafkaSourceTopicListConfiguration(
+            var config = new KafkaSourceTopicListProperties(
                 List.of("localhost:9092"),
                 "test-group",
                 List.of("test-topic"),
@@ -201,9 +201,9 @@ class KafkaSourceFactoryTest {
             );
 
             assertAll(
-                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor((KafkaSourceTopicListConfiguration) null, TEST_SCHEMA)),
+                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor((KafkaSourceTopicListProperties) null, TEST_SCHEMA)),
                 () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor(config, null)),
-                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor((KafkaSourceTopicListConfiguration) null, TEST_SCHEMA)),
+                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor((KafkaSourceTopicListProperties) null, TEST_SCHEMA)),
                 () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor(config, null))
             );
         }
@@ -216,7 +216,7 @@ class KafkaSourceFactoryTest {
         @Test
         @DisplayName("Should successfully build KafkaSource and KafkaSourceBuilder from topic pattern config")
         void shouldBuildKafkaSource() {
-            var config = new KafkaSourceTopicPatternConfiguration(
+            var config = new KafkaSourceTopicPatternProperties(
                 List.of("localhost:9092"),
                 "test-group",
                 "test-.*",
@@ -235,7 +235,7 @@ class KafkaSourceFactoryTest {
         @Test
         @DisplayName("Should successfully build with valid TIMESTAMP offset config")
         void shouldBuildWithTimestamp() {
-            var config = new KafkaSourceTopicPatternConfiguration(
+            var config = new KafkaSourceTopicPatternProperties(
                 List.of("localhost:9092"),
                 "test-group",
                 "test-.*",
@@ -251,13 +251,13 @@ class KafkaSourceFactoryTest {
         @Test
         @DisplayName("Should successfully build with valid OFFSETS offset config")
         void shouldBuildWithPartitionOffsets() {
-            var config = new KafkaSourceTopicPatternConfiguration(
+            var config = new KafkaSourceTopicPatternProperties(
                 List.of("localhost:9092"),
                 "test-group",
                 "test-.*",
                 KafkaOffsetInitializer.OFFSETS,
                 null,
-                List.of(new TopicPartitionOffsetConfiguration("test-topic", 0, 100L)),
+                List.of(new TopicPartitionOffsetProperties("test-topic", 0, 100L)),
                 null
             );
 
@@ -267,7 +267,7 @@ class KafkaSourceFactoryTest {
         @Test
         @DisplayName("Should throw NullPointerException when parameters are null")
         void shouldThrowExceptionWhenParamsAreNull() {
-            var config = new KafkaSourceTopicPatternConfiguration(
+            var config = new KafkaSourceTopicPatternProperties(
                 List.of("localhost:9092"),
                 "test-group",
                 "test-.*",
@@ -278,9 +278,9 @@ class KafkaSourceFactoryTest {
             );
 
             assertAll(
-                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor((KafkaSourceTopicPatternConfiguration) null, TEST_SCHEMA)),
+                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor((KafkaSourceTopicPatternProperties) null, TEST_SCHEMA)),
                 () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor(config, null)),
-                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor((KafkaSourceTopicPatternConfiguration) null, TEST_SCHEMA)),
+                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor((KafkaSourceTopicPatternProperties) null, TEST_SCHEMA)),
                 () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor(config, null))
             );
         }

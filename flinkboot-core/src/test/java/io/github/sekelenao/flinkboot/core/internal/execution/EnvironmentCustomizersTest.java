@@ -1,13 +1,13 @@
 package io.github.sekelenao.flinkboot.core.internal.execution;
 
-import io.github.sekelenao.flinkboot.core.api.configuration.ExecutionEnvironmentConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.checkpointing.CheckpointingConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.restart.RestartStrategyConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.restart.RestartStrategyType;
-import io.github.sekelenao.flinkboot.core.api.configuration.savepoint.SavepointRestoreConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.state.CheckpointStorageType;
-import io.github.sekelenao.flinkboot.core.api.configuration.state.StateBackendConfiguration;
-import io.github.sekelenao.flinkboot.core.api.configuration.state.StateBackendType;
+import io.github.sekelenao.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.CheckpointingProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.restart.RestartStrategyProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.restart.RestartStrategyType;
+import io.github.sekelenao.flinkboot.core.api.properties.savepoint.SavepointRestoreProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.state.CheckpointStorageType;
+import io.github.sekelenao.flinkboot.core.api.properties.state.StateBackendProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.state.StateBackendType;
 import io.github.sekelenao.flinkboot.core.api.exception.FlinkbootException;
 import io.github.sekelenao.flinkboot.core.api.exception.resource.ResourceAccessException;
 import io.github.sekelenao.flinkboot.core.internal.execution.customizer.CheckpointingCustomizer;
@@ -41,7 +41,7 @@ public class EnvironmentCustomizersTest {
     @DisplayName("Should handle empty configuration objects in all customizers cleanly")
     void shouldHandleNullConfigurationObjectsInCustomizers() {
         Configuration config = new Configuration();
-        var emptyEnvConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null, null, null);
+        var emptyEnvConfig = new ExecutionEnvironmentProperties(null, null, null, null, null, null, null);
 
         assertAll(
             () -> new ExecutionCustomizer(config).configure(emptyEnvConfig),
@@ -58,7 +58,7 @@ public class EnvironmentCustomizersTest {
     @DisplayName("Should handle empty properties map in PropertiesCustomizer")
     void shouldHandleEmptyPropertiesMap() {
         Configuration config = new Configuration();
-        var emptyPropsEnvConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, null, null, Collections.emptyMap());
+        var emptyPropsEnvConfig = new ExecutionEnvironmentProperties(null, null, null, null, null, null, Collections.emptyMap());
 
         new PropertiesCustomizer(config).configure(emptyPropsEnvConfig);
         assertTrue(config.keySet().isEmpty());
@@ -68,18 +68,18 @@ public class EnvironmentCustomizersTest {
     @DisplayName("Should test NO_RESTART and FALLBACK restart strategy types")
     void shouldTestNoRestartAndFallbackTypes() {
         Configuration noRestartConfig = new Configuration();
-        var noRestartEnvConfig = new ExecutionEnvironmentConfiguration(
+        var noRestartEnvConfig = new ExecutionEnvironmentProperties(
             null, null,
-            new RestartStrategyConfiguration(RestartStrategyType.NO_RESTART, null, null, null),
+            new RestartStrategyProperties(RestartStrategyType.NO_RESTART, null, null, null),
             null, null, null, null
         );
         new RestartStrategyCustomizer(noRestartConfig).configure(noRestartEnvConfig);
         assertEquals("none", noRestartConfig.get(RestartStrategyOptions.RESTART_STRATEGY));
 
         Configuration fallbackConfig = new Configuration();
-        var fallbackEnvConfig = new ExecutionEnvironmentConfiguration(
+        var fallbackEnvConfig = new ExecutionEnvironmentProperties(
             null, null,
-            new RestartStrategyConfiguration(RestartStrategyType.FALLBACK, null, null, null),
+            new RestartStrategyProperties(RestartStrategyType.FALLBACK, null, null, null),
             null, null, null, null
         );
         new RestartStrategyCustomizer(fallbackConfig).configure(fallbackEnvConfig);
@@ -87,10 +87,10 @@ public class EnvironmentCustomizersTest {
     }
 
     @Test
-    @DisplayName("Should test StateBackendConfiguration optional fields")
+    @DisplayName("Should test StateBackendProperties optional fields")
     void shouldTestStateBackendOptionalFields() {
         Configuration config = new Configuration();
-        var stateBackendConfig = new StateBackendConfiguration(
+        var stateBackendConfig = new StateBackendProperties(
             StateBackendType.HASHMAP,
             CheckpointStorageType.JOBMANAGER,
             null,
@@ -98,9 +98,9 @@ public class EnvironmentCustomizersTest {
             false,
             null
         );
-        var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, stateBackendConfig, null, null, null);
+        var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
 
-        new StateBackendCustomizer(config).configure(envConfig);
+        new StateBackendCustomizer(config).configure(envProps);
 
         assertAll(
             () -> assertEquals("hashmap", config.get(StateBackendOptions.STATE_BACKEND)),
@@ -111,17 +111,17 @@ public class EnvironmentCustomizersTest {
     }
 
     @Test
-    @DisplayName("Should test SavepointRestoreConfiguration optional fields")
+    @DisplayName("Should test SavepointRestoreProperties optional fields")
     void shouldTestSavepointRestoreOptionalFields() {
         Configuration config = new Configuration();
-        var savepointConfig = new SavepointRestoreConfiguration(
+        var savepointConfig = new SavepointRestoreProperties(
             "/tmp/savepoint-2",
             null,
             null
         );
-        var envConfig = new ExecutionEnvironmentConfiguration(null, null, null, null, savepointConfig, null, null);
+        var envProps = new ExecutionEnvironmentProperties(null, null, null, null, savepointConfig, null, null);
 
-        new SavepointRestoreCustomizer(config).configure(envConfig);
+        new SavepointRestoreCustomizer(config).configure(envProps);
 
         assertAll(
             () -> assertEquals("/tmp/savepoint-2", config.get(StateRecoveryOptions.SAVEPOINT_PATH)),
@@ -131,10 +131,10 @@ public class EnvironmentCustomizersTest {
     }
 
     @Test
-    @DisplayName("Should test CheckpointingConfiguration disabled and optional fields")
+    @DisplayName("Should test CheckpointingProperties disabled and optional fields")
     void shouldTestCheckpointingOptionalFields() {
         Configuration config = new Configuration();
-        var chkConfig = new CheckpointingConfiguration(
+        var chkConfig = new CheckpointingProperties(
             false,
             null,
             null,
@@ -146,9 +146,9 @@ public class EnvironmentCustomizersTest {
             null,
             null
         );
-        var envConfig = new ExecutionEnvironmentConfiguration(null, chkConfig, null, null, null, null, null);
+        var envProps = new ExecutionEnvironmentProperties(null, chkConfig, null, null, null, null, null);
 
-        new CheckpointingCustomizer(config).configure(envConfig);
+        new CheckpointingCustomizer(config).configure(envProps);
 
         assertAll(
             () -> assertNull(config.get(CheckpointingOptions.CHECKPOINTING_INTERVAL)),

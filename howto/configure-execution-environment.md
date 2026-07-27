@@ -1,44 +1,14 @@
 # How to Configure the Execution Environment
 
-Flinkboot provides strongly typed configuration models and an automated factory to easily configure and obtain Apache Flink's `StreamExecutionEnvironment`.
-
-## Maven Dependencies
-
-Import the Flinkboot BOM in your `<dependencyManagement>` and add the core Flinkboot dependency along with Flink APIs:
-
-```xml
-<dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>io.github.sekelenao</groupId>
-            <artifactId>flinkboot</artifactId>
-            <version>0.1.0-1.20</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
-    </dependencies>
-</dependencyManagement>
-
-<dependencies>
-    <!-- Flinkboot Core -->
-    <dependency>
-        <groupId>io.github.sekelenao</groupId>
-        <artifactId>flinkboot-core</artifactId>
-    </dependency>
-
-    <!-- Flink Streaming API (Provided by Flink cluster) -->
-    <dependency>
-        <groupId>org.apache.flink</groupId>
-        <artifactId>flink-streaming-java</artifactId>
-    </dependency>
-</dependencies>
-```
+Flinkboot provides strongly typed configuration models to easily configure and obtain Apache Flink's `StreamExecutionEnvironment` directly from YAML configuration files.
 
 ---
 
-## 1. YAML Configuration Structure
+## 1. Default Configuration File & YAML Structure
 
-The execution environment configuration is structured around `JobConfiguration` and `ExecutionEnvironmentConfiguration`.
+By default, Flinkboot looks for its configuration file at `file:job-configuration.yaml` in the working directory (or custom paths specified via `-flinkboot-configurations`).
+
+Define your execution environment properties in your YAML file (`job-configuration.yaml`):
 
 ```yaml
 name: "my-streaming-job"
@@ -92,14 +62,14 @@ environment:
 
 ## 2. Configuration Parameters Reference
 
-### Job Level (`JobConfiguration`)
+### Job Level (`JobProperties`)
 
-| Property Key  | Type   | Required | Description                                                          |
-|:--------------|:-------|:---------|:---------------------------------------------------------------------|
-| `name`        | String | **Yes**  | Canonical job name registered with Flink (`PipelineOptions.NAME`).    |
-| `environment` | Object | No       | Execution environment settings (`ExecutionEnvironmentConfiguration`). |
+| Property Key  | Type   | Required | Description                                                         |
+|:--------------|:-------|:---------|:--------------------------------------------------------------------|
+| `name`        | String | **Yes**  | Canonical job name registered with Flink (`PipelineOptions.NAME`).   |
+| `environment` | Object | No       | Execution environment settings (`ExecutionEnvironmentProperties`). |
 
-### Execution Settings (`ExecutionConfiguration`)
+### Execution Settings (`ExecutionProperties`)
 
 | Property Key                 | Type    | Required | Validation        | Description                                                                                          |
 |:-----------------------------|:--------|:---------|:------------------|:-----------------------------------------------------------------------------------------------------|
@@ -110,7 +80,7 @@ environment:
 | `auto-watermark-interval-ms` | Long    | No       | `@PositiveOrZero` | Periodic watermark emission interval in ms (`PipelineOptions.AUTO_WATERMARK_INTERVAL`).              |
 | `object-reuse`               | Boolean | No       | Boolean           | Enable object reuse optimization (`PipelineOptions.OBJECT_REUSE`). Defaults to false in Flink.       |
 
-### Checkpointing Settings (`CheckpointingConfiguration`)
+### Checkpointing Settings (`CheckpointingProperties`)
 
 | Property Key                       | Type    | Required | Validation        | Description                                                                                                                           |
 |:-----------------------------------|:--------|:---------|:------------------|:--------------------------------------------------------------------------------------------------------------------------------------|
@@ -125,7 +95,7 @@ environment:
 | `aligned-checkpoint-timeout-ms`    | Long    | No       | `@PositiveOrZero` | Timeout before switching to unaligned checkpoints (`CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT`).                                |
 | `storage-uri`                      | String  | No       | String            | Target checkpoint storage directory URI, e.g. `s3://bucket/checkpoints` (`CheckpointingOptions.CHECKPOINTS_DIRECTORY`).              |
 
-### Restart Strategy Settings (`RestartStrategyConfiguration`)
+### Restart Strategy Settings (`RestartStrategyProperties`)
 
 The `restart-strategy` block accepts a `type` property (`NO_RESTART`, `FIXED_DELAY`, `FAILURE_RATE`, `EXPONENTIAL_DELAY`, `FALLBACK`) and at most **one** matching sub-configuration block.
 
@@ -136,8 +106,8 @@ The `restart-strategy` block accepts a `type` property (`NO_RESTART`, `FIXED_DEL
 | `FIXED_DELAY`       | Restarts job a fixed number of times with a delay between attempts.                             | `fixed-delay`                         |
 | `FAILURE_RATE`      | Restarts job if failure rate threshold is not exceeded in a time window.                       | `failure-rate`                        |
 | `EXPONENTIAL_DELAY` | Restarts job with exponentially increasing backoff delays.                                       | `exponential-delay`                   |
-| `NO_RESTART`        | Disables job restarts.                                                                          | *None allowed* (causes crash if set)  |
-| `FALLBACK`          | Fallback to Flink cluster's global default restart strategy (default if `type` omitted).        | *None allowed* (causes crash if set)  |
+| `NO_RESTART`        | Disables job restarts.                                                                          | *None allowed* (fails fast if set)    |
+| `FALLBACK`          | Fallback to Flink cluster's global default restart strategy (default if `type` omitted).        | *None allowed* (fails fast if set)    |
 
 #### Option Details per Strategy Block
 
@@ -166,7 +136,7 @@ The `restart-strategy` block accepts a `type` property (`NO_RESTART`, `FIXED_DEL
 | `reset-backoff-threshold-ms`| Long   | No       | `@Positive`                                   | Reset backoff threshold duration (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_RESET_BACKOFF_THRESHOLD`).|
 | `jitter-factor`             | Double | No       | `@DecimalMin("0.0")`, `@DecimalMax("1.0")`    | Jitter factor for delay randomization (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_JITTER_FACTOR`).  |
 
-### State Backend Settings (`StateBackendConfiguration`)
+### State Backend Settings (`StateBackendProperties`)
 
 | Property Key         | Type    | Required                     | Validation | Description                                                                                                                           |
 |:---------------------|:--------|:-----------------------------|:-----------|:--------------------------------------------------------------------------------------------------------------------------------------|
@@ -177,7 +147,7 @@ The `restart-strategy` block accepts a `type` property (`NO_RESTART`, `FIXED_DEL
 | `latency-tracking`   | Boolean | No                           | Boolean    | Enable latency tracking metrics for state access (`StateBackendOptions.LATENCY_TRACK_ENABLED`).                                       |
 | `custom-class`       | String  | **Yes** (if `type == CUSTOM`)| String     | Fully qualified class name for custom state backend. Allowed **only** when `type: CUSTOM`.                                            |
 
-### Savepoint Restore Settings (`SavepointRestoreConfiguration`)
+### Savepoint Restore Settings (`SavepointRestoreProperties`)
 
 | Property Key               | Type    | Required | Validation  | Description                                                                                                                           |
 |:---------------------------|:--------|:---------|:------------|:--------------------------------------------------------------------------------------------------------------------------------------|
@@ -185,7 +155,7 @@ The `restart-strategy` block accepts a `type` property (`NO_RESTART`, `FIXED_DEL
 | `allow-non-restored-state` | Boolean | No       | Boolean     | Allow job to start even if state contains subtasks that cannot be restored (`StateRecoveryOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE`).  |
 | `restore-mode`             | Enum    | No       | Enum        | Savepoint restore mode: `CLAIM`, `NO_CLAIM`, or `LEGACY` (`StateRecoveryOptions.RESTORE_MODE`).                                        |
 
-### Local Dev WebUI Settings (`LocalWebUiConfiguration`)
+### Local Dev WebUI Settings (`LocalWebUiProperties`)
 
 | Property Key   | Type    | Required | Validation  | Description                                                                                                                           |
 |:---------------|:--------|:---------|:------------|:--------------------------------------------------------------------------------------------------------------------------------------|
@@ -193,9 +163,9 @@ The `restart-strategy` block accepts a `type` property (`NO_RESTART`, `FIXED_DEL
 | `port`         | Integer | No       | `@Positive` | Port for local WebUI REST server (`RestOptions.PORT`). Defaults to 8081 in Flink. Applied **only** when `enabled: true`.              |
 | `bind-address` | String  | No       | String      | Local WebUI REST server bind address (`RestOptions.BIND_ADDRESS`). Defaults to `localhost`. Applied **only** when `enabled: true`.    |
 
-### Custom Escape-Hatch Properties (`properties`)
+### Escape-Hatch Custom Properties (`properties`)
 
-Arbitrary Flink configuration key-value pairs (`Map<String, String>`) applied directly onto Flink's `Configuration` via `configuration.setString(key, value)`.
+Arbitrary Flink configuration key-value pairs (`Map<String, String>`) applied directly onto Flink's native `Configuration` object:
 
 ```yaml
 environment:
@@ -203,60 +173,37 @@ environment:
     taskmanager.memory.managed.fraction: "0.4"
     pipeline.operator-chaining.enabled: "true"
     execution.checkpointing.interval: "5 s"
-    pipeline.auto-watermark-interval: "200 ms"
-    taskmanager.numberOfTaskSlots: "4"
 ```
 
-> [!TIP]
-> **Automatic Type Parsing (Numbers, Durations, Memory Sizes & Booleans)**:
-> Apache Flink's native `Configuration` system automatically parses string values from `properties` into their required target Java types:
-> - **Numbers & Booleans**: Raw numbers and booleans are parsed automatically (e.g. `"4"` for Integer, `"10000"` for Long, `"0.4"` for Double, `"true"` for Boolean).
-> - **Durations**: Must include explicit time units (e.g. `"500 ms"`, `"5 s"`, `"10 min"`, `"1 h"`, `"2 d"`).
-> - **Memory Sizes**: Can include memory units (e.g. `"512 mb"`, `"2 gb"`, `"1024 kb"`).
-
----
-
-## 3. Customizer Execution Order & Contract
-
-`ExecutionEnvironmentFactory` delegates configuration mapping to a chain of specialized `EnvironmentCustomizer` implementations in a strict order:
-
-1. **`ExecutionCustomizer`**: Runtime execution mode, parallelism, buffer timeout, object reuse, etc.
-2. **`CheckpointingCustomizer`**: Checkpoint interval, mode, timeout, unaligned checkpoints, storage URI.
-3. **`RestartStrategyCustomizer`**: Fixed delay, failure rate, or exponential delay restart options.
-4. **`StateBackendCustomizer`**: RocksDB / HashMap type, checkpoint storage, incremental checkpoints.
-5. **`SavepointRestoreCustomizer`**: Savepoint restore path, unclaimed state handling, restore mode.
-6. **`LocalWebUiCustomizer`**: REST port and bind address (applied only if `local-web-ui.enabled: true`).
-7. **`PropertiesCustomizer`**: Raw key-value string properties escape-hatch.
-
 > [!IMPORTANT]
-> **Properties Override Contract**: `PropertiesCustomizer` is executed **last**. Any property specified in the `properties` map will overwrite any typed setting previously set by earlier customizers if a key conflict occurs.
+> **Property Precedence**: Any property set in the `properties` map takes precedence and will overwrite typed settings configured above if a key collision occurs.
 
 ---
 
-## 4. Local WebUI vs Cluster Environment Resolution
+## 3. Local WebUI vs Cluster Execution Behavior
 
-`ExecutionEnvironmentFactory` automatically selects the appropriate Flink environment provider prior to creating the `StreamExecutionEnvironment`:
+Flinkboot automatically resolves how to instantiate Flink's `StreamExecutionEnvironment`:
 
 - **Local WebUI Mode (`local-web-ui.enabled: true`)**:
-  Resolves to `LocalWebUiExecutionEnvironmentProvider`, calling `StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(configuration)`.
-  This starts an embedded Flink MiniCluster with the WebUI dashboard active during local IDE development.
+  Instantiates a local environment with WebUI active (`StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(...)`).
+  This launches an embedded Flink MiniCluster with the dashboard active during local IDE testing.
   
   > [!NOTE]
-  > Using `local-web-ui.enabled: true` requires `org.apache.flink:flink-runtime-web` to be present on your project classpath (typically with `provided` or `test` scope).
+  > Requires `org.apache.flink:flink-runtime-web` present on your classpath.
 
 - **Standard Cluster Mode (`local-web-ui.enabled: false` or omitted)**:
-  Resolves to `ClusterExecutionEnvironmentProvider`, calling `StreamExecutionEnvironment.getExecutionEnvironment(configuration)`.
-  This allows Flink to dynamically determine the runtime context (e.g. standalone cluster, YARN, Kubernetes, or standard local environment).
+  Calls standard Flink environment discovery (`StreamExecutionEnvironment.getExecutionEnvironment(...)`).
+  This allows Flink to adapt automatically to your execution context (standalone cluster, YARN, Kubernetes, or standard local environment).
 
 ---
 
-## 5. Java Integration & Usage
+## 4. Java Integration
 
-### Step 1: Load Configuration and Instantiate Environment
+Load your configuration and obtain the pre-configured `StreamExecutionEnvironment`:
 
 ```java
 import io.github.sekelenao.flinkboot.core.api.Flinkboot;
-import io.github.sekelenao.flinkboot.core.api.configuration.JobConfiguration;
+import io.github.sekelenao.flinkboot.core.api.properties.JobProperties;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 public class MyFlinkJob {
@@ -264,25 +211,25 @@ public class MyFlinkJob {
         // 1. Initialize Flinkboot with CLI arguments
         Flinkboot boot = Flinkboot.initialize(args);
 
-        // 2. Load the typed JobConfiguration
-        JobConfiguration jobConfig = boot.configuration(JobConfiguration.class);
+        // 2. Load the typed JobProperties (defaults to file:job-configuration.yaml)
+        JobProperties jobProps = boot.configuration(JobProperties.class);
 
         // 3. Obtain the pre-configured StreamExecutionEnvironment
-        StreamExecutionEnvironment env = boot.executionEnvironment(jobConfig);
+        StreamExecutionEnvironment env = boot.executionEnvironment(jobProps);
 
         // 4. Build your Flink pipeline
-        env.fromData("Hello", "Flinkboot")
-           .print();
+        env.fromData("Hello", "Flinkboot").print();
 
-        env.execute(jobConfig.name());
+        env.execute(jobProps.name());
     }
 }
 ```
 
 ---
 
-## 6. Validation & Exception Handling
+## 5. Fail-Fast Validation & Exceptions
 
-All configuration models enforce Jakarta Bean Validation rules at startup:
-* `RestartStrategyConfiguration`: Validates that sub-blocks match the chosen `type` (*fail-fast* via `InvalidRestartStrategyConfigurationException`).
-* `StateBackendConfiguration`: Validates that `custom-class` is provided **if and only if** `type: CUSTOM` (*fail-fast* via `InvalidStateBackendConfigurationException`).
+All configuration models enforce fail-fast validation at startup:
+- **`InvalidRestartStrategyPropertiesException`**: Thrown if restart strategy sub-blocks do not match the specified `type`.
+- **`InvalidStateBackendPropertiesException`**: Thrown if `custom-class` is provided when `type` is not `CUSTOM` (or missing when `type` is `CUSTOM`).
+- **`InvalidLocalWebUiPropertiesException`**: Thrown if WebUI settings are invalid.
