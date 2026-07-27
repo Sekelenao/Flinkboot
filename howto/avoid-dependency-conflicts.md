@@ -67,7 +67,7 @@ Add the following configuration to your application's `pom.xml` build section:
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-shade-plugin</artifactId>
-            <version>3.5.1</version>
+            <version>3.6.0</version>
             <executions>
                 <execution>
                     <phase>package</phase>
@@ -78,16 +78,15 @@ Add the following configuration to your application's `pom.xml` build section:
                         <createDependencyReducedPom>false</createDependencyReducedPom>
                         <shadedArtifactAttached>false</shadedArtifactAttached>
                         
-                        <!-- Relocate Jackson to prevent version clashes with Flink runtime -->
-                        <!-- You can customize the shadedPattern namespace to match your project's packaging if preferred -->
+                        <!-- Relocate Jackson & com.fasterxml to prevent version clashes with Flink runtime -->
                         <relocations>
                             <relocation>
-                                <pattern>com.fasterxml.jackson</pattern>
-                                <shadedPattern>io.github.sekelenao.flinkboot.shaded.jackson</shadedPattern>
+                                <pattern>com.fasterxml</pattern>
+                                <shadedPattern>io.github.sekelenao.flinkboot.shaded.fasterxml</shadedPattern>
                             </relocation>
                         </relocations>
                         
-                        <!-- Exclude signatures to prevent SecurityException -->
+                        <!-- Exclude signatures and MRJAR entries -->
                         <filters>
                             <filter>
                                 <artifact>*:*</artifact>
@@ -95,6 +94,7 @@ Add the following configuration to your application's `pom.xml` build section:
                                     <exclude>META-INF/*.SF</exclude>
                                     <exclude>META-INF/*.DSA</exclude>
                                     <exclude>META-INF/*.RSA</exclude>
+                                    <exclude>META-INF/versions/**</exclude>
                                 </excludes>
                             </filter>
                         </filters>
