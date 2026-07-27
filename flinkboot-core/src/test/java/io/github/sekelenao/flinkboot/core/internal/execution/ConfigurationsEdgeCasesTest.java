@@ -1,9 +1,11 @@
 package io.github.sekelenao.flinkboot.core.internal.execution;
 
+import io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidRestartStrategyPropertiesException;
+import io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidStateBackendPropertiesException;
 import io.github.sekelenao.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
 import io.github.sekelenao.flinkboot.core.api.properties.JobProperties;
-import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.CheckpointingProperties;
 import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.CheckpointingMode;
+import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.CheckpointingProperties;
 import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.ExternalizedCheckpointCleanupMode;
 import io.github.sekelenao.flinkboot.core.api.properties.execution.ExecutionProperties;
 import io.github.sekelenao.flinkboot.core.api.properties.execution.ExecutionRuntimeMode;
@@ -18,8 +20,6 @@ import io.github.sekelenao.flinkboot.core.api.properties.savepoint.SavepointRest
 import io.github.sekelenao.flinkboot.core.api.properties.state.CheckpointStorageType;
 import io.github.sekelenao.flinkboot.core.api.properties.state.StateBackendProperties;
 import io.github.sekelenao.flinkboot.core.api.properties.state.StateBackendType;
-import io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidRestartStrategyPropertiesException;
-import io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidStateBackendPropertiesException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -1,8 +1,8 @@
 package io.github.sekelenao.flinkboot.core.internal.execution.customizer;
 
 import io.github.sekelenao.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
-import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.CheckpointingProperties;
 import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.CheckpointingMode;
+import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.CheckpointingProperties;
 import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.ExternalizedCheckpointCleanupMode;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;

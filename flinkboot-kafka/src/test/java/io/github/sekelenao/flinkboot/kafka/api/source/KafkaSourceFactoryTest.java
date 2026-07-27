@@ -1,10 +1,10 @@
 package io.github.sekelenao.flinkboot.kafka.api.source;
 
+import io.github.sekelenao.flinkboot.kafka.api.exception.InvalidKafkaSourcePropertiesException;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaOffsetInitializer;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceTopicListProperties;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceTopicPatternProperties;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.TopicPartitionOffsetProperties;
-import io.github.sekelenao.flinkboot.kafka.api.exception.InvalidKafkaSourcePropertiesException;
 import io.github.sekelenao.flinkboot.kafka.internal.OffsetInitializerMapper;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
