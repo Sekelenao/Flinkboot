@@ -116,7 +116,7 @@ public class KafkaSinkProperties implements Serializable {
     public String toString() {
         return "KafkaSinkProperties{" +
             "bootstrapServers=" + bootstrapServers +
-            ", groupId='" + topic + '\'' +
+            ", topic='" + topic + '\'' +
             ", deliveryGuarantee=" + deliveryGuarantee +
             ", transactionalIdPrefix='" + transactionalIdPrefix + '\'' +
             ", properties=" + properties +
