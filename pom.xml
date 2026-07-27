@@ -374,6 +374,8 @@
                         <configuration>
                             <source>${java.version}</source>
                             <detectJavaApiLink>true</detectJavaApiLink>
+                            <doclint>none</doclint>
+                            <legacyMode>true</legacyMode>
                             <links>
                                 <link>https://docs.oracle.com/en/java/javase/${java.version}/docs/api/</link>
                             </links>
