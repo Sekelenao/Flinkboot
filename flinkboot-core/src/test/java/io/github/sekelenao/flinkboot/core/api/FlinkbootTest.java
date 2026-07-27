@@ -3,6 +3,7 @@ package io.github.sekelenao.flinkboot.core.api;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import io.github.sekelenao.flinkboot.core.api.properties.JobProperties;
 import jakarta.validation.constraints.NotBlank;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -216,6 +217,27 @@ class FlinkbootTest {
         void shouldReturnFalseWhenFlagAbsent() {
             var flinkboot = Flinkboot.initialize(new String[0]);
             assertFalse(flinkboot.flag("my-flag"));
+        }
+    }
+
+    @Nested
+    @DisplayName("ExecutionEnvironment")
+    class ExecutionEnvironment {
+
+        @Test
+        @DisplayName("Should throw NullPointerException when jobProperties is null")
+        void shouldThrowExceptionWhenJobPropertiesIsNull() {
+            var flinkboot = Flinkboot.initialize(new String[0]);
+            assertThrows(NullPointerException.class, () -> flinkboot.executionEnvironment(null));
+        }
+
+        @Test
+        @DisplayName("Should create StreamExecutionEnvironment from valid JobProperties")
+        void shouldCreateStreamExecutionEnvironmentFromJobProperties() {
+            var flinkboot = Flinkboot.initialize(new String[0]);
+            var jobProps = new JobProperties("my-test-job", null);
+            var env = flinkboot.executionEnvironment(jobProps);
+            assertNotNull(env);
         }
     }
 }
