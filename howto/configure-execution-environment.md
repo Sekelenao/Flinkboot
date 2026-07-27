@@ -4,11 +4,9 @@ Flinkboot provides strongly typed configuration models to easily configure and o
 
 ---
 
-## 1. Default Configuration File & YAML Structure
+## 1. YAML Configuration Properties & Structure
 
-By default, Flinkboot looks for its configuration file at `file:job-configuration.yaml` in the working directory (or custom paths specified via `-flinkboot-configurations`).
-
-Define your execution environment properties in your YAML file (`job-configuration.yaml`):
+Define your execution environment properties in your YAML file:
 
 ```yaml
 name: "my-streaming-job"

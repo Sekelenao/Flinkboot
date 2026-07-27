@@ -41,10 +41,10 @@ By importing `flinkboot` in your `<dependencyManagement>` section (BOM pattern),
         <artifactId>flink-clients</artifactId>
     </dependency>
 
-    <!-- Flinkboot Connector (Bundled inside your Fat JAR) -->
+    <!-- Flinkboot Core (Bundled inside your Fat JAR) -->
     <dependency>
         <groupId>io.github.sekelenao</groupId>
-        <artifactId>flinkboot-kafka</artifactId>
+        <artifactId>flinkboot-core</artifactId>
     </dependency>
 </dependencies>
 ```

@@ -6,8 +6,6 @@ Flinkboot provides typed configuration models and a factory to easily initialize
 
 ## 1. YAML Configuration Properties & Structure
 
-By default, Flinkboot loads configuration properties from `file:job-configuration.yaml` in the current directory (or custom paths specified via `-flinkboot-configurations`).
-
 You can configure your Kafka Source using either a static list of topics or a topic pattern regex:
 
 ### Option A: Static List of Topics (`KafkaSourceTopicListProperties`)

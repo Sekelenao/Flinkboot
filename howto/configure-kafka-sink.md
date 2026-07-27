@@ -6,9 +6,7 @@ Flinkboot provides typed configuration models and a factory to easily initialize
 
 ## 1. YAML Configuration Properties & Structure
 
-By default, Flinkboot loads configuration properties from `file:job-configuration.yaml` in the current working directory (or custom paths specified via `-flinkboot-configurations`).
-
-Define your Kafka Sink properties in your YAML file (`job-configuration.yaml`):
+Define your Kafka Sink properties in your YAML file:
 
 ```yaml
 bootstrap-servers:
