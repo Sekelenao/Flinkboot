@@ -228,7 +228,8 @@ class FlinkbootTest {
         @DisplayName("Should throw NullPointerException when jobProperties is null")
         void shouldThrowExceptionWhenJobPropertiesIsNull() {
             var flinkboot = Flinkboot.initialize(new String[0]);
-            assertThrows(NullPointerException.class, () -> flinkboot.executionEnvironment(null));
+            var exception = assertThrows(NullPointerException.class, () -> flinkboot.executionEnvironment(null));
+            assertEquals("jobProperties must not be null", exception.getMessage());
         }
 
         @Test

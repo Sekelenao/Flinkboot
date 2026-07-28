@@ -29,12 +29,6 @@ class JobPropertiesTest {
     class GettersTests {
 
         @Test
-        @DisplayName("Should throw NullPointerException when name is null in constructor")
-        void shouldThrowNpeWhenNameIsNull() {
-            assertThrows(NullPointerException.class, () -> new JobProperties(null, null));
-        }
-
-        @Test
         @DisplayName("Should correctly return name and environment Optional")
         void shouldReturnGettersCorrectly() {
             var execConfig = new ExecutionProperties(ExecutionRuntimeMode.STREAMING, 8, 128, 100L, 200L, true);
@@ -72,6 +66,15 @@ class JobPropertiesTest {
 
             Set<ConstraintViolation<JobProperties>> violations = validator.validate(jobConfig);
             assertTrue(violations.isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should fail validation when name is null")
+        void shouldFailValidationWhenNameIsNull() {
+            var jobConfig = new JobProperties(null, null);
+
+            Set<ConstraintViolation<JobProperties>> violations = validator.validate(jobConfig);
+            assertEquals(1, violations.size());
         }
 
         @Test

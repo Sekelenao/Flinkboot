@@ -70,7 +70,7 @@ public final class Flinkboot {
     }
 
     public StreamExecutionEnvironment executionEnvironment(JobProperties jobProperties) {
-        Objects.requireNonNull(jobProperties);
+        Objects.requireNonNull(jobProperties, "jobProperties must not be null");
         return new ExecutionEnvironmentFactory().create(jobProperties);
     }
 

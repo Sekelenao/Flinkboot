@@ -25,7 +25,7 @@ public final class JobProperties implements Serializable {
         @JsonProperty("name") String name,
         @JsonProperty("environment") ExecutionEnvironmentProperties environment
     ) {
-        this.name = Objects.requireNonNull(name);
+        this.name = name;
         this.environment = environment;
     }
 

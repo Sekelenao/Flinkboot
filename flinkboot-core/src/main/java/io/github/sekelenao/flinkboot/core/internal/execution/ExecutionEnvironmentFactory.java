@@ -38,7 +38,7 @@ public final class ExecutionEnvironmentFactory {
     }
 
     public StreamExecutionEnvironment create(JobProperties jobProperties) {
-        Objects.requireNonNull(jobProperties);
+        Objects.requireNonNull(jobProperties, "jobProperties must not be null");
         configuration.set(PipelineOptions.NAME, jobProperties.name());
         jobProperties.environment().ifPresent(envProps ->
             customizers.forEach(customizer -> customizer.configure(envProps))

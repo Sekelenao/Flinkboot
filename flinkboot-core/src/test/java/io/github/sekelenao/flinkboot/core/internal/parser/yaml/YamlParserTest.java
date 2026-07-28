@@ -538,5 +538,48 @@ public class YamlParserTest {
                 );
             }
         }
+
+        @Test
+        @DisplayName("Should throw ConfigurationValidationException when job key is empty in YAML")
+        void shouldThrowValidationExceptionWhenJobKeyIsEmptyInYaml() {
+            var yaml = "job:   \n";
+
+            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+                parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+                var exception = assertThrows(ConfigurationValidationException.class, () -> parser.convertTo(TestConfigWithJob.class));
+                assertTrue(exception.getMessage().contains("job"));
+            }
+        }
+
+        @Test
+        @DisplayName("Should throw ConfigurationValidationException when job name is missing in YAML")
+        void shouldThrowValidationExceptionWhenJobNameIsMissingInYaml() {
+            var yaml = "job:\n" +
+                "  environment:\n" +
+                "    execution:\n" +
+                "      parallelism: 2\n";
+
+            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+                parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+                var exception = assertThrows(ConfigurationValidationException.class, () -> parser.convertTo(TestConfigWithJob.class));
+                assertTrue(exception.getMessage().contains("name"));
+            }
+        }
+    }
+
+    static final class TestConfigWithJob {
+        @JsonProperty("job")
+        @jakarta.validation.Valid
+        @jakarta.validation.constraints.NotNull
+        private final io.github.sekelenao.flinkboot.core.api.properties.JobProperties job;
+
+        @JsonCreator
+        public TestConfigWithJob(@JsonProperty("job") io.github.sekelenao.flinkboot.core.api.properties.JobProperties job) {
+            this.job = job;
+        }
+
+        public io.github.sekelenao.flinkboot.core.api.properties.JobProperties job() {
+            return job;
+        }
     }
 }
