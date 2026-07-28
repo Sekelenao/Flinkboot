@@ -67,7 +67,7 @@ Add the following configuration to your application's `pom.xml` build section:
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-shade-plugin</artifactId>
-            <version>3.6.0</version>
+            <version>${maven-shade-plugin.version}</version>
             <executions>
                 <execution>
                     <phase>package</phase>
@@ -119,8 +119,6 @@ Flink's runtime comes with an integrated Log4j setup. Bundling log4j configurati
    <dependency>
        <groupId>org.slf4j</groupId>
        <artifactId>slf4j-api</artifactId>
-       <version>1.7.36</version>
-       <scope>provided</scope>
    </dependency>
    ```
 3. Let the Flink cluster runtime bind SLF4J to its own Log4j implementation.

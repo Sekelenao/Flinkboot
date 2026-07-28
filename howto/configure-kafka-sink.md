@@ -4,6 +4,40 @@ Flinkboot provides typed configuration models and a factory to easily initialize
 
 ---
 
+## Maven Dependencies
+
+Import the Flinkboot BOM in your `<dependencyManagement>` and add the Flinkboot Kafka module along with Flink APIs:
+
+```xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>io.github.sekelenao</groupId>
+            <artifactId>flinkboot</artifactId>
+            <version>0.1.0-1.20</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+
+<dependencies>
+    <!-- Flinkboot Kafka -->
+    <dependency>
+        <groupId>io.github.sekelenao</groupId>
+        <artifactId>flinkboot-kafka</artifactId>
+    </dependency>
+
+    <!-- Flink Streaming API (Provided by Flink cluster) -->
+    <dependency>
+        <groupId>org.apache.flink</groupId>
+        <artifactId>flink-streaming-java</artifactId>
+    </dependency>
+</dependencies>
+```
+
+---
+
 ## 1. YAML Configuration Properties & Structure
 
 Define your Kafka Sink properties in your YAML file:
