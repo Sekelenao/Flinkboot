@@ -21,6 +21,12 @@
 
     <dependencies>
 
+        <!-- Flinkboot Core -->
+        <dependency>
+            <groupId>io.github.sekelenao</groupId>
+            <artifactId>flinkboot-core</artifactId>
+        </dependency>
+
         <!-- Flink dependencies -->
         <dependency>
             <groupId>org.apache.flink</groupId>

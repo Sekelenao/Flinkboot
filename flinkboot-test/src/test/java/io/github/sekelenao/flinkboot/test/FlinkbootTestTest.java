@@ -1,15 +1,24 @@
 package io.github.sekelenao.flinkboot.test;
 
+import io.github.sekelenao.flinkboot.core.api.properties.JobProperties;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opentest4j.AssertionFailedError;
 
+import java.nio.file.Files;
+
+import java.util.List;
 import java.util.stream.Stream;
 
 import static io.github.sekelenao.flinkboot.test.FlinkbootTest.assertPojo;
+import static io.github.sekelenao.flinkboot.test.FlinkbootTest.configuration;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -145,6 +154,63 @@ class FlinkbootTestTest {
         var exception = assertThrows(java.lang.reflect.InvocationTargetException.class, constructor::newInstance);
         assertInstanceOf(AssertionError.class, exception.getCause());
         assertTrue(exception.getCause().getMessage().contains("You cannot instantiate this class"));
+    }
+
+    @Nested
+    @DisplayName("Configuration Helper")
+    class ConfigurationHelperTests {
+
+        @Test
+        @DisplayName("Should load configuration directly from single temp YAML file using varargs")
+        void shouldLoadConfigurationFromSingleFile() throws Exception {
+            var tempFile = Files.createTempFile("flinkboot-test-", ".yaml");
+            tempFile.toFile().deleteOnExit();
+            Files.writeString(tempFile, "name: test-job-single-file\n");
+
+            var jobProperties = configuration(
+                JobProperties.class,
+                "file:" + tempFile.toAbsolutePath()
+            );
+
+            assertAll(
+                () -> assertNotNull(jobProperties),
+                () -> assertEquals("test-job-single-file", jobProperties.name())
+            );
+        }
+
+        @Test
+        @DisplayName("Should load configuration directly from multiple temp YAML files using varargs")
+        void shouldLoadConfigurationFromMultipleFiles() throws Exception {
+            var baseFile = Files.createTempFile("flinkboot-base-", ".yaml");
+            baseFile.toFile().deleteOnExit();
+            Files.writeString(baseFile, "name: base-job\n");
+
+            var envFile = Files.createTempFile("flinkboot-env-", ".yaml");
+            envFile.toFile().deleteOnExit();
+            Files.writeString(envFile, "environment:\n  execution:\n    parallelism: 4\n");
+
+            var jobProperties = configuration(
+                JobProperties.class,
+                "file:" + baseFile.toAbsolutePath(),
+                "file:" + envFile.toAbsolutePath()
+            );
+
+            assertAll(
+                () -> assertNotNull(jobProperties),
+                () -> assertEquals("base-job", jobProperties.name()),
+                () -> assertTrue(jobProperties.environment().isPresent()),
+                () -> assertEquals(4, jobProperties.environment().get().execution().orElseThrow().parallelism().orElseThrow())
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when parameters are null")
+        void shouldThrowExceptionWhenParametersAreNull() {
+            assertAll(
+                () -> assertThrows(NullPointerException.class, () -> configuration(null, "classpath:path.yaml")),
+                () -> assertThrows(NullPointerException.class, () -> configuration(JobProperties.class, (String[]) null))
+            );
+        }
     }
 
 }
