@@ -44,7 +44,8 @@ class KafkaSourceTopicListPropertiesTest {
         @Test
         @DisplayName("Should successfully deserialize from valid YAML with all fields")
         void shouldDeserializeValidYaml() throws Exception {
-            var yaml = "bootstrap-servers:\n" +
+            var yaml = "name: my-source\n" +
+                "bootstrap-servers:\n" +
                 "  - localhost:9092\n" +
                 "group-id: my-group\n" +
                 "topics:\n" +
@@ -58,6 +59,7 @@ class KafkaSourceTopicListPropertiesTest {
 
             assertAll(
                 () -> assertNotNull(config),
+                () -> assertEquals("my-source", config.name()),
                 () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
                 () -> assertEquals("my-group", config.groupId()),
                 () -> assertEquals(List.of("topic-a", "topic-b"), config.topics()),
@@ -70,7 +72,8 @@ class KafkaSourceTopicListPropertiesTest {
         @Test
         @DisplayName("Should deserialize successfully from YAML without optional properties")
         void shouldDeserializeWithoutOptionalProperties() throws Exception {
-            var yaml = "bootstrap-servers:\n" +
+            var yaml = "name: my-source\n" +
+                "bootstrap-servers:\n" +
                 "  - localhost:9092\n" +
                 "group-id: my-group\n" +
                 "topics:\n" +
@@ -81,6 +84,7 @@ class KafkaSourceTopicListPropertiesTest {
 
             assertAll(
                 () -> assertNotNull(config),
+                () -> assertEquals("my-source", config.name()),
                 () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
                 () -> assertEquals("my-group", config.groupId()),
                 () -> assertEquals(List.of("topic-a"), config.topics()),
@@ -92,7 +96,8 @@ class KafkaSourceTopicListPropertiesTest {
         @Test
         @DisplayName("Should deserialize case-insensitive enums")
         void shouldDeserializeCaseInsensitiveEnums() throws Exception {
-            var yaml = "bootstrap-servers:\n" +
+            var yaml = "name: my-source\n" +
+                "bootstrap-servers:\n" +
                 "  - localhost:9092\n" +
                 "group-id: my-group\n" +
                 "topics:\n" +
@@ -110,7 +115,8 @@ class KafkaSourceTopicListPropertiesTest {
         @Test
         @DisplayName("Should successfully deserialize TIMESTAMP starting-offsets and starting-offsets-timestamp")
         void shouldDeserializeTimestampOffsets() throws Exception {
-            var yaml = "bootstrap-servers:\n" +
+            var yaml = "name: my-source\n" +
+                "bootstrap-servers:\n" +
                 "  - localhost:9092\n" +
                 "group-id: my-group\n" +
                 "topics:\n" +
@@ -131,7 +137,8 @@ class KafkaSourceTopicListPropertiesTest {
         @Test
         @DisplayName("Should successfully deserialize OFFSETS starting-offsets and starting-offsets-partition-offsets")
         void shouldDeserializePartitionOffsets() throws Exception {
-            var yaml = "bootstrap-servers:\n" +
+            var yaml = "name: my-source\n" +
+                "bootstrap-servers:\n" +
                 "  - localhost:9092\n" +
                 "group-id: my-group\n" +
                 "topics:\n" +
@@ -169,6 +176,7 @@ class KafkaSourceTopicListPropertiesTest {
         @DisplayName("Should pass validation with valid properties")
         void shouldPassValidation() {
             var config = new KafkaSourceTopicListProperties(
+                "my-source",
                 List.of("localhost:9092"),
                 "my-group",
                 List.of("topic-a"),
@@ -183,9 +191,31 @@ class KafkaSourceTopicListPropertiesTest {
         }
 
         @Test
+        @DisplayName("Should fail validation when name is blank")
+        void shouldFailWhenNameIsBlank() {
+            var config = new KafkaSourceTopicListProperties(
+                "",
+                List.of("localhost:9092"),
+                "my-group",
+                List.of("topic-a"),
+                KafkaOffsetInitializer.LATEST,
+                null,
+                null,
+                null
+            );
+
+            Set<ConstraintViolation<KafkaSourceTopicListProperties>> violations = validator.validate(config);
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("name")))
+            );
+        }
+
+        @Test
         @DisplayName("Should fail validation when bootstrap-servers is empty")
         void shouldFailWhenBootstrapServersIsEmpty() {
             var config = new KafkaSourceTopicListProperties(
+                "my-source",
                 List.of(),
                 "my-group",
                 List.of("topic-a"),
@@ -206,6 +236,7 @@ class KafkaSourceTopicListPropertiesTest {
         @DisplayName("Should fail validation when group-id is blank")
         void shouldFailWhenGroupIdIsBlank() {
             var config = new KafkaSourceTopicListProperties(
+                "my-source",
                 List.of("localhost:9092"),
                 "   ",
                 List.of("topic-a"),
@@ -226,6 +257,7 @@ class KafkaSourceTopicListPropertiesTest {
         @DisplayName("Should fail validation when topics is empty")
         void shouldFailWhenTopicsIsEmpty() {
             var config = new KafkaSourceTopicListProperties(
+                "my-source",
                 List.of("localhost:9092"),
                 "my-group",
                 List.of(),
@@ -248,6 +280,7 @@ class KafkaSourceTopicListPropertiesTest {
             assertThrows(
                 NullPointerException.class,
                 () -> new KafkaSourceTopicListProperties(
+                    "my-source",
                     List.of("localhost:9092"),
                     "my-group",
                     List.of("topic-a"),
@@ -263,6 +296,7 @@ class KafkaSourceTopicListPropertiesTest {
         @DisplayName("Should fail validation when nested partition offset has invalid properties")
         void shouldFailWhenNestedPartitionOffsetIsInvalid() {
             var config = new KafkaSourceTopicListProperties(
+                "my-source",
                 List.of("localhost:9092"),
                 "my-group",
                 List.of("topic-a"),
@@ -280,6 +314,7 @@ class KafkaSourceTopicListPropertiesTest {
         @DisplayName("Should fail validation when starting-offsets-timestamp is negative")
         void shouldFailWhenStartingOffsetsTimestampIsNegative() {
             var config = new KafkaSourceTopicListProperties(
+                "my-source",
                 List.of("localhost:9092"),
                 "my-group",
                 List.of("topic-a"),
@@ -306,6 +341,7 @@ class KafkaSourceTopicListPropertiesTest {
         @DisplayName("Should return expected values from getters when all parameters are present")
         void testGettersWithAllParameters() {
             var config = new KafkaSourceTopicListProperties(
+                "my-source",
                 List.of("localhost:9092"),
                 "my-group",
                 List.of("topic-a"),
@@ -316,6 +352,7 @@ class KafkaSourceTopicListPropertiesTest {
             );
 
             assertAll(
+                () -> assertEquals("my-source", config.name()),
                 () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
                 () -> assertEquals("my-group", config.groupId()),
                 () -> assertEquals(List.of("topic-a"), config.topics()),
@@ -331,6 +368,7 @@ class KafkaSourceTopicListPropertiesTest {
         @DisplayName("Should return empty structures from getters when optional parameters are absent")
         void testGettersWithAbsentParameters() {
             var config = new KafkaSourceTopicListProperties(
+                "my-source",
                 List.of("localhost:9092"),
                 "my-group",
                 List.of("topic-a"),
@@ -356,6 +394,7 @@ class KafkaSourceTopicListPropertiesTest {
         @DisplayName("Equals and HashCode should work correctly across all branches")
         void testEqualsAndHashCode() {
             var config1 = new KafkaSourceTopicListProperties(
+                "my-source",
                 List.of("localhost:9092"),
                 "my-group",
                 List.of("topic-a"),
@@ -365,6 +404,7 @@ class KafkaSourceTopicListPropertiesTest {
                 null
             );
             var config2 = new KafkaSourceTopicListProperties(
+                "my-source",
                 List.of("localhost:9092"),
                 "my-group",
                 List.of("topic-a"),
@@ -374,6 +414,7 @@ class KafkaSourceTopicListPropertiesTest {
                 null
             );
             var configDiffGroup = new KafkaSourceTopicListProperties(
+                "my-source",
                 List.of("localhost:9092"),
                 "other-group",
                 List.of("topic-a"),

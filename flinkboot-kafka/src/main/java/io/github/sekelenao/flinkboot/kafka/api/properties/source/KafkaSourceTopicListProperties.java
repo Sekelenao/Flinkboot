@@ -22,6 +22,9 @@ public class KafkaSourceTopicListProperties implements OffsetInitializerProperti
 
     private static final long serialVersionUID = 1L;
 
+    @NotBlank
+    private final String name;
+
     @NotEmpty
     private final List<String> bootstrapServers;
 
@@ -43,6 +46,7 @@ public class KafkaSourceTopicListProperties implements OffsetInitializerProperti
 
     @JsonCreator
     public KafkaSourceTopicListProperties(
+        @JsonProperty("name") String name,
         @JsonProperty("bootstrap-servers") List<String> bootstrapServers,
         @JsonProperty("group-id") String groupId,
         @JsonProperty("topics") List<String> topics,
@@ -51,6 +55,7 @@ public class KafkaSourceTopicListProperties implements OffsetInitializerProperti
         @JsonProperty("starting-offsets-partition-offsets") List<TopicPartitionOffsetProperties> startingOffsetsPartitionOffsets,
         @JsonProperty("properties") Map<String, String> properties
     ) {
+        this.name = Objects.requireNonNull(name);
         this.bootstrapServers = Objects.requireNonNull(bootstrapServers);
         this.groupId = Objects.requireNonNull(groupId);
         this.topics = Objects.requireNonNull(topics);
@@ -84,6 +89,10 @@ public class KafkaSourceTopicListProperties implements OffsetInitializerProperti
                 throw new InvalidKafkaSourcePropertiesException("starting-offsets-partition-offsets must not be specified when starting-offsets is " + startingOffsets);
             }
         }
+    }
+
+    public String name() {
+        return name;
     }
 
     public List<String> bootstrapServers() {
@@ -130,7 +139,8 @@ public class KafkaSourceTopicListProperties implements OffsetInitializerProperti
             return false;
         }
         var o = (KafkaSourceTopicListProperties) other;
-        return Objects.equals(bootstrapServers, o.bootstrapServers)
+        return Objects.equals(name, o.name)
+            && Objects.equals(bootstrapServers, o.bootstrapServers)
             && Objects.equals(groupId, o.groupId)
             && Objects.equals(topics, o.topics)
             && startingOffsets == o.startingOffsets
@@ -142,13 +152,14 @@ public class KafkaSourceTopicListProperties implements OffsetInitializerProperti
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(bootstrapServers, groupId, topics, startingOffsets, startingOffsetsTimestamp, startingOffsetsPartitionOffsets, properties);
+        return Objects.hash(name, bootstrapServers, groupId, topics, startingOffsets, startingOffsetsTimestamp, startingOffsetsPartitionOffsets, properties);
     }
 
     @Override
     public String toString() {
         return "KafkaSourceTopicListProperties{" +
-            "bootstrapServers=" + bootstrapServers +
+            "name='" + name + '\'' +
+            ", bootstrapServers=" + bootstrapServers +
             ", groupId='" + groupId + '\'' +
             ", topics=" + topics +
             ", startingOffsets=" + startingOffsets +

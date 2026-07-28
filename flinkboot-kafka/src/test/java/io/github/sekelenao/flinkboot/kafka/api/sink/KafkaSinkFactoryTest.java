@@ -30,6 +30,7 @@ class KafkaSinkFactoryTest {
         @DisplayName("Should successfully build KafkaSink and KafkaSinkBuilder with default configuration")
         void shouldBuildKafkaSink() {
             var config = new KafkaSinkProperties(
+                "my-sink",
                 List.of("localhost:9092"),
                 "my-topic",
                 null,
@@ -47,6 +48,7 @@ class KafkaSinkFactoryTest {
         @DisplayName("Should successfully build with EXACTLY_ONCE and transactional ID prefix")
         void shouldBuildWithExactlyOnce() {
             var config = new KafkaSinkProperties(
+                "my-sink",
                 List.of("localhost:9092"),
                 "my-topic",
                 KafkaDeliveryGuarantee.EXACTLY_ONCE,
@@ -62,6 +64,7 @@ class KafkaSinkFactoryTest {
         void shouldBuildWithOtherGuarantees() {
             for (var guarantee : List.of(KafkaDeliveryGuarantee.NONE, KafkaDeliveryGuarantee.AT_LEAST_ONCE)) {
                 var config = new KafkaSinkProperties(
+                    "my-sink",
                     List.of("localhost:9092"),
                     "my-topic",
                     guarantee,
@@ -79,6 +82,7 @@ class KafkaSinkFactoryTest {
                 InvalidKafkaSinkPropertiesException.class,
                 () -> {
                     var config = new KafkaSinkProperties(
+                        "my-sink",
                         List.of("localhost:9092"),
                         "my-topic",
                         KafkaDeliveryGuarantee.EXACTLY_ONCE,
@@ -97,6 +101,7 @@ class KafkaSinkFactoryTest {
                 InvalidKafkaSinkPropertiesException.class,
                 () -> {
                     var config = new KafkaSinkProperties(
+                        "my-sink",
                         List.of("localhost:9092"),
                         "my-topic",
                         KafkaDeliveryGuarantee.AT_LEAST_ONCE,
@@ -115,6 +120,7 @@ class KafkaSinkFactoryTest {
                 InvalidKafkaSinkPropertiesException.class,
                 () -> {
                     var config = new KafkaSinkProperties(
+                        "my-sink",
                         List.of("localhost:9092"),
                         "my-topic",
                         null,
@@ -130,6 +136,7 @@ class KafkaSinkFactoryTest {
         @DisplayName("Should throw NullPointerException when parameters are null")
         void shouldThrowExceptionWhenParamsAreNull() {
             var config = new KafkaSinkProperties(
+                "my-sink",
                 List.of("localhost:9092"),
                 "my-topic",
                 KafkaDeliveryGuarantee.AT_LEAST_ONCE,

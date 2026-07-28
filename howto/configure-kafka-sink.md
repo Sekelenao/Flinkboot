@@ -43,6 +43,7 @@ Import the Flinkboot BOM in your `<dependencyManagement>` and add the Flinkboot 
 Define your Kafka Sink properties in your YAML file:
 
 ```yaml
+name: "my-kafka-sink"
 bootstrap-servers:
   - "localhost:9092"
 topic: "users-sink"
@@ -58,6 +59,7 @@ properties:
 
 | Property Key              | Type            | Required | Validation                    | Description                                                                                                                                                                           |
 |:--------------------------|:----------------|:---------|:------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `name`                    | String          | **Yes**  | `@NotBlank`                   | Logical name of the Kafka sink configuration.                                                                                                                                         |
 | `bootstrap-servers`       | List of Strings | **Yes**  | `@NotEmpty`, items `@NotBlank` | Kafka bootstrap broker hosts/ports (e.g. `localhost:9092`).                                                                                                                           |
 | `topic`                   | String          | **Yes**  | `@NotBlank`                   | Target Kafka topic to write events to.                                                                                                                                                |
 | `delivery-guarantee`      | Enum            | No       | Enum                          | Delivery guarantee. Supported values: `NONE`, `AT_LEAST_ONCE`, `EXACTLY_ONCE`. Defaults to Flink default if omitted.                                                                  |

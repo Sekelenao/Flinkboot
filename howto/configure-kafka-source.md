@@ -45,6 +45,7 @@ You can configure your Kafka Source using either a static list of topics or a to
 ### Option A: Static List of Topics (`KafkaSourceTopicListProperties`)
 
 ```yaml
+name: "my-kafka-source"
 bootstrap-servers:
   - "localhost:9092"
 group-id: "my-consumer-group"
@@ -59,6 +60,7 @@ properties:
 ### Option B: Topic Pattern Regex (`KafkaSourceTopicPatternProperties`)
 
 ```yaml
+name: "my-kafka-source"
 bootstrap-servers:
   - "localhost:9092"
 group-id: "my-consumer-group"
@@ -72,6 +74,7 @@ starting-offsets: "LATEST"
 
 | Property Key                         | Type            | Required                    | Validation                        | Description                                                                                                                                         |
 |:-------------------------------------|:----------------|:----------------------------|:----------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `name`                               | String          | **Yes**                     | `@NotBlank`                       | Logical name of the Kafka source configuration.                                                                                                     |
 | `bootstrap-servers`                  | List of Strings | **Yes**                     | `@NotEmpty`, items `@NotBlank`     | Kafka bootstrap broker hosts/ports (e.g. `localhost:9092`).                                                                                         |
 | `group-id`                           | String          | **Yes**                     | `@NotBlank`                       | Consumer group ID.                                                                                                                                  |
 | `topics`                             | List of Strings | **Yes** (Only for Option A) | `@NotEmpty`, items `@NotBlank`     | Static list of topics to subscribe to.                                                                                                              |

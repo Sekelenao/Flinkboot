@@ -44,7 +44,8 @@ class KafkaSourceTopicPatternPropertiesTest {
         @Test
         @DisplayName("Should successfully deserialize from valid YAML with all fields")
         void shouldDeserializeValidYaml() throws Exception {
-            var yaml = "bootstrap-servers:\n" +
+            var yaml = "name: my-source\n" +
+                "bootstrap-servers:\n" +
                 "  - localhost:9092\n" +
                 "group-id: my-group\n" +
                 "topic-pattern: \"^my-topic-.*$\"\n" +
@@ -56,6 +57,7 @@ class KafkaSourceTopicPatternPropertiesTest {
 
             assertAll(
                 () -> assertNotNull(config),
+                () -> assertEquals("my-source", config.name()),
                 () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
                 () -> assertEquals("my-group", config.groupId()),
                 () -> assertEquals("^my-topic-.*$", config.topicPattern()),
@@ -67,7 +69,8 @@ class KafkaSourceTopicPatternPropertiesTest {
         @Test
         @DisplayName("Should deserialize successfully from YAML without optional properties")
         void shouldDeserializeWithoutOptionalProperties() throws Exception {
-            var yaml = "bootstrap-servers:\n" +
+            var yaml = "name: my-source\n" +
+                "bootstrap-servers:\n" +
                 "  - localhost:9092\n" +
                 "group-id: my-group\n" +
                 "topic-pattern: \"^my-topic-.*$\"\n" +
@@ -77,6 +80,7 @@ class KafkaSourceTopicPatternPropertiesTest {
 
             assertAll(
                 () -> assertNotNull(config),
+                () -> assertEquals("my-source", config.name()),
                 () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
                 () -> assertEquals("my-group", config.groupId()),
                 () -> assertEquals("^my-topic-.*$", config.topicPattern()),
@@ -88,7 +92,8 @@ class KafkaSourceTopicPatternPropertiesTest {
         @Test
         @DisplayName("Should successfully deserialize TIMESTAMP starting-offsets and starting-offsets-timestamp")
         void shouldDeserializeTimestampOffsets() throws Exception {
-            var yaml = "bootstrap-servers:\n" +
+            var yaml = "name: my-source\n" +
+                "bootstrap-servers:\n" +
                 "  - localhost:9092\n" +
                 "group-id: my-group\n" +
                 "topic-pattern: \"^my-topic-.*$\"\n" +
@@ -108,7 +113,8 @@ class KafkaSourceTopicPatternPropertiesTest {
         @Test
         @DisplayName("Should successfully deserialize OFFSETS starting-offsets and starting-offsets-partition-offsets")
         void shouldDeserializePartitionOffsets() throws Exception {
-            var yaml = "bootstrap-servers:\n" +
+            var yaml = "name: my-source\n" +
+                "bootstrap-servers:\n" +
                 "  - localhost:9092\n" +
                 "group-id: my-group\n" +
                 "topic-pattern: \"^my-topic-.*$\"\n" +
@@ -139,6 +145,7 @@ class KafkaSourceTopicPatternPropertiesTest {
         @DisplayName("Should pass validation with valid properties")
         void shouldPassValidation() {
             var config = new KafkaSourceTopicPatternProperties(
+                "my-source",
                 List.of("localhost:9092"),
                 "my-group",
                 "^my-topic-.*$",
@@ -153,9 +160,31 @@ class KafkaSourceTopicPatternPropertiesTest {
         }
 
         @Test
+        @DisplayName("Should fail validation when name is blank")
+        void shouldFailWhenNameIsBlank() {
+            var config = new KafkaSourceTopicPatternProperties(
+                "",
+                List.of("localhost:9092"),
+                "my-group",
+                "^my-topic-.*$",
+                KafkaOffsetInitializer.LATEST,
+                null,
+                null,
+                null
+            );
+
+            Set<ConstraintViolation<KafkaSourceTopicPatternProperties>> violations = validator.validate(config);
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("name")))
+            );
+        }
+
+        @Test
         @DisplayName("Should fail validation when bootstrap-servers is empty")
         void shouldFailWhenBootstrapServersIsEmpty() {
             var config = new KafkaSourceTopicPatternProperties(
+                "my-source",
                 List.of(),
                 "my-group",
                 "^my-topic-.*$",
@@ -176,6 +205,7 @@ class KafkaSourceTopicPatternPropertiesTest {
         @DisplayName("Should fail validation when group-id is blank")
         void shouldFailWhenGroupIdIsBlank() {
             var config = new KafkaSourceTopicPatternProperties(
+                "my-source",
                 List.of("localhost:9092"),
                 "",
                 "^my-topic-.*$",
@@ -198,6 +228,7 @@ class KafkaSourceTopicPatternPropertiesTest {
             assertThrows(
                 NullPointerException.class,
                 () -> new KafkaSourceTopicPatternProperties(
+                    "my-source",
                     List.of("localhost:9092"),
                     "my-group",
                     null,
@@ -213,6 +244,7 @@ class KafkaSourceTopicPatternPropertiesTest {
         @DisplayName("Should fail validation when topic-pattern is blank")
         void shouldFailWhenTopicPatternIsBlank() {
             var config = new KafkaSourceTopicPatternProperties(
+                "my-source",
                 List.of("localhost:9092"),
                 "my-group",
                 "   ",
@@ -235,6 +267,7 @@ class KafkaSourceTopicPatternPropertiesTest {
             assertThrows(
                 NullPointerException.class,
                 () -> new KafkaSourceTopicPatternProperties(
+                    "my-source",
                     List.of("localhost:9092"),
                     "my-group",
                     "^my-topic-.*$",
@@ -250,6 +283,7 @@ class KafkaSourceTopicPatternPropertiesTest {
         @DisplayName("Should fail validation when nested partition offset has invalid properties")
         void shouldFailWhenNestedPartitionOffsetIsInvalid() {
             var config = new KafkaSourceTopicPatternProperties(
+                "my-source",
                 List.of("localhost:9092"),
                 "my-group",
                 "^my-topic-.*$",
@@ -267,6 +301,7 @@ class KafkaSourceTopicPatternPropertiesTest {
         @DisplayName("Should fail validation when starting-offsets-timestamp is negative")
         void shouldFailWhenStartingOffsetsTimestampIsNegative() {
             var config = new KafkaSourceTopicPatternProperties(
+                "my-source",
                 List.of("localhost:9092"),
                 "my-group",
                 "^my-topic-.*$",
@@ -293,6 +328,7 @@ class KafkaSourceTopicPatternPropertiesTest {
         @DisplayName("Should return expected values from getters when all parameters are present")
         void testGettersWithAllParameters() {
             var config = new KafkaSourceTopicPatternProperties(
+                "my-source",
                 List.of("localhost:9092"),
                 "my-group",
                 "topic-.*",
@@ -303,6 +339,7 @@ class KafkaSourceTopicPatternPropertiesTest {
             );
 
             assertAll(
+                () -> assertEquals("my-source", config.name()),
                 () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
                 () -> assertEquals("my-group", config.groupId()),
                 () -> assertEquals("topic-.*", config.topicPattern()),
@@ -318,6 +355,7 @@ class KafkaSourceTopicPatternPropertiesTest {
         @DisplayName("Should return empty structures from getters when optional parameters are absent")
         void testGettersWithAbsentParameters() {
             var config = new KafkaSourceTopicPatternProperties(
+                "my-source",
                 List.of("localhost:9092"),
                 "my-group",
                 "^my-topic-.*$",
@@ -344,6 +382,7 @@ class KafkaSourceTopicPatternPropertiesTest {
         void testEqualsAndHashCode() {
             var pattern = "^my-topic-.*$";
             var config1 = new KafkaSourceTopicPatternProperties(
+                "my-source",
                 List.of("localhost:9092"),
                 "my-group",
                 pattern,
@@ -353,6 +392,7 @@ class KafkaSourceTopicPatternPropertiesTest {
                 null
             );
             var config2 = new KafkaSourceTopicPatternProperties(
+                "my-source",
                 List.of("localhost:9092"),
                 "my-group",
                 pattern,
@@ -362,6 +402,7 @@ class KafkaSourceTopicPatternPropertiesTest {
                 null
             );
             var configDiffGroup = new KafkaSourceTopicPatternProperties(
+                "my-source",
                 List.of("localhost:9092"),
                 "other-group",
                 pattern,

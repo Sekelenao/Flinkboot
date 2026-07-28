@@ -46,7 +46,8 @@ class KafkaSinkPropertiesTest {
         @Test
         @DisplayName("Should successfully deserialize from valid YAML with all fields")
         void shouldDeserializeValidYaml() throws Exception {
-            var yaml = "bootstrap-servers:\n" +
+            var yaml = "name: my-sink\n" +
+                "bootstrap-servers:\n" +
                 "  - localhost:9092\n" +
                 "topic: my-topic\n" +
                 "delivery-guarantee: EXACTLY_ONCE\n" +
@@ -58,6 +59,7 @@ class KafkaSinkPropertiesTest {
 
             assertAll(
                 () -> assertNotNull(config),
+                () -> assertEquals("my-sink", config.name()),
                 () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
                 () -> assertEquals("my-topic", config.topic()),
                 () -> assertTrue(config.deliveryGuarantee().isPresent()),
@@ -71,7 +73,8 @@ class KafkaSinkPropertiesTest {
         @Test
         @DisplayName("Should deserialize successfully from YAML without optional properties")
         void shouldDeserializeWithoutOptionalProperties() throws Exception {
-            var yaml = "bootstrap-servers:\n" +
+            var yaml = "name: my-sink\n" +
+                "bootstrap-servers:\n" +
                 "  - localhost:9092\n" +
                 "topic: my-topic\n";
 
@@ -79,6 +82,7 @@ class KafkaSinkPropertiesTest {
 
             assertAll(
                 () -> assertNotNull(config),
+                () -> assertEquals("my-sink", config.name()),
                 () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
                 () -> assertEquals("my-topic", config.topic()),
                 () -> assertTrue(config.deliveryGuarantee().isEmpty()),
@@ -96,6 +100,7 @@ class KafkaSinkPropertiesTest {
         @DisplayName("Should pass validation with valid properties")
         void shouldPassValidation() {
             var config = new KafkaSinkProperties(
+                "my-sink",
                 List.of("localhost:9092"),
                 "my-topic",
                 KafkaDeliveryGuarantee.AT_LEAST_ONCE,
@@ -108,9 +113,29 @@ class KafkaSinkPropertiesTest {
         }
 
         @Test
+        @DisplayName("Should fail validation when name is blank")
+        void shouldFailWhenNameIsBlank() {
+            var config = new KafkaSinkProperties(
+                "",
+                List.of("localhost:9092"),
+                "my-topic",
+                KafkaDeliveryGuarantee.AT_LEAST_ONCE,
+                null,
+                null
+            );
+
+            Set<ConstraintViolation<KafkaSinkProperties>> violations = validator.validate(config);
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("name")))
+            );
+        }
+
+        @Test
         @DisplayName("Should fail validation when bootstrap-servers is empty")
         void shouldFailWhenBootstrapServersIsEmpty() {
             var config = new KafkaSinkProperties(
+                "my-sink",
                 List.of(),
                 "my-topic",
                 KafkaDeliveryGuarantee.AT_LEAST_ONCE,
@@ -129,6 +154,7 @@ class KafkaSinkPropertiesTest {
         @DisplayName("Should fail validation when topic is blank")
         void shouldFailWhenTopicIsBlank() {
             var config = new KafkaSinkProperties(
+                "my-sink",
                 List.of("localhost:9092"),
                 "",
                 KafkaDeliveryGuarantee.AT_LEAST_ONCE,
@@ -149,6 +175,7 @@ class KafkaSinkPropertiesTest {
             assertThrows(
                 InvalidKafkaSinkPropertiesException.class,
                 () -> new KafkaSinkProperties(
+                    "my-sink",
                     List.of("localhost:9092"),
                     "my-topic",
                     KafkaDeliveryGuarantee.EXACTLY_ONCE,
@@ -164,6 +191,7 @@ class KafkaSinkPropertiesTest {
             assertThrows(
                 InvalidKafkaSinkPropertiesException.class,
                 () -> new KafkaSinkProperties(
+                    "my-sink",
                     List.of("localhost:9092"),
                     "my-topic",
                     KafkaDeliveryGuarantee.EXACTLY_ONCE,
@@ -179,6 +207,7 @@ class KafkaSinkPropertiesTest {
             var properties = new HashMap<String, String>();
             properties.put("key", null);
             var config = new KafkaSinkProperties(
+                "my-sink",
                 List.of("localhost:9092"),
                 "my-topic",
                 KafkaDeliveryGuarantee.AT_LEAST_ONCE,
@@ -202,6 +231,7 @@ class KafkaSinkPropertiesTest {
         @DisplayName("Should return expected values from getters when all parameters are present")
         void testGettersWithAllParameters() {
             var config = new KafkaSinkProperties(
+                "my-sink",
                 List.of("localhost:9092"),
                 "my-topic",
                 KafkaDeliveryGuarantee.EXACTLY_ONCE,
@@ -210,6 +240,7 @@ class KafkaSinkPropertiesTest {
             );
 
             assertAll(
+                () -> assertEquals("my-sink", config.name()),
                 () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
                 () -> assertEquals("my-topic", config.topic()),
                 () -> assertTrue(config.deliveryGuarantee().isPresent()),
@@ -229,6 +260,7 @@ class KafkaSinkPropertiesTest {
         @DisplayName("Equals and HashCode should work correctly")
         void testEqualsAndHashCode() {
             var config1 = new KafkaSinkProperties(
+                "my-sink",
                 List.of("localhost:9092"),
                 "my-topic",
                 KafkaDeliveryGuarantee.AT_LEAST_ONCE,
@@ -236,6 +268,7 @@ class KafkaSinkPropertiesTest {
                 null
             );
             var config2 = new KafkaSinkProperties(
+                "my-sink",
                 List.of("localhost:9092"),
                 "my-topic",
                 KafkaDeliveryGuarantee.AT_LEAST_ONCE,
@@ -243,6 +276,7 @@ class KafkaSinkPropertiesTest {
                 null
             );
             var configDiffTopic = new KafkaSinkProperties(
+                "my-sink",
                 List.of("localhost:9092"),
                 "other-topic",
                 KafkaDeliveryGuarantee.AT_LEAST_ONCE,

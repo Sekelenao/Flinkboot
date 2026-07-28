@@ -38,9 +38,9 @@ public class KafkaPropertiesEdgeCasesTest {
             () -> assertNotNull(part1.toString())
         );
 
-        var listConfig1 = new KafkaSourceTopicListProperties(List.of("localhost:9092"), "group1", List.of("topic1"), KafkaOffsetInitializer.EARLIEST, null, null, Map.of("k", "v"));
-        var listConfig2 = new KafkaSourceTopicListProperties(List.of("localhost:9092"), "group1", List.of("topic1"), KafkaOffsetInitializer.EARLIEST, null, null, Map.of("k", "v"));
-        var listConfig3 = new KafkaSourceTopicListProperties(List.of("localhost:9092"), "group2", List.of("topic2"), KafkaOffsetInitializer.TIMESTAMP, 10000L, null, null);
+        var listConfig1 = new KafkaSourceTopicListProperties("list-src", List.of("localhost:9092"), "group1", List.of("topic1"), KafkaOffsetInitializer.EARLIEST, null, null, Map.of("k", "v"));
+        var listConfig2 = new KafkaSourceTopicListProperties("list-src", List.of("localhost:9092"), "group1", List.of("topic1"), KafkaOffsetInitializer.EARLIEST, null, null, Map.of("k", "v"));
+        var listConfig3 = new KafkaSourceTopicListProperties("list-src-2", List.of("localhost:9092"), "group2", List.of("topic2"), KafkaOffsetInitializer.TIMESTAMP, 10000L, null, null);
 
         assertAll(
             () -> assertEquals(listConfig1, listConfig1),
@@ -52,9 +52,9 @@ public class KafkaPropertiesEdgeCasesTest {
             () -> assertNotNull(listConfig1.toString())
         );
 
-        var patternConfig1 = new KafkaSourceTopicPatternProperties(List.of("localhost:9092"), "group1", "^topic-.*$", KafkaOffsetInitializer.EARLIEST, null, null, Map.of("k", "v"));
-        var patternConfig2 = new KafkaSourceTopicPatternProperties(List.of("localhost:9092"), "group1", "^topic-.*$", KafkaOffsetInitializer.EARLIEST, null, null, Map.of("k", "v"));
-        var patternConfig3 = new KafkaSourceTopicPatternProperties(List.of("localhost:9092"), "group2", "^other-.*$", KafkaOffsetInitializer.TIMESTAMP, 10000L, null, null);
+        var patternConfig1 = new KafkaSourceTopicPatternProperties("pattern-src", List.of("localhost:9092"), "group1", "^topic-.*$", KafkaOffsetInitializer.EARLIEST, null, null, Map.of("k", "v"));
+        var patternConfig2 = new KafkaSourceTopicPatternProperties("pattern-src", List.of("localhost:9092"), "group1", "^topic-.*$", KafkaOffsetInitializer.EARLIEST, null, null, Map.of("k", "v"));
+        var patternConfig3 = new KafkaSourceTopicPatternProperties("pattern-src-2", List.of("localhost:9092"), "group2", "^other-.*$", KafkaOffsetInitializer.TIMESTAMP, 10000L, null, null);
 
         assertAll(
             () -> assertEquals(patternConfig1, patternConfig1),
@@ -66,9 +66,9 @@ public class KafkaPropertiesEdgeCasesTest {
             () -> assertNotNull(patternConfig1.toString())
         );
 
-        var sinkConfig1 = new KafkaSinkProperties(List.of("localhost:9092"), "topic1", KafkaDeliveryGuarantee.AT_LEAST_ONCE, null, Map.of("k", "v"));
-        var sinkConfig2 = new KafkaSinkProperties(List.of("localhost:9092"), "topic1", KafkaDeliveryGuarantee.AT_LEAST_ONCE, null, Map.of("k", "v"));
-        var sinkConfig3 = new KafkaSinkProperties(List.of("localhost:9092"), "topic2", KafkaDeliveryGuarantee.EXACTLY_ONCE, "tx-prefix", null);
+        var sinkConfig1 = new KafkaSinkProperties("sink-name", List.of("localhost:9092"), "topic1", KafkaDeliveryGuarantee.AT_LEAST_ONCE, null, Map.of("k", "v"));
+        var sinkConfig2 = new KafkaSinkProperties("sink-name", List.of("localhost:9092"), "topic1", KafkaDeliveryGuarantee.AT_LEAST_ONCE, null, Map.of("k", "v"));
+        var sinkConfig3 = new KafkaSinkProperties("sink-name-2", List.of("localhost:9092"), "topic2", KafkaDeliveryGuarantee.EXACTLY_ONCE, "tx-prefix", null);
 
         assertAll(
             () -> assertEquals(sinkConfig1, sinkConfig1),
@@ -84,9 +84,9 @@ public class KafkaPropertiesEdgeCasesTest {
     @Test
     @DisplayName("Should test getters with null or empty optional fields")
     void shouldTestGettersWithNullOrEmptyFields() {
-        var nullSinkConfig = new KafkaSinkProperties(List.of("localhost:9092"), "topic", null, "", null);
-        var nullListConfig = new KafkaSourceTopicListProperties(List.of("localhost:9092"), "group", List.of("topic"), KafkaOffsetInitializer.EARLIEST, null, null, null);
-        var nullPatternConfig = new KafkaSourceTopicPatternProperties(List.of("localhost:9092"), "group", "^pattern$", KafkaOffsetInitializer.EARLIEST, null, null, null);
+        var nullSinkConfig = new KafkaSinkProperties("sink-name", List.of("localhost:9092"), "topic", null, "", null);
+        var nullListConfig = new KafkaSourceTopicListProperties("list-src", List.of("localhost:9092"), "group", List.of("topic"), KafkaOffsetInitializer.EARLIEST, null, null, null);
+        var nullPatternConfig = new KafkaSourceTopicPatternProperties("pattern-src", List.of("localhost:9092"), "group", "^pattern$", KafkaOffsetInitializer.EARLIEST, null, null, null);
 
         assertAll(
             () -> assertTrue(nullSinkConfig.properties().isEmpty()),

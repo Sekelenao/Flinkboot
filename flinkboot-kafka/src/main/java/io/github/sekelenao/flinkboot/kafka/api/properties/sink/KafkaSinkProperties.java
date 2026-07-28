@@ -20,6 +20,9 @@ public class KafkaSinkProperties implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @NotBlank
+    private final String name;
+
     @NotEmpty
     private final List<String> bootstrapServers;
 
@@ -35,12 +38,14 @@ public class KafkaSinkProperties implements Serializable {
 
     @JsonCreator
     public KafkaSinkProperties(
+        @JsonProperty("name") String name,
         @JsonProperty("bootstrap-servers") List<String> bootstrapServers,
         @JsonProperty("topic") String topic,
         @JsonProperty("delivery-guarantee") KafkaDeliveryGuarantee deliveryGuarantee,
         @JsonProperty("transactional-id-prefix") String transactionalIdPrefix,
         @JsonProperty("properties") Map<String, String> properties
     ) {
+        this.name = Objects.requireNonNull(name);
         this.bootstrapServers = Objects.requireNonNull(bootstrapServers);
         this.topic = Objects.requireNonNull(topic);
         this.deliveryGuarantee = deliveryGuarantee;
@@ -60,6 +65,10 @@ public class KafkaSinkProperties implements Serializable {
         if (!exactlyOnce && hasPrefix) {
             throw new InvalidKafkaSinkPropertiesException("transactional-id-prefix can only be specified when delivery-guarantee is EXACTLY_ONCE");
         }
+    }
+
+    public String name() {
+        return name;
     }
 
     public List<String> bootstrapServers() {
@@ -98,7 +107,8 @@ public class KafkaSinkProperties implements Serializable {
             return false;
         }
         var o = (KafkaSinkProperties) other;
-        return Objects.equals(bootstrapServers, o.bootstrapServers)
+        return Objects.equals(name, o.name)
+            && Objects.equals(bootstrapServers, o.bootstrapServers)
             && Objects.equals(topic, o.topic)
             && deliveryGuarantee == o.deliveryGuarantee
             && Objects.equals(transactionalIdPrefix, o.transactionalIdPrefix)
@@ -108,14 +118,15 @@ public class KafkaSinkProperties implements Serializable {
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(bootstrapServers, topic, deliveryGuarantee, transactionalIdPrefix, properties);
+        return Objects.hash(name, bootstrapServers, topic, deliveryGuarantee, transactionalIdPrefix, properties);
     }
 
     @Override
     @Generated
     public String toString() {
         return "KafkaSinkProperties{" +
-            "bootstrapServers=" + bootstrapServers +
+            "name='" + name + '\'' +
+            ", bootstrapServers=" + bootstrapServers +
             ", topic='" + topic + '\'' +
             ", deliveryGuarantee=" + deliveryGuarantee +
             ", transactionalIdPrefix='" + transactionalIdPrefix + '\'' +
