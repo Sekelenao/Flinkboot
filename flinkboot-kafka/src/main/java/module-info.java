@@ -1,5 +1,5 @@
 module io.github.sekelenao.flinkboot.kafka {
-    requires io.github.sekelenao.flinkboot.core;
+    requires transitive io.github.sekelenao.flinkboot.core;
     requires kafka.clients;
     requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.databind;
