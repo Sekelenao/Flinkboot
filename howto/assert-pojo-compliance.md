@@ -19,6 +19,7 @@ To be recognized as a POJO by Flink's `TypeExtractor`, a class must meet the fol
 3. All fields must be either:
    * **public** (non-final), or
    * have **public getter and setter** methods following the JavaBean naming convention (e.g. `getField()` and `setField(...)`).
+4. **No Generic/Kryo Fallback Fields**: No fields (or nested fields) may fall back to `GenericTypeInfo` (Kryo fallback serialization). `FlinkbootTest.assertPojo()` inspects fields to ensure pure native Flink POJO serialization.
 
 ---
 
@@ -90,7 +91,7 @@ public class UserActivity {
 Create a test class in your `src/test/java` directory:
 
 ```java
-import io.github.sekelenao.flinkboot.test.FlinkbootTest;
+import io.github.sekelenao.flinkboot.test.api.FlinkbootTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -104,4 +105,23 @@ class UserActivityTest {
 }
 ```
 
-If the class violates any of Flink's requirements, the assertion fails immediately with a descriptive error message explaining what needs to be fixed.
+If the class violates any of Flink's requirements or contains fields falling back to Kryo serialization, the assertion fails immediately with a descriptive error message indicating the exact path of the invalid field (e.g., `UserActivity.timestamp`).
+
+---
+
+## 4. Special Field Types (`java.time.*` and `Optional`)
+
+### Java 8 Date/Time Types (`LocalDateTime`, `OffsetDateTime`, etc.)
+By default, Flink's `TypeExtractor` treats unannotated `java.time.*` fields as `GenericTypeInfo` (Kryo fallback). To ensure strict POJO compliance with `assertPojo()`:
+- Annotate the field with Flink's `@TypeInfo` providing a custom `TypeInfoFactory`:
+  ```java
+  public class CustomEvent {
+      @TypeInfo(LocalDateTimeTypeInfoFactory.class)
+      public LocalDateTime eventTime;
+  }
+  ```
+- Or use natively supported types like `Instant`, `java.sql.Timestamp`, or `long` epoch milliseconds.
+
+### `java.util.Optional`
+`java.util.Optional` lacks a public zero-argument constructor and is not a Flink POJO. Fields typed as `Optional<T>` fall back to Kryo and will cause `assertPojo()` to fail. Prefer nullable fields or Flink's `@Nullable` annotation on POJO fields.
+

@@ -64,7 +64,7 @@ job:
 In your JUnit 5 test class:
 
 ```java
-import io.github.sekelenao.flinkboot.test.FlinkbootTest;
+import io.github.sekelenao.flinkboot.test.api.FlinkbootTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

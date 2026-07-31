@@ -1,13 +1,11 @@
-package io.github.sekelenao.flinkboot.test;
+package io.github.sekelenao.flinkboot.test.api;
 
 import io.github.sekelenao.flinkboot.core.api.Flinkboot;
-import org.apache.flink.api.java.typeutils.PojoTypeInfo;
+import io.github.sekelenao.flinkboot.test.internal.PojoValidator;
 import org.apache.flink.api.java.typeutils.TypeExtractor;
-import org.junit.jupiter.api.Assertions;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.List;
 import java.util.Objects;
 
 public final class FlinkbootTest {
@@ -39,11 +37,6 @@ public final class FlinkbootTest {
 
     public static void assertPojo(Class<?> clazz) {
         Objects.requireNonNull(clazz, "Class to assert must not be null");
-        var typeInfo = TypeExtractor.createTypeInfo(clazz);
-        Assertions.assertInstanceOf(PojoTypeInfo.class, typeInfo, () -> String.format(
-            "Class '%s' is not recognized as a POJO by Apache Flink's TypeExtractor. " +
-            "Ensure it is public, has a public zero-argument constructor, and all fields are public or have public getters/setters.",
-            clazz.getName()
-        ));
+        new PojoValidator().validate(clazz);
     }
 }
