@@ -32,6 +32,10 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-streaming-java</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-core</artifactId>
+        </dependency>
 
         <!--   Test   -->
         <dependency>
@@ -52,6 +56,8 @@
                         <arg>-Xlint:-module</arg>
                         <arg>--add-reads</arg>
                         <arg>io.github.sekelenao.flinkboot.test=ALL-UNNAMED</arg>
+                        <arg>--add-reads</arg>
+                        <arg>io.github.sekelenao.flinkboot.core=ALL-UNNAMED</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
@@ -59,7 +65,13 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <useModulePath>false</useModulePath>
+                    <argLine>
+                        @{argLine}
+                        --add-opens org.junit.platform.commons/org.junit.platform.commons.util=ALL-UNNAMED
+                        --add-opens org.junit.platform.commons/org.junit.platform.commons.logging=ALL-UNNAMED
+                        --add-reads io.github.sekelenao.flinkboot.test=ALL-UNNAMED
+                        --add-reads io.github.sekelenao.flinkboot.core=ALL-UNNAMED
+                    </argLine>
                 </configuration>
             </plugin>
         </plugins>

@@ -1,5 +1,9 @@
 package io.github.sekelenao.flinkboot.test.internal;
 
+import io.github.sekelenao.flinkboot.core.api.typing.InstantTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.LocalDateTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.LocalDateTimeTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.LocalTimeTypeInfoFactory;
 import org.apache.flink.api.common.typeinfo.TypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInfoFactory;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -12,7 +16,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.opentest4j.AssertionFailedError;
 
 import java.lang.reflect.Type;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -28,13 +35,6 @@ class PojoValidatorTest {
     @BeforeEach
     void setUp() {
         validator = new PojoValidator();
-    }
-
-    public static class LocalDateTimeTypeInfoFactory extends TypeInfoFactory<LocalDateTime> {
-        @Override
-        public TypeInformation<LocalDateTime> createTypeInfo(Type t, Map<String, TypeInformation<?>> genericParameters) {
-            return Types.LOCAL_DATE_TIME;
-        }
     }
 
     // --- Valid POJO Variants ---
@@ -67,6 +67,20 @@ class PojoValidatorTest {
     public static class AnnotatedLocalDateTimePojo {
         @TypeInfo(LocalDateTimeTypeInfoFactory.class)
         public LocalDateTime time;
+    }
+
+    public static class AnnotatedJavaTimePojo {
+        @TypeInfo(LocalDateTimeTypeInfoFactory.class)
+        public LocalDateTime localDateTime;
+
+        @TypeInfo(LocalDateTypeInfoFactory.class)
+        public LocalDate localDate;
+
+        @TypeInfo(LocalTimeTypeInfoFactory.class)
+        public LocalTime localTime;
+
+        @TypeInfo(InstantTypeInfoFactory.class)
+        public Instant instant;
     }
 
     // --- Invalid POJO Variants ---
@@ -125,7 +139,8 @@ class PojoValidatorTest {
         return Stream.of(
             ValidPojo.class,
             ValidPojoWithGetterSetterAndPrivateField.class,
-            AnnotatedLocalDateTimePojo.class
+            AnnotatedLocalDateTimePojo.class,
+            AnnotatedJavaTimePojo.class
         );
     }
 
