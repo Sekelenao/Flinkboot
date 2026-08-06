@@ -1,7 +1,5 @@
 package io.github.sekelenao.flinkboot.test.internal;
 
-import io.github.sekelenao.flinkboot.core.api.typing.math.BigDecimalTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.math.BigIntegerTypeInfoFactory;
 import io.github.sekelenao.flinkboot.core.api.typing.time.InstantTypeInfoFactory;
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTimeTypeInfoFactory;
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTypeInfoFactory;
@@ -14,8 +12,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opentest4j.AssertionFailedError;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -82,14 +78,6 @@ class PojoValidatorTest {
         public Instant instant;
     }
 
-    public static class AnnotatedMathPojo {
-        @TypeInfo(BigDecimalTypeInfoFactory.class)
-        public BigDecimal bigDecimal;
-
-        @TypeInfo(BigIntegerTypeInfoFactory.class)
-        public BigInteger bigInteger;
-    }
-
     // --- Invalid POJO Variants ---
     @SuppressWarnings("all")
     private static class PrivatePojo {
@@ -147,8 +135,7 @@ class PojoValidatorTest {
             ValidPojo.class,
             ValidPojoWithGetterSetterAndPrivateField.class,
             AnnotatedLocalDateTimePojo.class,
-            AnnotatedJavaTimePojo.class,
-            AnnotatedMathPojo.class
+            AnnotatedJavaTimePojo.class
         );
     }
 

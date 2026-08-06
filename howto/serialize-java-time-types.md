@@ -1,6 +1,6 @@
-# How to Serialize JDK Time & Math Types (`java.time.*`, `java.math.*`)
+# How to Serialize Java 8 Time Types (`java.time.*`)
  
-Apache Flink does not register default `TypeInfoFactory` mappings for modern Java Date/Time classes (`Instant`, `LocalDateTime`, `LocalDate`, `LocalTime`) and Math types (`BigDecimal`, `BigInteger`). Without custom factories, Flink's `TypeExtractor` falls back to **Kryo serialization**, which is slow, space-inefficient, and prone to state migration issues in production.
+Apache Flink does not register default `TypeInfoFactory` mappings for modern Java Date/Time classes (`Instant`, `LocalDateTime`, `LocalDate`, `LocalTime`). Without custom factories, Flink's `TypeExtractor` falls back to **Kryo serialization**, which is slow, space-inefficient, and prone to state migration issues in production.
 
 Flinkboot provides built-in, optimized `TypeInfoFactory` classes to enable native Flink serialization for these types.
 
@@ -8,9 +8,7 @@ Flinkboot provides built-in, optimized `TypeInfoFactory` classes to enable nativ
 
 ## 1. Available Factories
 
-The factories are organized into subpackages under `io.github.sekelenao.flinkboot.core.api.typing`:
-
-### Time Types (`io.github.sekelenao.flinkboot.core.api.typing.time`)
+All built-in factories are located in the package `io.github.sekelenao.flinkboot.core.api.typing.time`:
 
 | Java 8 Type | Flinkboot Factory Class | Under the hood Flink Type |
 | :--- | :--- | :--- |
@@ -18,13 +16,6 @@ The factories are organized into subpackages under `io.github.sekelenao.flinkboo
 | `java.time.LocalDateTime` | `LocalDateTimeTypeInfoFactory` | `Types.LOCAL_DATE_TIME` |
 | `java.time.LocalDate` | `LocalDateTypeInfoFactory` | `Types.LOCAL_DATE` |
 | `java.time.LocalTime` | `LocalTimeTypeInfoFactory` | `Types.LOCAL_TIME` |
-
-### Math Types (`io.github.sekelenao.flinkboot.core.api.typing.math`)
-
-| Java Type | Flinkboot Factory Class | Under the hood Flink Type |
-| :--- | :--- | :--- |
-| `java.math.BigDecimal` | `BigDecimalTypeInfoFactory` | `Types.BIG_DEC` |
-| `java.math.BigInteger` | `BigIntegerTypeInfoFactory` | `Types.BIG_INT` |
 
 ---
 
@@ -37,11 +28,7 @@ import io.github.sekelenao.flinkboot.core.api.typing.time.InstantTypeInfoFactory
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTypeInfoFactory;
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTimeTypeInfoFactory;
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalTimeTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.math.BigDecimalTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.math.BigIntegerTypeInfoFactory;
 import org.apache.flink.api.common.typeinfo.TypeInfo;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -50,12 +37,7 @@ import java.time.LocalTime;
 public class TransactionEvent {
 
     public String transactionId;
-
-    @TypeInfo(BigDecimalTypeInfoFactory.class)
-    public BigDecimal amount;
-
-    @TypeInfo(BigIntegerTypeInfoFactory.class)
-    public BigInteger transactionCount;
+    public double amount;
 
     // Forces Flink to use optimized InstantSerializer instead of Kryo
     @TypeInfo(InstantTypeInfoFactory.class)
@@ -102,7 +84,7 @@ class TransactionEventTest {
 
     @Test
     void testPojoCompliance() {
-        // Will fail if any java.time.* or java.math.* field is missing its @TypeInfo annotation
+        // Will fail if any java.time.* field is missing its @TypeInfo annotation
         FlinkbootTest.assertPojo(TransactionEvent.class);
     }
 }

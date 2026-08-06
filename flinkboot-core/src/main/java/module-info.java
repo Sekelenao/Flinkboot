@@ -13,7 +13,6 @@ module io.github.sekelenao.flinkboot.core {
     exports io.github.sekelenao.flinkboot.core.api.exception.parsing;
     exports io.github.sekelenao.flinkboot.core.api.exception.resource;
     exports io.github.sekelenao.flinkboot.core.api.typing.time;
-    exports io.github.sekelenao.flinkboot.core.api.typing.math;
     // Internal annotation exported specifically to flinkboot-kafka for code generation metadata
     exports io.github.sekelenao.flinkboot.core.internal.annotation to io.github.sekelenao.flinkboot.kafka;
 
