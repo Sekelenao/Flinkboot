@@ -107,21 +107,10 @@ class UserActivityTest {
 
 If the class violates any of Flink's requirements or contains fields falling back to Kryo serialization, the assertion fails immediately with a descriptive error message indicating the exact path of the invalid field (e.g., `UserActivity.timestamp`).
 
----
-
-## 4. Special Field Types (`java.time.*` and `Optional`)
-
-### Java 8 Date/Time Types (`LocalDateTime`, `OffsetDateTime`, etc.)
-By default, Flink's `TypeExtractor` treats unannotated `java.time.*` fields as `GenericTypeInfo` (Kryo fallback). To ensure strict POJO compliance with `assertPojo()`:
-- Annotate the field with Flink's `@TypeInfo` providing a custom `TypeInfoFactory`:
-  ```java
-  public class CustomEvent {
-      @TypeInfo(LocalDateTimeTypeInfoFactory.class)
-      public LocalDateTime eventTime;
-  }
-  ```
-- Or use natively supported types like `Instant`, `java.sql.Timestamp`, or `long` epoch milliseconds.
+## 4. Special Field Types (`Optional` and `java.time.*`)
 
 ### `java.util.Optional`
 `java.util.Optional` lacks a public zero-argument constructor and is not a Flink POJO. Fields typed as `Optional<T>` fall back to Kryo and will cause `assertPojo()` to fail. Prefer nullable fields or Flink's `@Nullable` annotation on POJO fields.
 
+### Java 8 Date/Time Types (`LocalDateTime`, `Instant`, etc.)
+By default, `java.time.*` fields fall back to Kryo serialization and will cause `assertPojo()` to fail. To serialize them natively and comply with POJO requirements, see the [How to Serialize Java 8 Time Types](serialize-java-time-types.md) guide.
