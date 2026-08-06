@@ -1,5 +1,11 @@
 package io.github.sekelenao.flinkboot.core.api.typing;
 
+import io.github.sekelenao.flinkboot.core.api.typing.time.InstantTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTimeTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.time.LocalTimeTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.math.BigDecimalTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.math.BigIntegerTypeInfoFactory;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,6 +42,20 @@ class TypeInfoFactoriesTest {
     void testInstantTypeInfoFactory() {
         var factory = new InstantTypeInfoFactory();
         assertEquals(Types.INSTANT, factory.createTypeInfo(null, Collections.emptyMap()));
+    }
+
+    @Test
+    @DisplayName("BigDecimalTypeInfoFactory returns Types.BIG_DEC")
+    void testBigDecimalTypeInfoFactory() {
+        var factory = new BigDecimalTypeInfoFactory();
+        assertEquals(Types.BIG_DEC, factory.createTypeInfo(null, Collections.emptyMap()));
+    }
+
+    @Test
+    @DisplayName("BigIntegerTypeInfoFactory returns Types.BIG_INT")
+    void testBigIntegerTypeInfoFactory() {
+        var factory = new BigIntegerTypeInfoFactory();
+        assertEquals(Types.BIG_INT, factory.createTypeInfo(null, Collections.emptyMap()));
     }
 
 }
