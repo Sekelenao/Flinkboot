@@ -2,7 +2,6 @@ package io.github.sekelenao.flinkboot.test.api;
 
 import io.github.sekelenao.flinkboot.core.api.Flinkboot;
 import io.github.sekelenao.flinkboot.test.internal.PojoValidator;
-import org.apache.flink.api.java.typeutils.TypeExtractor;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
