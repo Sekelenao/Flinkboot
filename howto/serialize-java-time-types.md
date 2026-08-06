@@ -16,6 +16,7 @@ All built-in factories are located in the package `io.github.sekelenao.flinkboot
 | `java.time.LocalDateTime` | `LocalDateTimeTypeInfoFactory` | `Types.LOCAL_DATE_TIME` |
 | `java.time.LocalDate` | `LocalDateTypeInfoFactory` | `Types.LOCAL_DATE` |
 | `java.time.LocalTime` | `LocalTimeTypeInfoFactory` | `Types.LOCAL_TIME` |
+| `java.time.Duration` | `DurationTypeInfoFactory` | Custom (12-byte: long seconds + int nanos) |
 
 ---
 
@@ -28,7 +29,9 @@ import io.github.sekelenao.flinkboot.core.api.typing.time.InstantTypeInfoFactory
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTypeInfoFactory;
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTimeTypeInfoFactory;
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalTimeTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.time.DurationTypeInfoFactory;
 import org.apache.flink.api.common.typeinfo.TypeInfo;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -51,6 +54,9 @@ public class TransactionEvent {
 
     @TypeInfo(LocalTimeTypeInfoFactory.class)
     public LocalTime systemTime;
+
+    @TypeInfo(DurationTypeInfoFactory.class)
+    public Duration activeDuration;
 
     // Public zero-arg constructor required for Flink POJO
     public TransactionEvent() {}

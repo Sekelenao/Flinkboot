@@ -1,5 +1,7 @@
 package io.github.sekelenao.flinkboot.core.api.typing;
 
+import io.github.sekelenao.flinkboot.core.api.typing.time.DurationTypeInfo;
+import io.github.sekelenao.flinkboot.core.api.typing.time.DurationTypeInfoFactory;
 import io.github.sekelenao.flinkboot.core.api.typing.time.InstantTypeInfoFactory;
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTypeInfoFactory;
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTimeTypeInfoFactory;
@@ -40,6 +42,13 @@ class TypeInfoFactoriesTest {
     void testInstantTypeInfoFactory() {
         var factory = new InstantTypeInfoFactory();
         assertEquals(Types.INSTANT, factory.createTypeInfo(null, Collections.emptyMap()));
+    }
+
+    @Test
+    @DisplayName("DurationTypeInfoFactory returns DurationTypeInfo.INSTANCE")
+    void testDurationTypeInfoFactory() {
+        var factory = new DurationTypeInfoFactory();
+        assertEquals(DurationTypeInfo.INSTANCE, factory.createTypeInfo(null, Collections.emptyMap()));
     }
 
 }

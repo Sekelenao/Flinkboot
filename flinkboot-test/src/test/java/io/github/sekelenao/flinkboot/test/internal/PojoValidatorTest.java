@@ -1,5 +1,6 @@
 package io.github.sekelenao.flinkboot.test.internal;
 
+import io.github.sekelenao.flinkboot.core.api.typing.time.DurationTypeInfoFactory;
 import io.github.sekelenao.flinkboot.core.api.typing.time.InstantTypeInfoFactory;
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTimeTypeInfoFactory;
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTypeInfoFactory;
@@ -12,6 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opentest4j.AssertionFailedError;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -76,6 +78,9 @@ class PojoValidatorTest {
 
         @TypeInfo(InstantTypeInfoFactory.class)
         public Instant instant;
+
+        @TypeInfo(DurationTypeInfoFactory.class)
+        public Duration duration;
     }
 
     // --- Invalid POJO Variants ---
@@ -130,6 +135,10 @@ class PojoValidatorTest {
         public LocalDateTime time;
     }
 
+    public static class UnannotatedDurationPojo {
+        public Duration duration;
+    }
+
     static Stream<Class<?>> validPojoProvider() {
         return Stream.of(
             ValidPojo.class,
@@ -149,7 +158,8 @@ class PojoValidatorTest {
             PrivateAccessorsPojo.class,
             NonStaticInnerPojo.class,
             NonPOJOSerializableField.class,
-            UnannotatedLocalDateTimePojo.class
+            UnannotatedLocalDateTimePojo.class,
+            UnannotatedDurationPojo.class
         );
     }
 
