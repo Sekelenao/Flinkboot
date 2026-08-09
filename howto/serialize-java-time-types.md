@@ -25,12 +25,13 @@ All built-in factories are located in the package `io.github.sekelenao.flinkboot
 To use these factories, annotate your POJO fields using Flink's `@TypeInfo` annotation:
 
 ```java
-import io.github.sekelenao.flinkboot.core.api.typing.time.InstantTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTimeTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.time.LocalTimeTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.time.DurationTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.instant.InstantTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.local.LocalDateTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.local.LocalDateTimeTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.local.LocalTimeTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.duration.DurationTypeInfoFactory;
 import org.apache.flink.api.common.typeinfo.TypeInfo;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -59,7 +60,8 @@ public class TransactionEvent {
     public Duration activeDuration;
 
     // Public zero-arg constructor required for Flink POJO
-    public TransactionEvent() {}
+    public TransactionEvent() {
+    }
 }
 ```
 

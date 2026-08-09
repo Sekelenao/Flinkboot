@@ -1,10 +1,10 @@
 package io.github.sekelenao.flinkboot.test.internal;
 
-import io.github.sekelenao.flinkboot.core.api.typing.time.DurationTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.time.InstantTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTimeTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.time.LocalTimeTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.duration.DurationTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.instant.InstantTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.local.LocalDateTimeTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.local.LocalDateTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.local.LocalTimeTypeInfoFactory;
 import org.apache.flink.api.common.typeinfo.TypeInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

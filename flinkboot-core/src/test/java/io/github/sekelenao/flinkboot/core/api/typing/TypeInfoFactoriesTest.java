@@ -1,16 +1,23 @@
 package io.github.sekelenao.flinkboot.core.api.typing;
 
-import io.github.sekelenao.flinkboot.core.api.typing.time.DurationTypeInfo;
-import io.github.sekelenao.flinkboot.core.api.typing.time.DurationTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.time.InstantTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTimeTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.time.LocalTimeTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.duration.DurationSerializer;
+import io.github.sekelenao.flinkboot.core.api.typing.duration.DurationTypeInfo;
+import io.github.sekelenao.flinkboot.core.api.typing.duration.DurationTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.instant.InstantTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.local.LocalDateTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.local.LocalDateTimeTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.local.LocalTimeTypeInfoFactory;
+import org.apache.flink.core.memory.DataInputDeserializer;
+import org.apache.flink.core.memory.DataOutputSerializer;
+import java.time.Duration;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Collections;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -49,6 +56,32 @@ class TypeInfoFactoriesTest {
     void testDurationTypeInfoFactory() {
         var factory = new DurationTypeInfoFactory();
         assertEquals(DurationTypeInfo.INSTANCE, factory.createTypeInfo(null, Collections.emptyMap()));
+    }
+
+    static Stream<Duration> durationProvider() {
+        return Stream.of(
+            Duration.ofSeconds(123456L, 789000000),
+            Duration.ofSeconds(-987654L, 123000000),
+            Duration.ofSeconds(Long.MAX_VALUE, 999999999),
+            Duration.ofSeconds(Long.MIN_VALUE, 0),
+            Duration.ZERO,
+            null
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("durationProvider")
+    @DisplayName("DurationSerializer correctly serializes and deserializes Duration values")
+    void testDurationSerialization(Duration original) throws Exception {
+        var serializer = DurationSerializer.INSTANCE;
+        var out = new DataOutputSerializer(128);
+
+        serializer.serialize(original, out);
+
+        var in = new DataInputDeserializer(out.getCopyOfBuffer());
+        var deserialized = serializer.deserialize(in);
+
+        assertEquals(original, deserialized);
     }
 
 }
