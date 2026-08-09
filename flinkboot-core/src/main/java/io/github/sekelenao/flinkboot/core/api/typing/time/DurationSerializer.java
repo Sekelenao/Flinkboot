@@ -1,4 +1,4 @@
-package io.github.sekelenao.flinkboot.core.api.typing.duration;
+package io.github.sekelenao.flinkboot.core.api.typing.time;
 
 import org.apache.flink.api.common.typeutils.TypeSerializer;
 import org.apache.flink.api.common.typeutils.TypeSerializerSnapshot;

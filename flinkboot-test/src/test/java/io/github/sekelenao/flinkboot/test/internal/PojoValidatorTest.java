@@ -1,10 +1,10 @@
 package io.github.sekelenao.flinkboot.test.internal;
 
-import io.github.sekelenao.flinkboot.core.api.typing.duration.DurationTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.instant.InstantTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.local.LocalDateTimeTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.local.LocalDateTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.local.LocalTimeTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.time.DurationTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.time.InstantTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTimeTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.time.LocalTimeTypeInfoFactory;
 import org.apache.flink.api.common.typeinfo.TypeInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,12 +13,16 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opentest4j.AssertionFailedError;
 
+import io.github.sekelenao.flinkboot.core.api.typing.collection.ListTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.collection.MapTypeInfoFactory;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -38,6 +42,12 @@ class PojoValidatorTest {
     public static class ValidPojo {
         public String name;
         public int value;
+
+        @TypeInfo(ListTypeInfoFactory.class)
+        public List<String> items;
+
+        @TypeInfo(MapTypeInfoFactory.class)
+        public Map<String, Integer> mapField;
     }
 
     public static class ValidPojoWithGetterSetterAndPrivateField {
@@ -139,6 +149,14 @@ class PojoValidatorTest {
         public Duration duration;
     }
 
+    public static class UnannotatedListPojo {
+        public List<String> listField;
+    }
+
+    public static class UnannotatedMapPojo {
+        public Map<String, Integer> mapField;
+    }
+
     static Stream<Class<?>> validPojoProvider() {
         return Stream.of(
             ValidPojo.class,
@@ -159,7 +177,9 @@ class PojoValidatorTest {
             NonStaticInnerPojo.class,
             NonPOJOSerializableField.class,
             UnannotatedLocalDateTimePojo.class,
-            UnannotatedDurationPojo.class
+            UnannotatedDurationPojo.class,
+            UnannotatedListPojo.class,
+            UnannotatedMapPojo.class
         );
     }
 

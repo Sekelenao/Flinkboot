@@ -1,12 +1,12 @@
 package io.github.sekelenao.flinkboot.core.api.typing;
 
-import io.github.sekelenao.flinkboot.core.api.typing.duration.DurationSerializer;
-import io.github.sekelenao.flinkboot.core.api.typing.duration.DurationTypeInfo;
-import io.github.sekelenao.flinkboot.core.api.typing.duration.DurationTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.instant.InstantTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.local.LocalDateTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.local.LocalDateTimeTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.local.LocalTimeTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.time.DurationSerializer;
+import io.github.sekelenao.flinkboot.core.api.typing.time.DurationTypeInfo;
+import io.github.sekelenao.flinkboot.core.api.typing.time.DurationTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.time.InstantTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTimeTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.time.LocalTimeTypeInfoFactory;
 import org.apache.flink.core.memory.DataInputDeserializer;
 import org.apache.flink.core.memory.DataOutputSerializer;
 import java.time.Duration;

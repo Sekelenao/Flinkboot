@@ -1,4 +1,4 @@
-package io.github.sekelenao.flinkboot.core.api.typing.local;
+package io.github.sekelenao.flinkboot.core.api.typing.time;
 
 import org.apache.flink.api.common.typeinfo.TypeInfoFactory;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
