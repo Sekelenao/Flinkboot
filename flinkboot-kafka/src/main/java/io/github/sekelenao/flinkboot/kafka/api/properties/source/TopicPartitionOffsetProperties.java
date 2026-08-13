@@ -51,10 +51,10 @@ public final class TopicPartitionOffsetProperties implements Serializable {
         if (!(other instanceof TopicPartitionOffsetProperties)) {
             return false;
         }
-        var otherTopicPartitionConfiguration = (TopicPartitionOffsetProperties) other;
-        return Objects.equals(topic, otherTopicPartitionConfiguration.topic)
-            && partition == otherTopicPartitionConfiguration.partition
-            && offset == otherTopicPartitionConfiguration.offset;
+        var o = (TopicPartitionOffsetProperties) other;
+        return Objects.equals(topic, o.topic)
+            && partition == o.partition
+            && offset == o.offset;
     }
 
     @Override
@@ -66,7 +66,7 @@ public final class TopicPartitionOffsetProperties implements Serializable {
     @Override
     @Generated
     public String toString() {
-        return "TopicPartitionConfiguration{" +
+        return "TopicPartitionOffsetProperties{" +
             "topic='" + topic + '\'' +
             ", partition=" + partition +
             ", offset=" + offset +

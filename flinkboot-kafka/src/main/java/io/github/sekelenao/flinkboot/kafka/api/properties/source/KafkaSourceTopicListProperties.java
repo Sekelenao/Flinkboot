@@ -156,6 +156,7 @@ public class KafkaSourceTopicListProperties implements OffsetInitializerProperti
     }
 
     @Override
+    @Generated
     public String toString() {
         return "KafkaSourceTopicListProperties{" +
             "name='" + name + '\'' +

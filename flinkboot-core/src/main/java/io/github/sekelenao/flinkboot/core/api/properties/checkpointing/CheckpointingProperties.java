@@ -2,6 +2,7 @@ package io.github.sekelenao.flinkboot.core.api.properties.checkpointing;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
@@ -121,23 +122,26 @@ public final class CheckpointingProperties implements Serializable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        CheckpointingProperties that = (CheckpointingProperties) o;
-        return Objects.equals(enabled, that.enabled) &&
-            Objects.equals(intervalMs, that.intervalMs) &&
-            mode == that.mode &&
-            Objects.equals(timeoutMs, that.timeoutMs) &&
-            Objects.equals(minPauseBetweenCheckpointsMs, that.minPauseBetweenCheckpointsMs) &&
-            Objects.equals(maxConcurrentCheckpoints, that.maxConcurrentCheckpoints) &&
-            externalizedCheckpointCleanup == that.externalizedCheckpointCleanup &&
-            Objects.equals(unalignedCheckpoints, that.unalignedCheckpoints) &&
-            Objects.equals(alignedCheckpointTimeoutMs, that.alignedCheckpointTimeoutMs) &&
-            Objects.equals(storageUri, that.storageUri);
+    @Generated
+    public boolean equals(Object other) {
+        if (!(other instanceof CheckpointingProperties)) {
+            return false;
+        }
+        var o = (CheckpointingProperties) other;
+        return Objects.equals(enabled, o.enabled)
+            && Objects.equals(intervalMs, o.intervalMs)
+            && mode == o.mode
+            && Objects.equals(timeoutMs, o.timeoutMs)
+            && Objects.equals(minPauseBetweenCheckpointsMs, o.minPauseBetweenCheckpointsMs)
+            && Objects.equals(maxConcurrentCheckpoints, o.maxConcurrentCheckpoints)
+            && externalizedCheckpointCleanup == o.externalizedCheckpointCleanup
+            && Objects.equals(unalignedCheckpoints, o.unalignedCheckpoints)
+            && Objects.equals(alignedCheckpointTimeoutMs, o.alignedCheckpointTimeoutMs)
+            && Objects.equals(storageUri, o.storageUri);
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(
             enabled,
@@ -151,5 +155,22 @@ public final class CheckpointingProperties implements Serializable {
             alignedCheckpointTimeoutMs,
             storageUri
         );
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return "CheckpointingProperties{" +
+            "enabled=" + enabled +
+            ", intervalMs=" + intervalMs +
+            ", mode=" + mode +
+            ", timeoutMs=" + timeoutMs +
+            ", minPauseBetweenCheckpointsMs=" + minPauseBetweenCheckpointsMs +
+            ", maxConcurrentCheckpoints=" + maxConcurrentCheckpoints +
+            ", externalizedCheckpointCleanup=" + externalizedCheckpointCleanup +
+            ", unalignedCheckpoints=" + unalignedCheckpoints +
+            ", alignedCheckpointTimeoutMs=" + alignedCheckpointTimeoutMs +
+            ", storageUri='" + storageUri + '\'' +
+            '}';
     }
 }

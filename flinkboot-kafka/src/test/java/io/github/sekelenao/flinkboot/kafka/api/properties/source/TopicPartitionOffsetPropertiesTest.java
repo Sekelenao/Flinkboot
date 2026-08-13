@@ -42,6 +42,6 @@ class TopicPartitionOffsetPropertiesTest {
     @DisplayName("ToString should return the formatted string representation")
     void testToString() {
         var config = new TopicPartitionOffsetProperties("topic-a", 2, 500L);
-        assertEquals("TopicPartitionConfiguration{topic='topic-a', partition=2, offset=500}", config.toString());
+        assertEquals("TopicPartitionOffsetProperties{topic='topic-a', partition=2, offset=500}", config.toString());
     }
 }

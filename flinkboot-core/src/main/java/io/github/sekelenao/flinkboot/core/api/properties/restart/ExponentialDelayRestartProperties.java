@@ -2,6 +2,7 @@ package io.github.sekelenao.flinkboot.core.api.properties.restart;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Positive;
@@ -82,18 +83,21 @@ public final class ExponentialDelayRestartProperties implements Serializable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ExponentialDelayRestartProperties that = (ExponentialDelayRestartProperties) o;
-        return Objects.equals(initialBackoffMs, that.initialBackoffMs) &&
-            Objects.equals(maxBackoffMs, that.maxBackoffMs) &&
-            Objects.equals(backoffMultiplier, that.backoffMultiplier) &&
-            Objects.equals(resetBackoffThresholdMs, that.resetBackoffThresholdMs) &&
-            Objects.equals(jitterFactor, that.jitterFactor);
+    @Generated
+    public boolean equals(Object other) {
+        if (!(other instanceof ExponentialDelayRestartProperties)) {
+            return false;
+        }
+        var o = (ExponentialDelayRestartProperties) other;
+        return Objects.equals(initialBackoffMs, o.initialBackoffMs)
+            && Objects.equals(maxBackoffMs, o.maxBackoffMs)
+            && Objects.equals(backoffMultiplier, o.backoffMultiplier)
+            && Objects.equals(resetBackoffThresholdMs, o.resetBackoffThresholdMs)
+            && Objects.equals(jitterFactor, o.jitterFactor);
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(
             initialBackoffMs,
@@ -102,5 +106,17 @@ public final class ExponentialDelayRestartProperties implements Serializable {
             resetBackoffThresholdMs,
             jitterFactor
         );
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return "ExponentialDelayRestartProperties{" +
+            "initialBackoffMs=" + initialBackoffMs +
+            ", maxBackoffMs=" + maxBackoffMs +
+            ", backoffMultiplier=" + backoffMultiplier +
+            ", resetBackoffThresholdMs=" + resetBackoffThresholdMs +
+            ", jitterFactor=" + jitterFactor +
+            '}';
     }
 }

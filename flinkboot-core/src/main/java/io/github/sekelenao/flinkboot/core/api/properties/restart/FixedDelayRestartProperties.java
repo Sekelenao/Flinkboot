@@ -2,6 +2,7 @@ package io.github.sekelenao.flinkboot.core.api.properties.restart;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
@@ -44,16 +45,28 @@ public final class FixedDelayRestartProperties implements Serializable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        FixedDelayRestartProperties that = (FixedDelayRestartProperties) o;
-        return Objects.equals(attempts, that.attempts) &&
-            Objects.equals(delayMs, that.delayMs);
+    @Generated
+    public boolean equals(Object other) {
+        if (!(other instanceof FixedDelayRestartProperties)) {
+            return false;
+        }
+        var o = (FixedDelayRestartProperties) other;
+        return Objects.equals(attempts, o.attempts)
+            && Objects.equals(delayMs, o.delayMs);
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(attempts, delayMs);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return "FixedDelayRestartProperties{" +
+            "attempts=" + attempts +
+            ", delayMs=" + delayMs +
+            '}';
     }
 }

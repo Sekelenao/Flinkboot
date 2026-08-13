@@ -3,6 +3,7 @@ package io.github.sekelenao.flinkboot.core.api.properties.restart;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidRestartStrategyPropertiesException;
+import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.Valid;
 
 import java.io.Serializable;
@@ -92,18 +93,32 @@ public final class RestartStrategyProperties implements Serializable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        RestartStrategyProperties that = (RestartStrategyProperties) o;
-        return type == that.type &&
-            Objects.equals(fixedDelay, that.fixedDelay) &&
-            Objects.equals(failureRate, that.failureRate) &&
-            Objects.equals(exponentialDelay, that.exponentialDelay);
+    @Generated
+    public boolean equals(Object other) {
+        if (!(other instanceof RestartStrategyProperties)) {
+            return false;
+        }
+        var o = (RestartStrategyProperties) other;
+        return type == o.type
+            && Objects.equals(fixedDelay, o.fixedDelay)
+            && Objects.equals(failureRate, o.failureRate)
+            && Objects.equals(exponentialDelay, o.exponentialDelay);
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(type, fixedDelay, failureRate, exponentialDelay);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return "RestartStrategyProperties{" +
+            "type=" + type +
+            ", fixedDelay=" + fixedDelay +
+            ", failureRate=" + failureRate +
+            ", exponentialDelay=" + exponentialDelay +
+            '}';
     }
 }

@@ -3,6 +3,7 @@ package io.github.sekelenao.flinkboot.core.api.properties.state;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidStateBackendPropertiesException;
+import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -76,19 +77,22 @@ public final class StateBackendProperties implements Serializable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        StateBackendProperties that = (StateBackendProperties) o;
-        return type == that.type &&
-            checkpointStorage == that.checkpointStorage &&
-            Objects.equals(storagePath, that.storagePath) &&
-            Objects.equals(incremental, that.incremental) &&
-            Objects.equals(latencyTracking, that.latencyTracking) &&
-            Objects.equals(customClass, that.customClass);
+    @Generated
+    public boolean equals(Object other) {
+        if (!(other instanceof StateBackendProperties)) {
+            return false;
+        }
+        var o = (StateBackendProperties) other;
+        return type == o.type
+            && checkpointStorage == o.checkpointStorage
+            && Objects.equals(storagePath, o.storagePath)
+            && Objects.equals(incremental, o.incremental)
+            && Objects.equals(latencyTracking, o.latencyTracking)
+            && Objects.equals(customClass, o.customClass);
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(
             type,
@@ -101,6 +105,7 @@ public final class StateBackendProperties implements Serializable {
     }
 
     @Override
+    @Generated
     public String toString() {
         return "StateBackendProperties{" +
             "type=" + type +

@@ -2,6 +2,7 @@ package io.github.sekelenao.flinkboot.core.api.properties.restart;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
@@ -56,17 +57,30 @@ public final class FailureRateRestartProperties implements Serializable {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        FailureRateRestartProperties that = (FailureRateRestartProperties) o;
-        return Objects.equals(maxFailuresPerInterval, that.maxFailuresPerInterval) &&
-            Objects.equals(failureIntervalMs, that.failureIntervalMs) &&
-            Objects.equals(delayMs, that.delayMs);
+    @Generated
+    public boolean equals(Object other) {
+        if (!(other instanceof FailureRateRestartProperties)) {
+            return false;
+        }
+        var o = (FailureRateRestartProperties) other;
+        return Objects.equals(maxFailuresPerInterval, o.maxFailuresPerInterval)
+            && Objects.equals(failureIntervalMs, o.failureIntervalMs)
+            && Objects.equals(delayMs, o.delayMs);
     }
 
     @Override
+    @Generated
     public int hashCode() {
         return Objects.hash(maxFailuresPerInterval, failureIntervalMs, delayMs);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return "FailureRateRestartProperties{" +
+            "maxFailuresPerInterval=" + maxFailuresPerInterval +
+            ", failureIntervalMs=" + failureIntervalMs +
+            ", delayMs=" + delayMs +
+            '}';
     }
 }
