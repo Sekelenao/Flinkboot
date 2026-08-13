@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Configurations Edge Cases Tests")
-public class ConfigurationsEdgeCasesTest {
+class ConfigurationsEdgeCasesTest {
 
     @Test
     @DisplayName("Should test equals, hashCode, toString for all Configuration DTOs")

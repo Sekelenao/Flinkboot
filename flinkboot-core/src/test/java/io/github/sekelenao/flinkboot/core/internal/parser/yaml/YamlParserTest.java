@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("YamlParser")
-public class YamlParserTest {
+class YamlParserTest {
 
     private static final MergeFeatures STANDARD_FEATURES = MergeFeatures.builder()
         .permitOverride(false)

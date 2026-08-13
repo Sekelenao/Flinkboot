@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Kafka Configuration Edge Cases Tests")
-public class KafkaPropertiesEdgeCasesTest {
+class KafkaPropertiesEdgeCasesTest {
 
     @Test
     @DisplayName("Should test equals, hashCode, and toString on all Kafka DTOs")

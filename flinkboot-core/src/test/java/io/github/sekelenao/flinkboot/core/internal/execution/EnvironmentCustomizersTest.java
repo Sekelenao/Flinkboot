@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Environment Customizers Tests")
-public class EnvironmentCustomizersTest {
+class EnvironmentCustomizersTest {
 
     @Test
     @DisplayName("Should handle empty configuration objects in all customizers cleanly")
