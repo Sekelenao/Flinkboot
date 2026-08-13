@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn -B verify --file pom.xml
+
+      - name: Extract test count and create badge
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: test-count
+        run: |
+          TEST_COUNT=$(find . -path "*/target/surefire-reports/*.xml" -exec grep -h '<testcase' {} + | wc -l)
+          echo "count=$TEST_COUNT" >> $GITHUB_OUTPUT
+          echo "Total tests: $TEST_COUNT"
+          mkdir -p .github/badges
+          curl -s "https://img.shields.io/badge/Test%20count-$TEST_COUNT-blue.svg?logo=junit5&color=25A162" -o .github/badges/tests.svg
+
+      - name: Generate JaCoCo Badge
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        id: jacoco
+        uses: cicirello/jacoco-badge-generator@v2
+        with:
+          generate-branches-badge: true
+          jacoco-csv-file: >-
+            flinkboot-core/target/site/jacoco/jacoco.csv
+            flinkboot-test/target/site/jacoco/jacoco.csv
+            flinkboot-kafka/target/site/jacoco/jacoco.csv
+          coverage-label: 'Coverage'
+          branches-label: 'Branches'
+          colors: '#25A162 #25A162 #dfb317 #dfb317 #fe7d37 #e05d44'
+          intervals: '100 90 80 70 60 0'
+
+      - name: Log coverage percentage
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          echo "coverage = ${{ steps.jacoco.outputs.coverage }}"
+          echo "branch coverage = ${{ steps.jacoco.outputs.branches }}"
+
+      - name: Checkout badges branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/checkout@v4
+        with:
+          ref: badges
+          path: badges-repo
+
+      - name: Copy badges
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          cp .github/badges/jacoco.svg badges-repo/Coverage.svg
+          cp .github/badges/branches.svg badges-repo/Branches.svg
+          cp .github/badges/tests.svg badges-repo/Tests.svg
+          cd badges-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add *.svg
+          git diff --staged --quiet || git commit -m "Update badges"
+          git push
