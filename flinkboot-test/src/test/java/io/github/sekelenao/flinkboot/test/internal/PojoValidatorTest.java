@@ -169,6 +169,11 @@ class PojoValidatorTest {
         public Either<String, Integer> result;
     }
 
+    public static class ValidSharedChildPojo {
+        public NestedItemPojo primaryItem;
+        public NestedItemPojo secondaryItem;
+    }
+
     // ==========================================
     // 2. Invalid POJO Variants (Structural Rules)
     // ==========================================
@@ -319,6 +324,14 @@ class PojoValidatorTest {
         public Either<String, OffsetDateTime> result;
     }
 
+    public static class RecursiveTreePojo {
+        public String value;
+        public RecursiveTreePojo parent;
+
+        @TypeInfo(ListTypeInfoFactory.class)
+        public List<RecursiveTreePojo> children;
+    }
+
     // ==========================================
     // Providers
     // ==========================================
@@ -333,7 +346,8 @@ class PojoValidatorTest {
             ValidBoundedContainerPojo.class,
             ValidTuplePojo.class,
             ValidObjectArrayPojo.class,
-            ValidEitherPojo.class
+            ValidEitherPojo.class,
+            ValidSharedChildPojo.class
         );
     }
 
@@ -363,7 +377,8 @@ class PojoValidatorTest {
             WildcardListWithParentPojo.class,
             WildcardListWithUnsupportedTypePojo.class,
             EitherWithUnsupportedLeftPojo.class,
-            EitherWithUnsupportedRightPojo.class
+            EitherWithUnsupportedRightPojo.class,
+            RecursiveTreePojo.class
         );
     }
 

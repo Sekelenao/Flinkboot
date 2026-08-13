@@ -1,5 +1,6 @@
 package io.github.sekelenao.flinkboot.test.internal;
 
+import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeutils.CompositeType;
 import org.apache.flink.api.java.typeutils.EitherTypeInfo;
 import org.apache.flink.api.java.typeutils.GenericTypeInfo;
@@ -11,11 +12,14 @@ import org.apache.flink.api.java.typeutils.TypeExtractor;
 import org.junit.jupiter.api.Assertions;
 
 import java.util.ArrayDeque;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public final class PojoValidator {
 
     private final ArrayDeque<PojoValidationTask<?>> tasks = new ArrayDeque<>();
+    private final Set<TypeInformation<?>> visited = new HashSet<>();
 
     public void validate(Class<?> clazz) {
         Objects.requireNonNull(clazz, "Class must not be null");
@@ -39,7 +43,13 @@ public final class PojoValidator {
                 "Field or type '%s' is recognized as GenericTypeInfo (%s), which falls back to Kryo serialization.",
                 task.path(), genericTypeInfo.getTypeClass().getName()
             ));
-        } else if (typeInfo instanceof PojoTypeInfo) {
+        }
+
+        if (!visited.add(typeInfo)) {
+            return;
+        }
+
+        if (typeInfo instanceof PojoTypeInfo) {
             var pojoTypeInfo = (PojoTypeInfo<?>) typeInfo;
             for (int i = 0; i < pojoTypeInfo.getArity(); i++) {
                 var pojoField = pojoTypeInfo.getPojoFieldAt(i);
