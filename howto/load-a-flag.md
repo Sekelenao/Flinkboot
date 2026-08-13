@@ -15,7 +15,7 @@ Import the Flinkboot BOM in your `<dependencyManagement>` and add the core Flink
         <dependency>
             <groupId>io.github.sekelenao</groupId>
             <artifactId>flinkboot</artifactId>
-            <version>0.1.0-1.20</version>
+            <version>${flinkboot.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
