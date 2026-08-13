@@ -10,22 +10,13 @@
 
 ## What is Flinkboot?
 
-**Flinkboot** is a lightweight, high-performance configuration utility designed to bootstrap Apache Flink applications. It unifies command-line arguments, environment variables, and hierarchical YAML configuration files into a single, strongly-typed Java model with **zero boilerplate**.
+**Flinkboot** is a lightweight, high-performance configuration and developer toolkit designed to bootstrap Apache Flink applications. It unifies command-line arguments, environment variables, and hierarchical YAML configuration files into strongly-typed Java models with **zero boilerplate**.
 
-By combining clean Java configuration models and Jakarta Bean Validation (JSR-380), Flinkboot guarantees **fail-early safety**: typos, missing keys, or out-of-range parameters are caught on the JobManager immediately at startup, preventing jobs from failing mid-execution on the cluster.
-
----
-
-## Key Capabilities
-
-* **Unified Configuration Loading** — Parse and merge multiple YAML configuration files, CLI arguments, and environment variables into immutable Java classes/records.
-* **Fail-Fast Validation** — Enforce constraints (non-blank strings, numeric ranges, non-null properties maps, regex validation) before Flink resources are allocated.
-* **Safe Merge Semantics** — Detect and prevent accidental property overrides during configuration merges unless explicit override options are passed.
-* **Auto-configured Connectors** — Bootstrap Apache Flink sources and sinks (e.g. Apache Kafka) directly from configuration files with built-in validation rules.
+By combining clean Java records and Jakarta Bean Validation (JSR-380), Flinkboot guarantees **fail-early safety**: typos, missing keys, or out-of-range parameters are caught on the JobManager immediately at startup, preventing jobs from failing mid-execution on the cluster.
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 Follow these 3 essential steps to get started with Flinkboot:
 
@@ -40,9 +31,23 @@ Follow these 3 essential steps to get started with Flinkboot:
 
 ---
 
-## 📖 How-To Guides
+## Key Capabilities
 
-For all specific guides (connector integrations, parameters, flags, POJO compliance), please refer to the complete **[How-To Guides Index](howto/README.md)**.
+* **Unified Configuration Loading** — Parse and merge multiple YAML files, CLI arguments, and environment variables into immutable Java records.
+* **Fail-Fast Validation** — Catch missing parameters, invalid ranges, and syntax errors on the JobManager before resources are allocated.
+* **Declarative Execution Environment** — Configure and instantiate Flink's `StreamExecutionEnvironment` with zero boilerplate.
+* **Native JDK Type Serialization** — Built-in `@TypeInfo` factories for `Duration`, Java 8 time types, and generic collections without Kryo fallback.
+* **Deep POJO Compliance Verification** — Test utility (`assertPojo`) to recursively verify that data models serialize natively without Kryo.
+* **Testing Helpers** — Load and validate configurations directly in JUnit 5 tests.
+* **Auto-configured Connectors** — Production-ready sources and sinks (e.g. Apache Kafka) built directly from configuration.
+
+---
+
+## Documentation & References
+
+* **[How-To Guides Index](howto/README.md)** — Step-by-step guides for configurations, connectors, POJO compliance, and testing.
+* **[Compatibility Matrix](COMPATIBILITY.md)** — Supported Apache Flink versions and Java (JDK) runtimes.
+* **[Changelog](CHANGELOG.md)** — Release notes and user-facing change history.
 
 ---
 
