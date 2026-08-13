@@ -87,7 +87,7 @@ class EnvironmentCustomizersTest {
     }
 
     @Test
-    @DisplayName("Should test StateBackendProperties optional fields")
+    @DisplayName("Should test StateBackendProperties optional fields with HASHMAP")
     void shouldTestStateBackendOptionalFields() {
         Configuration config = new Configuration();
         var stateBackendConfig = new StateBackendProperties(
@@ -108,6 +108,68 @@ class EnvironmentCustomizersTest {
             () -> assertNull(config.get(CheckpointingOptions.CHECKPOINTS_DIRECTORY)),
             () -> assertFalse(config.get(CheckpointingOptions.INCREMENTAL_CHECKPOINTS))
         );
+    }
+
+    @Test
+    @DisplayName("Should configure ROCKSDB state backend with incremental checkpoints and filesystem storage")
+    void shouldConfigureRocksDbStateBackend() {
+        Configuration config = new Configuration();
+        var stateBackendConfig = new StateBackendProperties(
+            StateBackendType.ROCKSDB,
+            CheckpointStorageType.FILESYSTEM,
+            "file:///tmp/checkpoints",
+            true,
+            true,
+            null
+        );
+        var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
+
+        new StateBackendCustomizer(config).configure(envProps);
+
+        assertAll(
+            () -> assertEquals("rocksdb", config.get(StateBackendOptions.STATE_BACKEND)),
+            () -> assertEquals("filesystem", config.get(CheckpointingOptions.CHECKPOINT_STORAGE)),
+            () -> assertEquals("file:///tmp/checkpoints", config.get(CheckpointingOptions.CHECKPOINTS_DIRECTORY)),
+            () -> assertTrue(config.get(CheckpointingOptions.INCREMENTAL_CHECKPOINTS))
+        );
+    }
+
+    @Test
+    @DisplayName("Should configure CHANGELOG state backend")
+    void shouldConfigureChangelogStateBackend() {
+        Configuration config = new Configuration();
+        var stateBackendConfig = new StateBackendProperties(
+            StateBackendType.CHANGELOG,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+        var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
+
+        new StateBackendCustomizer(config).configure(envProps);
+
+        assertEquals("changelog", config.get(StateBackendOptions.STATE_BACKEND));
+    }
+
+    @Test
+    @DisplayName("Should configure CUSTOM state backend with custom class name")
+    void shouldConfigureCustomStateBackend() {
+        Configuration config = new Configuration();
+        var stateBackendConfig = new StateBackendProperties(
+            StateBackendType.CUSTOM,
+            null,
+            null,
+            null,
+            null,
+            "org.example.MyCustomStateBackendFactory"
+        );
+        var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
+
+        new StateBackendCustomizer(config).configure(envProps);
+
+        assertEquals("org.example.MyCustomStateBackendFactory", config.get(StateBackendOptions.STATE_BACKEND));
     }
 
     @Test
