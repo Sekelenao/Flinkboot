@@ -8,11 +8,15 @@ import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTimeTypeInfoF
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalTimeTypeInfoFactory;
 import org.apache.flink.api.common.serialization.SerializerConfigImpl;
 import org.apache.flink.api.common.typeinfo.TypeInfo;
+import org.apache.flink.api.common.typeinfo.TypeInfoFactory;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.api.java.typeutils.EitherTypeInfo;
 import org.apache.flink.api.java.typeutils.PojoTypeInfo;
 import org.apache.flink.api.java.typeutils.TypeExtractor;
 import org.apache.flink.core.memory.DataInputDeserializer;
 import org.apache.flink.core.memory.DataOutputSerializer;
+import org.apache.flink.types.Either;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -22,6 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.opentest4j.AssertionFailedError;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -147,6 +152,21 @@ class PojoValidatorTest {
     public static class ValidObjectArrayPojo {
         public String[] stringArray;
         public NestedItemPojo[] itemArray;
+    }
+
+    public static class CustomEitherTypeInfoFactory<L, R> extends TypeInfoFactory<Either<L, R>> {
+        @Override
+        @SuppressWarnings("unchecked")
+        public TypeInformation<Either<L, R>> createTypeInfo(Type t, Map<String, TypeInformation<?>> genericParameters) {
+            var left = (TypeInformation<L>) genericParameters.get("L");
+            var right = (TypeInformation<R>) genericParameters.get("R");
+            return new EitherTypeInfo<>(left, right);
+        }
+    }
+
+    public static class ValidEitherPojo {
+        @TypeInfo(CustomEitherTypeInfoFactory.class)
+        public Either<String, Integer> result;
     }
 
     // ==========================================
@@ -289,6 +309,16 @@ class PojoValidatorTest {
         public List<? extends OffsetDateTime> dates;
     }
 
+    public static class EitherWithUnsupportedLeftPojo {
+        @TypeInfo(CustomEitherTypeInfoFactory.class)
+        public Either<OffsetDateTime, Integer> result;
+    }
+
+    public static class EitherWithUnsupportedRightPojo {
+        @TypeInfo(CustomEitherTypeInfoFactory.class)
+        public Either<String, OffsetDateTime> result;
+    }
+
     // ==========================================
     // Providers
     // ==========================================
@@ -302,7 +332,8 @@ class PojoValidatorTest {
             ValidInheritancePojo.class,
             ValidBoundedContainerPojo.class,
             ValidTuplePojo.class,
-            ValidObjectArrayPojo.class
+            ValidObjectArrayPojo.class,
+            ValidEitherPojo.class
         );
     }
 
@@ -330,7 +361,9 @@ class PojoValidatorTest {
             GenericContainerWithUnsupportedTypePojo.class,
             ChildInheritingUnsupportedField.class,
             WildcardListWithParentPojo.class,
-            WildcardListWithUnsupportedTypePojo.class
+            WildcardListWithUnsupportedTypePojo.class,
+            EitherWithUnsupportedLeftPojo.class,
+            EitherWithUnsupportedRightPojo.class
         );
     }
 

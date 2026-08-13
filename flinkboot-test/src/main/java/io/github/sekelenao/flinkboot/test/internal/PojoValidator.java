@@ -1,6 +1,7 @@
 package io.github.sekelenao.flinkboot.test.internal;
 
 import org.apache.flink.api.common.typeutils.CompositeType;
+import org.apache.flink.api.java.typeutils.EitherTypeInfo;
 import org.apache.flink.api.java.typeutils.GenericTypeInfo;
 import org.apache.flink.api.java.typeutils.ListTypeInfo;
 import org.apache.flink.api.java.typeutils.MapTypeInfo;
@@ -55,6 +56,10 @@ public final class PojoValidator {
         } else if (typeInfo instanceof ObjectArrayTypeInfo) {
             var arrayTypeInfo = (ObjectArrayTypeInfo<?, ?>) typeInfo;
             tasks.add(new PojoValidationTask<>(task.path() + "[]", arrayTypeInfo.getComponentInfo()));
+        } else if (typeInfo instanceof EitherTypeInfo) {
+            var eitherTypeInfo = (EitherTypeInfo<?, ?>) typeInfo;
+            tasks.add(new PojoValidationTask<>(task.path() + "<left>", eitherTypeInfo.getLeftType()));
+            tasks.add(new PojoValidationTask<>(task.path() + "<right>", eitherTypeInfo.getRightType()));
         } else if (typeInfo instanceof CompositeType) {
             var compositeType = (CompositeType<?>) typeInfo;
             for (int i = 0; i < compositeType.getArity(); i++) {
