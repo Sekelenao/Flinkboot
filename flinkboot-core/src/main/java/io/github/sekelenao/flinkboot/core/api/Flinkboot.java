@@ -6,7 +6,6 @@ import io.github.sekelenao.flinkboot.core.internal.execution.ExecutionEnvironmen
 import io.github.sekelenao.flinkboot.core.internal.parser.yaml.YamlParser;
 import io.github.sekelenao.flinkboot.core.internal.resource.Resource;
 import io.github.sekelenao.flinkboot.core.internal.startup.StartupEnvironment;
-import io.github.sekelenao.flinkboot.core.internal.typing.DefaultTypeInfoRegistrar;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import java.io.IOException;
@@ -20,9 +19,6 @@ public final class Flinkboot {
 
     private Flinkboot(String[] args) {
         this.startupEnvironment = new StartupEnvironment(args);
-        if (!startupEnvironment.typeInfoRegistrationDisabled()) {
-            DefaultTypeInfoRegistrar.registerDefaultFactories();
-        }
     }
 
     public static Flinkboot initialize(String[] args){

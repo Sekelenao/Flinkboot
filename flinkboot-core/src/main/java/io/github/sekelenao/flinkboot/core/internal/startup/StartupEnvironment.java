@@ -54,8 +54,4 @@ public final class StartupEnvironment {
             .build();
     }
 
-    public boolean typeInfoRegistrationDisabled() {
-        return flag("flinkboot-disable-typeinfo-registration");
-    }
-
 }

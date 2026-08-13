@@ -241,25 +241,4 @@ class FlinkbootTest {
             assertNotNull(env);
         }
     }
-
-    @Nested
-    @DisplayName("TypeInfoRegistration")
-    class TypeInfoRegistration {
-
-        @Test
-        @DisplayName("Should initialize with default type info registration enabled")
-        void shouldInitializeWithDefaultTypeInfoRegistration() {
-            var flinkboot = Flinkboot.initialize(new String[0]);
-            assertNotNull(flinkboot);
-            assertFalse(flinkboot.flag("flinkboot-disable-typeinfo-registration"));
-        }
-
-        @Test
-        @DisplayName("Should initialize with type info registration disabled via flag")
-        void shouldInitializeWithTypeInfoRegistrationDisabled() {
-            var flinkboot = Flinkboot.initialize(new String[]{"--flinkboot-disable-typeinfo-registration"});
-            assertNotNull(flinkboot);
-            assertTrue(flinkboot.flag("flinkboot-disable-typeinfo-registration"));
-        }
-    }
 }
