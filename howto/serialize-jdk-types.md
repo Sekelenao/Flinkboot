@@ -1,31 +1,19 @@
-# How to Serialize Common JDK Types (Time, Duration, Collections)
+# How to Serialize JDK Types (Time, Duration, Collections)
 
-Apache Flink does not register default `TypeInfoFactory` mappings for modern Java Date/Time classes (`Instant`, `LocalDateTime`, `LocalDate`, `LocalTime`), `Duration`, or generic Collection interfaces (`List`, `Map`) in POJO fields. 
+In Apache Flink, POJO fields using `LocalDateTime`, `LocalDate`, `LocalTime`, `Duration`, `List`, or `Map` default to **Kryo serialization** (which is slower, less space-efficient, and risky for state evolution).
 
-Without custom factories, Flink's `TypeExtractor` falls back to **Kryo serialization**, which is slow, space-inefficient, and prone to state migration issues in stateful streaming applications.
-
-Flinkboot provides built-in, optimized `TypeInfoFactory` classes to enable native Flink serialization for these types.
+Flinkboot provides optimized `TypeInfoFactory` classes to enable native Flink serialization for these types.
 
 ---
 
 ## 1. Available Factories
 
-The following factories are available in Flinkboot:
-
-### Time & Duration Types (`io.github.sekelenao.flinkboot.core.api.typing.time`)
-
-| JDK Type | Flinkboot Factory Class | Under the hood Flink Type |
+| Field Type | Flinkboot Factory Class | Serializer / Underlying Type |
 | :--- | :--- | :--- |
-| `java.time.Instant` | `InstantTypeInfoFactory` | `Types.INSTANT` |
 | `java.time.LocalDateTime` | `LocalDateTimeTypeInfoFactory` | `Types.LOCAL_DATE_TIME` |
 | `java.time.LocalDate` | `LocalDateTypeInfoFactory` | `Types.LOCAL_DATE` |
 | `java.time.LocalTime` | `LocalTimeTypeInfoFactory` | `Types.LOCAL_TIME` |
-| `java.time.Duration` | `DurationTypeInfoFactory` | Custom (12-byte: long seconds + int nanos) |
-
-### Collection Types (`io.github.sekelenao.flinkboot.core.api.typing.collection`)
-
-| JDK Type | Flinkboot Factory Class | Under the hood Flink Type |
-| :--- | :--- | :--- |
+| `java.time.Duration` | `DurationTypeInfoFactory` | Custom 12-byte `DurationSerializer` |
 | `java.util.List<E>` | `ListTypeInfoFactory` | `Types.LIST(elementType)` |
 | `java.util.Map<K, V>` | `MapTypeInfoFactory` | `Types.MAP(keyType, valueType)` |
 
@@ -33,77 +21,55 @@ The following factories are available in Flinkboot:
 
 ## 2. Usage in POJO Classes
 
-To use these factories, annotate your POJO fields using Flink's `@TypeInfo` annotation. Flinkboot's factories will automatically resolve generic parameters for collections:
+Annotate your POJO fields with Flink's `@TypeInfo` annotation:
 
 ```java
-import io.github.sekelenao.flinkboot.core.api.typing.time.*;
-import io.github.sekelenao.flinkboot.core.api.typing.collection.*;
+import io.github.sekelenao.flinkboot.core.api.typing.collection.ListTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.collection.MapTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.time.DurationTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTimeTypeInfoFactory;
 import org.apache.flink.api.common.typeinfo.TypeInfo;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-public class UserSessionEvent {
+public class UserEvent {
 
     public String userId;
 
-    // Forces Flink to use optimized InstantSerializer instead of Kryo
-    @TypeInfo(InstantTypeInfoFactory.class)
-    public Instant loginTimestamp;
-
-    // Forces Flink to use optimized LocalDateTimeSerializer instead of Kryo
     @TypeInfo(LocalDateTimeTypeInfoFactory.class)
-    public LocalDateTime lastActivityTime;
+    public LocalDateTime eventTime;
 
-    // Forces Flink to use optimized custom 12-byte DurationSerializer instead of Kryo
     @TypeInfo(DurationTypeInfoFactory.class)
-    public Duration sessionDuration;
+    public Duration duration;
 
-    // Forces Flink to use optimized ListSerializer instead of Kryo
     @TypeInfo(ListTypeInfoFactory.class)
-    public List<String> pageViews;
+    public List<String> tags;
 
-    // Forces Flink to use optimized MapSerializer instead of Kryo
     @TypeInfo(MapTypeInfoFactory.class)
-    public Map<String, Integer> actionCounts;
+    public Map<String, Integer> metrics;
 
-    // Public zero-arg constructor required for Flink POJO
-    public UserSessionEvent() {}
+    public UserEvent() {}
 }
 ```
 
 ---
 
-## 3. Why is this necessary?
+## 3. POJO Compliance Validation
 
-### Kryo Fallback is a Performance Bottleneck
-When Flink encounters a type it doesn't natively support in a POJO (like `java.time.Duration` or raw interfaces like `List`), it falls back to Kryo:
-* Kryo writes class metadata into each record, drastically increasing serialization size.
-* Kryo relies on Java reflection, which is slow.
-* State backends (like RocksDB) will store serialized Kryo structures, causing state sizes to bloat.
-
-### State Schema Evolution
-If you change your class layout or update Flink versions, Kryo-serialized state is notoriously difficult to migrate and often leads to serialization incompatibility errors. Using native Flink serializers via `TypeInfoFactory` (like `Types.LIST`, `Types.MAP`, etc.) ensures safe state schema evolution.
-
----
-
-## 4. Verification with Flinkboot Test
-
-To verify that your POJOs are correctly configured and do not fall back to Kryo, write a compliance test using `FlinkbootTest.assertPojo()` from the `flinkboot-test` module:
+To ensure your POJOs never fall back to Kryo serialization, validate them in your unit tests with `FlinkbootTest.assertPojo()`:
 
 ```java
 import io.github.sekelenao.flinkboot.test.api.FlinkbootTest;
 import org.junit.jupiter.api.Test;
 
-class UserSessionEventTest {
+class UserEventTest {
 
     @Test
     void testPojoCompliance() {
-        // Will fail if any JDK time, duration, or collection field is missing its @TypeInfo annotation
-        FlinkbootTest.assertPojo(UserSessionEvent.class);
+        FlinkbootTest.assertPojo(UserEvent.class);
     }
 }
 ```

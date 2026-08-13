@@ -1,9 +1,10 @@
 package io.github.sekelenao.flinkboot.test.internal;
 
+import io.github.sekelenao.flinkboot.core.api.typing.collection.ListTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.collection.MapTypeInfoFactory;
 import io.github.sekelenao.flinkboot.core.api.typing.time.DurationTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.time.InstantTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTimeTypeInfoFactory;
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTypeInfoFactory;
+import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTimeTypeInfoFactory;
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalTimeTypeInfoFactory;
 import org.apache.flink.api.common.serialization.SerializerConfigImpl;
 import org.apache.flink.api.common.typeinfo.TypeInfo;
@@ -19,11 +20,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opentest4j.AssertionFailedError;
 
-import io.github.sekelenao.flinkboot.core.api.typing.collection.ListTypeInfoFactory;
-import io.github.sekelenao.flinkboot.core.api.typing.collection.MapTypeInfoFactory;
 import java.io.IOException;
 import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -47,19 +45,34 @@ class PojoValidatorTest {
         validator = new PojoValidator();
     }
 
-    // --- Valid POJO Variants ---
-    public static class ValidPojo {
+    // ==========================================
+    // 1. Valid POJO Variants
+    // ==========================================
+
+    public static class ValidAnnotatedPojo {
         public String name;
         public int value;
 
+        @TypeInfo(LocalDateTimeTypeInfoFactory.class)
+        public LocalDateTime localDateTime;
+
+        @TypeInfo(LocalDateTypeInfoFactory.class)
+        public LocalDate localDate;
+
+        @TypeInfo(LocalTimeTypeInfoFactory.class)
+        public LocalTime localTime;
+
+        @TypeInfo(DurationTypeInfoFactory.class)
+        public Duration duration;
+
         @TypeInfo(ListTypeInfoFactory.class)
-        public List<String> items;
+        public List<String> list;
 
         @TypeInfo(MapTypeInfoFactory.class)
-        public Map<String, Integer> mapField;
+        public Map<String, Integer> map;
     }
 
-    public static class ValidPojoWithGetterSetterAndPrivateField {
+    public static class ValidPojoWithGettersSetters {
         private String name;
         private int value;
 
@@ -80,56 +93,10 @@ class PojoValidatorTest {
         }
     }
 
-    public static class AnnotatedLocalDateTimePojo {
-        @TypeInfo(LocalDateTimeTypeInfoFactory.class)
-        public LocalDateTime time;
-    }
+    // ==========================================
+    // 2. Invalid POJO Variants (Structural Rules)
+    // ==========================================
 
-    public static class AnnotatedJavaTimePojo {
-        @TypeInfo(LocalDateTimeTypeInfoFactory.class)
-        public LocalDateTime localDateTime;
-
-        @TypeInfo(LocalDateTypeInfoFactory.class)
-        public LocalDate localDate;
-
-        @TypeInfo(LocalTimeTypeInfoFactory.class)
-        public LocalTime localTime;
-
-        @TypeInfo(InstantTypeInfoFactory.class)
-        public Instant instant;
-
-        @TypeInfo(DurationTypeInfoFactory.class)
-        public Duration duration;
-    }
-
-    public static class FullAnnotatedPojo {
-        public String name;
-        public int value;
-
-        @TypeInfo(InstantTypeInfoFactory.class)
-        public Instant instant;
-
-        @TypeInfo(LocalDateTimeTypeInfoFactory.class)
-        public LocalDateTime localDateTime;
-
-        @TypeInfo(LocalDateTypeInfoFactory.class)
-        public LocalDate localDate;
-
-        @TypeInfo(LocalTimeTypeInfoFactory.class)
-        public LocalTime localTime;
-
-        @TypeInfo(DurationTypeInfoFactory.class)
-        public Duration duration;
-
-        @TypeInfo(ListTypeInfoFactory.class)
-        public List<String> list;
-
-        @TypeInfo(MapTypeInfoFactory.class)
-        public Map<String, Integer> map;
-
-    }
-
-    // --- Invalid POJO Variants ---
     @SuppressWarnings("all")
     private static class PrivatePojo {
         public String name;
@@ -138,6 +105,7 @@ class PojoValidatorTest {
     @SuppressWarnings("all")
     public static class NoDefaultConstructorPojo {
         public String name;
+
         public NoDefaultConstructorPojo(String name) {
             this.name = name;
         }
@@ -151,34 +119,57 @@ class PojoValidatorTest {
     @SuppressWarnings("all")
     public static class PrivateFieldOnlyGetterPojo {
         private String name;
-        public String getName() { return name; }
+
+        public String getName() {
+            return name;
+        }
     }
 
     @SuppressWarnings("all")
     public static class PrivateFieldOnlySetterPojo {
         private String name;
-        public void setName(String name) { this.name = name; }
+
+        public void setName(String name) {
+            this.name = name;
+        }
     }
 
     @SuppressWarnings("all")
     public static class PrivateAccessorsPojo {
         private String name;
-        private String getName() { return name; }
-        private void setName(String name) { this.name = name; }
+
+        private String getName() {
+            return name;
+        }
+
+        private void setName(String name) {
+            this.name = name;
+        }
     }
 
     @SuppressWarnings("all")
     class NonStaticInnerPojo {
         public String name;
-        public NonStaticInnerPojo() {}
     }
 
-    public static class NonPOJOSerializableField {
+    // ==========================================
+    // 3. Invalid POJO Variants (Missing @TypeInfo or Unsupported Types)
+    // ==========================================
+
+    public static class UnsupportedTypePojo {
         public OffsetDateTime time;
     }
 
     public static class UnannotatedLocalDateTimePojo {
-        public LocalDateTime time;
+        public LocalDateTime localDateTime;
+    }
+
+    public static class UnannotatedLocalDatePojo {
+        public LocalDate localDate;
+    }
+
+    public static class UnannotatedLocalTimePojo {
+        public LocalTime localTime;
     }
 
     public static class UnannotatedDurationPojo {
@@ -186,20 +177,21 @@ class PojoValidatorTest {
     }
 
     public static class UnannotatedListPojo {
-        public List<String> listField;
+        public List<String> list;
     }
 
     public static class UnannotatedMapPojo {
-        public Map<String, Integer> mapField;
+        public Map<String, Integer> map;
     }
+
+    // ==========================================
+    // Providers
+    // ==========================================
 
     static Stream<Class<?>> validPojoProvider() {
         return Stream.of(
-            ValidPojo.class,
-            ValidPojoWithGetterSetterAndPrivateField.class,
-            AnnotatedLocalDateTimePojo.class,
-            AnnotatedJavaTimePojo.class,
-            FullAnnotatedPojo.class
+            ValidAnnotatedPojo.class,
+            ValidPojoWithGettersSetters.class
         );
     }
 
@@ -212,49 +204,37 @@ class PojoValidatorTest {
             PrivateFieldOnlySetterPojo.class,
             PrivateAccessorsPojo.class,
             NonStaticInnerPojo.class,
-            NonPOJOSerializableField.class,
+            UnsupportedTypePojo.class,
             UnannotatedLocalDateTimePojo.class,
+            UnannotatedLocalDatePojo.class,
+            UnannotatedLocalTimePojo.class,
             UnannotatedDurationPojo.class,
             UnannotatedListPojo.class,
             UnannotatedMapPojo.class
         );
     }
 
+    // ==========================================
+    // Tests
+    // ==========================================
+
     @ParameterizedTest
     @MethodSource("validPojoProvider")
-    @DisplayName("Should pass when class is a valid POJO")
+    @DisplayName("Should pass validation when class is a valid POJO")
     void shouldPassWhenValidPojo(Class<?> validPojoClass) {
         assertDoesNotThrow(() -> validator.validate(validPojoClass));
     }
 
     @ParameterizedTest
     @MethodSource("invalidPojoProvider")
-    @DisplayName("Should fail when class is not a valid POJO")
+    @DisplayName("Should fail validation when class is not a valid POJO")
     void shouldFailWhenInvalidPojo(Class<?> invalidPojoClass) {
         assertThrows(AssertionFailedError.class, () -> validator.validate(invalidPojoClass));
     }
 
     @Test
-    @DisplayName("Non POJO serializable fields fail validation")
-    void nonPojoField() {
-        assertThrows(AssertionFailedError.class, () -> validator.validate(NonPOJOSerializableField.class));
-    }
-
-    @Test
-    @DisplayName("LocalDateTime field fails when not annotated with @TypeInfo")
-    void localDateTimeFailsWhenUnannotated() {
-        assertThrows(AssertionFailedError.class, () -> validator.validate(UnannotatedLocalDateTimePojo.class));
-    }
-
-    @Test
-    @DisplayName("LocalDateTime field passes when annotated with @TypeInfo")
-    void localDateTimePassesWhenAnnotated() {
-        assertDoesNotThrow(() -> validator.validate(AnnotatedLocalDateTimePojo.class));
-    }
-
-    @Test
     @DisplayName("Should throw NullPointerException when class is null")
-    void shouldThrowForNullInputs() {
+    void shouldThrowWhenClassIsNull() {
         assertThrows(NullPointerException.class, () -> validator.validate(null));
     }
 
@@ -264,14 +244,14 @@ class PojoValidatorTest {
 
         @Test
         @DisplayName("Should correctly serialize and deserialize a POJO with all @TypeInfo annotations")
+        @SuppressWarnings("unchecked")
         void shouldSerializeAndDeserializeFullAnnotatedPojo() throws IOException {
-            var typeInfo = (PojoTypeInfo<FullAnnotatedPojo>) TypeExtractor.createTypeInfo(FullAnnotatedPojo.class);
+            var typeInfo = (PojoTypeInfo<ValidAnnotatedPojo>) TypeExtractor.createTypeInfo(ValidAnnotatedPojo.class);
             var serializer = typeInfo.createSerializer(new SerializerConfigImpl());
 
-            var pojo = new FullAnnotatedPojo();
+            var pojo = new ValidAnnotatedPojo();
             pojo.name = "John Doe";
             pojo.value = 42;
-            pojo.instant = Instant.parse("2026-08-13T12:00:00Z");
             pojo.localDateTime = LocalDateTime.parse("2026-08-13T14:30:00");
             pojo.localDate = LocalDate.parse("2026-08-13");
             pojo.localTime = LocalTime.parse("14:30:00");
@@ -288,7 +268,6 @@ class PojoValidatorTest {
             assertAll(
                 () -> assertEquals(pojo.name, deserialized.name),
                 () -> assertEquals(pojo.value, deserialized.value),
-                () -> assertEquals(pojo.instant, deserialized.instant),
                 () -> assertEquals(pojo.localDateTime, deserialized.localDateTime),
                 () -> assertEquals(pojo.localDate, deserialized.localDate),
                 () -> assertEquals(pojo.localTime, deserialized.localTime),
@@ -299,4 +278,5 @@ class PojoValidatorTest {
         }
 
     }
+
 }
