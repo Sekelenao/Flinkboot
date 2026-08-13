@@ -8,18 +8,17 @@ import org.apache.flink.api.common.typeinfo.Types;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-public class MapTypeInfoFactory extends TypeInfoFactory<Map<?, ?>> {
+public class MapTypeInfoFactory<K, V> extends TypeInfoFactory<Map<K, V>> {
 
-    @SuppressWarnings("unchecked")
     @Override
-    public TypeInformation<Map<?, ?>> createTypeInfo(Type t, Map<String, TypeInformation<?>> genericParameters) {
-        TypeInformation<?> keyType = genericParameters.get("K");
-        TypeInformation<?> valueType = genericParameters.get("V");
-
+    @SuppressWarnings("unchecked")
+    public TypeInformation<Map<K, V>> createTypeInfo(Type t, Map<String, TypeInformation<?>> genericParameters) {
+        var keyType = genericParameters.get("K");
+        var valueType = genericParameters.get("V");
         if (keyType == null || valueType == null) {
             throw new InvalidTypesException("Type extraction is not possible on Map (key or value type unknown).");
         }
-
-        return (TypeInformation<Map<?, ?>>) (TypeInformation<?>) Types.MAP(keyType, valueType);
+        return Types.MAP((TypeInformation<K>) keyType, (TypeInformation<V>) valueType);
     }
+
 }

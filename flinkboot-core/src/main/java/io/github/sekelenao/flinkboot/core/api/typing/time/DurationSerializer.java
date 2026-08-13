@@ -45,13 +45,13 @@ public class DurationSerializer extends TypeSerializer<Duration> {
     }
 
     @Override
-    public void serialize(Duration record, DataOutputView target) throws IOException {
-        if (record == null) {
+    public void serialize(Duration duration, DataOutputView target) throws IOException {
+        if (duration == null) {
             target.writeBoolean(true);
         } else {
             target.writeBoolean(false);
-            target.writeLong(record.getSeconds());
-            target.writeInt(record.getNano());
+            target.writeLong(duration.getSeconds());
+            target.writeInt(duration.getNano());
         }
     }
 

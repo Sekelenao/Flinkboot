@@ -9,17 +9,16 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
-public class ListTypeInfoFactory extends TypeInfoFactory<List<?>> {
+public class ListTypeInfoFactory<E> extends TypeInfoFactory<List<E>> {
 
-    @SuppressWarnings("unchecked")
     @Override
-    public TypeInformation<List<?>> createTypeInfo(Type t, Map<String, TypeInformation<?>> genericParameters) {
-        TypeInformation<?> elementType = genericParameters.get("E");
-
+    @SuppressWarnings("unchecked")
+    public TypeInformation<List<E>> createTypeInfo(Type t, Map<String, TypeInformation<?>> genericParameters) {
+        var elementType = genericParameters.get("E");
         if (elementType == null) {
             throw new InvalidTypesException("Type extraction is not possible on List (element type unknown).");
         }
-
-        return (TypeInformation<List<?>>) (TypeInformation<?>) Types.LIST(elementType);
+        return Types.LIST((TypeInformation<E>) elementType);
     }
+
 }
