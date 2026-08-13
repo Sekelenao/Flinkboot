@@ -236,4 +236,41 @@ class StartupEnvironmentTest {
             );
         }
     }
+
+    @Nested
+    @DisplayName("TypeInfoRegistrationDisabled")
+    class TypeInfoRegistrationDisabled {
+
+        @Test
+        @DisplayName("Should return false by default when flag is absent")
+        void shouldReturnFalseByDefault() {
+            var cmd = CommandLine.parse(new String[0]);
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+
+            assertFalse(startupEnv.typeInfoRegistrationDisabled());
+        }
+
+        @Test
+        @DisplayName("Should return true when flag is passed on command line")
+        void shouldReturnTrueWhenFlagInCommandLine() {
+            var cmd = CommandLine.parse(new String[]{"--flinkboot-disable-typeinfo-registration"});
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+
+            assertTrue(startupEnv.typeInfoRegistrationDisabled());
+        }
+
+        @Test
+        @DisplayName("Should return true when flag is set via environment variable")
+        void shouldReturnTrueWhenFlagInEnv() {
+            var cmd = CommandLine.parse(new String[0]);
+            var env = Map.of("FLINKBOOT_DISABLE_TYPEINFO_REGISTRATION", "true");
+            var resolver = new EnvVarResolver(env::get);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+
+            assertTrue(startupEnv.typeInfoRegistrationDisabled());
+        }
+
+    }
 }

@@ -52,7 +52,10 @@ public final class StartupEnvironment {
             .permitOverride(flag("flinkboot-configuration-override"))
             .listMerging(flag("flinkboot-configuration-list-merging"))
             .build();
+    }
 
+    public boolean typeInfoRegistrationDisabled() {
+        return flag("flinkboot-disable-typeinfo-registration");
     }
 
 }

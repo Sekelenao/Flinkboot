@@ -37,4 +37,5 @@ module io.github.sekelenao.flinkboot.core {
     opens io.github.sekelenao.flinkboot.core.internal.execution to org.junit.platform.commons;
     opens io.github.sekelenao.flinkboot.core.internal.execution.customizer to org.junit.platform.commons;
     opens io.github.sekelenao.flinkboot.core.internal.execution.provider to org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.internal.typing to org.junit.platform.commons;
 }
