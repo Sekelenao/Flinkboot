@@ -8,6 +8,7 @@ import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTimeTypeInfoF
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalTimeTypeInfoFactory;
 import org.apache.flink.api.common.serialization.SerializerConfigImpl;
 import org.apache.flink.api.common.typeinfo.TypeInfo;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.typeutils.PojoTypeInfo;
 import org.apache.flink.api.java.typeutils.TypeExtractor;
 import org.apache.flink.core.memory.DataInputDeserializer;
@@ -93,6 +94,61 @@ class PojoValidatorTest {
         }
     }
 
+    public static class NestedItemPojo {
+        public String itemId;
+        public int quantity;
+    }
+
+    public static class ValidNestedPojo {
+        public String orderId;
+        public NestedItemPojo item;
+
+        @TypeInfo(ListTypeInfoFactory.class)
+        public List<NestedItemPojo> items;
+    }
+
+    public static class TripleContainer<A, B, C> {
+        public A first;
+        public B second;
+        public C third;
+    }
+
+    public static class ValidGenericContainerPojo {
+        public TripleContainer<String, Integer, Double> triple;
+    }
+
+    public static class ParentPojo {
+        public String parentId;
+    }
+
+    public static class ChildPojo extends ParentPojo {
+        public int childValue;
+
+        @TypeInfo(DurationTypeInfoFactory.class)
+        public Duration childDuration;
+    }
+
+    public static class ValidInheritancePojo {
+        public ChildPojo child;
+    }
+
+    public static class BoundedContainer<T extends ParentPojo> {
+        public T data;
+    }
+
+    public static class ValidBoundedContainerPojo {
+        public BoundedContainer<ChildPojo> container;
+    }
+
+    public static class ValidTuplePojo {
+        public Tuple3<String, Integer, Long> tuple;
+    }
+
+    public static class ValidObjectArrayPojo {
+        public String[] stringArray;
+        public NestedItemPojo[] itemArray;
+    }
+
     // ==========================================
     // 2. Invalid POJO Variants (Structural Rules)
     // ==========================================
@@ -153,7 +209,7 @@ class PojoValidatorTest {
     }
 
     // ==========================================
-    // 3. Invalid POJO Variants (Missing @TypeInfo or Unsupported Types)
+    // 3. Invalid POJO Variants (Missing @TypeInfo or Unsupported Direct Types)
     // ==========================================
 
     public static class UnsupportedTypePojo {
@@ -185,13 +241,68 @@ class PojoValidatorTest {
     }
 
     // ==========================================
+    // 4. Invalid POJO Variants (Nested & Parameterized Types Falling Back to Kryo)
+    // ==========================================
+
+    public static class ListWithUnsupportedElementPojo {
+        @TypeInfo(ListTypeInfoFactory.class)
+        public List<OffsetDateTime> dates;
+    }
+
+    public static class MapWithUnsupportedKeyPojo {
+        @TypeInfo(MapTypeInfoFactory.class)
+        public Map<OffsetDateTime, String> map;
+    }
+
+    public static class MapWithUnsupportedValuePojo {
+        @TypeInfo(MapTypeInfoFactory.class)
+        public Map<String, OffsetDateTime> map;
+    }
+
+    public static class ObjectArrayWithUnsupportedElementPojo {
+        public OffsetDateTime[] array;
+    }
+
+    public static class TupleWithUnsupportedElementPojo {
+        public Tuple3<String, OffsetDateTime, Integer> tuple;
+    }
+
+    public static class GenericContainerWithUnsupportedTypePojo {
+        public TripleContainer<String, OffsetDateTime, Integer> container;
+    }
+
+    public static class ParentWithUnsupportedField {
+        public OffsetDateTime unsupportedTime;
+    }
+
+    public static class ChildInheritingUnsupportedField extends ParentWithUnsupportedField {
+        public String validField;
+    }
+
+    public static class WildcardListWithParentPojo {
+        @TypeInfo(ListTypeInfoFactory.class)
+        public List<? extends ParentPojo> items;
+    }
+
+    public static class WildcardListWithUnsupportedTypePojo {
+        @TypeInfo(ListTypeInfoFactory.class)
+        public List<? extends OffsetDateTime> dates;
+    }
+
+    // ==========================================
     // Providers
     // ==========================================
 
     static Stream<Class<?>> validPojoProvider() {
         return Stream.of(
             ValidAnnotatedPojo.class,
-            ValidPojoWithGettersSetters.class
+            ValidPojoWithGettersSetters.class,
+            ValidNestedPojo.class,
+            ValidGenericContainerPojo.class,
+            ValidInheritancePojo.class,
+            ValidBoundedContainerPojo.class,
+            ValidTuplePojo.class,
+            ValidObjectArrayPojo.class
         );
     }
 
@@ -210,7 +321,16 @@ class PojoValidatorTest {
             UnannotatedLocalTimePojo.class,
             UnannotatedDurationPojo.class,
             UnannotatedListPojo.class,
-            UnannotatedMapPojo.class
+            UnannotatedMapPojo.class,
+            ListWithUnsupportedElementPojo.class,
+            MapWithUnsupportedKeyPojo.class,
+            MapWithUnsupportedValuePojo.class,
+            ObjectArrayWithUnsupportedElementPojo.class,
+            TupleWithUnsupportedElementPojo.class,
+            GenericContainerWithUnsupportedTypePojo.class,
+            ChildInheritingUnsupportedField.class,
+            WildcardListWithParentPojo.class,
+            WildcardListWithUnsupportedTypePojo.class
         );
     }
 
@@ -227,7 +347,7 @@ class PojoValidatorTest {
 
     @ParameterizedTest
     @MethodSource("invalidPojoProvider")
-    @DisplayName("Should fail validation when class is not a valid POJO")
+    @DisplayName("Should fail validation when class is not a valid POJO or contains unsupported types")
     void shouldFailWhenInvalidPojo(Class<?> invalidPojoClass) {
         assertThrows(AssertionFailedError.class, () -> validator.validate(invalidPojoClass));
     }

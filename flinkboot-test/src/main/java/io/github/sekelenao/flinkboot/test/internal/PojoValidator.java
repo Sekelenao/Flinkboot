@@ -1,6 +1,10 @@
 package io.github.sekelenao.flinkboot.test.internal;
 
+import org.apache.flink.api.common.typeutils.CompositeType;
 import org.apache.flink.api.java.typeutils.GenericTypeInfo;
+import org.apache.flink.api.java.typeutils.ListTypeInfo;
+import org.apache.flink.api.java.typeutils.MapTypeInfo;
+import org.apache.flink.api.java.typeutils.ObjectArrayTypeInfo;
 import org.apache.flink.api.java.typeutils.PojoTypeInfo;
 import org.apache.flink.api.java.typeutils.TypeExtractor;
 import org.junit.jupiter.api.Assertions;
@@ -40,6 +44,21 @@ public final class PojoValidator {
                 var pojoField = pojoTypeInfo.getPojoFieldAt(i);
                 var fieldPath = task.path() + "." + pojoField.getField().getName();
                 tasks.add(new PojoValidationTask<>(fieldPath, pojoField.getTypeInformation()));
+            }
+        } else if (typeInfo instanceof ListTypeInfo) {
+            var listTypeInfo = (ListTypeInfo<?>) typeInfo;
+            tasks.add(new PojoValidationTask<>(task.path() + "[]", listTypeInfo.getElementTypeInfo()));
+        } else if (typeInfo instanceof MapTypeInfo) {
+            var mapTypeInfo = (MapTypeInfo<?, ?>) typeInfo;
+            tasks.add(new PojoValidationTask<>(task.path() + "<key>", mapTypeInfo.getKeyTypeInfo()));
+            tasks.add(new PojoValidationTask<>(task.path() + "<value>", mapTypeInfo.getValueTypeInfo()));
+        } else if (typeInfo instanceof ObjectArrayTypeInfo) {
+            var arrayTypeInfo = (ObjectArrayTypeInfo<?, ?>) typeInfo;
+            tasks.add(new PojoValidationTask<>(task.path() + "[]", arrayTypeInfo.getComponentInfo()));
+        } else if (typeInfo instanceof CompositeType) {
+            var compositeType = (CompositeType<?>) typeInfo;
+            for (int i = 0; i < compositeType.getArity(); i++) {
+                tasks.add(new PojoValidationTask<>(task.path() + "[" + i + "]", compositeType.getTypeAt(i)));
             }
         }
     }

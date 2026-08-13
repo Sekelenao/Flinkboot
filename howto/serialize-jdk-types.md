@@ -102,6 +102,10 @@ Flink's `TypeExtractor` will automatically find the class-level annotation when 
 ### D. Nullability
 Flink's native serializers for collections and time types properly support `null` values within POJO fields.
 
+### E. Generic Bounds vs Wildcards in Collections
+* **Bounded Class Generics (`Container<T extends ParentDto>`)**: When a concrete class argument is provided (e.g. `Container<ChildDto>`), Flink's `TypeExtractor` resolves `ChildDto` natively as a POJO.
+* **Wildcards in Collections (`List<? extends ParentDto>`)**: Wildcard type arguments cannot be resolved into concrete type parameters by Flink's `TypeInfoFactory` and therefore fall back to Kryo serialization (`GenericTypeInfo`). Always declare collections with concrete type arguments (e.g. `List<ParentDto>` instead of `List<? extends ParentDto>`).
+
 ---
 
 ## 4. POJO Compliance Validation
