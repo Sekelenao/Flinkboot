@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### `flinkboot-core`
+- **Unified Public Resource API (`Resource.of`)**:
+  - Introduced public `Resource` interface in `io.github.sekelenao.flinkboot.core.api.resource` supporting `classpath:`, `resource:`, and `file:` URI schemes.
+  - Fail-fast validation against empty/blank paths and malformed URI prefixes with dedicated runtime exceptions.
+  - Multi-platform path normalization (Linux, macOS, and Windows drive letters / UNC shares) and stateless stream consumption.
 - **Native JDK Type Serialization (`@TypeInfo` Factories)**:
   - `DurationTypeInfoFactory`: Efficient native serialization for `java.time.Duration` using an optimized 12-byte binary serializer (`DurationSerializer`).
   - `LocalDateTimeTypeInfoFactory`, `LocalDateTypeInfoFactory`, `LocalTimeTypeInfoFactory`: Native serializers for Java 8 date and time types.

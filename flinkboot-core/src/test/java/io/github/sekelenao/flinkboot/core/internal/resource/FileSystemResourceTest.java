@@ -1,5 +1,6 @@
 package io.github.sekelenao.flinkboot.core.internal.resource;
 
+import io.github.sekelenao.flinkboot.core.api.exception.FlinkbootException;
 import io.github.sekelenao.flinkboot.core.api.exception.resource.ResourceAccessException;
 import io.github.sekelenao.flinkboot.core.api.exception.resource.ResourceNotFoundException;
 import org.junit.jupiter.api.DisplayName;
@@ -12,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -33,6 +35,20 @@ class FileSystemResourceTest {
     }
 
     @Test
+    @DisplayName("Should successfully load file with multiple leading slashes")
+    void shouldLoadFileWithMultipleLeadingSlashes(@TempDir Path tempDir) throws IOException {
+        var tempFile = tempDir.resolve("multi-slash-file.yaml");
+        Files.writeString(tempFile, "multi slash content");
+
+        var resource = new FileSystemResource("///" + tempFile.toAbsolutePath());
+        try (var is = resource.inputStream()) {
+            assertNotNull(is);
+            var content = new String(is.readAllBytes(), StandardCharsets.UTF_8).trim();
+            assertEquals("multi slash content", content);
+        }
+    }
+
+    @Test
     @DisplayName("Should throw ResourceNotFoundException when file does not exist")
     void shouldThrowExceptionWhenNotFound() {
         var resource = new FileSystemResource("/non/existent/path/file.yaml");
@@ -44,7 +60,13 @@ class FileSystemResourceTest {
     void shouldThrowResourceAccessExceptionWhenIsDirectory(@TempDir Path tempDir) {
         var resource = new FileSystemResource(tempDir.toAbsolutePath().toString());
         var exception = assertThrows(ResourceAccessException.class, resource::inputStream);
-        org.junit.jupiter.api.Assertions.assertInstanceOf(io.github.sekelenao.flinkboot.core.api.exception.FlinkbootException.class, exception);
+        assertInstanceOf(FlinkbootException.class, exception);
     }
 
+    @Test
+    @DisplayName("Should throw ResourceAccessException when location has invalid path characters")
+    void shouldThrowResourceAccessExceptionWhenPathIsInvalid() {
+        var resource = new FileSystemResource("\0invalid-path");
+        assertThrows(ResourceAccessException.class, resource::inputStream);
+    }
 }

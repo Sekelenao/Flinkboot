@@ -2,15 +2,17 @@ package io.github.sekelenao.flinkboot.core.internal.resource;
 
 import io.github.sekelenao.flinkboot.core.api.exception.resource.ResourceAccessException;
 import io.github.sekelenao.flinkboot.core.api.exception.resource.ResourceNotFoundException;
+import io.github.sekelenao.flinkboot.core.api.resource.Resource;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Objects;
 
-class FileSystemResource implements Resource {
+public class FileSystemResource implements Resource {
 
     private final String location;
 
@@ -20,8 +22,13 @@ class FileSystemResource implements Resource {
 
     @Override
     public InputStream inputStream() {
-        var path = Paths.get(location);
-        if(Files.isDirectory(path)) {
+        Path path;
+        try {
+            path = Path.of(location);
+        } catch (InvalidPathException exception) {
+            throw new ResourceAccessException(location, exception);
+        }
+        if (Files.isDirectory(path)) {
             throw new ResourceAccessException(location + " is a directory, not a readable resource");
         }
         try {

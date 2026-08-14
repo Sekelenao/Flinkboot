@@ -3,6 +3,8 @@ package io.github.sekelenao.flinkboot.core.internal.resource;
 import io.github.sekelenao.flinkboot.core.api.exception.resource.ResourceNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 
@@ -13,20 +15,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("ClasspathResource")
 class ClasspathResourceTest {
 
-    @Test
-    @DisplayName("Should successfully load resource from classpath root")
-    void shouldLoadResource() throws IOException {
-        var resource = new ClasspathResource("io/github/sekelenao/flinkboot/core/internal/resource/ClasspathResourceTest.class");
-        try (var is = resource.inputStream()) {
-            assertNotNull(is);
-            assertTrue(is.readAllBytes().length > 0);
-        }
-    }
-
-    @Test
-    @DisplayName("Should successfully load resource with absolute leading slash")
-    void shouldLoadResourceWithLeadingSlash() throws IOException {
-        var resource = new ClasspathResource("/io/github/sekelenao/flinkboot/core/internal/resource/ClasspathResourceTest.class");
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "io/github/sekelenao/flinkboot/core/internal/resource/ClasspathResourceTest.class",
+        "/io/github/sekelenao/flinkboot/core/internal/resource/ClasspathResourceTest.class",
+        "///io/github/sekelenao/flinkboot/core/internal/resource/ClasspathResourceTest.class"
+    })
+    @DisplayName("Should successfully load resource from classpath with various leading slash combinations")
+    void shouldLoadResourceWithLeadingSlashes(String path) throws IOException {
+        var resource = new ClasspathResource(path);
         try (var is = resource.inputStream()) {
             assertNotNull(is);
             assertTrue(is.readAllBytes().length > 0);

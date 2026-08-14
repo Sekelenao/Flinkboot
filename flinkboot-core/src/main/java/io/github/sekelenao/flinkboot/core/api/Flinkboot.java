@@ -4,7 +4,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.github.sekelenao.flinkboot.core.api.properties.JobProperties;
 import io.github.sekelenao.flinkboot.core.internal.execution.ExecutionEnvironmentFactory;
 import io.github.sekelenao.flinkboot.core.internal.parser.yaml.YamlParser;
-import io.github.sekelenao.flinkboot.core.internal.resource.Resource;
+import io.github.sekelenao.flinkboot.core.api.resource.Resource;
 import io.github.sekelenao.flinkboot.core.internal.startup.StartupEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
@@ -39,7 +39,7 @@ public final class Flinkboot {
     private <C> C readConfigurations(Class<C> configurationClass, YamlParser parser) throws IOException {
         var locations = startupEnvironment.configurationResourceLocations();
         for (var location : locations){
-            try(var inputStream = Resource.get(location).inputStream()) {
+            try(var inputStream = Resource.of(location).inputStream()) {
                 parser.parse(inputStream);
             }
         }
