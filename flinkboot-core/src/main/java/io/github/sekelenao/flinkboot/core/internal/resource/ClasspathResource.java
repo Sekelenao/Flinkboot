@@ -16,7 +16,10 @@ public class ClasspathResource implements Resource {
 
     @Override
     public InputStream inputStream() {
-        var cleanPath = location.replaceAll("^/+", "");
+        var cleanPath = location;
+        while (cleanPath.startsWith("/")) {
+            cleanPath = cleanPath.substring(1);
+        }
         var classLoader = Thread.currentThread().getContextClassLoader();
         if (classLoader == null) {
             classLoader = ClasspathResource.class.getClassLoader();

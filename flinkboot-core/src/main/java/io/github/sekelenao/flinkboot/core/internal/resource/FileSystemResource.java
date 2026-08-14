@@ -20,21 +20,14 @@ public class FileSystemResource implements Resource {
         this.location = Objects.requireNonNull(location);
     }
 
-    private Path path() {
-        var cleanLocation = location;
-        if (cleanLocation.matches("^/+[a-zA-Z]:.*")) {
-            cleanLocation = cleanLocation.replaceAll("^/+", "");
-        }
+    @Override
+    public InputStream inputStream() {
+        Path path;
         try {
-            return Path.of(cleanLocation);
+            path = Path.of(location);
         } catch (InvalidPathException exception) {
             throw new ResourceAccessException(location, exception);
         }
-    }
-
-    @Override
-    public InputStream inputStream() {
-        var path = path();
         if (Files.isDirectory(path)) {
             throw new ResourceAccessException(location + " is a directory, not a readable resource");
         }
