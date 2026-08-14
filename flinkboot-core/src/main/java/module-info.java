@@ -12,6 +12,7 @@ module io.github.sekelenao.flinkboot.core {
     exports io.github.sekelenao.flinkboot.core.api.exception.configuration;
     exports io.github.sekelenao.flinkboot.core.api.exception.parsing;
     exports io.github.sekelenao.flinkboot.core.api.exception.resource;
+    exports io.github.sekelenao.flinkboot.core.api.resource;
     exports io.github.sekelenao.flinkboot.core.api.typing.time;
     exports io.github.sekelenao.flinkboot.core.api.typing.collection;
     // Internal annotation exported specifically to flinkboot-kafka for code generation metadata
@@ -33,6 +34,7 @@ module io.github.sekelenao.flinkboot.core {
     opens io.github.sekelenao.flinkboot.core.api.properties.restart to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
     opens io.github.sekelenao.flinkboot.core.api.properties.savepoint to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
     opens io.github.sekelenao.flinkboot.core.api.properties.state to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.api.resource to org.junit.platform.commons;
     opens io.github.sekelenao.flinkboot.core.internal.parser.yaml to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
     opens io.github.sekelenao.flinkboot.core.internal.execution to org.junit.platform.commons;
     opens io.github.sekelenao.flinkboot.core.internal.execution.customizer to org.junit.platform.commons;

@@ -2,6 +2,7 @@ package io.github.sekelenao.flinkboot.core.internal.resource;
 
 import io.github.sekelenao.flinkboot.core.api.exception.resource.ResourceAccessException;
 import io.github.sekelenao.flinkboot.core.api.exception.resource.ResourceNotFoundException;
+import io.github.sekelenao.flinkboot.core.api.resource.Resource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,7 +11,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-class FileSystemResource implements Resource {
+public class FileSystemResource implements Resource {
 
     private final String location;
 
