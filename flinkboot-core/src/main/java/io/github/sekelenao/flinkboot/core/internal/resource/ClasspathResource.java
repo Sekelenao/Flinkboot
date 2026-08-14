@@ -24,7 +24,10 @@ public class ClasspathResource implements Resource {
         if (classLoader == null) {
             classLoader = ClassLoader.getSystemClassLoader();
         }
-        var stream = classLoader != null ? classLoader.getResourceAsStream(cleanPath) : null;
+        if (classLoader == null) {
+            throw new ResourceNotFoundException(location);
+        }
+        var stream = classLoader.getResourceAsStream(cleanPath);
         if (stream == null) {
             throw new ResourceNotFoundException(location);
         }

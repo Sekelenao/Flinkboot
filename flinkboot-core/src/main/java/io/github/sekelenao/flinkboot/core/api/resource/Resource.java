@@ -14,7 +14,7 @@ public interface Resource {
         Objects.requireNonNull(location);
         var trimmedLocation = location.strip();
         var index = trimmedLocation.indexOf(':');
-        if (index == -1 || index == 0) {
+        if (index <= 0) {
             throw new UnrecognizedResourceException(location);
         }
         var prefix = trimmedLocation.substring(0, index).toLowerCase(Locale.ROOT);

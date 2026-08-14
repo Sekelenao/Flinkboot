@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 
 public class FileSystemResource implements Resource {
@@ -21,15 +20,13 @@ public class FileSystemResource implements Resource {
         this.location = Objects.requireNonNull(location);
     }
 
-    private Path resolvePath() {
+    private Path path() {
         var cleanLocation = location;
         if (cleanLocation.matches("^/+[a-zA-Z]:.*")) {
             cleanLocation = cleanLocation.replaceAll("^/+", "");
-        } else if (cleanLocation.startsWith("//")) {
-            cleanLocation = "/" + cleanLocation.replaceAll("^/+", "");
         }
         try {
-            return Paths.get(cleanLocation);
+            return Path.of(cleanLocation);
         } catch (InvalidPathException exception) {
             throw new ResourceAccessException(location, exception);
         }
@@ -37,7 +34,7 @@ public class FileSystemResource implements Resource {
 
     @Override
     public InputStream inputStream() {
-        var path = resolvePath();
+        var path = path();
         if (Files.isDirectory(path)) {
             throw new ResourceAccessException(location + " is a directory, not a readable resource");
         }
