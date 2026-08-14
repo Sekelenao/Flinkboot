@@ -7,6 +7,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -32,65 +34,61 @@ class ResourceTest {
             assertThrows(NullPointerException.class, () -> Resource.of(null));
         }
 
-        @Test
+        @ParameterizedTest
+        @ValueSource(strings = {"", "   "})
         @DisplayName("Should throw UnrecognizedResourceException when location is empty or blank")
-        void shouldThrowExceptionWhenLocationIsEmptyOrBlank() {
-            assertAll(
-                () -> assertThrows(UnrecognizedResourceException.class, () -> Resource.of("")),
-                () -> assertThrows(UnrecognizedResourceException.class, () -> Resource.of("   "))
-            );
+        void shouldThrowExceptionWhenLocationIsEmptyOrBlank(String location) {
+            assertThrows(UnrecognizedResourceException.class, () -> Resource.of(location));
         }
 
-        @Test
+        @ParameterizedTest
+        @ValueSource(strings = {
+            "file:",
+            "file:   ",
+            "classpath:",
+            "classpath:   ",
+            "resource:",
+            "resource:   "
+        })
         @DisplayName("Should throw UnrecognizedResourceException when location suffix is empty or blank")
-        void shouldThrowExceptionWhenSuffixIsEmptyOrBlank() {
-            assertAll(
-                () -> assertThrows(UnrecognizedResourceException.class, () -> Resource.of("file:")),
-                () -> assertThrows(UnrecognizedResourceException.class, () -> Resource.of("file:   ")),
-                () -> assertThrows(UnrecognizedResourceException.class, () -> Resource.of("classpath:")),
-                () -> assertThrows(UnrecognizedResourceException.class, () -> Resource.of("classpath:   ")),
-                () -> assertThrows(UnrecognizedResourceException.class, () -> Resource.of("resource:"))
-            );
+        void shouldThrowExceptionWhenSuffixIsEmptyOrBlank(String location) {
+            assertThrows(UnrecognizedResourceException.class, () -> Resource.of(location));
         }
 
-        @Test
+        @ParameterizedTest
+        @ValueSource(strings = {
+            "classpath:config.yaml",
+            "resource:config.yaml",
+            "Classpath:config.yaml",
+            "RESOURCE:config.yaml"
+        })
         @DisplayName("Should return ClasspathResource when prefixed with classpath: or resource:")
-        void shouldReturnClasspathResourceWithPrefixes() {
-            assertAll(
-                () -> assertInstanceOf(ClasspathResource.class, Resource.of("classpath:config.yaml")),
-                () -> assertInstanceOf(ClasspathResource.class, Resource.of("resource:config.yaml"))
-            );
+        void shouldReturnClasspathResourceWithPrefixes(String location) {
+            assertInstanceOf(ClasspathResource.class, Resource.of(location));
         }
 
-        @Test
+        @ParameterizedTest
+        @ValueSource(strings = {
+            "file:/path/to/config.yaml",
+            "File:/path/to/config.yaml",
+            "FILE:config.yaml"
+        })
         @DisplayName("Should return FileSystemResource when prefixed with file:")
-        void shouldReturnFileSystemResourceWithPrefix() {
-            assertInstanceOf(FileSystemResource.class, Resource.of("file:/path/to/config.yaml"));
+        void shouldReturnFileSystemResourceWithPrefix(String location) {
+            assertInstanceOf(FileSystemResource.class, Resource.of(location));
         }
 
-        @Test
+        @ParameterizedTest
+        @ValueSource(strings = {"config.yaml", "/path/to/config.yaml"})
         @DisplayName("Should throw UnrecognizedResourceException when no prefix is specified")
-        void shouldThrowExceptionWhenNoPrefix() {
-            assertAll(
-                () -> assertThrows(UnrecognizedResourceException.class, () -> Resource.of("config.yaml")),
-                () -> assertThrows(UnrecognizedResourceException.class, () -> Resource.of("/path/to/config.yaml"))
-            );
+        void shouldThrowExceptionWhenNoPrefix(String location) {
+            assertThrows(UnrecognizedResourceException.class, () -> Resource.of(location));
         }
 
         @Test
         @DisplayName("Should throw UnrecognizedResourceException when prefix is unsupported")
         void shouldThrowExceptionForUnsupportedPrefix() {
             assertThrows(UnrecognizedResourceException.class, () -> Resource.of("http://localhost/config.yaml"));
-        }
-
-        @Test
-        @DisplayName("Should successfully resolve resource case-insensitively")
-        void shouldResolveResourceCaseInsensitively() {
-            assertAll(
-                () -> assertInstanceOf(ClasspathResource.class, Resource.of("Classpath:config.yaml")),
-                () -> assertInstanceOf(ClasspathResource.class, Resource.of("RESOURCE:config.yaml")),
-                () -> assertInstanceOf(FileSystemResource.class, Resource.of("File:config.yaml"))
-            );
         }
     }
 
