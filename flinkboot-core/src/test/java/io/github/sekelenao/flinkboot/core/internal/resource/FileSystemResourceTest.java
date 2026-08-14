@@ -35,6 +35,20 @@ class FileSystemResourceTest {
     }
 
     @Test
+    @DisplayName("Should successfully load file with multiple leading slashes")
+    void shouldLoadFileWithMultipleLeadingSlashes(@TempDir Path tempDir) throws IOException {
+        var tempFile = tempDir.resolve("multi-slash-file.yaml");
+        Files.writeString(tempFile, "multi slash content");
+
+        var resource = new FileSystemResource("///" + tempFile.toAbsolutePath());
+        try (var is = resource.inputStream()) {
+            assertNotNull(is);
+            var content = new String(is.readAllBytes(), StandardCharsets.UTF_8).trim();
+            assertEquals("multi slash content", content);
+        }
+    }
+
+    @Test
     @DisplayName("Should throw ResourceNotFoundException when file does not exist")
     void shouldThrowExceptionWhenNotFound() {
         var resource = new FileSystemResource("/non/existent/path/file.yaml");
@@ -49,4 +63,10 @@ class FileSystemResourceTest {
         assertInstanceOf(FlinkbootException.class, exception);
     }
 
+    @Test
+    @DisplayName("Should throw ResourceAccessException when location has invalid path characters")
+    void shouldThrowResourceAccessExceptionWhenPathIsInvalid() {
+        var resource = new FileSystemResource("\0invalid-path");
+        assertThrows(ResourceAccessException.class, resource::inputStream);
+    }
 }

@@ -33,9 +33,24 @@ class ResourceTest {
         }
 
         @Test
-        @DisplayName("Should throw UnrecognizedResourceException when location is empty")
-        void shouldThrowExceptionWhenLocationIsEmpty() {
-            assertThrows(UnrecognizedResourceException.class, () -> Resource.of(""));
+        @DisplayName("Should throw UnrecognizedResourceException when location is empty or blank")
+        void shouldThrowExceptionWhenLocationIsEmptyOrBlank() {
+            assertAll(
+                () -> assertThrows(UnrecognizedResourceException.class, () -> Resource.of("")),
+                () -> assertThrows(UnrecognizedResourceException.class, () -> Resource.of("   "))
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw UnrecognizedResourceException when location suffix is empty or blank")
+        void shouldThrowExceptionWhenSuffixIsEmptyOrBlank() {
+            assertAll(
+                () -> assertThrows(UnrecognizedResourceException.class, () -> Resource.of("file:")),
+                () -> assertThrows(UnrecognizedResourceException.class, () -> Resource.of("file:   ")),
+                () -> assertThrows(UnrecognizedResourceException.class, () -> Resource.of("classpath:")),
+                () -> assertThrows(UnrecognizedResourceException.class, () -> Resource.of("classpath:   ")),
+                () -> assertThrows(UnrecognizedResourceException.class, () -> Resource.of("resource:"))
+            );
         }
 
         @Test

@@ -16,14 +16,16 @@ public class ClasspathResource implements Resource {
 
     @Override
     public InputStream inputStream() {
-        Objects.requireNonNull(location);
-        var cleanPath = location.startsWith("/") ? location.substring(1) : location;
+        var cleanPath = location.replaceAll("^/+", "");
         var classLoader = Thread.currentThread().getContextClassLoader();
         if (classLoader == null) {
             classLoader = ClasspathResource.class.getClassLoader();
         }
-        var stream = classLoader.getResourceAsStream(cleanPath);
-        if(stream == null){
+        if (classLoader == null) {
+            classLoader = ClassLoader.getSystemClassLoader();
+        }
+        var stream = classLoader != null ? classLoader.getResourceAsStream(cleanPath) : null;
+        if (stream == null) {
             throw new ResourceNotFoundException(location);
         }
         return stream;

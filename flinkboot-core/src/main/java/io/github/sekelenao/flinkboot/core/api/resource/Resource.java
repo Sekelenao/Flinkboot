@@ -12,12 +12,16 @@ public interface Resource {
 
     static Resource of(String location) {
         Objects.requireNonNull(location);
-        var index = location.indexOf(':');
+        var trimmedLocation = location.strip();
+        var index = trimmedLocation.indexOf(':');
         if (index == -1 || index == 0) {
             throw new UnrecognizedResourceException(location);
         }
-        var prefix = location.substring(0, index).toLowerCase(Locale.ROOT);
-        var suffix = location.substring(index + 1);
+        var prefix = trimmedLocation.substring(0, index).toLowerCase(Locale.ROOT);
+        var suffix = trimmedLocation.substring(index + 1).strip();
+        if (suffix.isEmpty()) {
+            throw new UnrecognizedResourceException(location);
+        }
         if (prefix.equals("classpath") || prefix.equals("resource")) {
             return new ClasspathResource(suffix);
         }

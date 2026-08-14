@@ -34,6 +34,16 @@ class ClasspathResourceTest {
     }
 
     @Test
+    @DisplayName("Should successfully load resource with multiple leading slashes")
+    void shouldLoadResourceWithMultipleLeadingSlashes() throws IOException {
+        var resource = new ClasspathResource("///io/github/sekelenao/flinkboot/core/internal/resource/ClasspathResourceTest.class");
+        try (var is = resource.inputStream()) {
+            assertNotNull(is);
+            assertTrue(is.readAllBytes().length > 0);
+        }
+    }
+
+    @Test
     @DisplayName("Should throw ResourceNotFoundException when classpath resource is missing")
     void shouldThrowExceptionWhenNotFound() {
         var resource = new ClasspathResource("non-existent-resource.txt");
