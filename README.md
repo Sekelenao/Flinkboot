@@ -47,6 +47,7 @@ Follow these 3 essential steps to get started with Flinkboot:
 * **Native JDK Type Serialization** — Built-in `@TypeInfo` factories for `Duration`, Java 8 time types, and generic collections without Kryo fallback.
 * **Deep POJO Compliance Verification** — Test utility (`assertPojo`) to recursively verify that data models serialize natively without Kryo.
 * **Testing Helpers** — Load and validate configurations directly in JUnit 5 tests.
+* **Unified Resource Loading** — Load files and assets seamlessly across classpath and file systems with a unified URI syntax (`Resource.of`).
 * **Auto-configured Connectors** — Production-ready sources and sinks (e.g. Apache Kafka) built directly from configuration.
 
 ---

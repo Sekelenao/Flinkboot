@@ -64,6 +64,10 @@ flink run MyJob.jar
 *Supported location URI schemes:*
 - `file:<path>` — Path on the local filesystem (e.g., `file:job-configuration.yaml` or `file:/etc/flink/job.yaml`).
 - `classpath:<path>` — Resource file inside the JAR classpath (e.g., `classpath:job-configuration.yaml`).
+- `resource:<path>` — Alias for classpath resources.
+
+> [!NOTE]
+> Configuration resolution is powered by Flinkboot's unified `Resource` API. See the [How to Load Resources](load-resources.md) guide for comprehensive details on resource loading.
 
 ---
 

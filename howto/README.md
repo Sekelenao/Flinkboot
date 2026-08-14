@@ -13,5 +13,6 @@ This section contains step-by-step guides to help you implement specific feature
 - [How to Assert Flink POJO Compliance](assert-pojo-compliance.md) — Verify that your data classes are compatible with Flink's optimized POJO serializer.
 - [How to Serialize Common JDK Types](serialize-jdk-types.md) — Learn how to serialize Java Date/Time, Duration, and Collections natively using Flinkboot's built-in factories.
 - [How to Load Configurations in Tests](load-configurations-in-tests.md) — Easily load, merge, and validate YAML configurations within JUnit 5 tests.
+- [How to Load Resources](load-resources.md) — Load files and assets seamlessly across classpath and file systems with a unified URI syntax.
 - [Avoid Classpath & Dependency Conflicts](avoid-dependency-conflicts.md) — Best practices for shading and aligning dependencies in production.
 - [Reserved Keys & Configuration Properties](reserved-keys.md) — View the configuration keys and environment variables reserved by Flinkboot.
