@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -50,8 +50,8 @@ jobs:
             flinkboot-kafka/target/site/jacoco/jacoco.csv
           coverage-label: 'Coverage'
           branches-label: 'Branches'
-          colors: '#25A162 #25A162 #dfb317 #dfb317 #fe7d37 #e05d44'
-          intervals: '100 90 80 70 60 0'
+          colors: '#25A162 #25A162 #dfb317 #fe7d37 #e05d44'
+          intervals: '100 80 70 60 0'
 
       - name: Log coverage percentage
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
