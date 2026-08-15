@@ -5,6 +5,6 @@ module io.github.sekelenao.flinkboot.test {
 
     exports io.github.sekelenao.flinkboot.test.api;
 
-    opens io.github.sekelenao.flinkboot.test.api to org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.test.api;
     opens io.github.sekelenao.flinkboot.test.internal to org.junit.platform.commons;
 }

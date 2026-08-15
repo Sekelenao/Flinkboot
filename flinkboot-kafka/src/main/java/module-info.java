@@ -11,6 +11,8 @@ module io.github.sekelenao.flinkboot.kafka {
     exports io.github.sekelenao.flinkboot.kafka.api.sink;
     exports io.github.sekelenao.flinkboot.kafka.api.exception;
 
-    opens io.github.sekelenao.flinkboot.kafka.api.properties.source to com.fasterxml.jackson.databind, org.hibernate.validator;
-    opens io.github.sekelenao.flinkboot.kafka.api.properties.sink to com.fasterxml.jackson.databind, org.hibernate.validator;
+    opens io.github.sekelenao.flinkboot.kafka.api.properties.source;
+    opens io.github.sekelenao.flinkboot.kafka.api.properties.sink;
+    opens io.github.sekelenao.flinkboot.kafka.api.source;
+    opens io.github.sekelenao.flinkboot.kafka.api.sink;
 }

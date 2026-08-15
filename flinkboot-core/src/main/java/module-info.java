@@ -26,15 +26,17 @@ module io.github.sekelenao.flinkboot.core {
     requires org.glassfish.expressly;
     requires flink.streaming.java;
 
-    opens io.github.sekelenao.flinkboot.core.api to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
-    opens io.github.sekelenao.flinkboot.core.api.properties to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
-    opens io.github.sekelenao.flinkboot.core.api.properties.checkpointing to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
-    opens io.github.sekelenao.flinkboot.core.api.properties.execution to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
-    opens io.github.sekelenao.flinkboot.core.api.properties.local to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
-    opens io.github.sekelenao.flinkboot.core.api.properties.restart to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
-    opens io.github.sekelenao.flinkboot.core.api.properties.savepoint to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
-    opens io.github.sekelenao.flinkboot.core.api.properties.state to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
-    opens io.github.sekelenao.flinkboot.core.api.resource to org.junit.platform.commons;
+    opens io.github.sekelenao.flinkboot.core.api;
+    opens io.github.sekelenao.flinkboot.core.api.properties;
+    opens io.github.sekelenao.flinkboot.core.api.properties.checkpointing;
+    opens io.github.sekelenao.flinkboot.core.api.properties.execution;
+    opens io.github.sekelenao.flinkboot.core.api.properties.local;
+    opens io.github.sekelenao.flinkboot.core.api.properties.restart;
+    opens io.github.sekelenao.flinkboot.core.api.properties.savepoint;
+    opens io.github.sekelenao.flinkboot.core.api.properties.state;
+    opens io.github.sekelenao.flinkboot.core.api.resource;
+    opens io.github.sekelenao.flinkboot.core.api.typing.time;
+    opens io.github.sekelenao.flinkboot.core.api.typing.collection;
     opens io.github.sekelenao.flinkboot.core.internal.parser.yaml to com.fasterxml.jackson.databind, org.hibernate.validator, org.junit.platform.commons;
     opens io.github.sekelenao.flinkboot.core.internal.execution to org.junit.platform.commons;
     opens io.github.sekelenao.flinkboot.core.internal.execution.customizer to org.junit.platform.commons;
