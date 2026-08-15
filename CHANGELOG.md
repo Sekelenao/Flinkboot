@@ -31,6 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Operator Naming**:
   - Added `name` configuration property to `KafkaSourceProperties` and `KafkaSinkProperties` for explicit operator naming in Flink execution graphs and metrics.
 
+### Changed
+- **JPMS Modular Reflection (`module-info.java`)**:
+  - Opened all public API, properties, resource, and typing packages unconditionally across `flinkboot-core`, `flinkboot-kafka`, and `flinkboot-test` to support seamless runtime reflection, mocking, and serialization (Mockito, ByteBuddy, Spring, custom Jackson modules) in modular environments, while maintaining strict encapsulation of internal packages.
+
 ---
 
 ## [0.1.0-1.20]
