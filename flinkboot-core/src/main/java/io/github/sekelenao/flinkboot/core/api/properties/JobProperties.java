@@ -10,6 +10,9 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Root configuration properties describing a Flink job, including its name and execution environment.
+ */
 public final class JobProperties implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -20,6 +23,12 @@ public final class JobProperties implements Serializable {
     @Valid
     private final ExecutionEnvironmentProperties environment;
 
+    /**
+     * Creates a new {@code JobProperties} instance.
+     *
+     * @param name        the unique name of the Flink job
+     * @param environment the execution environment configuration
+     */
     @JsonCreator
     public JobProperties(
         @JsonProperty("name") String name,
@@ -29,10 +38,20 @@ public final class JobProperties implements Serializable {
         this.environment = environment;
     }
 
+    /**
+     * Returns the name of the Flink job.
+     *
+     * @return the job name
+     */
     public String name() {
         return name;
     }
 
+    /**
+     * Returns the optional execution environment configuration.
+     *
+     * @return an {@link Optional} containing the execution environment configuration, or empty if not configured
+     */
     public Optional<ExecutionEnvironmentProperties> environment() {
         return Optional.ofNullable(environment);
     }

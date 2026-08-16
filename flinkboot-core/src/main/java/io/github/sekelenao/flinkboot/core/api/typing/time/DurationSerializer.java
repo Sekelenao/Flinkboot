@@ -8,10 +8,19 @@ import org.apache.flink.core.memory.DataOutputView;
 import java.io.IOException;
 import java.time.Duration;
 
+/**
+ * Optimized native Flink {@link TypeSerializer} for {@link Duration}.
+ * <p>
+ * Serializes {@link Duration} into a compact binary format consisting of a null flag boolean,
+ * 8-byte seconds long, and 4-byte nanoseconds int, avoiding slow Kryo serialization.
+ */
 public class DurationSerializer extends TypeSerializer<Duration> {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Singleton instance of {@link DurationSerializer}.
+     */
     public static final DurationSerializer INSTANCE = new DurationSerializer();
 
     @Override

@@ -16,6 +16,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Configuration properties for setting up a Flink execution environment.
+ * <p>
+ * Encapsulates execution settings, checkpointing, restart strategies, state backends,
+ * savepoint restoration, local Web UI, and arbitrary key-value properties.
+ */
 public final class ExecutionEnvironmentProperties implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -40,6 +46,17 @@ public final class ExecutionEnvironmentProperties implements Serializable {
 
     private final Map<String, String> properties;
 
+    /**
+     * Creates a new {@code ExecutionEnvironmentProperties} instance.
+     *
+     * @param execution        runtime execution properties
+     * @param checkpointing    checkpointing settings
+     * @param restartStrategy  failure restart strategy
+     * @param stateBackend     state backend and checkpoint storage configuration
+     * @param savepointRestore savepoint restore settings
+     * @param localWebUi       local development Web UI configuration
+     * @param properties       additional raw Flink configuration key-value properties
+     */
     @JsonCreator
     public ExecutionEnvironmentProperties(
         @JsonProperty("execution") ExecutionProperties execution,
@@ -59,30 +76,65 @@ public final class ExecutionEnvironmentProperties implements Serializable {
         this.properties = properties;
     }
 
+    /**
+     * Returns the optional execution properties.
+     *
+     * @return an {@link Optional} containing execution properties, or empty if not configured
+     */
     public Optional<ExecutionProperties> execution() {
         return Optional.ofNullable(execution);
     }
 
+    /**
+     * Returns the optional checkpointing properties.
+     *
+     * @return an {@link Optional} containing checkpointing properties, or empty if not configured
+     */
     public Optional<CheckpointingProperties> checkpointing() {
         return Optional.ofNullable(checkpointing);
     }
 
+    /**
+     * Returns the optional restart strategy configuration.
+     *
+     * @return an {@link Optional} containing the restart strategy properties, or empty if not configured
+     */
     public Optional<RestartStrategyProperties> restartStrategy() {
         return Optional.ofNullable(restartStrategy);
     }
 
+    /**
+     * Returns the optional state backend configuration.
+     *
+     * @return an {@link Optional} containing state backend properties, or empty if not configured
+     */
     public Optional<StateBackendProperties> stateBackend() {
         return Optional.ofNullable(stateBackend);
     }
 
+    /**
+     * Returns the optional savepoint restore configuration.
+     *
+     * @return an {@link Optional} containing savepoint restore properties, or empty if not configured
+     */
     public Optional<SavepointRestoreProperties> savepointRestore() {
         return Optional.ofNullable(savepointRestore);
     }
 
+    /**
+     * Returns the optional local Web UI configuration.
+     *
+     * @return an {@link Optional} containing local Web UI properties, or empty if not configured
+     */
     public Optional<LocalWebUiProperties> localWebUi() {
         return Optional.ofNullable(localWebUi);
     }
 
+    /**
+     * Returns the additional key-value configuration properties.
+     *
+     * @return an unmodifiable map of raw Flink configuration properties
+     */
     public Map<String, String> properties() {
         if (properties == null) {
             return Map.of();

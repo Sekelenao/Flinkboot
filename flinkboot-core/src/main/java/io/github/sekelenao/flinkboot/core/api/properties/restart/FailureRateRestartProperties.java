@@ -11,6 +11,9 @@ import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 
+/**
+ * Configuration properties for failure rate restart strategy.
+ */
 public final class FailureRateRestartProperties implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -24,6 +27,13 @@ public final class FailureRateRestartProperties implements Serializable {
     @PositiveOrZero
     private final Long delayMs;
 
+    /**
+     * Creates a new {@code FailureRateRestartProperties} instance.
+     *
+     * @param maxFailuresPerInterval maximum allowed failures within the interval before failing the job
+     * @param failureIntervalMs      time interval window for measuring failure rate in milliseconds
+     * @param delayMs                delay duration between restart attempts in milliseconds
+     */
     @JsonCreator
     public FailureRateRestartProperties(
         @JsonProperty("max-failures-per-interval") Integer maxFailuresPerInterval,
@@ -35,6 +45,11 @@ public final class FailureRateRestartProperties implements Serializable {
         this.delayMs = delayMs;
     }
 
+    /**
+     * Returns the maximum allowed failures within the failure interval.
+     *
+     * @return an {@link OptionalInt} containing max failures, or empty if not specified
+     */
     public OptionalInt maxFailuresPerInterval() {
         if (maxFailuresPerInterval == null) {
             return OptionalInt.empty();
@@ -42,6 +57,11 @@ public final class FailureRateRestartProperties implements Serializable {
         return OptionalInt.of(maxFailuresPerInterval);
     }
 
+    /**
+     * Returns the failure measurement interval in milliseconds.
+     *
+     * @return an {@link OptionalLong} containing the interval in milliseconds, or empty if not specified
+     */
     public OptionalLong failureIntervalMs() {
         if (failureIntervalMs == null) {
             return OptionalLong.empty();
@@ -49,6 +69,11 @@ public final class FailureRateRestartProperties implements Serializable {
         return OptionalLong.of(failureIntervalMs);
     }
 
+    /**
+     * Returns the delay duration between restart attempts in milliseconds.
+     *
+     * @return an {@link OptionalLong} containing the delay in milliseconds, or empty if not specified
+     */
     public OptionalLong delayMs() {
         if (delayMs == null) {
             return OptionalLong.empty();

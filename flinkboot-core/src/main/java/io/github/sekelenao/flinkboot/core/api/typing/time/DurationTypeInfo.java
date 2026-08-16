@@ -6,10 +6,16 @@ import org.apache.flink.api.common.typeutils.TypeSerializer;
 
 import java.time.Duration;
 
+/**
+ * Flink {@link TypeInformation} representation for {@link Duration}.
+ */
 public class DurationTypeInfo extends TypeInformation<Duration> {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Singleton instance of {@link DurationTypeInfo}.
+     */
     public static final DurationTypeInfo INSTANCE = new DurationTypeInfo();
 
     @Override

@@ -8,6 +8,14 @@ import org.apache.flink.api.common.typeinfo.Types;
 import java.lang.reflect.Type;
 import java.util.Map;
 
+/**
+ * Generic {@link TypeInfoFactory} for {@link Map} fields in Flink POJOs.
+ * <p>
+ * Extracts generic key and value type parameters to construct {@link Types#MAP} without falling back to Kryo.
+ *
+ * @param <K> key type
+ * @param <V> value type
+ */
 public class MapTypeInfoFactory<K, V> extends TypeInfoFactory<Map<K, V>> {
 
     @Override

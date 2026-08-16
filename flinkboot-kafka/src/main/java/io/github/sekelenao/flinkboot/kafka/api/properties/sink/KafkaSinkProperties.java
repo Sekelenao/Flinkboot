@@ -16,6 +16,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Configuration properties for Kafka producer sinks in Apache Flink.
+ */
 public class KafkaSinkProperties implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -36,6 +39,17 @@ public class KafkaSinkProperties implements Serializable {
 
     private final Map<@NotNull String, @NotNull String> properties;
 
+    /**
+     * Creates a new {@code KafkaSinkProperties} instance.
+     *
+     * @param name                  sink operator name in Flink DAG
+     * @param bootstrapServers      list of Kafka broker addresses
+     * @param topic                 target Kafka topic name
+     * @param deliveryGuarantee     delivery guarantee (NONE, AT_LEAST_ONCE, EXACTLY_ONCE)
+     * @param transactionalIdPrefix prefix for Kafka transactions (required if deliveryGuarantee is EXACTLY_ONCE)
+     * @param properties            additional Kafka producer client properties
+     * @throws InvalidKafkaSinkPropertiesException if delivery guarantee and transactional prefix conflict
+     */
     @JsonCreator
     public KafkaSinkProperties(
         @JsonProperty("name") String name,
@@ -67,10 +81,20 @@ public class KafkaSinkProperties implements Serializable {
         }
     }
 
+    /**
+     * Returns the sink operator name.
+     *
+     * @return the name string
+     */
     public String name() {
         return name;
     }
 
+    /**
+     * Returns the list of Kafka bootstrap servers.
+     *
+     * @return an unmodifiable list of broker addresses
+     */
     public List<String> bootstrapServers() {
         if (bootstrapServers == null) {
             return Collections.emptyList();
@@ -78,14 +102,29 @@ public class KafkaSinkProperties implements Serializable {
         return Collections.unmodifiableList(bootstrapServers);
     }
 
+    /**
+     * Returns the target Kafka topic name.
+     *
+     * @return the topic name
+     */
     public String topic() {
         return topic;
     }
 
+    /**
+     * Returns the optional delivery guarantee semantic.
+     *
+     * @return an {@link Optional} containing {@link KafkaDeliveryGuarantee}, or empty if not specified
+     */
     public Optional<KafkaDeliveryGuarantee> deliveryGuarantee() {
         return Optional.ofNullable(deliveryGuarantee);
     }
 
+    /**
+     * Returns the transactional ID prefix for exactly-once producer transactions.
+     *
+     * @return an {@link Optional} containing the prefix string, or empty if not specified
+     */
     public Optional<String> transactionalIdPrefix() {
         if (transactionalIdPrefix == null || transactionalIdPrefix.isBlank()) {
             return Optional.empty();
@@ -93,6 +132,11 @@ public class KafkaSinkProperties implements Serializable {
         return Optional.of(transactionalIdPrefix);
     }
 
+    /**
+     * Returns additional Kafka producer client properties.
+     *
+     * @return an unmodifiable map of configuration properties
+     */
     public Map<String, String> properties() {
         if (properties == null) {
             return Collections.emptyMap();

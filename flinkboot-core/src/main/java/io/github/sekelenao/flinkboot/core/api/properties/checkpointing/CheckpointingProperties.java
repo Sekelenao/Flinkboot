@@ -12,6 +12,12 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 
+/**
+ * Configuration properties for Flink stream checkpointing.
+ * <p>
+ * Configures interval, timeout, consistency mode, concurrency, unaligned checkpoints,
+ * externalized checkpoint cleanup, and storage URI.
+ */
 public final class CheckpointingProperties implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -41,6 +47,20 @@ public final class CheckpointingProperties implements Serializable {
 
     private final String storageUri;
 
+    /**
+     * Creates a new {@code CheckpointingProperties} instance.
+     *
+     * @param enabled                       whether checkpointing is enabled
+     * @param intervalMs                    checkpoint interval in milliseconds
+     * @param mode                          consistency mode (EXACTLY_ONCE or AT_LEAST_ONCE)
+     * @param timeoutMs                     checkpoint timeout in milliseconds
+     * @param minPauseBetweenCheckpointsMs  minimum pause duration between consecutive checkpoints in milliseconds
+     * @param maxConcurrentCheckpoints      maximum number of concurrent in-flight checkpoints
+     * @param externalizedCheckpointCleanup cleanup behavior for externalized checkpoints on cancellation
+     * @param unalignedCheckpoints          whether unaligned checkpoints are enabled
+     * @param alignedCheckpointTimeoutMs    timeout before switching from aligned to unaligned checkpoint
+     * @param storageUri                    checkpoint storage directory URI (e.g. {@code "file:///checkpoints"} or {@code "s3://bucket/checkpoints"})
+     */
     @JsonCreator
     public CheckpointingProperties(
         @JsonProperty("enabled") Boolean enabled,
@@ -66,10 +86,20 @@ public final class CheckpointingProperties implements Serializable {
         this.storageUri = storageUri;
     }
 
+    /**
+     * Returns whether checkpointing is explicitly enabled.
+     *
+     * @return an {@link Optional} containing the enabled flag, or empty if not specified
+     */
     public Optional<Boolean> enabled() {
         return Optional.ofNullable(enabled);
     }
 
+    /**
+     * Returns the optional checkpoint interval in milliseconds.
+     *
+     * @return an {@link OptionalLong} containing the interval in milliseconds, or empty if not specified
+     */
     public OptionalLong intervalMs() {
         if (intervalMs == null) {
             return OptionalLong.empty();
@@ -77,10 +107,20 @@ public final class CheckpointingProperties implements Serializable {
         return OptionalLong.of(intervalMs);
     }
 
+    /**
+     * Returns the optional checkpointing consistency mode.
+     *
+     * @return an {@link Optional} containing the {@link CheckpointingMode}, or empty if not specified
+     */
     public Optional<CheckpointingMode> mode() {
         return Optional.ofNullable(mode);
     }
 
+    /**
+     * Returns the optional checkpoint timeout in milliseconds.
+     *
+     * @return an {@link OptionalLong} containing the timeout in milliseconds, or empty if not specified
+     */
     public OptionalLong timeoutMs() {
         if (timeoutMs == null) {
             return OptionalLong.empty();
@@ -88,6 +128,11 @@ public final class CheckpointingProperties implements Serializable {
         return OptionalLong.of(timeoutMs);
     }
 
+    /**
+     * Returns the optional minimum pause duration between consecutive checkpoints in milliseconds.
+     *
+     * @return an {@link OptionalLong} containing the pause in milliseconds, or empty if not specified
+     */
     public OptionalLong minPauseBetweenCheckpointsMs() {
         if (minPauseBetweenCheckpointsMs == null) {
             return OptionalLong.empty();
@@ -95,6 +140,11 @@ public final class CheckpointingProperties implements Serializable {
         return OptionalLong.of(minPauseBetweenCheckpointsMs);
     }
 
+    /**
+     * Returns the optional maximum number of concurrent checkpoints.
+     *
+     * @return an {@link OptionalInt} containing the maximum concurrent checkpoints, or empty if not specified
+     */
     public OptionalInt maxConcurrentCheckpoints() {
         if (maxConcurrentCheckpoints == null) {
             return OptionalInt.empty();
@@ -102,14 +152,29 @@ public final class CheckpointingProperties implements Serializable {
         return OptionalInt.of(maxConcurrentCheckpoints);
     }
 
+    /**
+     * Returns the optional cleanup mode for externalized checkpoints upon cancellation.
+     *
+     * @return an {@link Optional} containing the {@link ExternalizedCheckpointCleanupMode}, or empty if not specified
+     */
     public Optional<ExternalizedCheckpointCleanupMode> externalizedCheckpointCleanup() {
         return Optional.ofNullable(externalizedCheckpointCleanup);
     }
 
+    /**
+     * Returns whether unaligned checkpoints are enabled.
+     *
+     * @return an {@link Optional} containing the unaligned checkpoints flag, or empty if not specified
+     */
     public Optional<Boolean> unalignedCheckpoints() {
         return Optional.ofNullable(unalignedCheckpoints);
     }
 
+    /**
+     * Returns the optional alignment timeout in milliseconds before falling back to unaligned checkpointing.
+     *
+     * @return an {@link OptionalLong} containing the timeout in milliseconds, or empty if not specified
+     */
     public OptionalLong alignedCheckpointTimeoutMs() {
         if (alignedCheckpointTimeoutMs == null) {
             return OptionalLong.empty();
@@ -117,6 +182,11 @@ public final class CheckpointingProperties implements Serializable {
         return OptionalLong.of(alignedCheckpointTimeoutMs);
     }
 
+    /**
+     * Returns the optional checkpoint storage directory URI.
+     *
+     * @return an {@link Optional} containing the storage URI string, or empty if not specified
+     */
     public Optional<String> storageUri() {
         return Optional.ofNullable(storageUri);
     }

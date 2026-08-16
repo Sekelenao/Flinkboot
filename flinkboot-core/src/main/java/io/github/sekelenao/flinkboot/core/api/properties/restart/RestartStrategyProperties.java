@@ -10,6 +10,13 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Root configuration properties for Flink job failure restart strategies.
+ * <p>
+ * Supports {@link RestartStrategyType#NO_RESTART}, {@link RestartStrategyType#FIXED_DELAY},
+ * {@link RestartStrategyType#FAILURE_RATE}, {@link RestartStrategyType#EXPONENTIAL_DELAY},
+ * or {@link RestartStrategyType#FALLBACK}.
+ */
 public final class RestartStrategyProperties implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -25,6 +32,15 @@ public final class RestartStrategyProperties implements Serializable {
     @Valid
     private final ExponentialDelayRestartProperties exponentialDelay;
 
+    /**
+     * Creates a new {@code RestartStrategyProperties} instance.
+     *
+     * @param type             the restart strategy type (NO_RESTART, FIXED_DELAY, FAILURE_RATE, EXPONENTIAL_DELAY, FALLBACK)
+     * @param fixedDelay       parameters for fixed delay restart strategy
+     * @param failureRate      parameters for failure rate restart strategy
+     * @param exponentialDelay parameters for exponential delay restart strategy
+     * @throws InvalidRestartStrategyPropertiesException if parameters conflict with the selected type
+     */
     @JsonCreator
     public RestartStrategyProperties(
         @JsonProperty("type") RestartStrategyType type,
@@ -39,18 +55,38 @@ public final class RestartStrategyProperties implements Serializable {
         validate();
     }
 
+    /**
+     * Returns the optional restart strategy type.
+     *
+     * @return an {@link Optional} containing the {@link RestartStrategyType}, or empty if not specified
+     */
     public Optional<RestartStrategyType> type() {
         return Optional.ofNullable(type);
     }
 
+    /**
+     * Returns the fixed delay restart strategy properties.
+     *
+     * @return an {@link Optional} containing {@link FixedDelayRestartProperties}, or empty if not configured
+     */
     public Optional<FixedDelayRestartProperties> fixedDelay() {
         return Optional.ofNullable(fixedDelay);
     }
 
+    /**
+     * Returns the failure rate restart strategy properties.
+     *
+     * @return an {@link Optional} containing {@link FailureRateRestartProperties}, or empty if not configured
+     */
     public Optional<FailureRateRestartProperties> failureRate() {
         return Optional.ofNullable(failureRate);
     }
 
+    /**
+     * Returns the exponential delay restart strategy properties.
+     *
+     * @return an {@link Optional} containing {@link ExponentialDelayRestartProperties}, or empty if not configured
+     */
     public Optional<ExponentialDelayRestartProperties> exponentialDelay() {
         return Optional.ofNullable(exponentialDelay);
     }
