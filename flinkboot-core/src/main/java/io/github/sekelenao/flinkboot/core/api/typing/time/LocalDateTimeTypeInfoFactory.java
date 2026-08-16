@@ -8,6 +8,12 @@ import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+/**
+ * {@link TypeInfoFactory} for {@link LocalDateTime} fields in Flink POJOs.
+ * <p>
+ * Annotate {@link LocalDateTime} fields with {@code @TypeInfo(LocalDateTimeTypeInfoFactory.class)} to enable
+ * native Flink serialization without slow Kryo fallback.
+ */
 public class LocalDateTimeTypeInfoFactory extends TypeInfoFactory<LocalDateTime> {
 
     @Override

@@ -11,6 +11,9 @@ import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 
+/**
+ * Configuration properties for fixed delay restart strategy.
+ */
 public final class FixedDelayRestartProperties implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -21,6 +24,12 @@ public final class FixedDelayRestartProperties implements Serializable {
     @PositiveOrZero
     private final Long delayMs;
 
+    /**
+     * Creates a new {@code FixedDelayRestartProperties} instance.
+     *
+     * @param attempts maximum number of restart attempts
+     * @param delayMs  delay duration between restart attempts in milliseconds
+     */
     @JsonCreator
     public FixedDelayRestartProperties(
         @JsonProperty("attempts") Integer attempts,
@@ -30,6 +39,11 @@ public final class FixedDelayRestartProperties implements Serializable {
         this.delayMs = delayMs;
     }
 
+    /**
+     * Returns the maximum number of restart attempts.
+     *
+     * @return an {@link OptionalInt} containing the attempt count, or empty if not specified
+     */
     public OptionalInt attempts() {
         if (attempts == null) {
             return OptionalInt.empty();
@@ -37,6 +51,11 @@ public final class FixedDelayRestartProperties implements Serializable {
         return OptionalInt.of(attempts);
     }
 
+    /**
+     * Returns the delay duration between restart attempts in milliseconds.
+     *
+     * @return an {@link OptionalLong} containing the delay in milliseconds, or empty if not specified
+     */
     public OptionalLong delayMs() {
         if (delayMs == null) {
             return OptionalLong.empty();

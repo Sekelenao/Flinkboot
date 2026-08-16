@@ -10,6 +10,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+/**
+ * Configuration properties for Flink local MiniCluster Web UI dashboard.
+ */
 public final class LocalWebUiProperties implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -20,6 +23,13 @@ public final class LocalWebUiProperties implements Serializable {
     private final Integer port;
     private final String bindAddress;
 
+    /**
+     * Creates a new {@code LocalWebUiProperties} instance.
+     *
+     * @param enabled     whether the local Web UI dashboard is enabled
+     * @param port        the HTTP port to bind the Web UI to (e.g. 8081)
+     * @param bindAddress the host interface to bind to (e.g. {@code "localhost"} or {@code "0.0.0.0"})
+     */
     @JsonCreator
     public LocalWebUiProperties(
         @JsonProperty("enabled") Boolean enabled,
@@ -31,10 +41,20 @@ public final class LocalWebUiProperties implements Serializable {
         this.bindAddress = bindAddress;
     }
 
+    /**
+     * Returns whether the local Web UI is enabled.
+     *
+     * @return an {@link Optional} containing the enabled flag, or empty if not specified
+     */
     public Optional<Boolean> enabled() {
         return Optional.ofNullable(enabled);
     }
 
+    /**
+     * Returns the HTTP port for the local Web UI.
+     *
+     * @return an {@link OptionalInt} containing the port number, or empty if not specified
+     */
     public OptionalInt port() {
         if (port == null) {
             return OptionalInt.empty();
@@ -42,6 +62,11 @@ public final class LocalWebUiProperties implements Serializable {
         return OptionalInt.of(port);
     }
 
+    /**
+     * Returns the host interface / bind address for the local Web UI.
+     *
+     * @return an {@link Optional} containing the bind address string, or empty if not specified
+     */
     public Optional<String> bindAddress() {
         return Optional.ofNullable(bindAddress);
     }

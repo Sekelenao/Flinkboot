@@ -9,6 +9,13 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Generic {@link TypeInfoFactory} for {@link List} fields in Flink POJOs.
+ * <p>
+ * Extracts generic element type parameters to construct {@link Types#LIST} without falling back to Kryo.
+ *
+ * @param <E> element type
+ */
 public class ListTypeInfoFactory<E> extends TypeInfoFactory<List<E>> {
 
     @Override

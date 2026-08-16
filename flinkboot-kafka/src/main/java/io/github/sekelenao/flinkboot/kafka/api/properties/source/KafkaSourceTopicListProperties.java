@@ -18,6 +18,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalLong;
 
+/**
+ * Configuration properties for Kafka sources consuming from an explicit list of topics.
+ */
 public class KafkaSourceTopicListProperties implements OffsetInitializerProperties, Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -44,6 +47,19 @@ public class KafkaSourceTopicListProperties implements OffsetInitializerProperti
 
     private final Map<@NotNull String, @NotNull String> properties;
 
+    /**
+     * Creates a new {@code KafkaSourceTopicListProperties} instance.
+     *
+     * @param name                           source operator name in Flink DAG
+     * @param bootstrapServers               list of Kafka broker addresses
+     * @param groupId                        Kafka consumer group ID
+     * @param topics                         list of topics to consume from
+     * @param startingOffsets                starting offset strategy (EARLIEST, LATEST, COMMITTED, TIMESTAMP, OFFSETS)
+     * @param startingOffsetsTimestamp       timestamp in milliseconds (required if startingOffsets is TIMESTAMP)
+     * @param startingOffsetsPartitionOffsets list of partition offsets (required if startingOffsets is OFFSETS)
+     * @param properties                     additional Kafka consumer client properties
+     * @throws InvalidKafkaSourcePropertiesException if offset parameters conflict or are missing
+     */
     @JsonCreator
     public KafkaSourceTopicListProperties(
         @JsonProperty("name") String name,
@@ -91,26 +107,56 @@ public class KafkaSourceTopicListProperties implements OffsetInitializerProperti
         }
     }
 
+    /**
+     * Returns the Flink source operator name.
+     *
+     * @return the source name
+     */
     public String name() {
         return name;
     }
 
+    /**
+     * Returns the list of Kafka bootstrap servers.
+     *
+     * @return an unmodifiable list of bootstrap server addresses
+     */
     public List<String> bootstrapServers() {
         return Collections.unmodifiableList(bootstrapServers);
     }
 
+    /**
+     * Returns the Kafka consumer group ID.
+     *
+     * @return the group ID string
+     */
     public String groupId() {
         return groupId;
     }
 
+    /**
+     * Returns the list of topics to subscribe to.
+     *
+     * @return an unmodifiable list of topic names
+     */
     public List<String> topics() {
         return Collections.unmodifiableList(topics);
     }
 
+    /**
+     * Returns the starting offset strategy.
+     *
+     * @return the {@link KafkaOffsetInitializer}
+     */
     public KafkaOffsetInitializer startingOffsets() {
         return startingOffsets;
     }
 
+    /**
+     * Returns the optional starting offset timestamp in milliseconds.
+     *
+     * @return an {@link OptionalLong} containing the timestamp, or empty if not specified
+     */
     public OptionalLong startingOffsetsTimestamp() {
         if (startingOffsetsTimestamp == null) {
             return OptionalLong.empty();
@@ -118,6 +164,11 @@ public class KafkaSourceTopicListProperties implements OffsetInitializerProperti
         return OptionalLong.of(startingOffsetsTimestamp);
     }
 
+    /**
+     * Returns the list of specific partition starting offsets.
+     *
+     * @return an unmodifiable list of {@link TopicPartitionOffsetProperties}
+     */
     public List<TopicPartitionOffsetProperties> startingOffsetsPartitionOffsets() {
         if (startingOffsetsPartitionOffsets == null) {
             return Collections.emptyList();
@@ -125,6 +176,11 @@ public class KafkaSourceTopicListProperties implements OffsetInitializerProperti
         return Collections.unmodifiableList(startingOffsetsPartitionOffsets);
     }
 
+    /**
+     * Returns additional Kafka consumer client properties.
+     *
+     * @return an unmodifiable map of configuration properties
+     */
     public Map<String, String> properties() {
         if (properties == null) {
             return Collections.emptyMap();

@@ -12,6 +12,9 @@ import java.util.Objects;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
 
+/**
+ * Configuration properties for exponential delay restart strategy.
+ */
 public final class ExponentialDelayRestartProperties implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -32,6 +35,15 @@ public final class ExponentialDelayRestartProperties implements Serializable {
     @DecimalMax("1.0")
     private final Double jitterFactor;
 
+    /**
+     * Creates a new {@code ExponentialDelayRestartProperties} instance.
+     *
+     * @param initialBackoffMs        starting backoff delay in milliseconds
+     * @param maxBackoffMs            maximum backoff delay upper bound in milliseconds
+     * @param backoffMultiplier       multiplier for increasing backoff delay after each failure
+     * @param resetBackoffThresholdMs duration of stable execution before resetting backoff delay
+     * @param jitterFactor            jitter randomization factor (0.0 to 1.0)
+     */
     @JsonCreator
     public ExponentialDelayRestartProperties(
         @JsonProperty("initial-backoff-ms") Long initialBackoffMs,
@@ -47,6 +59,11 @@ public final class ExponentialDelayRestartProperties implements Serializable {
         this.jitterFactor = jitterFactor;
     }
 
+    /**
+     * Returns the initial backoff delay in milliseconds.
+     *
+     * @return an {@link OptionalLong} containing initial backoff, or empty if not specified
+     */
     public OptionalLong initialBackoffMs() {
         if (initialBackoffMs == null) {
             return OptionalLong.empty();
@@ -54,6 +71,11 @@ public final class ExponentialDelayRestartProperties implements Serializable {
         return OptionalLong.of(initialBackoffMs);
     }
 
+    /**
+     * Returns the maximum backoff delay cap in milliseconds.
+     *
+     * @return an {@link OptionalLong} containing max backoff, or empty if not specified
+     */
     public OptionalLong maxBackoffMs() {
         if (maxBackoffMs == null) {
             return OptionalLong.empty();
@@ -61,6 +83,11 @@ public final class ExponentialDelayRestartProperties implements Serializable {
         return OptionalLong.of(maxBackoffMs);
     }
 
+    /**
+     * Returns the exponential backoff multiplier factor.
+     *
+     * @return an {@link OptionalDouble} containing backoff multiplier, or empty if not specified
+     */
     public OptionalDouble backoffMultiplier() {
         if (backoffMultiplier == null) {
             return OptionalDouble.empty();
@@ -68,6 +95,11 @@ public final class ExponentialDelayRestartProperties implements Serializable {
         return OptionalDouble.of(backoffMultiplier);
     }
 
+    /**
+     * Returns the threshold in milliseconds after which the backoff delay resets.
+     *
+     * @return an {@link OptionalLong} containing reset threshold, or empty if not specified
+     */
     public OptionalLong resetBackoffThresholdMs() {
         if (resetBackoffThresholdMs == null) {
             return OptionalLong.empty();
@@ -75,6 +107,11 @@ public final class ExponentialDelayRestartProperties implements Serializable {
         return OptionalLong.of(resetBackoffThresholdMs);
     }
 
+    /**
+     * Returns the jitter randomization factor applied to delay intervals.
+     *
+     * @return an {@link OptionalDouble} containing jitter factor, or empty if not specified
+     */
     public OptionalDouble jitterFactor() {
         if (jitterFactor == null) {
             return OptionalDouble.empty();
