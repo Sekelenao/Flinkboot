@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.ConfigurationValidationException;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.YamlParsingException;
 import jakarta.validation.Validation;
@@ -35,6 +36,7 @@ public final class YamlParser implements AutoCloseable {
         var builder = YAMLMapper.builder()
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true)
+            .addModule(new JavaTimeModule())
             .findAndAddModules();
         additionalConfiguration.accept(builder);
         this.mapper = builder.build();

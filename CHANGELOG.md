@@ -35,6 +35,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **JPMS Modular Reflection (`module-info.java`)**:
   - Opened all public API, properties, resource, and typing packages unconditionally across `flinkboot-core`, `flinkboot-kafka`, and `flinkboot-test` to support seamless runtime reflection, mocking, and serialization (Mockito, ByteBuddy, Spring, custom Jackson modules) in modular environments, while maintaining strict encapsulation of internal packages.
 
+### Fixed
+
+#### `flinkboot-core`
+- **Native Java 8 Date/Time Deserialization in YAML Configuration (`JavaTimeModule`)**:
+  - Bundled `jackson-datatype-jsr310` and explicitly registered `JavaTimeModule` in `YamlParser` to guarantee out-of-the-box support for `java.time.Duration`, `java.time.Instant`, `java.time.LocalDate`, etc., even when Jackson classes are relocated/shaded in fat JARs where SPI ServiceLoader auto-discovery fails.
+
 ---
 
 ## [0.1.0-1.20]
