@@ -18,4 +18,5 @@ This section contains step-by-step guides to help you implement specific feature
 - [How to Load Configurations in Tests](load-configurations-in-tests.md) — Easily load, merge, and validate YAML configurations within JUnit 5 tests.
 - [How to Load Resources](load-resources.md) — Load files and assets seamlessly across classpath and file systems with a unified URI syntax.
 - [Avoid Classpath & Dependency Conflicts](avoid-dependency-conflicts.md) — Best practices for shading and aligning dependencies in production.
+- [Flinkboot BOM & Managed Dependencies](bom-managed-dependencies.md) — Complete breakdown of all dependencies, versions, and scopes managed by the BOM.
 - [Reserved Keys & Configuration Properties](reserved-keys.md) — View the configuration keys and environment variables reserved by Flinkboot.

@@ -14,6 +14,9 @@ Any dependency that is already provided in the Flink cluster's `lib/` directory 
 
 By importing `flinkboot` in your `<dependencyManagement>` section (BOM pattern), you get managed versions **and** automatic `provided` scopes for all Flink dependencies. You don't need to specify `<version>` or `<scope>` manually for Flink components!
 
+> [!NOTE]
+> For the complete table of all managed dependencies, versions, and pre-configured scopes, see [Flinkboot BOM & Managed Dependencies](bom-managed-dependencies.md).
+
 ```xml
 <dependencyManagement>
     <dependencies>
