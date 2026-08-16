@@ -7,8 +7,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.ConfigurationValidationException;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.YamlParsingException;
+import io.github.sekelenao.flinkboot.core.api.properties.JobProperties;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -18,7 +21,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -567,18 +574,72 @@ class YamlParserTest {
         }
     }
 
-    static final class TestConfigWithJob {
-        @JsonProperty("job")
-        @jakarta.validation.Valid
-        @jakarta.validation.constraints.NotNull
-        private final io.github.sekelenao.flinkboot.core.api.properties.JobProperties job;
+    @Nested
+    @DisplayName("Java Date and Time Types")
+    class JavaDateTimeTests {
+
+        @Test
+        @DisplayName("Should successfully parse Duration, Instant and LocalDate from YAML")
+        void shouldSuccessfullyParseJavaTimeTypesFromYaml() {
+            var yaml = "duration: \"PT0.5S\"\n" +
+                "instant: \"2026-08-16T18:00:00Z\"\n" +
+                "date: \"2026-08-16\"\n";
+
+            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+                parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+                var config = parser.convertTo(TestConfigWithTime.class);
+
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertEquals(Duration.ofMillis(500), config.duration()),
+                    () -> assertEquals(Instant.parse("2026-08-16T18:00:00Z"), config.instant()),
+                    () -> assertEquals(LocalDate.of(2026, 8, 16), config.date())
+                );
+            }
+        }
+    }
+
+    static final class TestConfigWithTime {
+        private final Duration duration;
+        private final Instant instant;
+        private final LocalDate date;
 
         @JsonCreator
-        public TestConfigWithJob(@JsonProperty("job") io.github.sekelenao.flinkboot.core.api.properties.JobProperties job) {
+        public TestConfigWithTime(
+            @JsonProperty("duration") Duration duration,
+            @JsonProperty("instant") Instant instant,
+            @JsonProperty("date") LocalDate date
+        ) {
+            this.duration = Objects.requireNonNull(duration);
+            this.instant = Objects.requireNonNull(instant);
+            this.date = Objects.requireNonNull(date);
+        }
+
+        public Duration duration() {
+            return duration;
+        }
+
+        public Instant instant() {
+            return instant;
+        }
+
+        public LocalDate date() {
+            return date;
+        }
+    }
+
+    static final class TestConfigWithJob {
+        @JsonProperty("job")
+        @Valid
+        @NotNull
+        private final JobProperties job;
+
+        @JsonCreator
+        public TestConfigWithJob(@JsonProperty("job") JobProperties job) {
             this.job = job;
         }
 
-        public io.github.sekelenao.flinkboot.core.api.properties.JobProperties job() {
+        public JobProperties job() {
             return job;
         }
     }

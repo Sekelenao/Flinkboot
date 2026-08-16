@@ -8,5 +8,6 @@ target/
 # Project agent configurations
 .agents/**
 
-# Local todo tracking
+# Local todo/networking tracking
+.networking/**
 todo/
