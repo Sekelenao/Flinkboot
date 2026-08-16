@@ -2,6 +2,9 @@
 
 This section contains step-by-step guides to help you implement specific features and configurations in Flinkboot.
 
+> [!TIP]
+> **Looking for a ready-to-run template?** Explore the [Flinkboot Quickstart repository](https://github.com/Sekelenao/Flinkboot-Quickstart) for a complete end-to-end streaming application showcasing multi-source configuration, Kafka connectors, and native POJO serialization.
+
 ## Index
 
 - [How to Load a Flag](load-a-flag.md) — Learn how to define, read, and override boolean flags via CLI and environment variables.

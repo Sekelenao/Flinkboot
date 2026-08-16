@@ -206,7 +206,8 @@ topics:
 
 ## 5. Validation & Parsing Behaviors
 
-- **Fail-Fast Validation:** After loading and merging files, Flinkboot validates the root object against Jakarta Bean Validation annotations. If validation fails, a `PropertiesValidationException` is thrown detailing the errors.
+- **Fail-Fast Validation:** After loading and merging files, Flinkboot validates the root object against Jakarta Bean Validation annotations. If validation fails, a `ConfigurationValidationException` is thrown detailing the errors.
 - **Strict Property Parsing:** Any property in your YAML file that does not match a field in your Java class will cause a `YamlParsingException`. This catches typos immediately.
 - **Case-Insensitive Keys & Enums:** Property names and Enum values are matched case-insensitively.
-- **Jackson Module Auto-Discovery:** Jackson modules on the classpath (e.g. Java 8 date/time) are automatically registered.
+- **Native Java 8 Date/Time Support:** Java 8+ temporal types (`java.time.Duration`, `java.time.Instant`, `java.time.LocalDate`, etc.) are natively supported out-of-the-box in YAML models without extra configuration.
+- **Jackson Module Auto-Discovery:** Additional Jackson modules on the classpath are automatically discovered and registered via `findAndAddModules()`.

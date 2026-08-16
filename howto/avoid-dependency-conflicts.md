@@ -106,6 +106,9 @@ Add the following configuration to your application's `pom.xml` build section:
 </build>
 ```
 
+> [!TIP]
+> For a complete, production-tested `pom.xml` build configuration including shade relocations, filters, and Main-Class entry, refer to the [Flinkboot Quickstart repository](https://github.com/Sekelenao/Flinkboot-Quickstart).
+
 ---
 
 ## Best Practice 3: Handle Logging Correctly (Log4j)

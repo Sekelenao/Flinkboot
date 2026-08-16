@@ -24,6 +24,16 @@ In standard Flink deployments, misconfigurations, missing parameters, state back
 
 ---
 
+## Quickstart ⚡
+
+Looking for an end-to-end, runnable example project? Check out the **[Flinkboot Quickstart](https://github.com/Sekelenao/Flinkboot-Quickstart)** repository:
+* **Complete Real-Time Pipeline**: Edge heartbeat and latency monitoring with Apache Kafka source & sink.
+* **Fail-Fast Configuration**: Java 17 Record configuration model with Jakarta Bean Validation and YAML merging.
+* **Native POJO Serialization**: 100% native Flink serialization (zero Kryo fallback) with `java.time.LocalDateTime` and `Duration`.
+* **Production Packaging**: Fully pre-configured Maven shade plugin setup ready to build and submit to Apache Flink 1.20+.
+
+---
+
 ## Getting Started
 
 Follow these 3 essential steps to get started with Flinkboot:
@@ -54,6 +64,7 @@ Follow these 3 essential steps to get started with Flinkboot:
 
 ## Documentation & References
 
+* **[Flinkboot Quickstart Repository](https://github.com/Sekelenao/Flinkboot-Quickstart)** — Complete, runnable example project with Kafka and Docker Compose.
 * **[How-To Guides Index](howto/README.md)** — Step-by-step guides for configurations, connectors, POJO compliance, and testing.
 * **[Compatibility Matrix](COMPATIBILITY.md)** — Supported Apache Flink versions and Java (JDK) runtimes.
 * **[Changelog](CHANGELOG.md)** — Release notes and user-facing change history.
