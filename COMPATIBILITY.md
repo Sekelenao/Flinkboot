@@ -6,10 +6,10 @@ This document outlines the compatibility between Flinkboot, Apache Flink version
 
 ## Version Matrix
 
-| Flinkboot Version | Apache Flink Version | Target Java Baseline | Supported Java Runtimes | Status |
-| :--- | :--- | :--- | :--- | :--- |
-| `0.2.x-1.20` | `1.20.x` | Java 11 | Java 11, Java 17, Java 21 | Active / Current |
-| `0.1.x-1.20` | `1.20.x` | Java 11 | Java 11, Java 17, Java 21 | Maintained |
+| Flinkboot Version | Apache Flink Version | Java Runtime | Status           |
+|:------------------|:---------------------|:-------------|:-----------------|
+| `0.2.x-1.20`      | `1.20.x`             | Java 11+     | Active / Current |
+| `0.1.x-1.20`      | `1.20.x`             | Java 11+     | Maintained       |
 
 ---
 
