@@ -11,10 +11,6 @@ By importing the Flinkboot BOM into your root `pom.xml`, you no longer need to m
 Add the Flinkboot BOM to your project's `<dependencyManagement>` section:
 
 ```xml
-<properties>
-    <flinkboot.version>0.2.0-1.20</flinkboot.version>
-</properties>
-
 <dependencyManagement>
     <dependencies>
         <!-- Flinkboot Bill of Materials (BOM) -->
