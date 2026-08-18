@@ -44,10 +44,10 @@ Import the Flinkboot BOM in your `<dependencyManagement>` and add the core Flink
 By default, when you initialize Flinkboot, it looks for a configuration file located at:
 
 ```text
-file:job-configuration.yaml
+classpath:job-configuration.yaml
 ```
 
-*(i.e., a file named `job-configuration.yaml` in your application's current working directory).*
+*(i.e., a file named `job-configuration.yaml` in your application's JAR classpath / `src/main/resources/`).*
 
 ### Specifying Custom or Multiple Files
 You can override the default location or supply multiple comma-separated configuration files using the `-flinkboot-configurations` command-line argument or the `FLINKBOOT_CONFIGURATIONS` environment variable:
@@ -134,7 +134,7 @@ public class MyFlinkJob {
         // Initialize Flinkboot with CLI args
         Flinkboot boot = Flinkboot.initialize(args);
 
-        // Load configuration (defaults to file:job-configuration.yaml)
+        // Load configuration (defaults to classpath:job-configuration.yaml)
         MyJobConfig config = boot.configuration(MyJobConfig.class);
 
         System.out.println("Loaded Job: " + config.jobName());

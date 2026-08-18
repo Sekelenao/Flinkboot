@@ -5,6 +5,15 @@ All notable user-facing changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0-1.20]
+
+### Changed
+
+#### `flinkboot-core`
+- **Default Configuration Location to Classpath (`classpath:job-configuration.yaml`)**:
+  - Changed default configuration lookup location from `file:job-configuration.yaml` (local filesystem) to `classpath:job-configuration.yaml` (JAR classpath resources).
+  - Enables self-contained Fat JARs / Shaded JARs to run out of the box on Flink clusters without requiring local filesystem mounts or explicit `-flinkboot-configurations` arguments.
+
 ---
 
 ## [0.2.0-1.20]
