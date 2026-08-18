@@ -243,7 +243,7 @@ public class MyFlinkJob {
         // 1. Initialize Flinkboot with CLI arguments
         Flinkboot boot = Flinkboot.initialize(args);
 
-        // 2. Load the typed JobProperties (defaults to file:job-configuration.yaml)
+        // 2. Load the typed JobProperties (defaults to classpath:job-configuration.yaml)
         JobProperties jobProps = boot.configuration(JobProperties.class);
 
         // 3. Obtain the pre-configured StreamExecutionEnvironment

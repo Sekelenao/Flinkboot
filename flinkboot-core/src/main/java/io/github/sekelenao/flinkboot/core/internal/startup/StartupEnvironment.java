@@ -44,7 +44,7 @@ public final class StartupEnvironment {
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toUnmodifiableList()))
-            .orElse(Collections.singletonList("file:job-configuration.yaml"));
+            .orElse(Collections.singletonList("classpath:job-configuration.yaml"));
     }
 
     public MergeFeatures configurationMergeFeatures(){

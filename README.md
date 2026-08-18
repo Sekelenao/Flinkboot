@@ -42,7 +42,7 @@ Follow these 3 essential steps to get started with Flinkboot:
    *Configure your project's Maven POM, BOM dependencies, and shading relocations to prevent Jackson/Log4j runtime conflicts on your Flink cluster.*
 
 2. **[Configure Your Jobs (Load & Merge Configurations)](howto/load-configurations.md)**  
-   *Define your YAML configurations (defaults to `file:job-configuration.yaml`), load them into strongly-typed Java models, and apply CLI/environment overrides.*
+   *Define your YAML configurations (defaults to `classpath:job-configuration.yaml`), load them into strongly-typed Java models, and apply CLI/environment overrides.*
 
 3. **[Create an Execution Environment](howto/configure-execution-environment.md)**  
    *Configure execution modes, checkpointing, restart strategies, and RocksDB state backends to instantiate Flink's `StreamExecutionEnvironment` with zero boilerplate.*

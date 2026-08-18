@@ -106,7 +106,7 @@ public final class Flinkboot {
     /**
      * Loads, merges, and validates YAML configuration files into an instance of the target class.
      * <p>
-     * Configuration file locations default to {@code "file:job-configuration.yaml"} and can be overridden
+     * Configuration file locations default to {@code "classpath:job-configuration.yaml"} and can be overridden
      * via the {@code -flinkboot-configurations} CLI argument or {@code FLINKBOOT_CONFIGURATIONS} environment variable.
      *
      * @param configurationClass the target class or record to deserialize into (must not be {@code null})
