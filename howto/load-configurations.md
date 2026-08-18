@@ -62,7 +62,7 @@ flink run MyJob.jar
 ```
 
 *Supported location URI schemes:*
-- `file:<path>` — Path on the local filesystem (e.g., `file:job-configuration.yaml` or `file:/etc/flink/job.yaml`).
+- `file:<path>` — Path on the local filesystem (e.g., `file:/etc/flink/job-configuration.yaml` or `file:/tmp/override.yaml`).
 - `classpath:<path>` — Resource file inside the JAR classpath (e.g., `classpath:job-configuration.yaml`).
 - `resource:<path>` — Alias for classpath resources.
 
