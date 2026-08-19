@@ -10,12 +10,12 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>flinkboot-kafka</artifactId>
+    <artifactId>flinkboot-fluss</artifactId>
     <packaging>jar</packaging>
 
-    <name>Flinkboot Kafka</name>
+    <name>Flinkboot Fluss</name>
     <description>
-        Kafka integration and configuration for Flinkboot
+        Apache Fluss streaming storage integration and configuration for Flinkboot
     </description>
 
     <dependencies>
@@ -43,24 +43,23 @@
             <artifactId>flink-streaming-java</artifactId>
         </dependency>
 
-        <!-- Flink Kafka Connector -->
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-kafka</artifactId>
+            <artifactId>flink-table-common</artifactId>
+        </dependency>
+
+        <!-- Fluss dependencies -->
+        <dependency>
+            <groupId>org.apache.fluss</groupId>
+            <artifactId>fluss-flink-1.20</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-connector-base</artifactId>
+            <groupId>org.apache.fluss</groupId>
+            <artifactId>fluss-client</artifactId>
         </dependency>
 
-        <!-- Kafka Clients -->
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
-        </dependency>
-
-        <!--   Test   -->
+        <!-- Test -->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
@@ -84,7 +83,23 @@
                     <compilerArgs>
                         <arg>-Xlint:-module</arg>
                         <arg>--add-reads</arg>
-                        <arg>io.github.sekelenao.flinkboot.kafka=ALL-UNNAMED</arg>
+                        <arg>io.github.sekelenao.flinkboot.fluss=ALL-UNNAMED</arg>
+                        <!--
+                            Fluss JARs (fluss-flink-1.20, fluss-client) are fat-JARs that embed
+                            commons-lang3's module-info.class. Java resolves them as the named module
+                            'org.apache.commons.lang3', which does not export the Fluss packages.
+                            These exports make each used Fluss package accessible to our module.
+                        -->
+                        <arg>--add-exports</arg>
+                        <arg>org.apache.commons.lang3/org.apache.fluss.config=io.github.sekelenao.flinkboot.fluss</arg>
+                        <arg>--add-exports</arg>
+                        <arg>org.apache.commons.lang3/org.apache.fluss.flink.sink=io.github.sekelenao.flinkboot.fluss</arg>
+                        <arg>--add-exports</arg>
+                        <arg>org.apache.commons.lang3/org.apache.fluss.flink.sink.serializer=io.github.sekelenao.flinkboot.fluss</arg>
+                        <arg>--add-exports</arg>
+                        <arg>org.apache.commons.lang3/org.apache.fluss.flink.source=io.github.sekelenao.flinkboot.fluss</arg>
+                        <arg>--add-exports</arg>
+                        <arg>org.apache.commons.lang3/org.apache.fluss.flink.source.deserializer=io.github.sekelenao.flinkboot.fluss</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
@@ -94,7 +109,7 @@
                 <configuration>
                     <argLine>
                         @{argLine}
-                        --add-reads io.github.sekelenao.flinkboot.kafka=com.fasterxml.jackson.dataformat.yaml
+                        --add-reads io.github.sekelenao.flinkboot.fluss=com.fasterxml.jackson.dataformat.yaml
                     </argLine>
                 </configuration>
             </plugin>

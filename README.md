@@ -20,7 +20,7 @@ In standard Flink deployments, misconfigurations, missing parameters, state back
 * **Fail-Fast Startup & Multi-Source Configuration**: Unifies hierarchical YAML configurations, CLI arguments, and environment variables into immutable, validated Java records using Jakarta Bean Validation (JSR-380). Every parameter, numeric boundary, and regex is verified on the JobManager before resources are provisioned.
 * **High-Performance Native Serialization**: Built-in `@TypeInfo` factories and optimized serializers for Java 8 date/time types, collections (`List<E>`, `Map<K, V>`), and `Duration` (encoded in a compact 12-byte binary format) ensure pure native Flink serialization without slow Kryo fallback.
 * **Deep POJO Compliance Verification**: Unit testing utilities (`FlinkbootTest.assertPojo`) recursively inspect entire data model hierarchies—including nested objects, generics, collections, arrays, tuples, and `Either` types—guaranteeing 100% native Flink serialization compliance at build time.
-* **Declarative Execution & Pre-Built Connectors**: Bootstrap Flink's `StreamExecutionEnvironment` (checkpointing, RocksDB state backends, restart strategies, savepoints, Web UI) and production-ready connectors (e.g. Apache Kafka sources/sinks) with a single method call.
+* **Declarative Execution & Pre-Built Connectors**: Bootstrap Flink's `StreamExecutionEnvironment` (checkpointing, RocksDB state backends, restart strategies, savepoints, Web UI) and production-ready connectors (e.g. Apache Kafka, Apache Fluss sources/sinks) with a single method call.
 
 ---
 
@@ -58,7 +58,7 @@ Follow these 3 essential steps to get started with Flinkboot:
 * **Deep POJO Compliance Verification** — Test utility (`assertPojo`) to recursively verify that data models serialize natively without Kryo.
 * **Testing Helpers** — Load and validate configurations directly in JUnit 5 tests.
 * **Unified Resource Loading** — Load files and assets seamlessly across classpath and file systems with a unified URI syntax (`Resource.of`).
-* **Auto-configured Connectors** — Production-ready sources and sinks (e.g. Apache Kafka) built directly from configuration.
+* **Auto-configured Connectors** — Production-ready sources and sinks (e.g. Apache Kafka, Apache Fluss) built directly from configuration.
 
 ---
 

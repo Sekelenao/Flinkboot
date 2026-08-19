@@ -5,6 +5,20 @@ All notable user-facing changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0-1.20]
+
+### Added
+
+#### `flinkboot-fluss`
+- **New `flinkboot-fluss` Module for Apache Fluss**:
+  - Full support for Apache Fluss (sub-second streaming lakehouse) Source and Sink connectors on Apache Flink 1.20.
+  - **`FlussStartupMode`**: Declarative offset strategy supporting `EARLIEST`, `LATEST`, `FULL` (snapshot + continuous log), and `TIMESTAMP`.
+  - **`FlussSourceProperties` & `FlussSinkProperties`**: Immutable, fail-fast configuration models with Jakarta Bean Validation (`@NotBlank`, `@NotEmpty`, `@PositiveOrZero`).
+  - **`FlussSourceFactory` & `FlussSinkFactory`**: One-line factory utilities to build pre-configured Flink `FlussSource` and `FlussSink` instances.
+  - Dedicated runtime exceptions: `InvalidFlussSourcePropertiesException` and `InvalidFlussSinkPropertiesException`.
+
+---
+
 ## [0.3.0-1.20]
 
 ### Changed
