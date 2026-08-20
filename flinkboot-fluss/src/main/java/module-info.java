@@ -3,7 +3,6 @@ module io.github.sekelenao.flinkboot.fluss {
     requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.databind;
     requires jakarta.validation;
-    requires org.apache.commons.lang3;
 
     exports io.github.sekelenao.flinkboot.fluss.api.properties.source;
     exports io.github.sekelenao.flinkboot.fluss.api.properties.sink;
