@@ -76,8 +76,12 @@ public class FlussSourceProperties implements Serializable {
     }
 
     private void validate() {
-        if (startupMode == FlussStartupMode.TIMESTAMP && startupTimestamp == null) {
-            throw new InvalidFlussSourcePropertiesException("startupTimestamp must not be null when startupMode is TIMESTAMP");
+        if (startupMode == FlussStartupMode.TIMESTAMP) {
+            if (startupTimestamp == null) {
+                throw new InvalidFlussSourcePropertiesException("startup-timestamp is required when startup-mode is TIMESTAMP");
+            }
+        } else if (startupTimestamp != null) {
+            throw new InvalidFlussSourcePropertiesException("startup-timestamp must not be specified when startup-mode is " + startupMode);
         }
     }
 
@@ -132,7 +136,10 @@ public class FlussSourceProperties implements Serializable {
      * @return an {@link OptionalLong} containing the timestamp, or empty if not set
      */
     public OptionalLong startupTimestamp() {
-        return startupTimestamp == null ? OptionalLong.empty() : OptionalLong.of(startupTimestamp);
+        if (startupTimestamp == null) {
+            return OptionalLong.empty();
+        }
+        return OptionalLong.of(startupTimestamp);
     }
 
     /**
@@ -141,21 +148,26 @@ public class FlussSourceProperties implements Serializable {
      * @return an unmodifiable map of properties
      */
     public Map<String, String> properties() {
-        return properties == null ? Collections.emptyMap() : Collections.unmodifiableMap(properties);
+        if (properties == null) {
+            return Collections.emptyMap();
+        }
+        return Collections.unmodifiableMap(properties);
     }
 
     @Override
     @Generated
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        var that = (FlussSourceProperties) o;
-        return Objects.equals(name, that.name)
-            && Objects.equals(bootstrapServers, that.bootstrapServers)
-            && Objects.equals(database, that.database)
-            && Objects.equals(table, that.table)
-            && startupMode == that.startupMode
-            && Objects.equals(startupTimestamp, that.startupTimestamp)
-            && Objects.equals(properties, that.properties);
+    public boolean equals(Object other) {
+        if (!(other instanceof FlussSourceProperties)) {
+            return false;
+        }
+        var o = (FlussSourceProperties) other;
+        return Objects.equals(name, o.name)
+            && Objects.equals(bootstrapServers, o.bootstrapServers)
+            && Objects.equals(database, o.database)
+            && Objects.equals(table, o.table)
+            && startupMode == o.startupMode
+            && Objects.equals(startupTimestamp, o.startupTimestamp)
+            && Objects.equals(properties, o.properties);
     }
 
     @Override

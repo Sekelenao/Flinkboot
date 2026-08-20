@@ -194,7 +194,24 @@ class FlussSourcePropertiesTest {
                     Map.of()
                 )
             );
-            assertEquals("startupTimestamp must not be null when startupMode is TIMESTAMP", exception.getMessage());
+            assertEquals("startup-timestamp is required when startup-mode is TIMESTAMP", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should throw InvalidFlussSourcePropertiesException when timestamp is specified with non-TIMESTAMP mode")
+        void shouldThrowWhenTimestampSpecifiedWithNonTimestampMode() {
+            var exception = assertThrows(InvalidFlussSourcePropertiesException.class, () ->
+                new FlussSourceProperties(
+                    "my-source",
+                    List.of("localhost:9123"),
+                    "my_db",
+                    "my_table",
+                    FlussStartupMode.EARLIEST,
+                    1700000000000L,
+                    Map.of()
+                )
+            );
+            assertEquals("startup-timestamp must not be specified when startup-mode is EARLIEST", exception.getMessage());
         }
     }
 

@@ -114,7 +114,10 @@ public class FlussSinkProperties implements Serializable {
      * @return an {@link OptionalLong} containing the batch size in bytes, or empty if not set
      */
     public OptionalLong batchSize() {
-        return batchSize == null ? OptionalLong.empty() : OptionalLong.of(batchSize);
+        if (batchSize == null) {
+            return OptionalLong.empty();
+        }
+        return OptionalLong.of(batchSize);
     }
 
     /**
@@ -123,7 +126,10 @@ public class FlussSinkProperties implements Serializable {
      * @return an {@link OptionalLong} containing the batch timeout in milliseconds, or empty if not set
      */
     public OptionalLong batchTimeoutMs() {
-        return batchTimeoutMs == null ? OptionalLong.empty() : OptionalLong.of(batchTimeoutMs);
+        if (batchTimeoutMs == null) {
+            return OptionalLong.empty();
+        }
+        return OptionalLong.of(batchTimeoutMs);
     }
 
     /**
@@ -132,21 +138,26 @@ public class FlussSinkProperties implements Serializable {
      * @return an unmodifiable map of properties
      */
     public Map<String, String> properties() {
-        return properties == null ? Collections.emptyMap() : Collections.unmodifiableMap(properties);
+        if (properties == null) {
+            return Collections.emptyMap();
+        }
+        return Collections.unmodifiableMap(properties);
     }
 
     @Override
     @Generated
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        var that = (FlussSinkProperties) o;
-        return Objects.equals(name, that.name)
-            && Objects.equals(bootstrapServers, that.bootstrapServers)
-            && Objects.equals(database, that.database)
-            && Objects.equals(table, that.table)
-            && Objects.equals(batchSize, that.batchSize)
-            && Objects.equals(batchTimeoutMs, that.batchTimeoutMs)
-            && Objects.equals(properties, that.properties);
+    public boolean equals(Object other) {
+        if (!(other instanceof FlussSinkProperties)) {
+            return false;
+        }
+        var o = (FlussSinkProperties) other;
+        return Objects.equals(name, o.name)
+            && Objects.equals(bootstrapServers, o.bootstrapServers)
+            && Objects.equals(database, o.database)
+            && Objects.equals(table, o.table)
+            && Objects.equals(batchSize, o.batchSize)
+            && Objects.equals(batchTimeoutMs, o.batchTimeoutMs)
+            && Objects.equals(properties, o.properties);
     }
 
     @Override
