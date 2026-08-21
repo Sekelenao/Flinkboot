@@ -14,10 +14,10 @@ We are committed to providing a friendly and respectful environment for everyone
 
 ## Contribution Workflow
 
-1. **Features (Large or Small)**:
-   - An Issue is required before opening a PR. Please open an Issue first to discuss and validate the feature design with the maintainer.
-2. **Bug Fixes, Typos & Documentation**:
-   - You can open a Pull Request directly.
+**Every Pull Request must be linked to an existing Issue.**
+
+1. **Open an Issue First**: Open an Issue (Bug Report, Feature Request, or Documentation) to discuss the proposal with the maintainer.
+2. **Submit your PR**: Once the issue is opened and aligned, create a Pull Request linking to the issue (`Closes #<issue_number>`).
 
 ---
 
@@ -27,6 +27,14 @@ We are committed to providing a friendly and respectful environment for everyone
 - **No Lombok**: Lombok is strictly forbidden to ensure clean JPMS modularity and inspectable bytecode.
 
 > **Detailed Guidelines**: Refer to [.agents/skills/](.agents/skills/) for detailed rules on properties DTOs, package architecture, and testing patterns.
+
+---
+
+## Generative AI Usage
+
+The use of Generative AI tools (ChatGPT, Claude, Gemini, GitHub Copilot, Cursor, Antigravity, etc.) is welcome.
+- **Compliance Check Recommended**: Using an AI assistant to verify code and test compliance against the guidelines in [.agents/skills/](.agents/skills/) before submitting is strongly recommended.
+- **Transparency & Responsibility**: Contributors must disclose AI usage in the Pull Request template and remain fully responsible for reviewing and verifying all submitted code.
 
 ---
 

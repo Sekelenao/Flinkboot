@@ -3,12 +3,17 @@
   Example: #42: feat(fluss): add fluss sink factory
 -->
 
+## Related Issue
+<!-- Link the issue resolved by this PR. (Mandatory) -->
+Closes #
+
 ## Description
 <!-- Briefly describe what changes are introduced in this PR. -->
 
-## Related Issue
-<!-- Link the issue resolved by this PR. Mandatory for new features. -->
-Closes #
+## Generative AI Disclosure
+<!-- Please disclose if Generative AI tools were used to write or assist with this code. -->
+- [ ] No Generative AI was used.
+- [ ] Generative AI was used (please specify tool and confirm compliance with .agents/skills/).
 
 ## Checklist
 - [ ] My PR title follows the `#<issue_number>: <title>` format.

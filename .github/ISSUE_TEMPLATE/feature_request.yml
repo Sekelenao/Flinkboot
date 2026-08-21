@@ -44,3 +44,10 @@ body:
     attributes:
       label: Alternatives Considered
       placeholder: Any alternative solutions or workarounds you have considered?
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Willingness to contribute
+      options:
+        - label: I would like to submit a Pull Request to implement this feature.

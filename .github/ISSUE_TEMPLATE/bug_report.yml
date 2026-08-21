@@ -24,15 +24,11 @@ body:
     validations:
       required: true
 
-  - type: dropdown
+  - type: input
     id: java-version
     attributes:
       label: Java / JDK Version
-      options:
-        - "Java 11"
-        - "Java 17"
-        - "Java 21"
-        - "Other"
+      placeholder: "e.g. 17.0.10, Temurin 21, Corretto 11"
     validations:
       required: true
 
@@ -64,3 +60,10 @@ body:
       label: Relevant Log Output or Stacktrace
       description: Please copy and paste any relevant logs or exception stacktraces.
       render: shell
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Willingness to contribute
+      options:
+        - label: I would like to submit a Pull Request to fix this issue.
