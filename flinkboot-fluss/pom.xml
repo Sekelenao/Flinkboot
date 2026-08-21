@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.github.sekelenao</groupId>
+        <artifactId>flinkboot</artifactId>
+        <version>0.4.0-1.20</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>flinkboot-fluss</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Flinkboot Fluss</name>
+    <description>
+        Apache Fluss streaming storage integration and configuration for Flinkboot
+    </description>
+
+    <dependencies>
+
+        <!-- Flinkboot Core -->
+        <dependency>
+            <groupId>io.github.sekelenao</groupId>
+            <artifactId>flinkboot-core</artifactId>
+        </dependency>
+
+        <!-- Jakarta Validation (Hibernate Validator) -->
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.expressly</groupId>
+            <artifactId>expressly</artifactId>
+        </dependency>
+
+        <!-- Flink dependencies -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-streaming-java</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-common</artifactId>
+        </dependency>
+
+        <!-- Fluss dependencies -->
+        <dependency>
+            <groupId>org.apache.fluss</groupId>
+            <artifactId>fluss-flink-1.20</artifactId>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-runtime</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-Xlint:-module</arg>
+                        <arg>--add-reads</arg>
+                        <arg>io.github.sekelenao.flinkboot.fluss=ALL-UNNAMED</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>
+                        @{argLine}
+                        --add-reads io.github.sekelenao.flinkboot.fluss=com.fasterxml.jackson.dataformat.yaml
+                    </argLine>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

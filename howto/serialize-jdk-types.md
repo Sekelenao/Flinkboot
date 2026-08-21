@@ -8,14 +8,14 @@ Flinkboot provides built-in, optimized `TypeInfoFactory` classes to enable nativ
 
 ## 1. Available Factories
 
-| Field Type | Flinkboot Factory Class | Serializer / Underlying Type |
-| :--- | :--- | :--- |
-| `java.time.LocalDateTime` | `LocalDateTimeTypeInfoFactory` | `Types.LOCAL_DATE_TIME` |
-| `java.time.LocalDate` | `LocalDateTypeInfoFactory` | `Types.LOCAL_DATE` |
-| `java.time.LocalTime` | `LocalTimeTypeInfoFactory` | `Types.LOCAL_TIME` |
-| `java.time.Duration` | `DurationTypeInfoFactory` | Custom 12-byte `DurationSerializer` |
-| `java.util.List<E>` | `ListTypeInfoFactory` | `Types.LIST(elementType)` |
-| `java.util.Map<K, V>` | `MapTypeInfoFactory` | `Types.MAP(keyType, valueType)` |
+| Field Type                | Flinkboot Factory Class        | Serializer / Underlying Type        |
+|:--------------------------|:-------------------------------|:------------------------------------|
+| `java.time.LocalDateTime` | `LocalDateTimeTypeInfoFactory` | `Types.LOCAL_DATE_TIME`             |
+| `java.time.LocalDate`     | `LocalDateTypeInfoFactory`     | `Types.LOCAL_DATE`                  |
+| `java.time.LocalTime`     | `LocalTimeTypeInfoFactory`     | `Types.LOCAL_TIME`                  |
+| `java.time.Duration`      | `DurationTypeInfoFactory`      | Custom 12-byte `DurationSerializer` |
+| `java.util.List<E>`       | `ListTypeInfoFactory`          | `Types.LIST(elementType)`           |
+| `java.util.Map<K, V>`     | `MapTypeInfoFactory`           | `Types.MAP(keyType, valueType)`     |
 
 ---
 

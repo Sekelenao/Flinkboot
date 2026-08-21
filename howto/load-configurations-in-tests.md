@@ -132,11 +132,11 @@ void testLoadFromFileSystem() {
 
 Each path passed to `FlinkbootTest.configuration(...)` **must explicitly specify a resource scheme prefix**:
 
-| Scheme Prefix | Target Location | Example |
-|:---|:---|:---|
-| `classpath:` | Classpath resources (e.g. `src/test/resources`) | `"classpath:job-test.yaml"` |
-| `resource:` | Alias for classpath resources | `"resource:job-test.yaml"` |
-| `file:` | Absolute or relative file system paths | `"file:/tmp/test-config.yaml"` |
+| Scheme Prefix | Target Location                                 | Example                        |
+|:--------------|:------------------------------------------------|:-------------------------------|
+| `classpath:`  | Classpath resources (e.g. `src/test/resources`) | `"classpath:job-test.yaml"`    |
+| `resource:`   | Alias for classpath resources                   | `"resource:job-test.yaml"`     |
+| `file:`       | Absolute or relative file system paths          | `"file:/tmp/test-config.yaml"` |
 
 > [!IMPORTANT]
 > Omitting the scheme prefix (e.g., passing `"job-test.yaml"` without `classpath:`) will throw an `UnrecognizedResourceException`. Always include `classpath:` or `file:`. See the [How to Load Resources](load-resources.md) guide for more information on the underlying `Resource` abstraction.

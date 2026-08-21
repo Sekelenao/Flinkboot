@@ -96,9 +96,9 @@ environment:
 
 ### Job Level (`JobProperties`)
 
-| Property Key  | Type   | Required | Description                                                         |
-|:--------------|:-------|:---------|:--------------------------------------------------------------------|
-| `name`        | String | **Yes**  | Canonical job name registered with Flink (`PipelineOptions.NAME`).   |
+| Property Key  | Type   | Required | Description                                                        |
+|:--------------|:-------|:---------|:-------------------------------------------------------------------|
+| `name`        | String | **Yes**  | Canonical job name registered with Flink (`PipelineOptions.NAME`). |
 | `environment` | Object | No       | Execution environment settings (`ExecutionEnvironmentProperties`). |
 
 ### Execution Settings (`ExecutionProperties`)
@@ -114,18 +114,18 @@ environment:
 
 ### Checkpointing Settings (`CheckpointingProperties`)
 
-| Property Key                       | Type    | Required | Validation        | Description                                                                                                                           |
-|:-----------------------------------|:--------|:---------|:------------------|:--------------------------------------------------------------------------------------------------------------------------------------|
-| `enabled`                          | Boolean | No       | Boolean           | Enable checkpointing (`CheckpointingOptions.CHECKPOINTING_INTERVAL`).                                                                 |
-| `interval-ms`                      | Long    | No       | `@Positive`       | Time interval between checkpoints in ms (`CheckpointingOptions.CHECKPOINTING_INTERVAL`). Must be > 0.                                  |
-| `mode`                             | Enum    | No       | Enum              | Checkpointing consistency mode: `EXACTLY_ONCE` or `AT_LEAST_ONCE` (`CheckpointingOptions.CHECKPOINTING_CONSISTENCY_MODE`).             |
-| `timeout-ms`                       | Long    | No       | `@Positive`       | Maximum duration for a checkpoint before aborting (`CheckpointingOptions.CHECKPOINTING_TIMEOUT`). Must be > 0.                        |
-| `min-pause-between-checkpoints-ms` | Long    | No       | `@PositiveOrZero` | Minimum rest duration between consecutive checkpoints (`CheckpointingOptions.MIN_PAUSE_BETWEEN_CHECKPOINTS`).                         |
-| `max-concurrent-checkpoints`       | Integer | No       | `@Positive`       | Maximum concurrent checkpoints allowed (`CheckpointingOptions.MAX_CONCURRENT_CHECKPOINTS`). Must be > 0.                             |
-| `externalized-checkpoint-cleanup`  | Enum    | No       | Enum              | Cleanup retention mode on cancellation: `RETAIN_ON_CANCELLATION`, `DELETE_ON_CANCELLATION`, or `NO_EXTERNALIZED_CHECKPOINTS`.        |
-| `unaligned-checkpoints`            | Boolean | No       | Boolean           | Enable unaligned checkpoints (`CheckpointingOptions.ENABLE_UNALIGNED`).                                                               |
-| `aligned-checkpoint-timeout-ms`    | Long    | No       | `@PositiveOrZero` | Timeout before switching to unaligned checkpoints (`CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT`).                                |
-| `storage-uri`                      | String  | No       | String            | Target checkpoint storage directory URI, e.g. `s3://bucket/checkpoints` (`CheckpointingOptions.CHECKPOINTS_DIRECTORY`).              |
+| Property Key                       | Type    | Required | Validation        | Description                                                                                                                   |
+|:-----------------------------------|:--------|:---------|:------------------|:------------------------------------------------------------------------------------------------------------------------------|
+| `enabled`                          | Boolean | No       | Boolean           | Enable checkpointing (`CheckpointingOptions.CHECKPOINTING_INTERVAL`).                                                         |
+| `interval-ms`                      | Long    | No       | `@Positive`       | Time interval between checkpoints in ms (`CheckpointingOptions.CHECKPOINTING_INTERVAL`). Must be > 0.                         |
+| `mode`                             | Enum    | No       | Enum              | Checkpointing consistency mode: `EXACTLY_ONCE` or `AT_LEAST_ONCE` (`CheckpointingOptions.CHECKPOINTING_CONSISTENCY_MODE`).    |
+| `timeout-ms`                       | Long    | No       | `@Positive`       | Maximum duration for a checkpoint before aborting (`CheckpointingOptions.CHECKPOINTING_TIMEOUT`). Must be > 0.                |
+| `min-pause-between-checkpoints-ms` | Long    | No       | `@PositiveOrZero` | Minimum rest duration between consecutive checkpoints (`CheckpointingOptions.MIN_PAUSE_BETWEEN_CHECKPOINTS`).                 |
+| `max-concurrent-checkpoints`       | Integer | No       | `@Positive`       | Maximum concurrent checkpoints allowed (`CheckpointingOptions.MAX_CONCURRENT_CHECKPOINTS`). Must be > 0.                      |
+| `externalized-checkpoint-cleanup`  | Enum    | No       | Enum              | Cleanup retention mode on cancellation: `RETAIN_ON_CANCELLATION`, `DELETE_ON_CANCELLATION`, or `NO_EXTERNALIZED_CHECKPOINTS`. |
+| `unaligned-checkpoints`            | Boolean | No       | Boolean           | Enable unaligned checkpoints (`CheckpointingOptions.ENABLE_UNALIGNED`).                                                       |
+| `aligned-checkpoint-timeout-ms`    | Long    | No       | `@PositiveOrZero` | Timeout before switching to unaligned checkpoints (`CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT`).                        |
+| `storage-uri`                      | String  | No       | String            | Target checkpoint storage directory URI, e.g. `s3://bucket/checkpoints` (`CheckpointingOptions.CHECKPOINTS_DIRECTORY`).       |
 
 ### Restart Strategy Settings (`RestartStrategyProperties`)
 
@@ -133,59 +133,59 @@ The `restart-strategy` block accepts a `type` property (`NO_RESTART`, `FIXED_DEL
 
 #### Strategy Types Overview
 
-| Strategy Value      | Description                                                                                     | Allowed Sub-Block                     |
-|:--------------------|:------------------------------------------------------------------------------------------------|:--------------------------------------|
-| `FIXED_DELAY`       | Restarts job a fixed number of times with a delay between attempts.                             | `fixed-delay`                         |
-| `FAILURE_RATE`      | Restarts job if failure rate threshold is not exceeded in a time window.                       | `failure-rate`                        |
-| `EXPONENTIAL_DELAY` | Restarts job with exponentially increasing backoff delays.                                       | `exponential-delay`                   |
-| `NO_RESTART`        | Disables job restarts.                                                                          | *None allowed* (fails fast if set)    |
-| `FALLBACK`          | Fallback to Flink cluster's global default restart strategy (default if `type` omitted).        | *None allowed* (fails fast if set)    |
+| Strategy Value      | Description                                                                              | Allowed Sub-Block                  |
+|:--------------------|:-----------------------------------------------------------------------------------------|:-----------------------------------|
+| `FIXED_DELAY`       | Restarts job a fixed number of times with a delay between attempts.                      | `fixed-delay`                      |
+| `FAILURE_RATE`      | Restarts job if failure rate threshold is not exceeded in a time window.                 | `failure-rate`                     |
+| `EXPONENTIAL_DELAY` | Restarts job with exponentially increasing backoff delays.                               | `exponential-delay`                |
+| `NO_RESTART`        | Disables job restarts.                                                                   | *None allowed* (fails fast if set) |
+| `FALLBACK`          | Fallback to Flink cluster's global default restart strategy (default if `type` omitted). | *None allowed* (fails fast if set) |
 
 #### Option Details per Strategy Block
 
 ##### 1. Fixed Delay (`type: FIXED_DELAY` $\rightarrow$ `fixed-delay:`)
 
-| Property Key | Type    | Required | Validation        | Description                                                                                              |
-|:-------------|:--------|:---------|:------------------|:---------------------------------------------------------------------------------------------------------|
-| `attempts`   | Integer | No       | `@Positive`       | Number of restart attempts (`RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS`).               |
-| `delay-ms`   | Long    | No       | `@PositiveOrZero` | Delay between restart attempts in ms (`RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_DELAY`).      |
+| Property Key | Type    | Required | Validation        | Description                                                                                         |
+|:-------------|:--------|:---------|:------------------|:----------------------------------------------------------------------------------------------------|
+| `attempts`   | Integer | No       | `@Positive`       | Number of restart attempts (`RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS`).        |
+| `delay-ms`   | Long    | No       | `@PositiveOrZero` | Delay between restart attempts in ms (`RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_DELAY`). |
 
 ##### 2. Failure Rate (`type: FAILURE_RATE` $\rightarrow$ `failure-rate:`)
 
-| Property Key               | Type    | Required | Validation        | Description                                                                                                   |
-|:---------------------------|:--------|:---------|:------------------|:--------------------------------------------------------------------------------------------------------------|
-| `max-failures-per-interval`| Integer | No       | `@Positive`       | Max failures allowed within interval (`RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_MAX_FAILURES_PER_INTERVAL`).|
-| `failure-interval-ms`      | Long    | No       | `@Positive`       | Time window evaluating failure rate (`RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_FAILURE_RATE_INTERVAL`).|
-| `delay-ms`                 | Long    | No       | `@PositiveOrZero` | Delay between attempts in ms (`RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_DELAY`).                 |
+| Property Key                | Type    | Required | Validation        | Description                                                                                                              |
+|:----------------------------|:--------|:---------|:------------------|:-------------------------------------------------------------------------------------------------------------------------|
+| `max-failures-per-interval` | Integer | No       | `@Positive`       | Max failures allowed within interval (`RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_MAX_FAILURES_PER_INTERVAL`). |
+| `failure-interval-ms`       | Long    | No       | `@Positive`       | Time window evaluating failure rate (`RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_FAILURE_RATE_INTERVAL`).      |
+| `delay-ms`                  | Long    | No       | `@PositiveOrZero` | Delay between attempts in ms (`RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_DELAY`).                             |
 
 ##### 3. Exponential Delay (`type: EXPONENTIAL_DELAY` $\rightarrow$ `exponential-delay:`)
 
-| Property Key                | Type   | Required | Validation                                    | Description                                                                                                          |
-|:----------------------------|:-------|:---------|:----------------------------------------------|:---------------------------------------------------------------------------------------------------------------------|
-| `initial-backoff-ms`        | Long   | No       | `@Positive`                                   | Initial backoff delay (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_INITIAL_BACKOFF`).                  |
-| `max-backoff-ms`            | Long   | No       | `@Positive`, $\ge$ `initial-backoff-ms`       | Maximum backoff delay cap (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_MAX_BACKOFF`).                 |
-| `backoff-multiplier`        | Double | No       | `@DecimalMin("1.0")`                          | Exponential backoff multiplier (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_BACKOFF_MULTIPLIER`).      |
-| `reset-backoff-threshold-ms`| Long   | No       | `@Positive`                                   | Reset backoff threshold duration (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_RESET_BACKOFF_THRESHOLD`).|
-| `jitter-factor`             | Double | No       | `@DecimalMin("0.0")`, `@DecimalMax("1.0")`    | Jitter factor for delay randomization (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_JITTER_FACTOR`).  |
+| Property Key                 | Type   | Required | Validation                                 | Description                                                                                                             |
+|:-----------------------------|:-------|:---------|:-------------------------------------------|:------------------------------------------------------------------------------------------------------------------------|
+| `initial-backoff-ms`         | Long   | No       | `@Positive`                                | Initial backoff delay (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_INITIAL_BACKOFF`).                    |
+| `max-backoff-ms`             | Long   | No       | `@Positive`, $\ge$ `initial-backoff-ms`    | Maximum backoff delay cap (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_MAX_BACKOFF`).                    |
+| `backoff-multiplier`         | Double | No       | `@DecimalMin("1.0")`                       | Exponential backoff multiplier (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_BACKOFF_MULTIPLIER`).        |
+| `reset-backoff-threshold-ms` | Long   | No       | `@Positive`                                | Reset backoff threshold duration (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_RESET_BACKOFF_THRESHOLD`). |
+| `jitter-factor`              | Double | No       | `@DecimalMin("0.0")`, `@DecimalMax("1.0")` | Jitter factor for delay randomization (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_JITTER_FACTOR`).      |
 
 ### State Backend Settings (`StateBackendProperties`)
 
-| Property Key         | Type    | Required                     | Validation | Description                                                                                                                           |
-|:---------------------|:--------|:-----------------------------|:-----------|:--------------------------------------------------------------------------------------------------------------------------------------|
-| `type`               | Enum    | No                           | Enum       | State backend type: `HASHMAP`, `ROCKSDB`, `CHANGELOG`, or `CUSTOM` (`StateBackendOptions.STATE_BACKEND`).                             |
-| `checkpoint-storage` | Enum    | No                           | Enum       | Checkpoint storage mechanism: `JOBMANAGER` or `FILESYSTEM` (`CheckpointingOptions.CHECKPOINT_STORAGE`).                              |
-| `storage-path`       | String  | No                           | String     | Base directory URI for state checkpoints, e.g. `s3://bucket/checkpoints` (`CheckpointingOptions.CHECKPOINTS_DIRECTORY`).              |
-| `incremental`        | Boolean | No                           | Boolean    | Enable incremental checkpoints for RocksDB (`CheckpointingOptions.INCREMENTAL_CHECKPOINTS`).                                          |
-| `latency-tracking`   | Boolean | No                           | Boolean    | Enable latency tracking metrics for state access (`StateBackendOptions.LATENCY_TRACK_ENABLED`).                                       |
-| `custom-class`       | String  | **Yes** (if `type == CUSTOM`)| String     | Fully qualified class name for custom state backend. Allowed **only** when `type: CUSTOM`.                                            |
+| Property Key         | Type    | Required                      | Validation | Description                                                                                                              |
+|:---------------------|:--------|:------------------------------|:-----------|:-------------------------------------------------------------------------------------------------------------------------|
+| `type`               | Enum    | No                            | Enum       | State backend type: `HASHMAP`, `ROCKSDB`, `CHANGELOG`, or `CUSTOM` (`StateBackendOptions.STATE_BACKEND`).                |
+| `checkpoint-storage` | Enum    | No                            | Enum       | Checkpoint storage mechanism: `JOBMANAGER` or `FILESYSTEM` (`CheckpointingOptions.CHECKPOINT_STORAGE`).                  |
+| `storage-path`       | String  | No                            | String     | Base directory URI for state checkpoints, e.g. `s3://bucket/checkpoints` (`CheckpointingOptions.CHECKPOINTS_DIRECTORY`). |
+| `incremental`        | Boolean | No                            | Boolean    | Enable incremental checkpoints for RocksDB (`CheckpointingOptions.INCREMENTAL_CHECKPOINTS`).                             |
+| `latency-tracking`   | Boolean | No                            | Boolean    | Enable latency tracking metrics for state access (`StateBackendOptions.LATENCY_TRACK_ENABLED`).                          |
+| `custom-class`       | String  | **Yes** (if `type == CUSTOM`) | String     | Fully qualified class name for custom state backend. Allowed **only** when `type: CUSTOM`.                               |
 
 ### Savepoint Restore Settings (`SavepointRestoreProperties`)
 
 | Property Key               | Type    | Required | Validation  | Description                                                                                                                           |
 |:---------------------------|:--------|:---------|:------------|:--------------------------------------------------------------------------------------------------------------------------------------|
 | `savepoint-path`           | String  | **Yes**  | `@NotBlank` | Path to savepoint or initial checkpoint directory (`StateRecoveryOptions.SAVEPOINT_PATH`).                                            |
-| `allow-non-restored-state` | Boolean | No       | Boolean     | Allow job to start even if state contains subtasks that cannot be restored (`StateRecoveryOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE`).  |
-| `restore-mode`             | Enum    | No       | Enum        | Savepoint restore mode: `CLAIM`, `NO_CLAIM`, or `LEGACY` (`StateRecoveryOptions.RESTORE_MODE`).                                        |
+| `allow-non-restored-state` | Boolean | No       | Boolean     | Allow job to start even if state contains subtasks that cannot be restored (`StateRecoveryOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE`). |
+| `restore-mode`             | Enum    | No       | Enum        | Savepoint restore mode: `CLAIM`, `NO_CLAIM`, or `LEGACY` (`StateRecoveryOptions.RESTORE_MODE`).                                       |
 
 ### Local Dev WebUI Settings (`LocalWebUiProperties`)
 
@@ -220,8 +220,8 @@ Flinkboot automatically resolves how to instantiate Flink's `StreamExecutionEnvi
   Instantiates a local environment with WebUI active (`StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(...)`).
   This launches an embedded Flink MiniCluster with the dashboard active during local IDE testing.
   
-  > [!NOTE]
-  > Requires `org.apache.flink:flink-runtime-web` present on your classpath.
+> [!NOTE]
+> Requires `org.apache.flink:flink-runtime-web` present on your classpath.
 
 - **Standard Cluster Mode (`local-web-ui.enabled: false` or omitted)**:
   Calls standard Flink environment discovery (`StreamExecutionEnvironment.getExecutionEnvironment(...)`).

@@ -13,6 +13,8 @@ This section contains step-by-step guides to help you implement specific feature
 - [How to Configure the Execution Environment](configure-execution-environment.md) — Learn how to configure and instantiate Flink's StreamExecutionEnvironment.
 - [How to Configure a Kafka Source](configure-kafka-source.md) — Learn how to configure and build a Kafka Source with custom offset strategies.
 - [How to Configure a Kafka Sink](configure-kafka-sink.md) — Learn how to configure and build a Kafka Sink with custom delivery guarantees.
+- [How to Configure a Fluss Source](configure-fluss-source.md) — Learn how to configure and build an Apache Fluss Source with offset and snapshot strategies.
+- [How to Configure a Fluss Sink](configure-fluss-sink.md) — Learn how to configure and build an Apache Fluss Sink with batch tuning.
 - [How to Assert Flink POJO Compliance](assert-pojo-compliance.md) — Verify that your data classes are compatible with Flink's optimized POJO serializer.
 - [How to Serialize Common JDK Types](serialize-jdk-types.md) — Learn how to serialize Java Date/Time, Duration, and Collections natively using Flinkboot's built-in factories.
 - [How to Load Configurations in Tests](load-configurations-in-tests.md) — Easily load, merge, and validate YAML configurations within JUnit 5 tests.

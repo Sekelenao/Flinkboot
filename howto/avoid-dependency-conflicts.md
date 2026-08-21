@@ -89,7 +89,7 @@ Add the following configuration to your application's `pom.xml` build section:
                             </relocation>
                         </relocations>
                         
-                        <!-- Exclude signatures and MRJAR entries -->
+                        <!-- Exclude signatures, module descriptors, and MRJAR entries -->
                         <filters>
                             <filter>
                                 <artifact>*:*</artifact>
@@ -97,6 +97,7 @@ Add the following configuration to your application's `pom.xml` build section:
                                     <exclude>META-INF/*.SF</exclude>
                                     <exclude>META-INF/*.DSA</exclude>
                                     <exclude>META-INF/*.RSA</exclude>
+                                    <exclude>module-info.class</exclude>
                                     <exclude>META-INF/versions/**</exclude>
                                 </excludes>
                             </filter>

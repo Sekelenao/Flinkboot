@@ -5,9 +5,5 @@ target/
 .idea/
 *.iml
 
-# Project agent configurations
-.agents/**
-
 # Local todo/networking tracking
-.networking/**
-todo/
+.private/**

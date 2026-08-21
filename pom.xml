@@ -6,7 +6,7 @@
 
     <groupId>io.github.sekelenao</groupId>
     <artifactId>flinkboot</artifactId>
-    <version>0.3.0-1.20</version>
+    <version>0.4.0-1.20</version>
     <packaging>pom</packaging>
 
     <name>Flinkboot</name>
@@ -45,6 +45,7 @@
         <module>flinkboot-core</module>
         <module>flinkboot-test</module>
         <module>flinkboot-kafka</module>
+        <module>flinkboot-fluss</module>
     </modules>
 
     <properties>
@@ -55,7 +56,7 @@
         <!-- Flink version -->
         <flink.version>1.20.5</flink.version>
 
-        <!-- Dependencies versions -->
+        <!-- Dependency versions -->
         <dependency.junit.version>5.11.4</dependency.junit.version>
         <dependency.mockito.version>5.23.0</dependency.mockito.version>
         <dependency.jackson.version>2.22.1</dependency.jackson.version>
@@ -63,10 +64,11 @@
         <dependency.expressly.version>5.0.0</dependency.expressly.version>
         <dependency.flink-connector-kafka.version>3.4.0-1.20</dependency.flink-connector-kafka.version>
         <dependency.kafka-clients.version>3.4.0</dependency.kafka-clients.version>
+        <dependency.fluss.version>0.9.1-incubating</dependency.fluss.version>
         <dependency.slf4j.version>2.0.16</dependency.slf4j.version>
         <dependency.log4j.version>2.24.3</dependency.log4j.version>
 
-        <!-- Plugins versions -->
+        <!-- Plugin versions -->
         <plugin.maven.compiler.version>3.15.0</plugin.maven.compiler.version>
         <plugin.maven.enforcer.version>3.6.3</plugin.maven.enforcer.version>
         <plugin.maven.surefire.version>3.6.0-M1</plugin.maven.surefire.version>
@@ -120,6 +122,30 @@
                 <artifactId>flink-connector-base</artifactId>
                 <version>${flink.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-table-common</artifactId>
+                <version>${flink.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-table-runtime</artifactId>
+                <version>${flink.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- Fluss dependencies -->
+            <dependency>
+                <groupId>org.apache.fluss</groupId>
+                <artifactId>fluss-flink-1.20</artifactId>
+                <version>${dependency.fluss.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.fluss</groupId>
+                <artifactId>fluss-client</artifactId>
+                <version>${dependency.fluss.version}</version>
+            </dependency>
 
             <!-- Logging dependencies (Provided by Flink cluster) -->
             <dependency>
@@ -156,6 +182,11 @@
             <dependency>
                 <groupId>io.github.sekelenao</groupId>
                 <artifactId>flinkboot-kafka</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.sekelenao</groupId>
+                <artifactId>flinkboot-fluss</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

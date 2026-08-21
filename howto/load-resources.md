@@ -151,10 +151,10 @@ public class LookupEnrichmentFunction extends RichMapFunction<Event, EnrichedEve
 
 All exceptions thrown by the `Resource` API inherit from `FlinkbootException`:
 
-| Exception | Root Cause |
-|:---|:---|
-| `ResourceNotFoundException` | The file does not exist on disk or cannot be found on the classpath. |
-| `ResourceAccessException` | The target location is a directory, inaccessible due to I/O permissions, or has an invalid path syntax. |
+| Exception                       | Root Cause                                                                                                                    |
+|:--------------------------------|:------------------------------------------------------------------------------------------------------------------------------|
+| `ResourceNotFoundException`     | The file does not exist on disk or cannot be found on the classpath.                                                          |
+| `ResourceAccessException`       | The target location is a directory, inaccessible due to I/O permissions, or has an invalid path syntax.                       |
 | `UnrecognizedResourceException` | The location string is null, empty/blank, or does not specify a supported scheme prefix (`classpath:`, `resource:`, `file:`). |
 
 Example handling:
