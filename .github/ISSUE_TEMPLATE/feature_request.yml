@@ -1,7 +1,7 @@
 name: "Feature or Connector Request"
 description: Suggest an idea for a new feature, improvement, or connector module
 title: "[Feature]: "
-labels: ["type: feature"]
+labels: ["Feature"]
 body:
   - type: markdown
     attributes:

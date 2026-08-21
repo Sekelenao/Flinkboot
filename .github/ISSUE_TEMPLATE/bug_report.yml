@@ -1,7 +1,7 @@
 name: "Bug Report"
 description: Report a reproducible defect in Flinkboot
 title: "[Bug]: "
-labels: ["type: bug"]
+labels: ["Bug"]
 body:
   - type: markdown
     attributes:
