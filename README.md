@@ -67,6 +67,7 @@ Follow these 3 essential steps to get started with Flinkboot:
 * **[Flinkboot Quickstart Repository](https://github.com/Sekelenao/Flinkboot-Quickstart)** — Complete, runnable example project with Kafka and Docker Compose.
 * **[How-To Guides Index](howto/README.md)** — Step-by-step guides for configurations, connectors, POJO compliance, and testing.
 * **[Compatibility Matrix](COMPATIBILITY.md)** — Supported Apache Flink versions and Java (JDK) runtimes.
+* **[Contributing Guide](CONTRIBUTING.md)** — Guidelines for reporting issues, submitting pull requests, and coding standards.
 * **[Changelog](CHANGELOG.md)** — Release notes and user-facing change history.
 
 ---

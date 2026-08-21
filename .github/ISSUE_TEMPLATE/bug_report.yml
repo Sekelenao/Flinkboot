@@ -1,0 +1,66 @@
+name: "🐛 Bug Report"
+description: Report a reproducible defect in Flinkboot
+title: "[Bug]: "
+labels: ["type: bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue! Please provide as much context as possible to help us reproduce and resolve the problem quickly.
+
+  - type: input
+    id: flinkboot-version
+    attributes:
+      label: Flinkboot Version
+      placeholder: "e.g. 0.4.0-1.20"
+    validations:
+      required: true
+
+  - type: input
+    id: flink-version
+    attributes:
+      label: Apache Flink Version
+      placeholder: "e.g. 1.20.5"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: java-version
+    attributes:
+      label: Java / JDK Version
+      options:
+        - "Java 11"
+        - "Java 17"
+        - "Java 21"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description & Steps to Reproduce
+      placeholder: A clear and concise description of the bug and how to reproduce it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: config-yaml
+    attributes:
+      label: Minimal YAML Configuration
+      description: The YAML configuration snippet used when the issue occurs.
+      render: yaml
+
+  - type: textarea
+    id: java-code
+    attributes:
+      label: Minimal Java Code Snippet
+      description: The minimal Java code snippet (job main or properties definition).
+      render: java
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Log Output or Stacktrace
+      description: Please copy and paste any relevant logs or exception stacktraces.
+      render: shell

@@ -1,0 +1,46 @@
+name: "💡 Feature or Connector Request"
+description: Suggest an idea for a new feature, improvement, or connector module
+title: "[Feature]: "
+labels: ["type: feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature! Please describe your use case and proposed design.
+
+  - type: dropdown
+    id: module-scope
+    attributes:
+      label: Module / Scope
+      options:
+        - "flinkboot-core"
+        - "flinkboot-kafka"
+        - "flinkboot-fluss"
+        - "flinkboot-test"
+        - "New Connector (e.g. Iceberg, Paimon, etc.)"
+        - "Documentation / Examples"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-motivation
+    attributes:
+      label: Problem or Motivation
+      placeholder: What problem does this feature solve? What is your use case?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution & Desired YAML / Java API
+      placeholder: Describe the desired YAML configuration format and Java API surface.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      placeholder: Any alternative solutions or workarounds you have considered?
