@@ -131,9 +131,9 @@ public class MyJob {
 
 ## 4. Supported Startup Modes (`FlussStartupMode`)
 
-| Mode | Description |
-| :--- | :--- |
-| `EARLIEST` | Start reading from the earliest available offset / snapshot in the table. |
-| `LATEST` | Start reading from the latest available offset. |
-| `FULL` | Perform a full snapshot scan followed by continuous log reading (for Primary Key tables). |
-| `TIMESTAMP` | Start reading from a specific timestamp in milliseconds (requires `startup-timestamp`). |
+| Mode        | Description                                                                               |
+|:------------|:------------------------------------------------------------------------------------------|
+| `EARLIEST`  | Start reading from the earliest available offset / snapshot in the table.                 |
+| `LATEST`    | Start reading from the latest available offset.                                           |
+| `FULL`      | Perform a full snapshot scan followed by continuous log reading (for Primary Key tables). |
+| `TIMESTAMP` | Start reading from a specific timestamp in milliseconds (requires `startup-timestamp`).   |
