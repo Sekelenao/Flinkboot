@@ -8,21 +8,6 @@ body:
       value: |
         Thank you for suggesting a feature. Please describe your use case and proposed design.
 
-  - type: dropdown
-    id: module-scope
-    attributes:
-      label: Module / Scope
-      options:
-        - "flinkboot-core"
-        - "flinkboot-kafka"
-        - "flinkboot-fluss"
-        - "flinkboot-test"
-        - "New Connector (e.g. Iceberg, Paimon, etc.)"
-        - "Documentation / Examples"
-        - "Other"
-    validations:
-      required: true
-
   - type: textarea
     id: problem-motivation
     attributes:
