@@ -24,7 +24,7 @@ In standard Flink deployments, misconfigurations, missing parameters, state back
 
 ---
 
-## Quickstart ⚡
+## Quickstart
 
 Looking for an end-to-end, runnable example project? Check out the **[Flinkboot Quickstart](https://github.com/Sekelenao/Flinkboot-Quickstart)** repository:
 * **Complete Real-Time Pipeline**: Edge heartbeat and latency monitoring with Apache Kafka source & sink.
