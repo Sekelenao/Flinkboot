@@ -1,5 +1,1 @@
-blank_issues_enabled: true
-contact_links:
-  - name: "Ask a Question or Discuss"
-    url: https://github.com/Sekelenao/Flinkboot/discussions
-    about: Ask questions, share ideas, or get help with Flinkboot usage.
+blank_issues_enabled: false
