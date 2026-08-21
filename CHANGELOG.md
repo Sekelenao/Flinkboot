@@ -11,11 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### `flinkboot-fluss`
 - **New `flinkboot-fluss` Module for Apache Fluss**:
-  - Full support for Apache Fluss (sub-second streaming lakehouse) Source and Sink connectors on Apache Flink 1.20.
-  - **`FlussStartupMode`**: Declarative offset strategy supporting `EARLIEST`, `LATEST`, `FULL` (snapshot + continuous log), and `TIMESTAMP`.
-  - **`FlussSourceProperties` & `FlussSinkProperties`**: Immutable, fail-fast configuration models with Jakarta Bean Validation (`@NotBlank`, `@NotEmpty`, `@PositiveOrZero`).
-  - **`FlussSourceFactory` & `FlussSinkFactory`**: One-line factory utilities to build pre-configured Flink `FlussSource` and `FlussSink` instances.
+  - Full support for Apache Fluss (real-time sub-second streaming storage) Source and Sink connectors on Apache Flink 1.20.
+  - **`FlussStartupMode`**: Declarative startup strategy supporting `EARLIEST`, `LATEST`, `FULL` (snapshot + continuous log), and `TIMESTAMP`.
+  - **`FlussSourceProperties` & `FlussSinkProperties`**: Immutable, fail-fast configuration DTOs with Jakarta Bean Validation (`@NotBlank`, `@NotEmpty`, `@PositiveOrZero`).
+  - **Fail-Fast Cross-Field Validation**: Strict runtime check requiring `startup-timestamp` when `startup-mode` is `TIMESTAMP`, and rejecting timestamps for other modes.
+  - **`FlussSourceFactory` & `FlussSinkFactory`**: Factory utilities to build pre-configured Flink `FlussSource` and `FlussSink` instances with direct supply (`supplyFor`) and customizable builder (`supplyBuilderFor`) patterns.
   - Dedicated runtime exceptions: `InvalidFlussSourcePropertiesException` and `InvalidFlussSinkPropertiesException`.
+
+#### Documentation
+- **How-to Guides**:
+  - Added `howto/configure-fluss-source.md` for configuring Fluss sources in YAML.
+  - Added `howto/configure-fluss-sink.md` for configuring Fluss sinks with batch and timeout options.
+  - Updated `howto/avoid-dependency-conflicts.md` with recommended `maven-shade-plugin` exclusions (`module-info.class`, `META-INF/versions/**`).
+
+#### Contributor Tools & AI Skills
+- **Standardized Developer Skills (`.agents/skills/`)**:
+  - Added `configuration-properties`, `classes-and-records`, `test-classes`, and `project-architecture` guidelines for human and AI contributors.
 
 ---
 
