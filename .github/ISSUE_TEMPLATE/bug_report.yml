@@ -1,4 +1,4 @@
-name: "🐛 Bug Report"
+name: "Bug Report"
 description: Report a reproducible defect in Flinkboot
 title: "[Bug]: "
 labels: ["type: bug"]
@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for reporting an issue! Please provide as much context as possible to help us reproduce and resolve the problem quickly.
+        Thank you for reporting an issue. Please provide as much context as possible to help us reproduce and resolve the problem quickly.
 
   - type: input
     id: flinkboot-version

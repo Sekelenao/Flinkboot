@@ -1,4 +1,4 @@
-name: "💡 Feature or Connector Request"
+name: "Feature or Connector Request"
 description: Suggest an idea for a new feature, improvement, or connector module
 title: "[Feature]: "
 labels: ["type: feature"]
@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for suggesting a feature! Please describe your use case and proposed design.
+        Thank you for suggesting a feature. Please describe your use case and proposed design.
 
   - type: dropdown
     id: module-scope
