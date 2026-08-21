@@ -72,4 +72,4 @@ Follow these 3 essential steps to get started with Flinkboot:
 
 ---
 
-*Not affiliated with the Apache Software Foundation or the Apache Flink project.*
+*Apache®, Apache Flink®, Apache Kafka®, and Apache Fluss™ are trademarks of the Apache Software Foundation. Flinkboot is an independent open-source project and is not affiliated with, endorsed by, or sponsored by the Apache Software Foundation.*
