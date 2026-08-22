@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### `flinkboot-core`
+- **Environment Variable Placeholder Interpolation in YAML Configurations**:
+  - Support for strict `${VARIABLE_NAME}` placeholder interpolation across all YAML properties, scalar fields, array elements, and nested objects.
+  - Automatic case normalization (`${kafka-bootstrap-servers}` $\rightarrow$ `KAFKA_BOOTSTRAP_SERVERS`).
+  - Support for escaping literal placeholders via backslash syntax (`\${placeholder}` $\rightarrow$ `${placeholder}`).
+  - Strict fail-fast behavior throwing `UnresolvedPropertyPlaceholderException` if an environment variable is missing (no silent fallback).
+  - Native single-pass merge and resolution during YAML tree loading.
+
 #### `flinkboot-fluss`
 - **New `flinkboot-fluss` Module for Apache Fluss**:
   - Full support for Apache Fluss (real-time sub-second streaming storage) Source and Sink connectors on Apache Flink 1.20.
