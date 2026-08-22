@@ -41,7 +41,7 @@ Import the Flinkboot BOM in your `<dependencyManagement>` and add the core Flink
 
 ## 1. Usage in Java Code
 
-To check the presence or value of a flag in your Flink job, use the `flag(String name)` method of the [Flinkboot](file:///home/haine/Documents/Programmation/Flinkboot/flinkboot-core/src/main/java/io/github/sekelenao/flinkboot/core/api/Flinkboot.java) instance:
+To check the presence or value of a flag in your Flink job, use the `flag(String name)` method of the `Flinkboot` instance:
 
 ```java
 import io.github.sekelenao.flinkboot.core.api.Flinkboot;

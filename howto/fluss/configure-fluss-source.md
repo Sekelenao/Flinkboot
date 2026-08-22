@@ -74,7 +74,32 @@ startup-timestamp: 1700000000000
 
 ---
 
-## 2. Configuration Model in Java
+## 2. Configuration Parameters Reference
+
+| Property Key        | Type                  | Required    | Validation         | Description                                                                                            |
+|:--------------------|:----------------------|:------------|:-------------------|:-------------------------------------------------------------------------------------------------------|
+| `name`              | `String`              | **Yes**     | `@NotBlank`        | Unique operator identifier in the Flink DAG execution graph.                                           |
+| `bootstrap-servers` | `List<String>`        | **Yes**     | `@NotEmpty`        | List of Fluss coordinator addresses (e.g. `localhost:9123`).                                           |
+| `database`          | `String`              | **Yes**     | `@NotBlank`        | Target Fluss database name.                                                                            |
+| `table`             | `String`              | **Yes**     | `@NotBlank`        | Target Fluss table name.                                                                               |
+| `startup-mode`      | `FlussStartupMode`    | **Yes**     | `@NotNull`         | Startup strategy (`EARLIEST`, `LATEST`, `FULL`, `TIMESTAMP`).                                          |
+| `startup-timestamp` | `Long`                | Conditional | `@PositiveOrZero`  | Timestamp in epoch milliseconds (**mandatory** if `startup-mode` is `TIMESTAMP`, forbidden otherwise). |
+| `properties`        | `Map<String, String>` | No          | `@NotNull` entries | Additional custom Fluss client/scanner configuration properties.                                       |
+
+---
+
+## 3. Supported Startup Modes (`FlussStartupMode`)
+
+| Mode        | Description                                                                               |
+|:------------|:------------------------------------------------------------------------------------------|
+| `EARLIEST`  | Start reading from the earliest available offset / snapshot in the table.                 |
+| `LATEST`    | Start reading from the latest available offset.                                           |
+| `FULL`      | Perform a full snapshot scan followed by continuous log reading (for Primary Key tables). |
+| `TIMESTAMP` | Start reading from a specific timestamp in milliseconds (requires `startup-timestamp`).   |
+
+---
+
+## 4. Configuration Model in Java
 
 Bind the properties directly in your custom application configuration model:
 
@@ -94,7 +119,7 @@ public record AppConfiguration(
 
 ---
 
-## 3. Creating the Source via `FlussSourceFactory`
+## 5. Creating the Source via `FlussSourceFactory`
 
 Use `FlussSourceFactory` to build the source and add it to your Flink `StreamExecutionEnvironment`:
 
@@ -126,14 +151,3 @@ public class MyJob {
     }
 }
 ```
-
----
-
-## 4. Supported Startup Modes (`FlussStartupMode`)
-
-| Mode        | Description                                                                               |
-|:------------|:------------------------------------------------------------------------------------------|
-| `EARLIEST`  | Start reading from the earliest available offset / snapshot in the table.                 |
-| `LATEST`    | Start reading from the latest available offset.                                           |
-| `FULL`      | Perform a full snapshot scan followed by continuous log reading (for Primary Key tables). |
-| `TIMESTAMP` | Start reading from a specific timestamp in milliseconds (requires `startup-timestamp`).   |

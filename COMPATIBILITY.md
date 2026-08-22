@@ -8,7 +8,9 @@ This document outlines the compatibility between Flinkboot, Apache Flink version
 
 | Flinkboot Version | Apache Flink Version | Java Runtime | Status           |
 |:------------------|:---------------------|:-------------|:-----------------|
-| `0.2.x-1.20`      | `1.20.x`             | Java 11+     | Active / Current |
+| `0.4.x-1.20`      | `1.20.x`             | Java 11+     | Active / Current |
+| `0.3.x-1.20`      | `1.20.x`             | Java 11+     | Supported        |
+| `0.2.x-1.20`      | `1.20.x`             | Java 11+     | Supported        |
 | `0.1.x-1.20`      | `1.20.x`             | Java 11+     | Deprecated (EOL) |
 
 ---
@@ -19,7 +21,7 @@ Flinkboot follows a composite versioning format:
 
 $$\text{<flinkboot-version>}-\text{<flink-major.minor>}$$
 
-* **Flinkboot Version** (e.g., `0.2.0`): Follows [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`) indicating features, improvements, and fixes in Flinkboot itself.
+* **Flinkboot Version** (e.g., `0.4.0`): Follows [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`) indicating features, improvements, and fixes in Flinkboot itself.
 * **Flink Target Version** (e.g., `-1.20`): Identifies the compatible Apache Flink minor release branch.
 
 ---

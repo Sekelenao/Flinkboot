@@ -20,9 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Documentation
 - **How-to Guides**:
-  - Added `howto/configure-fluss-source.md` for configuring Fluss sources in YAML.
-  - Added `howto/configure-fluss-sink.md` for configuring Fluss sinks with batch and timeout options.
-  - Updated `howto/avoid-dependency-conflicts.md` with recommended `maven-shade-plugin` exclusions (`module-info.class`, `META-INF/versions/**`).
+  - Added `howto/fluss/configure-fluss-source.md` for configuring Fluss sources in YAML.
+  - Added `howto/fluss/configure-fluss-sink.md` for configuring Fluss sinks with batch and timeout options.
+  - Updated `howto/setup/avoid-dependency-conflicts.md` with recommended `maven-shade-plugin` exclusions (`module-info.class`, `META-INF/versions/**`).
 
 #### Contributor Tools & AI Skills
 - **Standardized Developer Skills (`.agents/skills/`)**:

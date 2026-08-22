@@ -38,13 +38,13 @@ Looking for an end-to-end, runnable example project? Check out the **[Flinkboot 
 
 Follow these 3 essential steps to get started with Flinkboot:
 
-1. **[Setup POM & Avoid Conflicts](howto/avoid-dependency-conflicts.md) (MUST READ)**  
+1. **[Setup POM & Avoid Conflicts](howto/setup/avoid-dependency-conflicts.md) (MUST READ)**  
    *Configure your project's Maven POM, BOM dependencies, and shading relocations to prevent Jackson/Log4j runtime conflicts on your Flink cluster.*
 
-2. **[Configure Your Jobs (Load & Merge Configurations)](howto/load-configurations.md)**  
+2. **[Configure Your Jobs (Load & Merge Configurations)](howto/configuration/load-configurations.md)**  
    *Define your YAML configurations (defaults to `classpath:job-configuration.yaml`), load them into strongly-typed Java models, and apply CLI/environment overrides.*
 
-3. **[Create an Execution Environment](howto/configure-execution-environment.md)**  
+3. **[Create an Execution Environment](howto/configuration/configure-execution-environment.md)**  
    *Configure execution modes, checkpointing, restart strategies, and RocksDB state backends to instantiate Flink's `StreamExecutionEnvironment` with zero boilerplate.*
 
 ---

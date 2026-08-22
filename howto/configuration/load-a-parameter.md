@@ -41,7 +41,7 @@ Import the Flinkboot BOM in your `<dependencyManagement>` and add the core Flink
 
 ## 1. Usage in Java Code
 
-To retrieve a parameter's value in your Flink job, use the `parameter(String name)` method of the [Flinkboot](file:///home/haine/Documents/Programmation/Flinkboot/flinkboot-core/src/main/java/io/github/sekelenao/flinkboot/core/api/Flinkboot.java) instance:
+To retrieve a parameter's value in your Flink job, use the `parameter(String name)` method of the `Flinkboot` instance:
 
 ```java
 import io.github.sekelenao.flinkboot.core.api.Flinkboot;

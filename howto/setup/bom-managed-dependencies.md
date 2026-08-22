@@ -70,17 +70,17 @@ The Flinkboot BOM categorizes dependencies into six logical groups:
 
 All standard Flink execution components are pre-configured with **`provided`** scope to prevent packaging duplicate Flink runtime classes into your application fat JAR.
 
-| Group ID | Artifact ID | Managed Version | Pre-configured Scope | Purpose |
-| :--- | :--- | :--- | :--- | :--- |
-| `org.apache.flink` | `flink-streaming-java` | `1.20.5` | `provided` | Flink DataStream API runtime. |
-| `org.apache.flink` | `flink-core` | `1.20.5` | `provided` | Core Flink abstractions, type extractors, serializers. |
-| `org.apache.flink` | `flink-clients` | `1.20.5` | `provided` | Local MiniCluster runner and job submission client. |
-| `org.apache.flink` | `flink-connector-base` | `1.20.5` | `provided` | Base interfaces for modern Flink 1.20+ connectors. |
-| `org.apache.flink` | `flink-table-common` | `1.20.5` | `provided` | Flink Table & SQL common types and logical structures. |
-| `org.apache.flink` | `flink-connector-kafka` | `3.4.0-1.20` | `compile` | Apache Kafka Source and Sink connector for Flink 1.20. |
-| `org.apache.kafka` | `kafka-clients` | `3.4.0` | `compile` | Official Apache Kafka Java client. |
-| `org.apache.fluss` | `fluss-flink-1.20` | `0.9.1-incubating` | `compile` | Apache Fluss streaming storage connector for Flink 1.20. |
-| `org.apache.fluss` | `fluss-client` | `0.9.1-incubating` | `compile` | Official Apache Fluss Java client. |
+| Group ID           | Artifact ID             | Managed Version    | Pre-configured Scope | Purpose                                                  |
+|:-------------------|:------------------------|:-------------------|:---------------------|:---------------------------------------------------------|
+| `org.apache.flink` | `flink-streaming-java`  | `1.20.5`           | `provided`           | Flink DataStream API runtime.                            |
+| `org.apache.flink` | `flink-core`            | `1.20.5`           | `provided`           | Core Flink abstractions, type extractors, serializers.   |
+| `org.apache.flink` | `flink-clients`         | `1.20.5`           | `provided`           | Local MiniCluster runner and job submission client.      |
+| `org.apache.flink` | `flink-connector-base`  | `1.20.5`           | `provided`           | Base interfaces for modern Flink 1.20+ connectors.       |
+| `org.apache.flink` | `flink-table-common`    | `1.20.5`           | `provided`           | Flink Table & SQL common types and logical structures.   |
+| `org.apache.flink` | `flink-connector-kafka` | `3.4.0-1.20`       | `compile`            | Apache Kafka Source and Sink connector for Flink 1.20.   |
+| `org.apache.kafka` | `kafka-clients`         | `3.4.0`            | `compile`            | Official Apache Kafka Java client.                       |
+| `org.apache.fluss` | `fluss-flink-1.20`      | `0.9.1-incubating` | `compile`            | Apache Fluss streaming storage connector for Flink 1.20. |
+| `org.apache.fluss` | `fluss-client`          | `0.9.1-incubating` | `compile`            | Official Apache Fluss Java client.                       |
 
 ---
 
@@ -88,12 +88,12 @@ All standard Flink execution components are pre-configured with **`provided`** s
 
 Flinkboot relies on Jackson for deserializing YAML configurations and Java 8 Date/Time types.
 
-| Group ID | Artifact ID | Managed Version | Default Scope | Purpose |
-| :--- | :--- | :--- | :--- | :--- |
-| `com.fasterxml.jackson.dataformat` | `jackson-dataformat-yaml` | `2.22.1` | `compile` | YAML parser engine. |
-| `com.fasterxml.jackson.core` | `jackson-databind` | `2.22.1` | `compile` | Object mapper and data binding. |
-| `com.fasterxml.jackson.core` | `jackson-core` | `2.22.1` | `compile` | Streaming JSON/YAML parser abstractions. |
-| `com.fasterxml.jackson.datatype` | `jackson-datatype-jsr310` | `2.22.1` | `compile` | `java.time.*` (`Instant`, `Duration`, `LocalDate`) deserialization. |
+| Group ID                           | Artifact ID               | Managed Version | Default Scope | Purpose                                                             |
+|:-----------------------------------|:--------------------------|:----------------|:--------------|:--------------------------------------------------------------------|
+| `com.fasterxml.jackson.dataformat` | `jackson-dataformat-yaml` | `2.22.2`        | `compile`     | YAML parser engine.                                                 |
+| `com.fasterxml.jackson.core`       | `jackson-databind`        | `2.22.2`        | `compile`     | Object mapper and data binding.                                     |
+| `com.fasterxml.jackson.core`       | `jackson-core`            | `2.22.2`        | `compile`     | Streaming JSON/YAML parser abstractions.                            |
+| `com.fasterxml.jackson.datatype`   | `jackson-datatype-jsr310` | `2.22.2`        | `compile`     | `java.time.*` (`Instant`, `Duration`, `LocalDate`) deserialization. |
 
 > [!IMPORTANT]
 > When building your fat JAR for deployment to a Flink cluster, Jackson must be relocated (shaded) to prevent version conflicts with Flink's internal Jackson classes. See [How to Avoid Dependency Conflicts](avoid-dependency-conflicts.md).
@@ -134,6 +134,6 @@ All logging implementations are pre-marked **`provided`** so that your fat JAR u
 
 ## Key Benefits of Using the Flinkboot BOM
 
-1. **Zero Version Mismatches**: Guarantees that `flinkboot-core`, `flinkboot-kafka`, and `flinkboot-test` always run with verified, binary-compatible versions of Jackson, Flink, and Hibernate Validator.
+1. **Zero Version Mismatches**: Guarantees that `flinkboot-core`, `flinkboot-kafka`, `flinkboot-fluss`, and `flinkboot-test` always run with verified, binary-compatible versions of Jackson, Flink, and Hibernate Validator.
 2. **Safe Fat JARs**: Pre-configured `provided` scopes prevent packaging `flink-core` or `log4j` inside your application JAR, avoiding classloader linkage errors on TaskManagers.
 3. **Painless Upgrades**: Upgrading your Flink or Flinkboot version only requires changing a single property: `<flinkboot.version>`.
