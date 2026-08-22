@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **`FlussSourceFactory` & `FlussSinkFactory`**: Factory utilities to build pre-configured Flink `FlussSource` and `FlussSink` instances with direct supply (`supplyFor`) and customizable builder (`supplyBuilderFor`) patterns.
   - Dedicated runtime exceptions: `InvalidFlussSourcePropertiesException` and `InvalidFlussSinkPropertiesException`.
 
+#### BOM & Dependencies
+- Added `org.apache.flink:flink-runtime-web` (scope `provided`) to BOM `dependencyManagement` for local Web Dashboard debugging and version alignment.
+
 #### Documentation
 - **How-to Guides**:
   - Added `howto/fluss/configure-fluss-source.md` for configuring Fluss sources in YAML.

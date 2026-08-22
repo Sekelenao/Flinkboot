@@ -77,6 +77,7 @@ All standard Flink execution components are pre-configured with **`provided`** s
 | `org.apache.flink` | `flink-clients`         | `1.20.5`           | `provided`           | Local MiniCluster runner and job submission client.      |
 | `org.apache.flink` | `flink-connector-base`  | `1.20.5`           | `provided`           | Base interfaces for modern Flink 1.20+ connectors.       |
 | `org.apache.flink` | `flink-table-common`    | `1.20.5`           | `provided`           | Flink Table & SQL common types and logical structures.   |
+| `org.apache.flink` | `flink-runtime-web`     | `1.20.5`           | `provided`           | Embedded Web Dashboard runtime for local execution.      |
 | `org.apache.flink` | `flink-connector-kafka` | `3.4.0-1.20`       | `compile`            | Apache Kafka Source and Sink connector for Flink 1.20.   |
 | `org.apache.kafka` | `kafka-clients`         | `3.4.0`            | `compile`            | Official Apache Kafka Java client.                       |
 | `org.apache.fluss` | `fluss-flink-1.20`      | `0.9.1-incubating` | `compile`            | Apache Fluss streaming storage connector for Flink 1.20. |
