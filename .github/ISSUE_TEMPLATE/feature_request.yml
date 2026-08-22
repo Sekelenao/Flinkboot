@@ -8,6 +8,15 @@ body:
       value: |
         Thank you for suggesting a feature. Please describe your use case and proposed design.
 
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Search & Verification
+      description: Please check the following before submitting.
+      options:
+        - label: I have searched existing issues and feature requests to ensure this is not a duplicate.
+          required: true
+
   - type: textarea
     id: problem-motivation
     attributes:
