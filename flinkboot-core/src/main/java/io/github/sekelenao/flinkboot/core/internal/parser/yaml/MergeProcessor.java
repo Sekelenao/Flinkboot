@@ -15,9 +15,12 @@ public final class MergeProcessor {
 
     private final MergeFeatures features;
 
-    public MergeProcessor(ObjectNode root, MergeFeatures features){
+    private final PlaceholderResolver placeholderResolver;
+
+    public MergeProcessor(ObjectNode root, MergeFeatures features, PlaceholderResolver placeholderResolver){
         this.root = Objects.requireNonNull(root);
         this.features = Objects.requireNonNull(features);
+        this.placeholderResolver = Objects.requireNonNull(placeholderResolver);
     }
 
     public void apply(ObjectNode target){
@@ -34,15 +37,17 @@ public final class MergeProcessor {
             var newValue = entry.getValue();
             var existingValue = task.root().get(key);
             if (existingValue == null) {
-                task.root().set(key, newValue);
+                task.root().set(key, placeholderResolver.resolve(newValue));
             } else if (existingValue.isObject() && newValue.isObject()) {
                 tasks.push(new MergeTask(task.pathOf(key), (ObjectNode) existingValue, (ObjectNode) newValue));
             } else if (existingValue.isArray() && newValue.isArray() && features.listMerging()) {
                 var existingArray = (ArrayNode) existingValue;
                 var newArray = (ArrayNode) newValue;
-                existingArray.addAll(newArray);
+                for (var elem : newArray) {
+                    existingArray.add(placeholderResolver.resolve(elem));
+                }
             } else if (features.permitOverride()) {
-                task.root().set(key, newValue);
+                task.root().set(key, placeholderResolver.resolve(newValue));
             } else {
                 throw new YamlParsingException("Overriding an existing value is forbidden: " + task.pathOf(key));
             }

@@ -6,8 +6,10 @@ import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.ConfigurationValidationException;
+import io.github.sekelenao.flinkboot.core.api.exception.configuration.UnresolvedPropertyPlaceholderException;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.YamlParsingException;
 import io.github.sekelenao.flinkboot.core.api.properties.JobProperties;
+import io.github.sekelenao.flinkboot.core.internal.startup.EnvVarResolver;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -25,6 +27,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -595,6 +598,93 @@ class YamlParserTest {
                     () -> assertEquals(Instant.parse("2026-08-16T18:00:00Z"), config.instant()),
                     () -> assertEquals(LocalDate.of(2026, 8, 16), config.date())
                 );
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("Placeholder Resolution")
+    class PlaceholderResolutionTests {
+
+        @Test
+        @DisplayName("Should resolve placeholders in scalar fields from environment variables")
+        void shouldResolvePlaceholdersInScalarFields() {
+            var yaml = "name: \"${APP_NAME}\"\nvalue: 42\n";
+            var env = Map.of("APP_NAME", "ProductionApp");
+            var placeholderResolver = new PlaceholderResolver(new EnvVarResolver(env::get));
+
+            try (var parser = new YamlParser(builder -> {}, STANDARD_FEATURES, placeholderResolver)) {
+                parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+                var config = parser.convertTo(TestConfig.class);
+
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertEquals("ProductionApp", config.name()),
+                    () -> assertEquals(42, config.value())
+                );
+            }
+        }
+
+        @Test
+        @DisplayName("Should resolve placeholders in list elements")
+        void shouldResolvePlaceholdersInListElements() {
+            var yaml = "items:\n  - \"${KAFKA_BROKER_1}\"\n  - \"${KAFKA_BROKER_2}\"\n";
+            var env = Map.of(
+                "KAFKA_BROKER_1", "kafka1:9092",
+                "KAFKA_BROKER_2", "kafka2:9092"
+            );
+            var placeholderResolver = new PlaceholderResolver(new EnvVarResolver(env::get));
+
+            try (var parser = new YamlParser(builder -> {}, STANDARD_FEATURES, placeholderResolver)) {
+                parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+                var config = parser.convertTo(TestConfigWithList.class);
+
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertEquals(List.of("kafka1:9092", "kafka2:9092"), config.items())
+                );
+            }
+        }
+
+        @Test
+        @DisplayName("Should resolve placeholders in nested complex objects")
+        void shouldResolvePlaceholdersInNestedComplexObjects() {
+            var yaml = "env: \"${DEPLOY_ENV}\"\n" +
+                "database:\n" +
+                "  host: \"${DB_HOST}\"\n" +
+                "  port: 5432\n" +
+                "  options:\n" +
+                "    - \"ssl=true\"\n" +
+                "replicas: []\n";
+            var env = Map.of(
+                "DEPLOY_ENV", "prod",
+                "DB_HOST", "postgres.prod.internal"
+            );
+            var placeholderResolver = new PlaceholderResolver(new EnvVarResolver(env::get));
+
+            try (var parser = new YamlParser(builder -> {}, STANDARD_FEATURES, placeholderResolver)) {
+                parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+                var config = parser.convertTo(ComplexConfig.class);
+
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertEquals("prod", config.env()),
+                    () -> assertEquals("postgres.prod.internal", config.database().host()),
+                    () -> assertEquals(5432, config.database().port())
+                );
+            }
+        }
+
+        @Test
+        @DisplayName("Should fail fast with UnresolvedPropertyPlaceholderException when placeholder variable is missing in YAML")
+        void shouldFailFastWhenPlaceholderMissing() {
+            var yaml = "name: \"${UNDEFINED_SECRET}\"\nvalue: 1\n";
+            var placeholderResolver = new PlaceholderResolver(new EnvVarResolver(key -> null));
+
+            try (var parser = new YamlParser(builder -> {}, STANDARD_FEATURES, placeholderResolver)) {
+                var stream = new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8));
+                var exception = assertThrows(UnresolvedPropertyPlaceholderException.class, () -> parser.parse(stream));
+                assertTrue(exception.getMessage().contains("UNDEFINED_SECRET"));
             }
         }
     }

@@ -7,6 +7,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.ConfigurationValidationException;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.YamlParsingException;
+import io.github.sekelenao.flinkboot.core.internal.annotation.VisibleForTesting;
+import io.github.sekelenao.flinkboot.core.internal.startup.EnvVarResolver;
 import jakarta.validation.Validation;
 import jakarta.validation.ValidatorFactory;
 
@@ -31,8 +33,14 @@ public final class YamlParser implements AutoCloseable {
     }
 
     public YamlParser(Consumer<YAMLMapper.Builder> additionalConfiguration, MergeFeatures features) {
+        this(additionalConfiguration, features, new PlaceholderResolver(new EnvVarResolver(System::getenv)));
+    }
+
+    @VisibleForTesting
+    YamlParser(Consumer<YAMLMapper.Builder> additionalConfiguration, MergeFeatures features, PlaceholderResolver placeholderResolver) {
         Objects.requireNonNull(additionalConfiguration);
         Objects.requireNonNull(features);
+        Objects.requireNonNull(placeholderResolver);
         var builder = YAMLMapper.builder()
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true)
@@ -41,15 +49,21 @@ public final class YamlParser implements AutoCloseable {
         additionalConfiguration.accept(builder);
         this.mapper = builder.build();
         this.root = mapper.createObjectNode();
-        this.mergeProcessor = new MergeProcessor((ObjectNode) root, features);
+        this.mergeProcessor = new MergeProcessor((ObjectNode) root, features, placeholderResolver);
         this.validatorFactory = Validation.buildDefaultValidatorFactory();
     }
 
     public YamlParser(YAMLMapper mapper, MergeFeatures mergeFeatures){
+        this(mapper, mergeFeatures, new PlaceholderResolver(new EnvVarResolver(System::getenv)));
+    }
+
+    @VisibleForTesting
+    YamlParser(YAMLMapper mapper, MergeFeatures mergeFeatures, PlaceholderResolver placeholderResolver){
         Objects.requireNonNull(mergeFeatures);
+        Objects.requireNonNull(placeholderResolver);
         this.mapper = Objects.requireNonNull(mapper);
         this.root = mapper.createObjectNode();
-        this.mergeProcessor = new MergeProcessor((ObjectNode) root, mergeFeatures);
+        this.mergeProcessor = new MergeProcessor((ObjectNode) root, mergeFeatures, placeholderResolver);
         this.validatorFactory = Validation.buildDefaultValidatorFactory();
     }
 

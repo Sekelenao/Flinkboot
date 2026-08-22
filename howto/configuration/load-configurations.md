@@ -159,7 +159,46 @@ MyJobConfig config = boot.configuration(MyJobConfig.class, customMapper);
 
 ---
 
-## 4. Merging Semantics & CLI Flags
+## 4. Environment Variable Placeholders
+
+You can interpolate environment variables directly in your YAML configuration files using the `${VARIABLE_NAME}` syntax:
+
+```yaml
+database:
+  url: "jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}"
+  username: "${DB_USER}"
+  password: "${DB_PASSWORD}"
+
+kafka-source:
+  bootstrap-servers:
+    - "${KAFKA_BOOTSTRAP_SERVERS}"
+  group-id: "${KAFKA_GROUP_ID}"
+```
+
+### Strict Fail-Fast Policy
+To prevent silent production misconfigurations (e.g. connecting to a default cluster due to a forgotten environment variable), Flinkboot adheres to a **strict fail-fast principle**:
+- If any referenced environment variable is missing, Flinkboot will **immediately abort startup** and throw an `UnresolvedPropertyPlaceholderException` indicating the missing variable name.
+- Default fallback syntax (e.g. `${VAR:default}`) is intentionally unsupported.
+
+### Case Normalization
+Placeholder names are automatically normalized to standard Unix environment variable naming conventions (`SCREAMING_SNAKE_CASE`):
+- `${kafka-bootstrap-servers}` $\rightarrow$ queries `KAFKA_BOOTSTRAP_SERVERS`
+- `${kafka.bootstrap.servers}` $\rightarrow$ queries `KAFKA_BOOTSTRAP_SERVERS`
+- `${KAFKA_BOOTSTRAP_SERVERS}` $\rightarrow$ queries `KAFKA_BOOTSTRAP_SERVERS`
+
+### Escaping Literal Placeholders
+If your application requires a literal `${...}` string (e.g. for S3 partition path templates, Logback/Log4j patterns, or regexes), escape it with a backslash `\${...}`:
+
+```yaml
+storage:
+  s3-partition-path: "year=\${year}/month=\${month}/day=\${day}"
+```
+
+* **Result in Java:** `"year=${year}/month=${month}/day=${day}"` (the leading backslash is stripped and no environment lookup is performed).
+
+---
+
+## 5. Merging Semantics & CLI Flags
 
 When multiple files are specified (e.g. `file:base.yaml,file:override.yaml`), Flinkboot merges them sequentially from left to right.
 
@@ -204,10 +243,11 @@ topics:
 
 ---
 
-## 5. Validation & Parsing Behaviors
+## 6. Validation & Parsing Behaviors
 
 - **Fail-Fast Validation:** After loading and merging files, Flinkboot validates the root object against Jakarta Bean Validation annotations. If validation fails, a `ConfigurationValidationException` is thrown detailing the errors.
 - **Strict Property Parsing:** Any property in your YAML file that does not match a field in your Java class will cause a `YamlParsingException`. This catches typos immediately.
 - **Case-Insensitive Keys & Enums:** Property names and Enum values are matched case-insensitively.
 - **Native Java 8 Date/Time Support:** Java 8+ temporal types (`java.time.Duration`, `java.time.Instant`, `java.time.LocalDate`, etc.) are natively supported out-of-the-box in YAML models without extra configuration.
 - **Jackson Module Auto-Discovery:** Additional Jackson modules on the classpath are automatically discovered and registered via `findAndAddModules()`.
+

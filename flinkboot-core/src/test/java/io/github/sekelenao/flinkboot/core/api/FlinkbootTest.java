@@ -3,6 +3,7 @@ package io.github.sekelenao.flinkboot.core.api;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import io.github.sekelenao.flinkboot.core.api.exception.configuration.UnresolvedPropertyPlaceholderException;
 import io.github.sekelenao.flinkboot.core.api.properties.JobProperties;
 import jakarta.validation.constraints.NotBlank;
 import org.junit.jupiter.api.DisplayName;
@@ -150,6 +151,18 @@ class FlinkbootTest {
                 () -> assertEquals("prod", config.environment()),
                 () -> assertEquals(9000, config.port())
             );
+        }
+
+        @Test
+        @DisplayName("Should fail fast with UnresolvedPropertyPlaceholderException when environment variable is missing")
+        void shouldThrowUnresolvedPropertyPlaceholderExceptionWhenEnvVarMissing(@TempDir Path tempDir) throws IOException {
+            var file = tempDir.resolve("config.yaml");
+            Files.writeString(file, "name: \"${NON_EXISTENT_VAR_NAME}\"");
+            var args = new String[]{"-flinkboot-configurations", "file:" + file.toAbsolutePath()};
+            var flinkboot = Flinkboot.initialize(args);
+
+            var exception = assertThrows(UnresolvedPropertyPlaceholderException.class, () -> flinkboot.configuration(TestConfig.class));
+            assertTrue(exception.getMessage().contains("NON_EXISTENT_VAR_NAME"));
         }
 
         @Test
