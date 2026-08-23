@@ -174,6 +174,26 @@ class PojoValidatorTest {
         public NestedItemPojo secondaryItem;
     }
 
+    public static class CustomRootTypeInfoFactory extends TypeInfoFactory<ValidAnnotatedRootClass> {
+        @Override
+        public TypeInformation<ValidAnnotatedRootClass> createTypeInfo(Type t, Map<String, TypeInformation<?>> genericParameters) {
+            return new PojoTypeInfo<>(ValidAnnotatedRootClass.class, List.of());
+        }
+    }
+
+    @TypeInfo(CustomRootTypeInfoFactory.class)
+    public static class ValidAnnotatedRootClass {
+        private final String data;
+
+        public ValidAnnotatedRootClass(String data) {
+            this.data = data;
+        }
+
+        public String data() {
+            return data;
+        }
+    }
+
     // ==========================================
     // 2. Invalid POJO Variants (Structural Rules)
     // ==========================================
@@ -347,7 +367,8 @@ class PojoValidatorTest {
             ValidTuplePojo.class,
             ValidObjectArrayPojo.class,
             ValidEitherPojo.class,
-            ValidSharedChildPojo.class
+            ValidSharedChildPojo.class,
+            ValidAnnotatedRootClass.class
         );
     }
 
@@ -412,7 +433,6 @@ class PojoValidatorTest {
 
         @Test
         @DisplayName("Should correctly serialize and deserialize a POJO with all @TypeInfo annotations")
-        @SuppressWarnings("unchecked")
         void shouldSerializeAndDeserializeFullAnnotatedPojo() throws IOException {
             var typeInfo = (PojoTypeInfo<ValidAnnotatedPojo>) TypeExtractor.createTypeInfo(ValidAnnotatedPojo.class);
             var serializer = typeInfo.createSerializer(new SerializerConfigImpl());

@@ -22,13 +22,8 @@ public final class PojoValidator {
     private final Set<TypeInformation<?>> visited = new HashSet<>();
 
     public void validate(Class<?> clazz) {
-        Objects.requireNonNull(clazz, "Class must not be null");
+        Objects.requireNonNull(clazz, "Class to assert must not be null");
         var typeInfo = TypeExtractor.createTypeInfo(clazz);
-        Assertions.assertInstanceOf(PojoTypeInfo.class, typeInfo, () -> String.format(
-            "Class '%s' is not recognized as a POJO by Apache Flink's TypeExtractor. " +
-            "Ensure it is public, has a public zero-argument constructor, and all fields are public or have public getters/setters.",
-            clazz.getName()
-        ));
         tasks.add(new PojoValidationTask<>(clazz.getName(), typeInfo));
         while (!tasks.isEmpty()) {
             processTask(tasks.pop());

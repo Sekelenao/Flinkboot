@@ -47,6 +47,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Protects terminal and cluster logs with a default limit of 10 errors and explicit overflow summary (`- ... and X more violation(s)`).
   - Configurable violations log size via `-flinkboot-configuration-violations-log-size <number>` CLI parameter or `FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE` environment variable.
 
+#### `flinkboot-test`
+- **Flexible Zero-Kryo POJO Assertion**:
+  - Enhanced `FlinkbootTest.assertPojo()` to validate zero-Kryo safety across any compliant Flink type, supporting `@TypeInfo`-annotated root classes, custom factories, and composite types without rigid `PojoTypeInfo` constraints.
+
 ---
 
 ## [0.3.0-1.20]

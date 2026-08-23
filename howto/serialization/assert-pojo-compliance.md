@@ -19,7 +19,7 @@ To be recognized as a POJO by Flink's `TypeExtractor`, a class must meet the fol
 3. All fields must be either:
    * **public** (non-final), or
    * have **public getter and setter** methods following the JavaBean naming convention (e.g. `getField()` and `setField(...)`).
-4. **No Generic/Kryo Fallback Fields**: No fields (or nested fields) may fall back to `GenericTypeInfo` (Kryo fallback serialization). `FlinkbootTest.assertPojo()` inspects fields to ensure pure native Flink POJO serialization.
+4. **No Generic/Kryo Fallback Fields**: No fields (or nested fields) may fall back to `GenericTypeInfo` (Kryo fallback serialization). `FlinkbootTest.assertPojo()` inspects fields recursively to ensure pure native Flink serialization (including types registered via custom `@TypeInfo` factories).
 
 ---
 
