@@ -43,9 +43,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("YamlParser")
 class YamlParserTest {
 
-    private static final MergeFeatures STANDARD_FEATURES = MergeFeatures.builder()
+    private static final ParserFeatures STANDARD_FEATURES = ParserFeatures.builder()
         .permitOverride(false)
         .listMerging(false)
+        .validationCapacity(10)
         .build();
 
     enum JobType {
@@ -240,7 +241,7 @@ class YamlParserTest {
             var baseYaml = "name: \"BaseApp\"\nvalue: 42\n";
             var overrideYaml = "value: 100\n";
 
-            var features = MergeFeatures.builder().permitOverride(true).listMerging(false).build();
+            var features = ParserFeatures.builder().permitOverride(true).listMerging(false).validationCapacity(10).build();
             try (var parser = new YamlParser(features)) {
                 parser.parse(new ByteArrayInputStream(baseYaml.getBytes(StandardCharsets.UTF_8)));
                 parser.parse(new ByteArrayInputStream(overrideYaml.getBytes(StandardCharsets.UTF_8)));
@@ -360,7 +361,7 @@ class YamlParserTest {
             var baseYaml = "items:\n  - \"item1\"\n  - \"item2\"\n";
             var overrideYaml = "items:\n  - \"item3\"\n";
 
-            var features = MergeFeatures.builder().permitOverride(false).listMerging(true).build();
+            var features = ParserFeatures.builder().permitOverride(false).listMerging(true).validationCapacity(10).build();
             try (var parser = new YamlParser(features)) {
                 parser.parse(new ByteArrayInputStream(baseYaml.getBytes(StandardCharsets.UTF_8)));
                 parser.parse(new ByteArrayInputStream(overrideYaml.getBytes(StandardCharsets.UTF_8)));
@@ -375,13 +376,13 @@ class YamlParserTest {
     }
 
     @Nested
-    @DisplayName("MergeFeatures Combinations")
-    class MergeFeaturesCombinations {
+    @DisplayName("ParserFeatures Combinations")
+    class ParserFeaturesCombinations {
 
         @Test
         @DisplayName("With permitOverride=false and listMerging=false: should throw exception on any override or list merge")
         void shouldThrowExceptionOnAnyOverrideOrListMerge() {
-            var features = MergeFeatures.builder().permitOverride(false).listMerging(false).build();
+            var features = ParserFeatures.builder().permitOverride(false).listMerging(false).validationCapacity(10).build();
             var yaml1 = "name: \"Base\"\nvalue: 42\n";
             var yaml2 = "value: 100\n";
             var yamlList1 = "items:\n  - \"a\"\n";
@@ -403,7 +404,7 @@ class YamlParserTest {
         @Test
         @DisplayName("With permitOverride=true and listMerging=false: should override scalars and replace lists")
         void shouldOverrideScalarsAndReplaceLists() {
-            var features = MergeFeatures.builder().permitOverride(true).listMerging(false).build();
+            var features = ParserFeatures.builder().permitOverride(true).listMerging(false).validationCapacity(10).build();
             var yaml1 = "name: \"Base\"\nvalue: 42\n";
             var yaml2 = "value: 100\n";
             var yamlList1 = "items:\n  - \"a\"\n";
@@ -434,7 +435,7 @@ class YamlParserTest {
         @Test
         @DisplayName("With permitOverride=false and listMerging=true: should throw on scalar override but append lists")
         void shouldThrowOnScalarOverrideButAppendLists() {
-            var features = MergeFeatures.builder().permitOverride(false).listMerging(true).build();
+            var features = ParserFeatures.builder().permitOverride(false).listMerging(true).validationCapacity(10).build();
             var yaml1 = "name: \"Base\"\nvalue: 42\n";
             var yaml2 = "value: 100\n";
             var yamlList1 = "items:\n  - \"a\"\n";
@@ -460,7 +461,7 @@ class YamlParserTest {
         @Test
         @DisplayName("With permitOverride=true and listMerging=true: should override scalars and append lists")
         void shouldOverrideScalarsAndAppendLists() {
-            var features = MergeFeatures.builder().permitOverride(true).listMerging(true).build();
+            var features = ParserFeatures.builder().permitOverride(true).listMerging(true).validationCapacity(10).build();
             var yamlScalar1 = "name: \"Base\"\nvalue: 42\n";
             var yamlScalar2 = "value: 100\n";
             var yamlList1 = "items:\n  - \"a\"\n";
@@ -491,9 +492,10 @@ class YamlParserTest {
         @Test
         @DisplayName("Should merge complex nested objects and lists correctly when merging is allowed")
         void shouldMergeComplexNestedObjectsAndLists() {
-            var features = MergeFeatures.builder()
+            var features = ParserFeatures.builder()
                 .permitOverride(true)
                 .listMerging(true)
+                .validationCapacity(10)
                 .build();
 
             var yaml1 = "env: \"dev\"\n" +

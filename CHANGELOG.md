@@ -39,6 +39,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Standardized Developer Skills (`.agents/skills/`)**:
   - Added `configuration-properties`, `classes-and-records`, `test-classes`, and `project-architecture` guidelines for human and AI contributors.
 
+### Fixed
+
+#### `flinkboot-core`
+- **Multi-Line Validation Error Reporting & Configurable Buffer**:
+  - Formats all Bean Validation errors as structured multi-line bullet lists with deterministic sorting.
+  - Protects terminal and cluster logs with a default limit of 10 errors and explicit overflow summary (`- ... and X more violation(s)`).
+  - Configurable violations log size via `-flinkboot-configuration-violations-log-size <number>` CLI parameter or `FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE` environment variable.
+
 ---
 
 ## [0.3.0-1.20]

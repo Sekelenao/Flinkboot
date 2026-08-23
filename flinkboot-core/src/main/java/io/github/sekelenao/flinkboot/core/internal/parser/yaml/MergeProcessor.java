@@ -13,11 +13,11 @@ public final class MergeProcessor {
 
     private final ObjectNode root;
 
-    private final MergeFeatures features;
+    private final ParserFeatures features;
 
     private final PlaceholderResolver placeholderResolver;
 
-    public MergeProcessor(ObjectNode root, MergeFeatures features, PlaceholderResolver placeholderResolver){
+    public MergeProcessor(ObjectNode root, ParserFeatures features, PlaceholderResolver placeholderResolver){
         this.root = Objects.requireNonNull(root);
         this.features = Objects.requireNonNull(features);
         this.placeholderResolver = Objects.requireNonNull(placeholderResolver);

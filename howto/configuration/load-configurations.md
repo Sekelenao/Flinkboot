@@ -245,7 +245,8 @@ topics:
 
 ## 6. Validation & Parsing Behaviors
 
-- **Fail-Fast Validation:** After loading and merging files, Flinkboot validates the root object against Jakarta Bean Validation annotations. If validation fails, a `ConfigurationValidationException` is thrown detailing the errors.
+- **Fail-Fast & Multi-Line Validation:** After loading and merging files, Flinkboot validates the root object against Jakarta Bean Validation annotations. If validation fails, a `ConfigurationValidationException` is thrown displaying violations as a structured, alphabetically-sorted bullet list.
+- **Configurable Violations Log Size:** By default, up to 10 validation errors are displayed before summary truncation (`- ... and X more violation(s)`) to prevent terminal and log pollution. This threshold can be adjusted using `-flinkboot-configuration-violations-log-size <number>` (or `FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE=<number>`).
 - **Strict Property Parsing:** Any property in your YAML file that does not match a field in your Java class will cause a `YamlParsingException`. This catches typos immediately.
 - **Case-Insensitive Keys & Enums:** Property names and Enum values are matched case-insensitively.
 - **Native Java 8 Date/Time Support:** Java 8+ temporal types (`java.time.Duration`, `java.time.Instant`, `java.time.LocalDate`, etc.) are natively supported out-of-the-box in YAML models without extra configuration.
