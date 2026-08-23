@@ -119,7 +119,7 @@ public final class Flinkboot {
      */
     public <C> C configuration(Class<C> configurationClass) throws IOException {
         Objects.requireNonNull(configurationClass);
-        try(var parser = new YamlParser(startupEnvironment.configurationMergeFeatures())) {
+        try(var parser = new YamlParser(startupEnvironment.parserFeatures())) {
             return readConfigurations(configurationClass, parser);
         }
     }
@@ -139,7 +139,7 @@ public final class Flinkboot {
     public <C> C configuration(Class<C> configurationClass, Consumer<YAMLMapper.Builder> customizer) throws IOException {
         Objects.requireNonNull(configurationClass);
         Objects.requireNonNull(customizer);
-        try(var parser = new YamlParser(customizer, startupEnvironment.configurationMergeFeatures())) {
+        try(var parser = new YamlParser(customizer, startupEnvironment.parserFeatures())) {
             return readConfigurations(configurationClass, parser);
         }
     }
@@ -159,7 +159,7 @@ public final class Flinkboot {
     public <C> C configuration(Class<C> configurationClass, YAMLMapper mapper) throws IOException {
         Objects.requireNonNull(configurationClass);
         Objects.requireNonNull(mapper);
-        try(var parser = new YamlParser(mapper, startupEnvironment.configurationMergeFeatures())) {
+        try(var parser = new YamlParser(mapper, startupEnvironment.parserFeatures())) {
             return readConfigurations(configurationClass, parser);
         }
     }

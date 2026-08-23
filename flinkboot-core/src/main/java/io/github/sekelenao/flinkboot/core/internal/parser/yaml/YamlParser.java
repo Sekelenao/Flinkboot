@@ -5,22 +5,19 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import io.github.sekelenao.flinkboot.core.api.exception.configuration.ConfigurationValidationException;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.YamlParsingException;
 import io.github.sekelenao.flinkboot.core.internal.annotation.VisibleForTesting;
 import io.github.sekelenao.flinkboot.core.internal.startup.EnvVarResolver;
-import jakarta.validation.Validation;
-import jakarta.validation.ValidatorFactory;
+import io.github.sekelenao.flinkboot.core.internal.validation.ConfigurationValidator;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public final class YamlParser implements AutoCloseable {
 
-    private final ValidatorFactory validatorFactory;
+    private final ConfigurationValidator validator;
 
     private final YAMLMapper mapper;
 
@@ -28,16 +25,16 @@ public final class YamlParser implements AutoCloseable {
 
     private final MergeProcessor mergeProcessor;
 
-    public YamlParser(MergeFeatures features) {
+    public YamlParser(ParserFeatures features) {
         this(additionalConfiguration -> {}, Objects.requireNonNull(features));
     }
 
-    public YamlParser(Consumer<YAMLMapper.Builder> additionalConfiguration, MergeFeatures features) {
+    public YamlParser(Consumer<YAMLMapper.Builder> additionalConfiguration, ParserFeatures features) {
         this(additionalConfiguration, features, new PlaceholderResolver(new EnvVarResolver(System::getenv)));
     }
 
     @VisibleForTesting
-    YamlParser(Consumer<YAMLMapper.Builder> additionalConfiguration, MergeFeatures features, PlaceholderResolver placeholderResolver) {
+    YamlParser(Consumer<YAMLMapper.Builder> additionalConfiguration, ParserFeatures features, PlaceholderResolver placeholderResolver) {
         Objects.requireNonNull(additionalConfiguration);
         Objects.requireNonNull(features);
         Objects.requireNonNull(placeholderResolver);
@@ -50,21 +47,21 @@ public final class YamlParser implements AutoCloseable {
         this.mapper = builder.build();
         this.root = mapper.createObjectNode();
         this.mergeProcessor = new MergeProcessor((ObjectNode) root, features, placeholderResolver);
-        this.validatorFactory = Validation.buildDefaultValidatorFactory();
+        this.validator = new ConfigurationValidator(features.validationCapacity());
     }
 
-    public YamlParser(YAMLMapper mapper, MergeFeatures mergeFeatures){
-        this(mapper, mergeFeatures, new PlaceholderResolver(new EnvVarResolver(System::getenv)));
+    public YamlParser(YAMLMapper mapper, ParserFeatures parserFeatures){
+        this(mapper, parserFeatures, new PlaceholderResolver(new EnvVarResolver(System::getenv)));
     }
 
     @VisibleForTesting
-    YamlParser(YAMLMapper mapper, MergeFeatures mergeFeatures, PlaceholderResolver placeholderResolver){
-        Objects.requireNonNull(mergeFeatures);
+    YamlParser(YAMLMapper mapper, ParserFeatures parserFeatures, PlaceholderResolver placeholderResolver){
+        Objects.requireNonNull(parserFeatures);
         Objects.requireNonNull(placeholderResolver);
         this.mapper = Objects.requireNonNull(mapper);
         this.root = mapper.createObjectNode();
-        this.mergeProcessor = new MergeProcessor((ObjectNode) root, mergeFeatures, placeholderResolver);
-        this.validatorFactory = Validation.buildDefaultValidatorFactory();
+        this.mergeProcessor = new MergeProcessor((ObjectNode) root, parserFeatures, placeholderResolver);
+        this.validator = new ConfigurationValidator(parserFeatures.validationCapacity());
     }
 
     public void parse(InputStream source){
@@ -90,13 +87,7 @@ public final class YamlParser implements AutoCloseable {
             if (yaml == null) {
                 throw new YamlParsingException("Configuration could not be mapped to target class: " + type.getSimpleName());
             }
-            var violations = validatorFactory.getValidator().validate(yaml);
-            if(!violations.isEmpty()){
-                var message = violations.stream().limit(3)
-                    .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
-                    .collect(Collectors.joining(", "));
-                throw new ConfigurationValidationException(message);
-            }
+            validator.validate(yaml);
             return yaml;
         } catch (IOException exception) {
             throw new YamlParsingException(exception.getMessage(), exception);
@@ -105,7 +96,7 @@ public final class YamlParser implements AutoCloseable {
 
     @Override
     public void close() {
-        validatorFactory.close();
+        validator.close();
     }
 
 }

@@ -190,49 +190,106 @@ class StartupEnvironmentTest {
     }
 
     @Nested
-    @DisplayName("MergeFeatures")
-    class MergeFeaturesTest {
+    @DisplayName("ParserFeatures")
+    class ParserFeaturesTest {
 
         @Test
-        @DisplayName("Should return MergeFeatures with false flags by default when absent")
-        void shouldReturnFalseFlagsByDefault() {
+        @DisplayName("Should return ParserFeatures with default values when absent")
+        void shouldReturnDefaultValuesWhenAbsent() {
             var cmd = CommandLine.parse(new String[0]);
             var resolver = new EnvVarResolver(k -> null);
             var startupEnv = new StartupEnvironment(cmd, resolver);
-            var features = startupEnv.configurationMergeFeatures();
+            var features = startupEnv.parserFeatures();
             assertAll(
                 () -> assertFalse(features.permitOverride()),
-                () -> assertFalse(features.listMerging())
+                () -> assertFalse(features.listMerging()),
+                () -> assertEquals(10, features.validationCapacity())
             );
         }
 
         @Test
-        @DisplayName("Should return MergeFeatures with true flags when flags are present in CommandLine")
-        void shouldReturnTrueFlagsWhenInCommandLine() {
-            var cmd = CommandLine.parse(new String[]{"--flinkboot-configuration-override", "--flinkboot-configuration-list-merging"});
+        @DisplayName("Should return ParserFeatures with true flags and custom capacity when in CommandLine")
+        void shouldReturnCustomValuesWhenInCommandLine() {
+            var cmd = CommandLine.parse(new String[]{
+                "--flinkboot-configuration-override",
+                "--flinkboot-configuration-list-merging",
+                "-flinkboot-configuration-violations-log-size", "25"
+            });
             var resolver = new EnvVarResolver(k -> null);
             var startupEnv = new StartupEnvironment(cmd, resolver);
-            var features = startupEnv.configurationMergeFeatures();
+            var features = startupEnv.parserFeatures();
             assertAll(
                 () -> assertTrue(features.permitOverride()),
-                () -> assertTrue(features.listMerging())
+                () -> assertTrue(features.listMerging()),
+                () -> assertEquals(25, features.validationCapacity())
             );
         }
 
         @Test
-        @DisplayName("Should return MergeFeatures with true flags when flags are present in env variables")
-        void shouldReturnTrueFlagsWhenInEnv() {
+        @DisplayName("Should return ParserFeatures with true flags and custom capacity when in env variables")
+        void shouldReturnCustomValuesWhenInEnv() {
             var cmd = CommandLine.parse(new String[0]);
             var env = Map.of(
                 "FLINKBOOT_CONFIGURATION_OVERRIDE", "true",
-                "FLINKBOOT_CONFIGURATION_LIST_MERGING", "true"
+                "FLINKBOOT_CONFIGURATION_LIST_MERGING", "true",
+                "FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE", "50"
             );
             var resolver = new EnvVarResolver(env::get);
             var startupEnv = new StartupEnvironment(cmd, resolver);
-            var features = startupEnv.configurationMergeFeatures();
+            var features = startupEnv.parserFeatures();
             assertAll(
                 () -> assertTrue(features.permitOverride()),
-                () -> assertTrue(features.listMerging())
+                () -> assertTrue(features.listMerging()),
+                () -> assertEquals(50, features.validationCapacity())
+            );
+        }
+
+        @Test
+        @DisplayName("Should fallback to default capacity when validation capacity is zero or negative in CommandLine")
+        void shouldFallbackToDefaultWhenValidationCapacityIsZeroOrNegativeInCommandLine() {
+            var cmdZero = CommandLine.parse(new String[]{"-flinkboot-configuration-violations-log-size", "0"});
+            var cmdNegative = CommandLine.parse(new String[]{"-flinkboot-configuration-violations-log-size", "-1"});
+            var resolver = new EnvVarResolver(k -> null);
+
+            var startupEnvZero = new StartupEnvironment(cmdZero, resolver);
+            var startupEnvNegative = new StartupEnvironment(cmdNegative, resolver);
+
+            assertAll(
+                () -> assertEquals(10, startupEnvZero.parserFeatures().validationCapacity()),
+                () -> assertEquals(10, startupEnvNegative.parserFeatures().validationCapacity())
+            );
+        }
+
+        @Test
+        @DisplayName("Should fallback to default capacity when validation capacity is zero or negative in env variables")
+        void shouldFallbackToDefaultWhenValidationCapacityIsZeroOrNegativeInEnv() {
+            var cmd = CommandLine.parse(new String[0]);
+            var resolverZero = new EnvVarResolver(k -> "FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE".equals(k) ? "0" : null);
+            var resolverNegative = new EnvVarResolver(k -> "FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE".equals(k) ? "-10" : null);
+
+            var startupEnvZero = new StartupEnvironment(cmd, resolverZero);
+            var startupEnvNegative = new StartupEnvironment(cmd, resolverNegative);
+
+            assertAll(
+                () -> assertEquals(10, startupEnvZero.parserFeatures().validationCapacity()),
+                () -> assertEquals(10, startupEnvNegative.parserFeatures().validationCapacity())
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw NumberFormatException when validation capacity is not a number in CommandLine or env variables")
+        void shouldThrowNumberFormatExceptionWhenValidationCapacityIsNotANumber() {
+            var cmd = CommandLine.parse(new String[]{"-flinkboot-configuration-violations-log-size", "ABC"});
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnvCmd = new StartupEnvironment(cmd, resolver);
+
+            var cmdEmpty = CommandLine.parse(new String[0]);
+            var resolverEnv = new EnvVarResolver(k -> "FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE".equals(k) ? "ABC" : null);
+            var startupEnvEnv = new StartupEnvironment(cmdEmpty, resolverEnv);
+
+            assertAll(
+                () -> assertThrows(NumberFormatException.class, startupEnvCmd::parserFeatures),
+                () -> assertThrows(NumberFormatException.class, startupEnvEnv::parserFeatures)
             );
         }
     }

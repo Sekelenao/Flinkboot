@@ -2,7 +2,7 @@ package io.github.sekelenao.flinkboot.core.internal.startup;
 
 import io.github.sekelenao.flinkboot.core.internal.annotation.VisibleForTesting;
 import io.github.sekelenao.flinkboot.core.internal.parser.bool.StrictBooleanParser;
-import io.github.sekelenao.flinkboot.core.internal.parser.yaml.MergeFeatures;
+import io.github.sekelenao.flinkboot.core.internal.parser.yaml.ParserFeatures;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -47,10 +47,15 @@ public final class StartupEnvironment {
             .orElse(Collections.singletonList("classpath:job-configuration.yaml"));
     }
 
-    public MergeFeatures configurationMergeFeatures(){
-        return MergeFeatures.builder()
+    public ParserFeatures parserFeatures(){
+        var validationCapacity = get("flinkboot-configuration-violations-log-size")
+            .map(Integer::parseInt)
+            .filter(size -> size > 0)
+            .orElse(10);
+        return ParserFeatures.builder()
             .permitOverride(flag("flinkboot-configuration-override"))
             .listMerging(flag("flinkboot-configuration-list-merging"))
+            .validationCapacity(validationCapacity)
             .build();
     }
 
