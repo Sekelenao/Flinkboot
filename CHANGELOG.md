@@ -40,6 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `howto/fluss/configure-fluss-sink.md` for configuring Fluss sinks with batch and timeout options.
   - Updated `howto/setup/avoid-dependency-conflicts.md` with recommended `maven-shade-plugin` exclusions (`module-info.class`, `META-INF/versions/**`).
   - Updated POJO validation guides to use `FlinkbootAssertions.assertThat(...).isPojo()`.
+  - Corrected CLI argument syntax examples in `Flinkboot` Javadoc to reflect space-separated parameters and presence-only flags without inline `=`.
+
 
 #### Contributor Tools & AI Skills
 - **Standardized Developer Skills (`.agents/skills/`)**:

@@ -68,8 +68,8 @@ public final class Flinkboot {
     }
 
     /**
-     * Resolves the boolean value of a flag from command-line arguments (e.g. {@code --my-flag} or
-     * {@code --my-flag=true}) or environment variables (e.g. {@code MY_FLAG=true}).
+     * Resolves the boolean value of a flag from command-line arguments (e.g. {@code --my-flag})
+     * or environment variables (e.g. {@code MY_FLAG=true}).
      *
      * @param flag the flag name without leading dashes (must not be {@code null})
      * @return {@code true} if the flag is enabled; {@code false} otherwise
@@ -81,8 +81,8 @@ public final class Flinkboot {
     }
 
     /**
-     * Resolves a string parameter value from command-line arguments (e.g. {@code -my-param value} or
-     * {@code -my-param=value}) or environment variables (e.g. {@code MY_PARAM=value}).
+     * Resolves a string parameter value from command-line arguments (e.g. {@code -my-param value})
+     * or environment variables (e.g. {@code MY_PARAM=value}).
      *
      * @param parameter the parameter name without leading dashes (must not be {@code null})
      * @return an {@link Optional} containing the parameter value if present, or {@link Optional#empty()}
