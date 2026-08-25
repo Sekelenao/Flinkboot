@@ -9,10 +9,12 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalLong;
 
 /**
@@ -37,8 +39,7 @@ public class FlussSinkProperties implements Serializable {
     @PositiveOrZero
     private final Long batchSize;
 
-    @PositiveOrZero
-    private final Long batchTimeoutMs;
+    private final Duration batchTimeout;
 
     private final Map<@NotNull String, @NotNull String> properties;
 
@@ -50,7 +51,7 @@ public class FlussSinkProperties implements Serializable {
      * @param database         target Fluss database name
      * @param table            target Fluss table name
      * @param batchSize        writer bucket batch size in bytes
-     * @param batchTimeoutMs   writer bucket batch timeout in milliseconds
+     * @param batchTimeout     writer bucket batch timeout duration
      * @param properties       additional Fluss writer configuration properties
      */
     @JsonCreator
@@ -60,7 +61,7 @@ public class FlussSinkProperties implements Serializable {
         @JsonProperty("database") String database,
         @JsonProperty("table") String table,
         @JsonProperty("batch-size") Long batchSize,
-        @JsonProperty("batch-timeout-ms") Long batchTimeoutMs,
+        @JsonProperty("batch-timeout") Duration batchTimeout,
         @JsonProperty("properties") Map<String, String> properties
     ) {
         this.name = Objects.requireNonNull(name);
@@ -68,7 +69,7 @@ public class FlussSinkProperties implements Serializable {
         this.database = Objects.requireNonNull(database);
         this.table = Objects.requireNonNull(table);
         this.batchSize = batchSize;
-        this.batchTimeoutMs = batchTimeoutMs;
+        this.batchTimeout = batchTimeout;
         this.properties = properties;
     }
 
@@ -121,15 +122,12 @@ public class FlussSinkProperties implements Serializable {
     }
 
     /**
-     * Returns the writer bucket batch timeout in milliseconds, if configured.
+     * Returns the writer bucket batch timeout duration, if configured.
      *
-     * @return an {@link OptionalLong} containing the batch timeout in milliseconds, or empty if not set
+     * @return an {@link Optional} containing the batch timeout duration, or empty if not set
      */
-    public OptionalLong batchTimeoutMs() {
-        if (batchTimeoutMs == null) {
-            return OptionalLong.empty();
-        }
-        return OptionalLong.of(batchTimeoutMs);
+    public Optional<Duration> batchTimeout() {
+        return Optional.ofNullable(batchTimeout);
     }
 
     /**
@@ -156,14 +154,14 @@ public class FlussSinkProperties implements Serializable {
             && Objects.equals(database, o.database)
             && Objects.equals(table, o.table)
             && Objects.equals(batchSize, o.batchSize)
-            && Objects.equals(batchTimeoutMs, o.batchTimeoutMs)
+            && Objects.equals(batchTimeout, o.batchTimeout)
             && Objects.equals(properties, o.properties);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(name, bootstrapServers, database, table, batchSize, batchTimeoutMs, properties);
+        return Objects.hash(name, bootstrapServers, database, table, batchSize, batchTimeout, properties);
     }
 
     @Override
@@ -175,8 +173,9 @@ public class FlussSinkProperties implements Serializable {
             ", database='" + database + '\'' +
             ", table='" + table + '\'' +
             ", batchSize=" + batchSize +
-            ", batchTimeoutMs=" + batchTimeoutMs +
+            ", batchTimeout=" + batchTimeout +
             ", properties=" + properties +
             '}';
     }
 }
+

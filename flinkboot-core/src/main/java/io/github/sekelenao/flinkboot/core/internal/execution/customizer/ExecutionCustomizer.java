@@ -30,8 +30,8 @@ public final class ExecutionCustomizer implements EnvironmentCustomizer {
         execConfig.runtimeMode().ifPresent(this::applyRuntimeMode);
         execConfig.parallelism().ifPresent(this::applyParallelism);
         execConfig.maxParallelism().ifPresent(this::applyMaxParallelism);
-        execConfig.bufferTimeoutMs().ifPresent(this::applyBufferTimeoutMs);
-        execConfig.autoWatermarkIntervalMs().ifPresent(this::applyAutoWatermarkIntervalMs);
+        execConfig.bufferTimeout().ifPresent(this::applyBufferTimeout);
+        execConfig.autoWatermarkInterval().ifPresent(this::applyAutoWatermarkInterval);
         execConfig.objectReuse().ifPresent(this::applyObjectReuse);
     }
 
@@ -48,17 +48,16 @@ public final class ExecutionCustomizer implements EnvironmentCustomizer {
         toConfigure.set(PipelineOptions.MAX_PARALLELISM, maxParallelism);
     }
 
-    private void applyBufferTimeoutMs(long bufferTimeoutMs) {
-        var duration = Duration.ofMillis(bufferTimeoutMs);
-        toConfigure.set(ExecutionOptions.BUFFER_TIMEOUT, duration);
+    private void applyBufferTimeout(Duration bufferTimeout) {
+        toConfigure.set(ExecutionOptions.BUFFER_TIMEOUT, bufferTimeout);
     }
 
-    private void applyAutoWatermarkIntervalMs(long autoWatermarkIntervalMs) {
-        var duration = Duration.ofMillis(autoWatermarkIntervalMs);
-        toConfigure.set(PipelineOptions.AUTO_WATERMARK_INTERVAL, duration);
+    private void applyAutoWatermarkInterval(Duration autoWatermarkInterval) {
+        toConfigure.set(PipelineOptions.AUTO_WATERMARK_INTERVAL, autoWatermarkInterval);
     }
 
     private void applyObjectReuse(boolean objectReuse) {
         toConfigure.set(PipelineOptions.OBJECT_REUSE, objectReuse);
     }
 }
+

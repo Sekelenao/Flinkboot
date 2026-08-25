@@ -26,20 +26,19 @@ public final class CheckpointingCustomizer implements EnvironmentCustomizer {
     }
 
     private void apply(CheckpointingProperties checkpointingConfig) {
-        checkpointingConfig.intervalMs().ifPresent(this::applyIntervalMs);
+        checkpointingConfig.interval().ifPresent(this::applyInterval);
         checkpointingConfig.mode().ifPresent(this::applyMode);
-        checkpointingConfig.timeoutMs().ifPresent(this::applyTimeoutMs);
-        checkpointingConfig.minPauseBetweenCheckpointsMs().ifPresent(this::applyMinPauseBetweenCheckpointsMs);
+        checkpointingConfig.timeout().ifPresent(this::applyTimeout);
+        checkpointingConfig.minPauseBetweenCheckpoints().ifPresent(this::applyMinPauseBetweenCheckpoints);
         checkpointingConfig.maxConcurrentCheckpoints().ifPresent(this::applyMaxConcurrentCheckpoints);
         checkpointingConfig.externalizedCheckpointCleanup().ifPresent(this::applyExternalizedCheckpointCleanup);
         checkpointingConfig.unalignedCheckpoints().ifPresent(this::applyUnalignedCheckpoints);
-        checkpointingConfig.alignedCheckpointTimeoutMs().ifPresent(this::applyAlignedCheckpointTimeoutMs);
+        checkpointingConfig.alignedCheckpointTimeout().ifPresent(this::applyAlignedCheckpointTimeout);
         checkpointingConfig.storageUri().ifPresent(this::applyStorageUri);
     }
 
-    private void applyIntervalMs(long intervalMs) {
-        var duration = Duration.ofMillis(intervalMs);
-        toConfigure.set(CheckpointingOptions.CHECKPOINTING_INTERVAL, duration);
+    private void applyInterval(Duration interval) {
+        toConfigure.set(CheckpointingOptions.CHECKPOINTING_INTERVAL, interval);
     }
 
     private void applyMode(CheckpointingMode mode) {
@@ -47,14 +46,12 @@ public final class CheckpointingCustomizer implements EnvironmentCustomizer {
         toConfigure.set(CheckpointingOptions.CHECKPOINTING_CONSISTENCY_MODE, flinkMode);
     }
 
-    private void applyTimeoutMs(long timeoutMs) {
-        var duration = Duration.ofMillis(timeoutMs);
-        toConfigure.set(CheckpointingOptions.CHECKPOINTING_TIMEOUT, duration);
+    private void applyTimeout(Duration timeout) {
+        toConfigure.set(CheckpointingOptions.CHECKPOINTING_TIMEOUT, timeout);
     }
 
-    private void applyMinPauseBetweenCheckpointsMs(long minPauseBetweenCheckpointsMs) {
-        var duration = Duration.ofMillis(minPauseBetweenCheckpointsMs);
-        toConfigure.set(CheckpointingOptions.MIN_PAUSE_BETWEEN_CHECKPOINTS, duration);
+    private void applyMinPauseBetweenCheckpoints(Duration minPauseBetweenCheckpoints) {
+        toConfigure.set(CheckpointingOptions.MIN_PAUSE_BETWEEN_CHECKPOINTS, minPauseBetweenCheckpoints);
     }
 
     private void applyMaxConcurrentCheckpoints(int maxConcurrentCheckpoints) {
@@ -70,12 +67,12 @@ public final class CheckpointingCustomizer implements EnvironmentCustomizer {
         toConfigure.set(CheckpointingOptions.ENABLE_UNALIGNED, unalignedCheckpoints);
     }
 
-    private void applyAlignedCheckpointTimeoutMs(long alignedCheckpointTimeoutMs) {
-        var duration = Duration.ofMillis(alignedCheckpointTimeoutMs);
-        toConfigure.set(CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT, duration);
+    private void applyAlignedCheckpointTimeout(Duration alignedCheckpointTimeout) {
+        toConfigure.set(CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT, alignedCheckpointTimeout);
     }
 
     private void applyStorageUri(String storageUri) {
         toConfigure.set(CheckpointingOptions.CHECKPOINTS_DIRECTORY, storageUri);
     }
 }
+

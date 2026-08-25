@@ -28,14 +28,14 @@ class CheckpointingCustomizerTest {
 
         var checkpointConfig = new CheckpointingProperties(
             true,
-            10000L,
+            Duration.ofMillis(10000L),
             CheckpointingMode.EXACTLY_ONCE,
-            60000L,
-            5000L,
+            Duration.ofMillis(60000L),
+            Duration.ofMillis(5000L),
             2,
             ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION,
             true,
-            1000L,
+            Duration.ofMillis(1000L),
             "s3://bucket/checkpoints"
         );
         var envProps = new ExecutionEnvironmentProperties(null, checkpointConfig, null, null, null, null, null);
@@ -67,3 +67,4 @@ class CheckpointingCustomizerTest {
         assertNull(flinkConfig.get(CheckpointingOptions.CHECKPOINTING_INTERVAL));
     }
 }
+

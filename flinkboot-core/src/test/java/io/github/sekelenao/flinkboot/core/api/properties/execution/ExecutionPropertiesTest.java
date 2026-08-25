@@ -1,6 +1,7 @@
 package io.github.sekelenao.flinkboot.core.api.properties.execution;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -28,6 +30,7 @@ class ExecutionPropertiesTest {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
         mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
     }
 
     @Nested
@@ -43,8 +46,8 @@ class ExecutionPropertiesTest {
                 () -> assertTrue(config.runtimeMode().isEmpty()),
                 () -> assertTrue(config.parallelism().isEmpty()),
                 () -> assertTrue(config.maxParallelism().isEmpty()),
-                () -> assertTrue(config.bufferTimeoutMs().isEmpty()),
-                () -> assertTrue(config.autoWatermarkIntervalMs().isEmpty()),
+                () -> assertTrue(config.bufferTimeout().isEmpty()),
+                () -> assertTrue(config.autoWatermarkInterval().isEmpty()),
                 () -> assertTrue(config.objectReuse().isEmpty())
             );
         }
@@ -56,8 +59,8 @@ class ExecutionPropertiesTest {
                 ExecutionRuntimeMode.STREAMING,
                 8,
                 128,
-                100L,
-                200L,
+                Duration.ofMillis(100),
+                Duration.ofMillis(200),
                 true
             );
 
@@ -65,8 +68,8 @@ class ExecutionPropertiesTest {
                 () -> assertEquals(ExecutionRuntimeMode.STREAMING, config.runtimeMode().orElseThrow()),
                 () -> assertEquals(8, config.parallelism().orElseThrow()),
                 () -> assertEquals(128, config.maxParallelism().orElseThrow()),
-                () -> assertEquals(100L, config.bufferTimeoutMs().orElseThrow()),
-                () -> assertEquals(200L, config.autoWatermarkIntervalMs().orElseThrow()),
+                () -> assertEquals(Duration.ofMillis(100), config.bufferTimeout().orElseThrow()),
+                () -> assertEquals(Duration.ofMillis(200), config.autoWatermarkInterval().orElseThrow()),
                 () -> assertTrue(config.objectReuse().orElseThrow())
             );
         }
@@ -83,8 +86,8 @@ class ExecutionPropertiesTest {
                 ExecutionRuntimeMode.BATCH,
                 4,
                 64,
-                0L,
-                0L,
+                Duration.ZERO,
+                Duration.ZERO,
                 false
             );
 
@@ -99,13 +102,13 @@ class ExecutionPropertiesTest {
                 ExecutionRuntimeMode.STREAMING,
                 0,
                 -1,
-                -10L,
-                -5L,
+                Duration.ofMillis(100),
+                Duration.ofMillis(200),
                 true
             );
 
             Set<ConstraintViolation<ExecutionProperties>> violations = validator.validate(config);
-            assertEquals(4, violations.size());
+            assertEquals(2, violations.size());
         }
     }
 
@@ -120,8 +123,8 @@ class ExecutionPropertiesTest {
                 "  \"runtime-mode\": \"STREAMING\",\n" +
                 "  \"parallelism\": 16,\n" +
                 "  \"max-parallelism\": 256,\n" +
-                "  \"buffer-timeout-ms\": 50,\n" +
-                "  \"auto-watermark-interval-ms\": 100,\n" +
+                "  \"buffer-timeout\": \"PT0.05S\",\n" +
+                "  \"auto-watermark-interval\": \"PT0.1S\",\n" +
                 "  \"object-reuse\": true\n" +
                 "}";
 
@@ -131,8 +134,8 @@ class ExecutionPropertiesTest {
                 () -> assertEquals(ExecutionRuntimeMode.STREAMING, config.runtimeMode().orElseThrow()),
                 () -> assertEquals(16, config.parallelism().orElseThrow()),
                 () -> assertEquals(256, config.maxParallelism().orElseThrow()),
-                () -> assertEquals(50L, config.bufferTimeoutMs().orElseThrow()),
-                () -> assertEquals(100L, config.autoWatermarkIntervalMs().orElseThrow()),
+                () -> assertEquals(Duration.ofMillis(50), config.bufferTimeout().orElseThrow()),
+                () -> assertEquals(Duration.ofMillis(100), config.autoWatermarkInterval().orElseThrow()),
                 () -> assertTrue(config.objectReuse().orElseThrow())
             );
         }
@@ -145,9 +148,9 @@ class ExecutionPropertiesTest {
         @Test
         @DisplayName("Should respect equals and hashCode contracts")
         void shouldRespectEqualsAndHashCode() {
-            var config1 = new ExecutionProperties(ExecutionRuntimeMode.STREAMING, 8, 128, 100L, 200L, true);
-            var config2 = new ExecutionProperties(ExecutionRuntimeMode.STREAMING, 8, 128, 100L, 200L, true);
-            var config3 = new ExecutionProperties(ExecutionRuntimeMode.BATCH, 4, 64, 50L, 100L, false);
+            var config1 = new ExecutionProperties(ExecutionRuntimeMode.STREAMING, 8, 128, Duration.ofMillis(100), Duration.ofMillis(200), true);
+            var config2 = new ExecutionProperties(ExecutionRuntimeMode.STREAMING, 8, 128, Duration.ofMillis(100), Duration.ofMillis(200), true);
+            var config3 = new ExecutionProperties(ExecutionRuntimeMode.BATCH, 4, 64, Duration.ofMillis(50), Duration.ofMillis(100), false);
 
             assertAll(
                 () -> assertEquals(config1, config2),
@@ -159,3 +162,4 @@ class ExecutionPropertiesTest {
         }
     }
 }
+

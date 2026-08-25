@@ -49,9 +49,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+#### `flinkboot-core` & `flinkboot-fluss`
+- **Native `java.time.Duration` Support in Configuration Properties DTOs**:
+  - Replaced raw millisecond numerical fields with `java.time.Duration` across `CheckpointingProperties`, `ExecutionProperties`, `FixedDelayRestartProperties`, `FailureRateRestartProperties`, `ExponentialDelayRestartProperties`, and `FlussSinkProperties`.
+  - Standardized YAML/JSON property keys by removing `-ms` suffixes (`interval`, `timeout`, `min-pause-between-checkpoints`, `aligned-checkpoint-timeout`, `buffer-timeout`, `auto-watermark-interval`, `delay`, `failure-interval`, `initial-backoff`, `max-backoff`, `reset-backoff-threshold`, `batch-timeout`), allowing expressive ISO-8601 duration strings (e.g. `"PT10S"`, `"PT1M"`, `"PT0.05S"`).
+  - Customizers (`ExecutionCustomizer`, `CheckpointingCustomizer`, `RestartStrategyCustomizer`) and factories (`FlussSinkFactory`) supply `Duration` objects directly to Apache Flink `Configuration`.
+
 #### `flinkboot-test`
 - **Single Responsibility Separation**:
   - Extracted POJO validation assertions out of `FlinkbootTest` into `FlinkbootAssertions`, focusing `FlinkbootTest` exclusively on test configuration loading (`FlinkbootTest.configuration(...)`).
+
 
 ### Fixed
 

@@ -66,8 +66,8 @@ class ExecutionEnvironmentFactoryTest {
                 ExecutionRuntimeMode.STREAMING,
                 8,
                 128,
-                100L,
-                200L,
+                Duration.ofMillis(100),
+                Duration.ofMillis(200),
                 true
             );
             var envProps = new ExecutionEnvironmentProperties(execConfig, null, null, null, null, null, null);
@@ -93,14 +93,14 @@ class ExecutionEnvironmentFactoryTest {
         void shouldMapCheckpointingPropertiesToFlinkConfiguration() {
             var chkConfig = new CheckpointingProperties(
                 true,
-                10000L,
+                Duration.ofMillis(10000),
                 CheckpointingMode.EXACTLY_ONCE,
-                60000L,
-                5000L,
+                Duration.ofMillis(60000),
+                Duration.ofMillis(5000),
                 2,
                 ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION,
                 true,
-                1000L,
+                Duration.ofMillis(1000),
                 "s3://my-bucket/checkpoints"
             );
             var envProps = new ExecutionEnvironmentProperties(null, chkConfig, null, null, null, null, null);
@@ -126,7 +126,7 @@ class ExecutionEnvironmentFactoryTest {
         @Test
         @DisplayName("Should correctly map FixedDelay RestartStrategyProperties into Flink Configuration")
         void shouldMapFixedDelayRestartStrategyToFlinkConfiguration() {
-            var fixed = new FixedDelayRestartProperties(3, 5000L);
+            var fixed = new FixedDelayRestartProperties(3, Duration.ofMillis(5000));
             var restartConfig = new RestartStrategyProperties(RestartStrategyType.FIXED_DELAY, fixed, null, null);
             var envProps = new ExecutionEnvironmentProperties(null, null, restartConfig, null, null, null, null);
             var jobConfig = new JobProperties("restart-job", envProps);
@@ -145,7 +145,7 @@ class ExecutionEnvironmentFactoryTest {
         @Test
         @DisplayName("Should correctly map FailureRate RestartStrategyProperties into Flink Configuration")
         void shouldMapFailureRateRestartStrategyToFlinkConfiguration() {
-            var failure = new FailureRateRestartProperties(3, 60000L, 1000L);
+            var failure = new FailureRateRestartProperties(3, Duration.ofMillis(60000), Duration.ofMillis(1000));
             var restartConfig = new RestartStrategyProperties(RestartStrategyType.FAILURE_RATE, null, failure, null);
             var envProps = new ExecutionEnvironmentProperties(null, null, restartConfig, null, null, null, null);
             var jobConfig = new JobProperties("restart-failure-job", envProps);
@@ -165,7 +165,7 @@ class ExecutionEnvironmentFactoryTest {
         @Test
         @DisplayName("Should correctly map ExponentialDelay RestartStrategyProperties into Flink Configuration")
         void shouldMapExponentialDelayRestartStrategyToFlinkConfiguration() {
-            var expo = new ExponentialDelayRestartProperties(1000L, 60000L, 2.0, 3600000L, 0.1);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofMillis(1000), Duration.ofMillis(60000), 2.0, Duration.ofMillis(3600000), 0.1);
             var restartConfig = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
             var envProps = new ExecutionEnvironmentProperties(null, null, restartConfig, null, null, null, null);
             var jobConfig = new JobProperties("restart-expo-job", envProps);
@@ -183,6 +183,7 @@ class ExecutionEnvironmentFactoryTest {
                 () -> assertEquals(0.1, flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_JITTER_FACTOR))
             );
         }
+
 
         @Test
         @DisplayName("Should correctly map NoRestart RestartStrategyProperties into Flink Configuration")
@@ -323,8 +324,8 @@ class ExecutionEnvironmentFactoryTest {
                 ExecutionRuntimeMode.STREAMING,
                 4,
                 32,
-                50L,
-                150L,
+                Duration.ofMillis(50),
+                Duration.ofMillis(150),
                 true
             );
             var envProps = new ExecutionEnvironmentProperties(execConfig, null, null, null, null, null, null);
@@ -345,3 +346,4 @@ class ExecutionEnvironmentFactoryTest {
         }
     }
 }
+

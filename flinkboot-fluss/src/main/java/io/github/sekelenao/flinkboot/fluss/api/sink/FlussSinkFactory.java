@@ -1,5 +1,6 @@
 package io.github.sekelenao.flinkboot.fluss.api.sink;
 
+import io.github.sekelenao.flinkboot.core.internal.time.DurationFormatter;
 import io.github.sekelenao.flinkboot.fluss.api.properties.sink.FlussSinkProperties;
 import org.apache.fluss.flink.sink.FlussSink;
 import org.apache.fluss.flink.sink.FlussSinkBuilder;
@@ -43,9 +44,9 @@ public final class FlussSinkFactory {
         Objects.requireNonNull(config);
         Objects.requireNonNull(serializationSchema);
 
-        var options = new HashMap<String, String>(config.properties());
+        var options = new HashMap<>(config.properties());
         config.batchSize().ifPresent(batchSize -> options.put("client.writer.bucket.batch.size", String.valueOf(batchSize)));
-        config.batchTimeoutMs().ifPresent(timeout -> options.put("client.writer.bucket.batch.timeout", timeout + "ms"));
+        config.batchTimeout().ifPresent(timeout -> options.put("client.writer.bucket.batch.timeout", DurationFormatter.format(timeout)));
 
         return new FlussSinkBuilder<T>()
             .setBootstrapServers(String.join(",", config.bootstrapServers()))

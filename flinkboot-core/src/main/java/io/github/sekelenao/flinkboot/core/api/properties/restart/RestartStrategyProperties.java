@@ -118,15 +118,16 @@ public final class RestartStrategyProperties implements Serializable {
                     "Cannot specify fixed-delay or failure-rate when restart strategy type is EXPONENTIAL_DELAY"
                 );
             }
-            if (exponentialDelay != null && exponentialDelay.initialBackoffMs().isPresent() && exponentialDelay.maxBackoffMs().isPresent()) {
-                if (exponentialDelay.maxBackoffMs().getAsLong() < exponentialDelay.initialBackoffMs().getAsLong()) {
+            if (exponentialDelay != null && exponentialDelay.initialBackoff().isPresent() && exponentialDelay.maxBackoff().isPresent()) {
+                if (exponentialDelay.maxBackoff().get().compareTo(exponentialDelay.initialBackoff().get()) < 0) {
                     throw new InvalidRestartStrategyPropertiesException(
-                        "max-backoff-ms cannot be smaller than initial-backoff-ms in exponential-delay restart strategy"
+                        "max-backoff cannot be smaller than initial-backoff in exponential-delay restart strategy"
                     );
                 }
             }
         }
     }
+
 
     @Override
     @Generated

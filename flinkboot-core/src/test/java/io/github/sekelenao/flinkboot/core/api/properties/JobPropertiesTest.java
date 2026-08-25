@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -30,7 +31,7 @@ class JobPropertiesTest {
         @Test
         @DisplayName("Should correctly return name and environment Optional")
         void shouldReturnGettersCorrectly() {
-            var execConfig = new ExecutionProperties(ExecutionRuntimeMode.STREAMING, 8, 128, 100L, 200L, true);
+            var execConfig = new ExecutionProperties(ExecutionRuntimeMode.STREAMING, 8, 128, Duration.ofMillis(100), Duration.ofMillis(200), true);
             var envProps = new ExecutionEnvironmentProperties(execConfig, null, null, null, null, null, null);
             var jobConfig = new JobProperties("my-job", envProps);
 
@@ -59,9 +60,10 @@ class JobPropertiesTest {
         @Test
         @DisplayName("Should pass validation with valid name and environment")
         void shouldPassValidation() {
-            var execConfig = new ExecutionProperties(ExecutionRuntimeMode.STREAMING, 8, 128, 100L, 200L, true);
+            var execConfig = new ExecutionProperties(ExecutionRuntimeMode.STREAMING, 8, 128, Duration.ofMillis(100), Duration.ofMillis(200), true);
             var envProps = new ExecutionEnvironmentProperties(execConfig, null, null, null, null, null, null);
             var jobConfig = new JobProperties("my-job", envProps);
+
 
             Set<ConstraintViolation<JobProperties>> violations = validator.validate(jobConfig);
             assertTrue(violations.isEmpty());

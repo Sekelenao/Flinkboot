@@ -76,9 +76,9 @@ flink run MyJob.jar
 Define your configuration properties in your YAML file (`job-configuration.yaml`):
 
 ```yaml
-jobName: "my-analytics-pipeline"
+job-name: "my-analytics-pipeline"
 parallelism: 8
-bufferTimeoutMs: 100
+buffer-timeout: "PT0.1S"
 ```
 
 ---
@@ -94,6 +94,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import java.time.Duration;
 
 public final class MyJobConfig {
 
@@ -103,24 +104,25 @@ public final class MyJobConfig {
     @Min(1)
     private final int parallelism;
 
-    private final long bufferTimeoutMs;
+    private final Duration bufferTimeout;
 
     @JsonCreator
     public MyJobConfig(
-        @JsonProperty("jobName") String jobName,
+        @JsonProperty("job-name") String jobName,
         @JsonProperty("parallelism") int parallelism,
-        @JsonProperty("bufferTimeoutMs") long bufferTimeoutMs
+        @JsonProperty("buffer-timeout") Duration bufferTimeout
     ) {
         this.jobName = jobName;
         this.parallelism = parallelism;
-        this.bufferTimeoutMs = bufferTimeoutMs;
+        this.bufferTimeout = bufferTimeout;
     }
 
     public String jobName() { return jobName; }
     public int parallelism() { return parallelism; }
-    public long bufferTimeoutMs() { return bufferTimeoutMs; }
+    public Duration bufferTimeout() { return bufferTimeout; }
 }
 ```
+
 
 ### Loading in Java
 
