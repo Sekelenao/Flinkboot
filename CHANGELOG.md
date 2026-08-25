@@ -26,6 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **`FlussSourceFactory` & `FlussSinkFactory`**: Factory utilities to build pre-configured Flink `FlussSource` and `FlussSink` instances with direct supply (`supplyFor`) and customizable builder (`supplyBuilderFor`) patterns.
   - Dedicated runtime exceptions: `InvalidFlussSourcePropertiesException` and `InvalidFlussSinkPropertiesException`.
 
+#### `flinkboot-test`
+- **Fluent Assertion API (`FlinkbootAssertions` & `ClassAssert`)**:
+  - Introduced `io.github.sekelenao.flinkboot.test.api.assertion.FlinkbootAssertions` with fluent entry point `assertThat(Class<?> actual)`.
+  - Added `ClassAssert.isPojo()` for recursive POJO compliance verification with zero Kryo fallback and method chaining support.
+
 #### BOM & Dependencies
 - Added `org.apache.flink:flink-runtime-web` (scope `provided`) to BOM `dependencyManagement` for local Web Dashboard debugging and version alignment.
 
@@ -34,10 +39,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `howto/fluss/configure-fluss-source.md` for configuring Fluss sources in YAML.
   - Added `howto/fluss/configure-fluss-sink.md` for configuring Fluss sinks with batch and timeout options.
   - Updated `howto/setup/avoid-dependency-conflicts.md` with recommended `maven-shade-plugin` exclusions (`module-info.class`, `META-INF/versions/**`).
+  - Updated POJO validation guides to use `FlinkbootAssertions.assertThat(...).isPojo()`.
 
 #### Contributor Tools & AI Skills
 - **Standardized Developer Skills (`.agents/skills/`)**:
   - Added `configuration-properties`, `classes-and-records`, `test-classes`, and `project-architecture` guidelines for human and AI contributors.
+
+### Changed
+
+#### `flinkboot-test`
+- **Single Responsibility Separation**:
+  - Extracted POJO validation assertions out of `FlinkbootTest` into `FlinkbootAssertions`, focusing `FlinkbootTest` exclusively on test configuration loading (`FlinkbootTest.configuration(...)`).
 
 ### Fixed
 
@@ -49,7 +61,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### `flinkboot-test`
 - **Flexible Zero-Kryo POJO Assertion**:
-  - Enhanced `FlinkbootTest.assertPojo()` to validate zero-Kryo safety across any compliant Flink type, supporting `@TypeInfo`-annotated root classes, custom factories, and composite types without rigid `PojoTypeInfo` constraints.
+  - Enhanced `PojoValidator` to validate zero-Kryo safety across any compliant Flink type, supporting `@TypeInfo`-annotated root classes, custom factories, and composite types without rigid `PojoTypeInfo` constraints.
+
 
 ---
 

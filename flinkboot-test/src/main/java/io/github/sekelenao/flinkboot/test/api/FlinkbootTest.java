@@ -1,22 +1,13 @@
 package io.github.sekelenao.flinkboot.test.api;
 
 import io.github.sekelenao.flinkboot.core.api.Flinkboot;
-import io.github.sekelenao.flinkboot.test.internal.PojoValidator;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Objects;
 
 /**
- * Testing utility providing helpers for verifying Flink POJO compliance and loading configurations in tests.
- *
- * <h3>Example: Asserting POJO Compliance</h3>
- * <pre>{@code
- * @Test
- * void shouldBePojoCompliant() {
- *     FlinkbootTest.assertPojo(MyEventDto.class);
- * }
- * }</pre>
+ * Testing utility providing helpers for loading and resolving configurations in tests.
  *
  * <h3>Example: Loading Configuration in Unit Tests</h3>
  * <pre>{@code
@@ -52,23 +43,10 @@ public final class FlinkbootTest {
         try {
             return Flinkboot.initialize(new String[]{"-flinkboot-configurations", joinedPaths})
                 .configuration(configurationClass);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+        } catch (IOException exception) {
+            throw new UncheckedIOException(exception);
         }
     }
 
-    /**
-     * Recursively verifies that a Java class strictly adheres to Apache Flink's POJO serialization rules.
-     * <p>
-     * Validates public constructors, field visibility, getters/setters, nested types, generics,
-     * collections, arrays, and {@code @TypeInfo} annotations to guarantee zero Kryo fallback.
-     *
-     * @param clazz the class to validate for POJO compliance
-     * @throws NullPointerException if {@code clazz} is {@code null}
-     * @throws AssertionError       if the class or any nested field violates Flink POJO rules
-     */
-    public static void assertPojo(Class<?> clazz) {
-        Objects.requireNonNull(clazz, "Class to assert must not be null");
-        new PojoValidator().validate(clazz);
-    }
 }
+

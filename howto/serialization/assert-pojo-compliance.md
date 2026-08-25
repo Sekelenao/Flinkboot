@@ -19,7 +19,7 @@ To be recognized as a POJO by Flink's `TypeExtractor`, a class must meet the fol
 3. All fields must be either:
    * **public** (non-final), or
    * have **public getter and setter** methods following the JavaBean naming convention (e.g. `getField()` and `setField(...)`).
-4. **No Generic/Kryo Fallback Fields**: No fields (or nested fields) may fall back to `GenericTypeInfo` (Kryo fallback serialization). `FlinkbootTest.assertPojo()` inspects fields recursively to ensure pure native Flink serialization (including types registered via custom `@TypeInfo` factories).
+4. **No Generic/Kryo Fallback Fields**: No fields (or nested fields) may fall back to `GenericTypeInfo` (Kryo fallback serialization). `FlinkbootAssertions.assertThat(MyClass.class).isPojo()` inspects fields recursively to ensure pure native Flink serialization (including types registered via custom `@TypeInfo` factories).
 
 ---
 
@@ -60,7 +60,7 @@ To write compliance tests, import the Flinkboot BOM in your `<dependencyManageme
 
 ## 3. Usage in JUnit 5
 
-Use `FlinkbootTest.assertPojo(Class<?> clazz)` to verify your model classes:
+Use `FlinkbootAssertions.assertThat(Class<?> clazz).isPojo()` to verify your model classes:
 
 ### Example Data Class
 
@@ -91,20 +91,22 @@ public class UserActivity {
 Create a test class in your `src/test/java` directory:
 
 ```java
-import io.github.sekelenao.flinkboot.test.api.FlinkbootTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import static io.github.sekelenao.flinkboot.test.api.assertion.FlinkbootAssertions.assertThat;
 
 class UserActivityTest {
 
     @Test
     @DisplayName("UserActivity should comply with Flink POJO serialization rules")
     void testPojoCompliance() {
-        FlinkbootTest.assertPojo(UserActivity.class);
+        assertThat(UserActivity.class).isPojo();
     }
 }
 ```
 
 If the class violates any of Flink's requirements or contains fields falling back to Kryo serialization, the assertion fails immediately with a descriptive error message indicating the exact path of the invalid field (e.g., `UserActivity.timestamp`).
+
 
 
