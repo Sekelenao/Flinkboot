@@ -62,7 +62,7 @@ The Flinkboot BOM categorizes dependencies into six logical groups:
 | `io.github.sekelenao` | `flinkboot-core` | `compile` | Core bootstrap API, YAML parsing, validation, and serialization. |
 | `io.github.sekelenao` | `flinkboot-kafka` | `compile` | Pre-configured Kafka Source and Sink factories. |
 | `io.github.sekelenao` | `flinkboot-fluss` | `compile` | Pre-configured Apache Fluss Source and Sink factories. |
-| `io.github.sekelenao` | `flinkboot-test` | `test` | Unit test helpers (`FlinkbootTest.assertPojo`, test config loaders). |
+| `io.github.sekelenao` | `flinkboot-test` | `test` | Unit test helpers (fluent POJO assertions, test config loaders). |
 
 ---
 

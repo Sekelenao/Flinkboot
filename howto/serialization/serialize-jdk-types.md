@@ -110,17 +110,19 @@ Flink's native serializers for collections and time types properly support `null
 
 ## 4. POJO Compliance Validation
 
-To verify that your POJOs are properly configured and do not fall back to Kryo serialization, validate them in your tests using `FlinkbootTest.assertPojo()` from `flinkboot-test`:
+To verify that your POJOs are properly configured and do not fall back to Kryo serialization, validate them in your tests using `FlinkbootAssertions.assertThat(...).isPojo()` from `flinkboot-test`:
 
 ```java
-import io.github.sekelenao.flinkboot.test.api.FlinkbootTest;
 import org.junit.jupiter.api.Test;
+
+import static io.github.sekelenao.flinkboot.test.api.assertion.FlinkbootAssertions.assertThat;
 
 class UserEventTest {
 
     @Test
     void testPojoCompliance() {
-        FlinkbootTest.assertPojo(UserEvent.class);
+        assertThat(UserEvent.class).isPojo();
     }
 }
 ```
+
