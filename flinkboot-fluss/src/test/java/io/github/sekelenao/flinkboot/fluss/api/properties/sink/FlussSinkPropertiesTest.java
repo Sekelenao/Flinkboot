@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,7 +51,7 @@ class FlussSinkPropertiesTest {
                 "database: my_db\n" +
                 "table: my_table\n" +
                 "batch-size: 1048576\n" +
-                "batch-timeout-ms: 50\n" +
+                "batch-timeout: \"PT0.05S\"\n" +
                 "properties:\n" +
                 "  client.writer.bucket.batch.size: 1048576\n";
 
@@ -63,7 +64,7 @@ class FlussSinkPropertiesTest {
                 () -> assertEquals("my_db", config.database()),
                 () -> assertEquals("my_table", config.table()),
                 () -> assertEquals(1048576L, config.batchSize().orElseThrow()),
-                () -> assertEquals(50L, config.batchTimeoutMs().orElseThrow()),
+                () -> assertEquals(Duration.ofMillis(50), config.batchTimeout().orElseThrow()),
                 () -> assertEquals(Map.of("client.writer.bucket.batch.size", "1048576"), config.properties())
             );
         }
@@ -86,7 +87,7 @@ class FlussSinkPropertiesTest {
                 () -> assertEquals("my_db", config.database()),
                 () -> assertEquals("my_table", config.table()),
                 () -> assertTrue(config.batchSize().isEmpty()),
-                () -> assertTrue(config.batchTimeoutMs().isEmpty()),
+                () -> assertTrue(config.batchTimeout().isEmpty()),
                 () -> assertTrue(config.properties().isEmpty())
             );
         }
@@ -105,7 +106,7 @@ class FlussSinkPropertiesTest {
                 "my_db",
                 "my_table",
                 1024L,
-                50L,
+                Duration.ofMillis(50),
                 Map.of()
             );
 
@@ -122,7 +123,7 @@ class FlussSinkPropertiesTest {
                 "my_db",
                 "my_table",
                 1024L,
-                50L,
+                Duration.ofMillis(50),
                 Map.of()
             );
 
@@ -139,7 +140,7 @@ class FlussSinkPropertiesTest {
                 "",
                 "my_table",
                 1024L,
-                50L,
+                Duration.ofMillis(50),
                 Map.of()
             );
 
@@ -156,7 +157,7 @@ class FlussSinkPropertiesTest {
                 "my_db",
                 "",
                 1024L,
-                50L,
+                Duration.ofMillis(50),
                 Map.of()
             );
 
@@ -188,9 +189,9 @@ class FlussSinkPropertiesTest {
         @Test
         @DisplayName("Should obey equals and hashCode contract")
         void shouldObeyContract() {
-            var props1 = new FlussSinkProperties("s", List.of("h:9123"), "d", "t", 100L, 50L, Map.of("k", "v"));
-            var props2 = new FlussSinkProperties("s", List.of("h:9123"), "d", "t", 100L, 50L, Map.of("k", "v"));
-            var props3 = new FlussSinkProperties("other", List.of("h:9123"), "d", "t", 100L, 50L, Map.of("k", "v"));
+            var props1 = new FlussSinkProperties("s", List.of("h:9123"), "d", "t", 100L, Duration.ofMillis(50), Map.of("k", "v"));
+            var props2 = new FlussSinkProperties("s", List.of("h:9123"), "d", "t", 100L, Duration.ofMillis(50), Map.of("k", "v"));
+            var props3 = new FlussSinkProperties("other", List.of("h:9123"), "d", "t", 100L, Duration.ofMillis(50), Map.of("k", "v"));
 
             assertAll(
                 () -> assertEquals(props1, props2),
@@ -203,3 +204,4 @@ class FlussSinkPropertiesTest {
         }
     }
 }
+

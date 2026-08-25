@@ -5,12 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Positive;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalDouble;
-import java.util.OptionalLong;
 
 /**
  * Configuration properties for exponential delay restart strategy.
@@ -19,17 +19,14 @@ public final class ExponentialDelayRestartProperties implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Positive
-    private final Long initialBackoffMs;
+    private final Duration initialBackoff;
 
-    @Positive
-    private final Long maxBackoffMs;
+    private final Duration maxBackoff;
 
     @DecimalMin("1.0")
     private final Double backoffMultiplier;
 
-    @Positive
-    private final Long resetBackoffThresholdMs;
+    private final Duration resetBackoffThreshold;
 
     @DecimalMin("0.0")
     @DecimalMax("1.0")
@@ -38,49 +35,43 @@ public final class ExponentialDelayRestartProperties implements Serializable {
     /**
      * Creates a new {@code ExponentialDelayRestartProperties} instance.
      *
-     * @param initialBackoffMs        starting backoff delay in milliseconds
-     * @param maxBackoffMs            maximum backoff delay upper bound in milliseconds
-     * @param backoffMultiplier       multiplier for increasing backoff delay after each failure
-     * @param resetBackoffThresholdMs duration of stable execution before resetting backoff delay
-     * @param jitterFactor            jitter randomization factor (0.0 to 1.0)
+     * @param initialBackoff        starting backoff delay duration
+     * @param maxBackoff            maximum backoff delay upper bound duration
+     * @param backoffMultiplier     multiplier for increasing backoff delay after each failure
+     * @param resetBackoffThreshold duration of stable execution before resetting backoff delay
+     * @param jitterFactor          jitter randomization factor (0.0 to 1.0)
      */
     @JsonCreator
     public ExponentialDelayRestartProperties(
-        @JsonProperty("initial-backoff-ms") Long initialBackoffMs,
-        @JsonProperty("max-backoff-ms") Long maxBackoffMs,
+        @JsonProperty("initial-backoff") Duration initialBackoff,
+        @JsonProperty("max-backoff") Duration maxBackoff,
         @JsonProperty("backoff-multiplier") Double backoffMultiplier,
-        @JsonProperty("reset-backoff-threshold-ms") Long resetBackoffThresholdMs,
+        @JsonProperty("reset-backoff-threshold") Duration resetBackoffThreshold,
         @JsonProperty("jitter-factor") Double jitterFactor
     ) {
-        this.initialBackoffMs = initialBackoffMs;
-        this.maxBackoffMs = maxBackoffMs;
+        this.initialBackoff = initialBackoff;
+        this.maxBackoff = maxBackoff;
         this.backoffMultiplier = backoffMultiplier;
-        this.resetBackoffThresholdMs = resetBackoffThresholdMs;
+        this.resetBackoffThreshold = resetBackoffThreshold;
         this.jitterFactor = jitterFactor;
     }
 
     /**
-     * Returns the initial backoff delay in milliseconds.
+     * Returns the initial backoff delay duration.
      *
-     * @return an {@link OptionalLong} containing initial backoff, or empty if not specified
+     * @return an {@link Optional} containing initial backoff duration, or empty if not specified
      */
-    public OptionalLong initialBackoffMs() {
-        if (initialBackoffMs == null) {
-            return OptionalLong.empty();
-        }
-        return OptionalLong.of(initialBackoffMs);
+    public Optional<Duration> initialBackoff() {
+        return Optional.ofNullable(initialBackoff);
     }
 
     /**
-     * Returns the maximum backoff delay cap in milliseconds.
+     * Returns the maximum backoff delay cap duration.
      *
-     * @return an {@link OptionalLong} containing max backoff, or empty if not specified
+     * @return an {@link Optional} containing max backoff duration, or empty if not specified
      */
-    public OptionalLong maxBackoffMs() {
-        if (maxBackoffMs == null) {
-            return OptionalLong.empty();
-        }
-        return OptionalLong.of(maxBackoffMs);
+    public Optional<Duration> maxBackoff() {
+        return Optional.ofNullable(maxBackoff);
     }
 
     /**
@@ -96,15 +87,12 @@ public final class ExponentialDelayRestartProperties implements Serializable {
     }
 
     /**
-     * Returns the threshold in milliseconds after which the backoff delay resets.
+     * Returns the threshold duration after which the backoff delay resets.
      *
-     * @return an {@link OptionalLong} containing reset threshold, or empty if not specified
+     * @return an {@link Optional} containing reset threshold duration, or empty if not specified
      */
-    public OptionalLong resetBackoffThresholdMs() {
-        if (resetBackoffThresholdMs == null) {
-            return OptionalLong.empty();
-        }
-        return OptionalLong.of(resetBackoffThresholdMs);
+    public Optional<Duration> resetBackoffThreshold() {
+        return Optional.ofNullable(resetBackoffThreshold);
     }
 
     /**
@@ -126,10 +114,10 @@ public final class ExponentialDelayRestartProperties implements Serializable {
             return false;
         }
         var o = (ExponentialDelayRestartProperties) other;
-        return Objects.equals(initialBackoffMs, o.initialBackoffMs)
-            && Objects.equals(maxBackoffMs, o.maxBackoffMs)
+        return Objects.equals(initialBackoff, o.initialBackoff)
+            && Objects.equals(maxBackoff, o.maxBackoff)
             && Objects.equals(backoffMultiplier, o.backoffMultiplier)
-            && Objects.equals(resetBackoffThresholdMs, o.resetBackoffThresholdMs)
+            && Objects.equals(resetBackoffThreshold, o.resetBackoffThreshold)
             && Objects.equals(jitterFactor, o.jitterFactor);
     }
 
@@ -137,10 +125,10 @@ public final class ExponentialDelayRestartProperties implements Serializable {
     @Generated
     public int hashCode() {
         return Objects.hash(
-            initialBackoffMs,
-            maxBackoffMs,
+            initialBackoff,
+            maxBackoff,
             backoffMultiplier,
-            resetBackoffThresholdMs,
+            resetBackoffThreshold,
             jitterFactor
         );
     }
@@ -149,11 +137,12 @@ public final class ExponentialDelayRestartProperties implements Serializable {
     @Generated
     public String toString() {
         return "ExponentialDelayRestartProperties{" +
-            "initialBackoffMs=" + initialBackoffMs +
-            ", maxBackoffMs=" + maxBackoffMs +
+            "initialBackoff=" + initialBackoff +
+            ", maxBackoff=" + maxBackoff +
             ", backoffMultiplier=" + backoffMultiplier +
-            ", resetBackoffThresholdMs=" + resetBackoffThresholdMs +
+            ", resetBackoffThreshold=" + resetBackoffThreshold +
             ", jitterFactor=" + jitterFactor +
             '}';
     }
 }
+

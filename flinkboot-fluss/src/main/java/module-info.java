@@ -5,6 +5,7 @@ module io.github.sekelenao.flinkboot.fluss {
     requires jakarta.validation;
 
     exports io.github.sekelenao.flinkboot.fluss.api.properties.source;
+
     exports io.github.sekelenao.flinkboot.fluss.api.properties.sink;
     exports io.github.sekelenao.flinkboot.fluss.api.source;
     exports io.github.sekelenao.flinkboot.fluss.api.sink;

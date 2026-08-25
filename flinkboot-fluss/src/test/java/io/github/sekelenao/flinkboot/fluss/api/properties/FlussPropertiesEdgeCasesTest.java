@@ -6,6 +6,7 @@ import io.github.sekelenao.flinkboot.fluss.api.properties.source.FlussStartupMod
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -35,8 +36,8 @@ class FlussPropertiesEdgeCasesTest {
             () -> assertNotNull(src1.toString())
         );
 
-        var sink1 = new FlussSinkProperties("snk", List.of("localhost:9123"), "db", "tbl", 1024L, 50L, Map.of("k", "v"));
-        var sink2 = new FlussSinkProperties("snk", List.of("localhost:9123"), "db", "tbl", 1024L, 50L, Map.of("k", "v"));
+        var sink1 = new FlussSinkProperties("snk", List.of("localhost:9123"), "db", "tbl", 1024L, Duration.ofMillis(50), Map.of("k", "v"));
+        var sink2 = new FlussSinkProperties("snk", List.of("localhost:9123"), "db", "tbl", 1024L, Duration.ofMillis(50), Map.of("k", "v"));
         var sink3 = new FlussSinkProperties("snk-other", List.of("localhost:9123"), "db2", "tbl2", null, null, null);
 
         assertAll(
@@ -61,7 +62,8 @@ class FlussPropertiesEdgeCasesTest {
             () -> assertTrue(nullSrc.startupTimestamp().isEmpty()),
             () -> assertTrue(nullSink.properties().isEmpty()),
             () -> assertTrue(nullSink.batchSize().isEmpty()),
-            () -> assertTrue(nullSink.batchTimeoutMs().isEmpty())
+            () -> assertTrue(nullSink.batchTimeout().isEmpty())
         );
     }
 }
+

@@ -1,15 +1,17 @@
 package io.github.sekelenao.flinkboot.core.api.properties.checkpointing;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -31,14 +33,14 @@ class CheckpointingPropertiesTest {
 
             assertAll(
                 () -> assertTrue(config.enabled().isEmpty()),
-                () -> assertTrue(config.intervalMs().isEmpty()),
+                () -> assertTrue(config.interval().isEmpty()),
                 () -> assertTrue(config.mode().isEmpty()),
-                () -> assertTrue(config.timeoutMs().isEmpty()),
-                () -> assertTrue(config.minPauseBetweenCheckpointsMs().isEmpty()),
+                () -> assertTrue(config.timeout().isEmpty()),
+                () -> assertTrue(config.minPauseBetweenCheckpoints().isEmpty()),
                 () -> assertTrue(config.maxConcurrentCheckpoints().isEmpty()),
                 () -> assertTrue(config.externalizedCheckpointCleanup().isEmpty()),
                 () -> assertTrue(config.unalignedCheckpoints().isEmpty()),
-                () -> assertTrue(config.alignedCheckpointTimeoutMs().isEmpty()),
+                () -> assertTrue(config.alignedCheckpointTimeout().isEmpty()),
                 () -> assertTrue(config.storageUri().isEmpty())
             );
         }
@@ -48,27 +50,27 @@ class CheckpointingPropertiesTest {
         void shouldReturnPopulatedOptionals() {
             var config = new CheckpointingProperties(
                 true,
-                10000L,
+                Duration.ofSeconds(10),
                 CheckpointingMode.EXACTLY_ONCE,
-                60000L,
-                5000L,
+                Duration.ofMinutes(1),
+                Duration.ofSeconds(5),
                 2,
                 ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION,
                 true,
-                1000L,
+                Duration.ofSeconds(1),
                 "file:///tmp/checkpoints"
             );
 
             assertAll(
                 () -> assertEquals(true, config.enabled().orElseThrow()),
-                () -> assertEquals(10000L, config.intervalMs().orElseThrow()),
+                () -> assertEquals(Duration.ofSeconds(10), config.interval().orElseThrow()),
                 () -> assertEquals(CheckpointingMode.EXACTLY_ONCE, config.mode().orElseThrow()),
-                () -> assertEquals(60000L, config.timeoutMs().orElseThrow()),
-                () -> assertEquals(5000L, config.minPauseBetweenCheckpointsMs().orElseThrow()),
+                () -> assertEquals(Duration.ofMinutes(1), config.timeout().orElseThrow()),
+                () -> assertEquals(Duration.ofSeconds(5), config.minPauseBetweenCheckpoints().orElseThrow()),
                 () -> assertEquals(2, config.maxConcurrentCheckpoints().orElseThrow()),
                 () -> assertEquals(ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, config.externalizedCheckpointCleanup().orElseThrow()),
                 () -> assertEquals(true, config.unalignedCheckpoints().orElseThrow()),
-                () -> assertEquals(1000L, config.alignedCheckpointTimeoutMs().orElseThrow()),
+                () -> assertEquals(Duration.ofSeconds(1), config.alignedCheckpointTimeout().orElseThrow()),
                 () -> assertEquals("file:///tmp/checkpoints", config.storageUri().orElseThrow())
             );
         }
@@ -82,22 +84,11 @@ class CheckpointingPropertiesTest {
         @DisplayName("Should pass validation when parameters are valid or null")
         void shouldPassValidationWhenValid() {
             var config = new CheckpointingProperties(
-                true, 1000L, CheckpointingMode.EXACTLY_ONCE, 5000L, 0L, 1,
-                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, false, 0L, "s3://bucket"
+                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, false, Duration.ZERO, "s3://bucket"
             );
             var violations = validator.validate(config);
             assertTrue(violations.isEmpty());
-        }
-
-        @Test
-        @DisplayName("Should fail validation when intervalMs is negative or zero")
-        void shouldFailValidationWhenIntervalIsInvalid() {
-            var config = new CheckpointingProperties(
-                true, -10L, CheckpointingMode.EXACTLY_ONCE, 5000L, 0L, 1,
-                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, false, 0L, "s3://bucket"
-            );
-            var violations = validator.validate(config);
-            assertFalse(violations.isEmpty());
         }
     }
 
@@ -109,12 +100,12 @@ class CheckpointingPropertiesTest {
         @DisplayName("Should verify equals and hashCode contracts")
         void shouldVerifyEqualsAndHashCode() {
             var config1 = new CheckpointingProperties(
-                true, 1000L, CheckpointingMode.EXACTLY_ONCE, 5000L, 0L, 1,
-                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, false, 0L, "s3://bucket"
+                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, false, Duration.ZERO, "s3://bucket"
             );
             var config2 = new CheckpointingProperties(
-                true, 1000L, CheckpointingMode.EXACTLY_ONCE, 5000L, 0L, 1,
-                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, false, 0L, "s3://bucket"
+                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, false, Duration.ZERO, "s3://bucket"
             );
 
             assertAll(
@@ -133,24 +124,26 @@ class CheckpointingPropertiesTest {
         void shouldDeserializeJson() throws Exception {
             String json = "{" +
                 "\"enabled\": true," +
-                "\"interval-ms\": 5000," +
+                "\"interval\": \"PT5S\"," +
                 "\"mode\": \"EXACTLY_ONCE\"," +
-                "\"timeout-ms\": 30000," +
-                "\"min-pause-between-checkpoints-ms\": 1000," +
+                "\"timeout\": \"PT30S\"," +
+                "\"min-pause-between-checkpoints\": \"PT1S\"," +
                 "\"max-concurrent-checkpoints\": 1," +
                 "\"externalized-checkpoint-cleanup\": \"RETAIN_ON_CANCELLATION\"," +
                 "\"unaligned-checkpoints\": true," +
-                "\"aligned-checkpoint-timeout-ms\": 500," +
+                "\"aligned-checkpoint-timeout\": \"PT0.5S\"," +
                 "\"storage-uri\": \"s3://my-bucket/checkpoints\"" +
                 "}";
 
             var mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
             var config = mapper.readValue(json, CheckpointingProperties.class);
 
             assertNotNull(config);
-            assertEquals(5000L, config.intervalMs().orElseThrow());
+            assertEquals(Duration.ofSeconds(5), config.interval().orElseThrow());
             assertEquals(CheckpointingMode.EXACTLY_ONCE, config.mode().orElseThrow());
             assertEquals("s3://my-bucket/checkpoints", config.storageUri().orElseThrow());
         }
     }
 }
+

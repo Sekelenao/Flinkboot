@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.OptionalLong;
 
 /**
  * Configuration properties for failure rate restart strategy.
@@ -21,28 +21,26 @@ public final class FailureRateRestartProperties implements Serializable {
     @Positive
     private final Integer maxFailuresPerInterval;
 
-    @Positive
-    private final Long failureIntervalMs;
+    private final Duration failureInterval;
 
-    @PositiveOrZero
-    private final Long delayMs;
+    private final Duration delay;
 
     /**
      * Creates a new {@code FailureRateRestartProperties} instance.
      *
      * @param maxFailuresPerInterval maximum allowed failures within the interval before failing the job
-     * @param failureIntervalMs      time interval window for measuring failure rate in milliseconds
-     * @param delayMs                delay duration between restart attempts in milliseconds
+     * @param failureInterval        time interval window for measuring failure rate
+     * @param delay                  delay duration between restart attempts
      */
     @JsonCreator
     public FailureRateRestartProperties(
         @JsonProperty("max-failures-per-interval") Integer maxFailuresPerInterval,
-        @JsonProperty("failure-interval-ms") Long failureIntervalMs,
-        @JsonProperty("delay-ms") Long delayMs
+        @JsonProperty("failure-interval") Duration failureInterval,
+        @JsonProperty("delay") Duration delay
     ) {
         this.maxFailuresPerInterval = maxFailuresPerInterval;
-        this.failureIntervalMs = failureIntervalMs;
-        this.delayMs = delayMs;
+        this.failureInterval = failureInterval;
+        this.delay = delay;
     }
 
     /**
@@ -58,27 +56,21 @@ public final class FailureRateRestartProperties implements Serializable {
     }
 
     /**
-     * Returns the failure measurement interval in milliseconds.
+     * Returns the failure measurement interval duration.
      *
-     * @return an {@link OptionalLong} containing the interval in milliseconds, or empty if not specified
+     * @return an {@link Optional} containing the interval duration, or empty if not specified
      */
-    public OptionalLong failureIntervalMs() {
-        if (failureIntervalMs == null) {
-            return OptionalLong.empty();
-        }
-        return OptionalLong.of(failureIntervalMs);
+    public Optional<Duration> failureInterval() {
+        return Optional.ofNullable(failureInterval);
     }
 
     /**
-     * Returns the delay duration between restart attempts in milliseconds.
+     * Returns the delay duration between restart attempts.
      *
-     * @return an {@link OptionalLong} containing the delay in milliseconds, or empty if not specified
+     * @return an {@link Optional} containing the delay duration, or empty if not specified
      */
-    public OptionalLong delayMs() {
-        if (delayMs == null) {
-            return OptionalLong.empty();
-        }
-        return OptionalLong.of(delayMs);
+    public Optional<Duration> delay() {
+        return Optional.ofNullable(delay);
     }
 
     @Override
@@ -89,14 +81,14 @@ public final class FailureRateRestartProperties implements Serializable {
         }
         var o = (FailureRateRestartProperties) other;
         return Objects.equals(maxFailuresPerInterval, o.maxFailuresPerInterval)
-            && Objects.equals(failureIntervalMs, o.failureIntervalMs)
-            && Objects.equals(delayMs, o.delayMs);
+            && Objects.equals(failureInterval, o.failureInterval)
+            && Objects.equals(delay, o.delay);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(maxFailuresPerInterval, failureIntervalMs, delayMs);
+        return Objects.hash(maxFailuresPerInterval, failureInterval, delay);
     }
 
     @Override
@@ -104,8 +96,9 @@ public final class FailureRateRestartProperties implements Serializable {
     public String toString() {
         return "FailureRateRestartProperties{" +
             "maxFailuresPerInterval=" + maxFailuresPerInterval +
-            ", failureIntervalMs=" + failureIntervalMs +
-            ", delayMs=" + delayMs +
+            ", failureInterval=" + failureInterval +
+            ", delay=" + delay +
             '}';
     }
 }
+

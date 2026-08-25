@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -51,9 +52,10 @@ class FlussSinkFactoryTest {
                 "my_db",
                 "my_table",
                 1048576L,
-                50L,
+                Duration.ofMillis(50),
                 Map.of("custom.key", "custom.value")
             );
+
 
             var builder = FlussSinkFactory.supplyBuilderFor(props, TEST_SCHEMA);
             assertNotNull(builder);

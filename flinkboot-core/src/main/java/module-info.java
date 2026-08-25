@@ -15,8 +15,10 @@ module io.github.sekelenao.flinkboot.core {
     exports io.github.sekelenao.flinkboot.core.api.resource;
     exports io.github.sekelenao.flinkboot.core.api.typing.time;
     exports io.github.sekelenao.flinkboot.core.api.typing.collection;
-    // Internal annotation exported specifically to companion modules for code generation metadata
+    // Internal utilities exported specifically to companion modules
     exports io.github.sekelenao.flinkboot.core.internal.annotation to io.github.sekelenao.flinkboot.kafka, io.github.sekelenao.flinkboot.fluss;
+    exports io.github.sekelenao.flinkboot.core.internal.time to io.github.sekelenao.flinkboot.kafka, io.github.sekelenao.flinkboot.fluss;
+
 
     requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.databind;

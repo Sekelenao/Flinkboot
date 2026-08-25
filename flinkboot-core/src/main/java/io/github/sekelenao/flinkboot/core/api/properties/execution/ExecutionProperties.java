@@ -4,13 +4,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.OptionalLong;
 
 /**
  * Configuration properties controlling Flink execution runtime behaviors, parallelism,
@@ -28,38 +27,36 @@ public final class ExecutionProperties implements Serializable {
     @Positive
     private final Integer maxParallelism;
 
-    @PositiveOrZero
-    private final Long bufferTimeoutMs;
+    private final Duration bufferTimeout;
 
-    @PositiveOrZero
-    private final Long autoWatermarkIntervalMs;
+    private final Duration autoWatermarkInterval;
 
     private final Boolean objectReuse;
 
     /**
      * Creates a new {@code ExecutionProperties} instance.
      *
-     * @param runtimeMode             execution runtime mode (STREAMING, BATCH, or AUTOMATIC)
-     * @param parallelism             default operator parallelism
-     * @param maxParallelism          maximum job parallelism
-     * @param bufferTimeoutMs         network buffer flush timeout in milliseconds
-     * @param autoWatermarkIntervalMs automatic watermark generation interval in milliseconds
-     * @param objectReuse             whether object reuse is enabled
+     * @param runtimeMode           execution runtime mode (STREAMING, BATCH, or AUTOMATIC)
+     * @param parallelism           default operator parallelism
+     * @param maxParallelism        maximum job parallelism
+     * @param bufferTimeout         network buffer flush timeout duration
+     * @param autoWatermarkInterval automatic watermark generation interval duration
+     * @param objectReuse           whether object reuse is enabled
      */
     @JsonCreator
     public ExecutionProperties(
         @JsonProperty("runtime-mode") ExecutionRuntimeMode runtimeMode,
         @JsonProperty("parallelism") Integer parallelism,
         @JsonProperty("max-parallelism") Integer maxParallelism,
-        @JsonProperty("buffer-timeout-ms") Long bufferTimeoutMs,
-        @JsonProperty("auto-watermark-interval-ms") Long autoWatermarkIntervalMs,
+        @JsonProperty("buffer-timeout") Duration bufferTimeout,
+        @JsonProperty("auto-watermark-interval") Duration autoWatermarkInterval,
         @JsonProperty("object-reuse") Boolean objectReuse
     ) {
         this.runtimeMode = runtimeMode;
         this.parallelism = parallelism;
         this.maxParallelism = maxParallelism;
-        this.bufferTimeoutMs = bufferTimeoutMs;
-        this.autoWatermarkIntervalMs = autoWatermarkIntervalMs;
+        this.bufferTimeout = bufferTimeout;
+        this.autoWatermarkInterval = autoWatermarkInterval;
         this.objectReuse = objectReuse;
     }
 
@@ -97,27 +94,21 @@ public final class ExecutionProperties implements Serializable {
     }
 
     /**
-     * Returns the optional buffer timeout in milliseconds.
+     * Returns the optional buffer timeout duration.
      *
-     * @return an {@link OptionalLong} containing the buffer timeout in milliseconds, or empty if not specified
+     * @return an {@link Optional} containing the buffer timeout duration, or empty if not specified
      */
-    public OptionalLong bufferTimeoutMs() {
-        if (bufferTimeoutMs == null) {
-            return OptionalLong.empty();
-        }
-        return OptionalLong.of(bufferTimeoutMs);
+    public Optional<Duration> bufferTimeout() {
+        return Optional.ofNullable(bufferTimeout);
     }
 
     /**
-     * Returns the optional automatic watermark generation interval in milliseconds.
+     * Returns the optional automatic watermark generation interval duration.
      *
-     * @return an {@link OptionalLong} containing the interval in milliseconds, or empty if not specified
+     * @return an {@link Optional} containing the interval duration, or empty if not specified
      */
-    public OptionalLong autoWatermarkIntervalMs() {
-        if (autoWatermarkIntervalMs == null) {
-            return OptionalLong.empty();
-        }
-        return OptionalLong.of(autoWatermarkIntervalMs);
+    public Optional<Duration> autoWatermarkInterval() {
+        return Optional.ofNullable(autoWatermarkInterval);
     }
 
     /**
@@ -139,15 +130,15 @@ public final class ExecutionProperties implements Serializable {
         return runtimeMode == o.runtimeMode
             && Objects.equals(parallelism, o.parallelism)
             && Objects.equals(maxParallelism, o.maxParallelism)
-            && Objects.equals(bufferTimeoutMs, o.bufferTimeoutMs)
-            && Objects.equals(autoWatermarkIntervalMs, o.autoWatermarkIntervalMs)
+            && Objects.equals(bufferTimeout, o.bufferTimeout)
+            && Objects.equals(autoWatermarkInterval, o.autoWatermarkInterval)
             && Objects.equals(objectReuse, o.objectReuse);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(runtimeMode, parallelism, maxParallelism, bufferTimeoutMs, autoWatermarkIntervalMs, objectReuse);
+        return Objects.hash(runtimeMode, parallelism, maxParallelism, bufferTimeout, autoWatermarkInterval, objectReuse);
     }
 
     @Override
@@ -157,9 +148,10 @@ public final class ExecutionProperties implements Serializable {
             "runtimeMode=" + runtimeMode +
             ", parallelism=" + parallelism +
             ", maxParallelism=" + maxParallelism +
-            ", bufferTimeoutMs=" + bufferTimeoutMs +
-            ", autoWatermarkIntervalMs=" + autoWatermarkIntervalMs +
+            ", bufferTimeout=" + bufferTimeout +
+            ", autoWatermarkInterval=" + autoWatermarkInterval +
             ", objectReuse=" + objectReuse +
             '}';
     }
 }
+

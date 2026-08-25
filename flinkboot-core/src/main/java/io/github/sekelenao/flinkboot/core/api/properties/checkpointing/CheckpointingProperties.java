@@ -4,13 +4,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.OptionalLong;
 
 /**
  * Configuration properties for Flink stream checkpointing.
@@ -24,16 +23,13 @@ public final class CheckpointingProperties implements Serializable {
 
     private final Boolean enabled;
 
-    @Positive
-    private final Long intervalMs;
+    private final Duration interval;
 
     private final CheckpointingMode mode;
 
-    @Positive
-    private final Long timeoutMs;
+    private final Duration timeout;
 
-    @PositiveOrZero
-    private final Long minPauseBetweenCheckpointsMs;
+    private final Duration minPauseBetweenCheckpoints;
 
     @Positive
     private final Integer maxConcurrentCheckpoints;
@@ -42,8 +38,7 @@ public final class CheckpointingProperties implements Serializable {
 
     private final Boolean unalignedCheckpoints;
 
-    @PositiveOrZero
-    private final Long alignedCheckpointTimeoutMs;
+    private final Duration alignedCheckpointTimeout;
 
     private final String storageUri;
 
@@ -51,38 +46,38 @@ public final class CheckpointingProperties implements Serializable {
      * Creates a new {@code CheckpointingProperties} instance.
      *
      * @param enabled                       whether checkpointing is enabled
-     * @param intervalMs                    checkpoint interval in milliseconds
+     * @param interval                      checkpoint interval duration
      * @param mode                          consistency mode (EXACTLY_ONCE or AT_LEAST_ONCE)
-     * @param timeoutMs                     checkpoint timeout in milliseconds
-     * @param minPauseBetweenCheckpointsMs  minimum pause duration between consecutive checkpoints in milliseconds
+     * @param timeout                       checkpoint timeout duration
+     * @param minPauseBetweenCheckpoints    minimum pause duration between consecutive checkpoints
      * @param maxConcurrentCheckpoints      maximum number of concurrent in-flight checkpoints
      * @param externalizedCheckpointCleanup cleanup behavior for externalized checkpoints on cancellation
      * @param unalignedCheckpoints          whether unaligned checkpoints are enabled
-     * @param alignedCheckpointTimeoutMs    timeout before switching from aligned to unaligned checkpoint
+     * @param alignedCheckpointTimeout      timeout before switching from aligned to unaligned checkpoint
      * @param storageUri                    checkpoint storage directory URI (e.g. {@code "file:///checkpoints"} or {@code "s3://bucket/checkpoints"})
      */
     @JsonCreator
     public CheckpointingProperties(
         @JsonProperty("enabled") Boolean enabled,
-        @JsonProperty("interval-ms") Long intervalMs,
+        @JsonProperty("interval") Duration interval,
         @JsonProperty("mode") CheckpointingMode mode,
-        @JsonProperty("timeout-ms") Long timeoutMs,
-        @JsonProperty("min-pause-between-checkpoints-ms") Long minPauseBetweenCheckpointsMs,
+        @JsonProperty("timeout") Duration timeout,
+        @JsonProperty("min-pause-between-checkpoints") Duration minPauseBetweenCheckpoints,
         @JsonProperty("max-concurrent-checkpoints") Integer maxConcurrentCheckpoints,
         @JsonProperty("externalized-checkpoint-cleanup") ExternalizedCheckpointCleanupMode externalizedCheckpointCleanup,
         @JsonProperty("unaligned-checkpoints") Boolean unalignedCheckpoints,
-        @JsonProperty("aligned-checkpoint-timeout-ms") Long alignedCheckpointTimeoutMs,
+        @JsonProperty("aligned-checkpoint-timeout") Duration alignedCheckpointTimeout,
         @JsonProperty("storage-uri") String storageUri
     ) {
         this.enabled = enabled;
-        this.intervalMs = intervalMs;
+        this.interval = interval;
         this.mode = mode;
-        this.timeoutMs = timeoutMs;
-        this.minPauseBetweenCheckpointsMs = minPauseBetweenCheckpointsMs;
+        this.timeout = timeout;
+        this.minPauseBetweenCheckpoints = minPauseBetweenCheckpoints;
         this.maxConcurrentCheckpoints = maxConcurrentCheckpoints;
         this.externalizedCheckpointCleanup = externalizedCheckpointCleanup;
         this.unalignedCheckpoints = unalignedCheckpoints;
-        this.alignedCheckpointTimeoutMs = alignedCheckpointTimeoutMs;
+        this.alignedCheckpointTimeout = alignedCheckpointTimeout;
         this.storageUri = storageUri;
     }
 
@@ -96,15 +91,12 @@ public final class CheckpointingProperties implements Serializable {
     }
 
     /**
-     * Returns the optional checkpoint interval in milliseconds.
+     * Returns the optional checkpoint interval duration.
      *
-     * @return an {@link OptionalLong} containing the interval in milliseconds, or empty if not specified
+     * @return an {@link Optional} containing the interval duration, or empty if not specified
      */
-    public OptionalLong intervalMs() {
-        if (intervalMs == null) {
-            return OptionalLong.empty();
-        }
-        return OptionalLong.of(intervalMs);
+    public Optional<Duration> interval() {
+        return Optional.ofNullable(interval);
     }
 
     /**
@@ -117,27 +109,21 @@ public final class CheckpointingProperties implements Serializable {
     }
 
     /**
-     * Returns the optional checkpoint timeout in milliseconds.
+     * Returns the optional checkpoint timeout duration.
      *
-     * @return an {@link OptionalLong} containing the timeout in milliseconds, or empty if not specified
+     * @return an {@link Optional} containing the timeout duration, or empty if not specified
      */
-    public OptionalLong timeoutMs() {
-        if (timeoutMs == null) {
-            return OptionalLong.empty();
-        }
-        return OptionalLong.of(timeoutMs);
+    public Optional<Duration> timeout() {
+        return Optional.ofNullable(timeout);
     }
 
     /**
-     * Returns the optional minimum pause duration between consecutive checkpoints in milliseconds.
+     * Returns the optional minimum pause duration between consecutive checkpoints.
      *
-     * @return an {@link OptionalLong} containing the pause in milliseconds, or empty if not specified
+     * @return an {@link Optional} containing the pause duration, or empty if not specified
      */
-    public OptionalLong minPauseBetweenCheckpointsMs() {
-        if (minPauseBetweenCheckpointsMs == null) {
-            return OptionalLong.empty();
-        }
-        return OptionalLong.of(minPauseBetweenCheckpointsMs);
+    public Optional<Duration> minPauseBetweenCheckpoints() {
+        return Optional.ofNullable(minPauseBetweenCheckpoints);
     }
 
     /**
@@ -171,15 +157,12 @@ public final class CheckpointingProperties implements Serializable {
     }
 
     /**
-     * Returns the optional alignment timeout in milliseconds before falling back to unaligned checkpointing.
+     * Returns the optional alignment timeout duration before falling back to unaligned checkpointing.
      *
-     * @return an {@link OptionalLong} containing the timeout in milliseconds, or empty if not specified
+     * @return an {@link Optional} containing the timeout duration, or empty if not specified
      */
-    public OptionalLong alignedCheckpointTimeoutMs() {
-        if (alignedCheckpointTimeoutMs == null) {
-            return OptionalLong.empty();
-        }
-        return OptionalLong.of(alignedCheckpointTimeoutMs);
+    public Optional<Duration> alignedCheckpointTimeout() {
+        return Optional.ofNullable(alignedCheckpointTimeout);
     }
 
     /**
@@ -199,14 +182,14 @@ public final class CheckpointingProperties implements Serializable {
         }
         var o = (CheckpointingProperties) other;
         return Objects.equals(enabled, o.enabled)
-            && Objects.equals(intervalMs, o.intervalMs)
+            && Objects.equals(interval, o.interval)
             && mode == o.mode
-            && Objects.equals(timeoutMs, o.timeoutMs)
-            && Objects.equals(minPauseBetweenCheckpointsMs, o.minPauseBetweenCheckpointsMs)
+            && Objects.equals(timeout, o.timeout)
+            && Objects.equals(minPauseBetweenCheckpoints, o.minPauseBetweenCheckpoints)
             && Objects.equals(maxConcurrentCheckpoints, o.maxConcurrentCheckpoints)
             && externalizedCheckpointCleanup == o.externalizedCheckpointCleanup
             && Objects.equals(unalignedCheckpoints, o.unalignedCheckpoints)
-            && Objects.equals(alignedCheckpointTimeoutMs, o.alignedCheckpointTimeoutMs)
+            && Objects.equals(alignedCheckpointTimeout, o.alignedCheckpointTimeout)
             && Objects.equals(storageUri, o.storageUri);
     }
 
@@ -215,14 +198,14 @@ public final class CheckpointingProperties implements Serializable {
     public int hashCode() {
         return Objects.hash(
             enabled,
-            intervalMs,
+            interval,
             mode,
-            timeoutMs,
-            minPauseBetweenCheckpointsMs,
+            timeout,
+            minPauseBetweenCheckpoints,
             maxConcurrentCheckpoints,
             externalizedCheckpointCleanup,
             unalignedCheckpoints,
-            alignedCheckpointTimeoutMs,
+            alignedCheckpointTimeout,
             storageUri
         );
     }
@@ -232,15 +215,16 @@ public final class CheckpointingProperties implements Serializable {
     public String toString() {
         return "CheckpointingProperties{" +
             "enabled=" + enabled +
-            ", intervalMs=" + intervalMs +
+            ", interval=" + interval +
             ", mode=" + mode +
-            ", timeoutMs=" + timeoutMs +
-            ", minPauseBetweenCheckpointsMs=" + minPauseBetweenCheckpointsMs +
+            ", timeout=" + timeout +
+            ", minPauseBetweenCheckpoints=" + minPauseBetweenCheckpoints +
             ", maxConcurrentCheckpoints=" + maxConcurrentCheckpoints +
             ", externalizedCheckpointCleanup=" + externalizedCheckpointCleanup +
             ", unalignedCheckpoints=" + unalignedCheckpoints +
-            ", alignedCheckpointTimeoutMs=" + alignedCheckpointTimeoutMs +
+            ", alignedCheckpointTimeout=" + alignedCheckpointTimeout +
             ", storageUri='" + storageUri + '\'' +
             '}';
     }
 }
+

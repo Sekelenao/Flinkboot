@@ -23,6 +23,7 @@ import io.github.sekelenao.flinkboot.core.api.properties.state.StateBackendType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -37,9 +38,9 @@ class ConfigurationsEdgeCasesTest {
     @Test
     @DisplayName("Should test equals, hashCode, toString for all Configuration DTOs")
     void shouldTestEqualsHashCodeToStringOnDtos() {
-        var execConfig1 = new ExecutionProperties(ExecutionRuntimeMode.STREAMING, 4, 32, 100L, 200L, true);
-        var execConfig2 = new ExecutionProperties(ExecutionRuntimeMode.STREAMING, 4, 32, 100L, 200L, true);
-        var execConfig3 = new ExecutionProperties(ExecutionRuntimeMode.BATCH, 2, 16, 50L, 100L, false);
+        var execConfig1 = new ExecutionProperties(ExecutionRuntimeMode.STREAMING, 4, 32, Duration.ofMillis(100), Duration.ofMillis(200), true);
+        var execConfig2 = new ExecutionProperties(ExecutionRuntimeMode.STREAMING, 4, 32, Duration.ofMillis(100), Duration.ofMillis(200), true);
+        var execConfig3 = new ExecutionProperties(ExecutionRuntimeMode.BATCH, 2, 16, Duration.ofMillis(50), Duration.ofMillis(100), false);
 
         assertAll(
             () -> assertEquals(execConfig1, execConfig1),
@@ -51,8 +52,8 @@ class ConfigurationsEdgeCasesTest {
             () -> assertNotNull(execConfig1.toString())
         );
 
-        var chkConfig1 = new CheckpointingProperties(true, 1000L, CheckpointingMode.EXACTLY_ONCE, 5000L, 100L, 1, ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, true, 500L, "s3://uri");
-        var chkConfig2 = new CheckpointingProperties(true, 1000L, CheckpointingMode.EXACTLY_ONCE, 5000L, 100L, 1, ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, true, 500L, "s3://uri");
+        var chkConfig1 = new CheckpointingProperties(true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ofMillis(100), 1, ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, true, Duration.ofMillis(500), "s3://uri");
+        var chkConfig2 = new CheckpointingProperties(true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ofMillis(100), 1, ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, true, Duration.ofMillis(500), "s3://uri");
 
         assertAll(
             () -> assertEquals(chkConfig1, chkConfig1),
@@ -63,8 +64,8 @@ class ConfigurationsEdgeCasesTest {
             () -> assertNotNull(chkConfig1.toString())
         );
 
-        var fixed1 = new FixedDelayRestartProperties(3, 1000L);
-        var fixed2 = new FixedDelayRestartProperties(3, 1000L);
+        var fixed1 = new FixedDelayRestartProperties(3, Duration.ofSeconds(1));
+        var fixed2 = new FixedDelayRestartProperties(3, Duration.ofSeconds(1));
         assertAll(
             () -> assertEquals(fixed1, fixed1),
             () -> assertEquals(fixed1, fixed2),
@@ -74,8 +75,8 @@ class ConfigurationsEdgeCasesTest {
             () -> assertNotNull(fixed1.toString())
         );
 
-        var failRate1 = new FailureRateRestartProperties(5, 60000L, 1000L);
-        var failRate2 = new FailureRateRestartProperties(5, 60000L, 1000L);
+        var failRate1 = new FailureRateRestartProperties(5, Duration.ofMinutes(1), Duration.ofSeconds(1));
+        var failRate2 = new FailureRateRestartProperties(5, Duration.ofMinutes(1), Duration.ofSeconds(1));
         assertAll(
             () -> assertEquals(failRate1, failRate1),
             () -> assertEquals(failRate1, failRate2),
@@ -85,8 +86,8 @@ class ConfigurationsEdgeCasesTest {
             () -> assertNotNull(failRate1.toString())
         );
 
-        var exp1 = new ExponentialDelayRestartProperties(1000L, 60000L, 2.0, 300000L, 0.1);
-        var exp2 = new ExponentialDelayRestartProperties(1000L, 60000L, 2.0, 300000L, 0.1);
+        var exp1 = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofMinutes(5), 0.1);
+        var exp2 = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofMinutes(5), 0.1);
         assertAll(
             () -> assertEquals(exp1, exp1),
             () -> assertEquals(exp1, exp2),
@@ -155,10 +156,10 @@ class ConfigurationsEdgeCasesTest {
     @Test
     @DisplayName("Should test invalid restart strategy sub-block configurations")
     void shouldTestInvalidRestartStrategySubBlocks() {
-        var fixed = new FixedDelayRestartProperties(1, 1000L);
+        var fixed = new FixedDelayRestartProperties(1, Duration.ofSeconds(1));
         assertAll(
             () -> assertThrows(InvalidRestartStrategyPropertiesException.class,
-                () -> new RestartStrategyProperties(RestartStrategyType.FIXED_DELAY, null, new FailureRateRestartProperties(1, 1L, 1L), null)),
+                () -> new RestartStrategyProperties(RestartStrategyType.FIXED_DELAY, null, new FailureRateRestartProperties(1, Duration.ofSeconds(1), Duration.ofSeconds(1)), null)),
             () -> assertThrows(InvalidRestartStrategyPropertiesException.class,
                 () -> new RestartStrategyProperties(RestartStrategyType.FAILURE_RATE, fixed, null, null)),
             () -> assertThrows(InvalidRestartStrategyPropertiesException.class,
@@ -167,6 +168,7 @@ class ConfigurationsEdgeCasesTest {
                 () -> new RestartStrategyProperties(RestartStrategyType.NO_RESTART, fixed, null, null))
         );
     }
+
 
     @Test
     @DisplayName("Should test invalid state backend custom class configuration")

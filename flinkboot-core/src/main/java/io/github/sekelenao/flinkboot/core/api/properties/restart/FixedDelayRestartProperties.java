@@ -4,12 +4,12 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.OptionalLong;
 
 /**
  * Configuration properties for fixed delay restart strategy.
@@ -21,22 +21,21 @@ public final class FixedDelayRestartProperties implements Serializable {
     @Positive
     private final Integer attempts;
 
-    @PositiveOrZero
-    private final Long delayMs;
+    private final Duration delay;
 
     /**
      * Creates a new {@code FixedDelayRestartProperties} instance.
      *
      * @param attempts maximum number of restart attempts
-     * @param delayMs  delay duration between restart attempts in milliseconds
+     * @param delay    delay duration between restart attempts
      */
     @JsonCreator
     public FixedDelayRestartProperties(
         @JsonProperty("attempts") Integer attempts,
-        @JsonProperty("delay-ms") Long delayMs
+        @JsonProperty("delay") Duration delay
     ) {
         this.attempts = attempts;
-        this.delayMs = delayMs;
+        this.delay = delay;
     }
 
     /**
@@ -52,15 +51,12 @@ public final class FixedDelayRestartProperties implements Serializable {
     }
 
     /**
-     * Returns the delay duration between restart attempts in milliseconds.
+     * Returns the delay duration between restart attempts.
      *
-     * @return an {@link OptionalLong} containing the delay in milliseconds, or empty if not specified
+     * @return an {@link Optional} containing the delay duration, or empty if not specified
      */
-    public OptionalLong delayMs() {
-        if (delayMs == null) {
-            return OptionalLong.empty();
-        }
-        return OptionalLong.of(delayMs);
+    public Optional<Duration> delay() {
+        return Optional.ofNullable(delay);
     }
 
     @Override
@@ -71,13 +67,13 @@ public final class FixedDelayRestartProperties implements Serializable {
         }
         var o = (FixedDelayRestartProperties) other;
         return Objects.equals(attempts, o.attempts)
-            && Objects.equals(delayMs, o.delayMs);
+            && Objects.equals(delay, o.delay);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(attempts, delayMs);
+        return Objects.hash(attempts, delay);
     }
 
     @Override
@@ -85,7 +81,8 @@ public final class FixedDelayRestartProperties implements Serializable {
     public String toString() {
         return "FixedDelayRestartProperties{" +
             "attempts=" + attempts +
-            ", delayMs=" + delayMs +
+            ", delay=" + delay +
             '}';
     }
 }
+
