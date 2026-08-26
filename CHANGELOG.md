@@ -28,24 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### `flinkboot-test`
 - **Fluent Assertion API (`FlinkbootAssertions` & `ClassAssert`)**:
-  - Introduced `io.github.sekelenao.flinkboot.test.api.assertion.FlinkbootAssertions` with fluent entry point `assertThat(Class<?> actual)`.
+  - Introduced `io.github.sekelenao.flinkboot.test.api.assertion.FlinkbootAssertions` with fluent entry point `assertThat(Class<?> type)`.
   - Added `ClassAssert.isPojo()` for recursive POJO compliance verification with zero Kryo fallback and method chaining support.
 
 #### BOM & Dependencies
 - Added `org.apache.flink:flink-runtime-web` (scope `provided`) to BOM `dependencyManagement` for local Web Dashboard debugging and version alignment.
-
-#### Documentation
-- **How-to Guides**:
-  - Added `howto/fluss/configure-fluss-source.md` for configuring Fluss sources in YAML.
-  - Added `howto/fluss/configure-fluss-sink.md` for configuring Fluss sinks with batch and timeout options.
-  - Updated `howto/setup/avoid-dependency-conflicts.md` with recommended `maven-shade-plugin` exclusions (`module-info.class`, `META-INF/versions/**`).
-  - Updated POJO validation guides to use `FlinkbootAssertions.assertThat(...).isPojo()`.
-  - Corrected CLI argument syntax examples in `Flinkboot` Javadoc to reflect space-separated parameters and presence-only flags without inline `=`.
-
-
-#### Contributor Tools & AI Skills
-- **Standardized Developer Skills (`.agents/skills/`)**:
-  - Added `configuration-properties`, `classes-and-records`, `test-classes`, and `project-architecture` guidelines for human and AI contributors.
 
 ### Changed
 
@@ -63,7 +50,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Standardized `Objects.requireNonNull` Messages**:
   - Unified `NullPointerException` parameter messages across all public entry points (`Flinkboot`, `Resource`, `KafkaSourceFactory`, `KafkaSinkFactory`, `FlussSourceFactory`, `FlussSinkFactory`, `FlinkbootTest`) with consistent `<param> must not be null` messages.
 
-
 ### Fixed
 
 #### `flinkboot-core`
@@ -71,6 +57,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Formats all Bean Validation errors as structured multi-line bullet lists with deterministic sorting.
   - Protects terminal and cluster logs with a default limit of 10 errors and explicit overflow summary (`- ... and X more violation(s)`).
   - Configurable violations log size via `-flinkboot-configuration-violations-log-size <number>` CLI parameter or `FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE` environment variable.
+- **CLI Argument Syntax in Javadoc**:
+  - Corrected CLI argument syntax examples in `Flinkboot` Javadoc to reflect space-separated parameters and presence-only flags without inline `=`.
 
 #### `flinkboot-test`
 - **Flexible Zero-Kryo POJO Assertion**:
