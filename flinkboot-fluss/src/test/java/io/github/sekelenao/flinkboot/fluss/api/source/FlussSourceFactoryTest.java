@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -141,10 +142,22 @@ class FlussSourceFactoryTest {
             );
 
             assertAll(
-                () -> assertThrows(NullPointerException.class, () -> FlussSourceFactory.supplyBuilderFor(null, TEST_SCHEMA)),
-                () -> assertThrows(NullPointerException.class, () -> FlussSourceFactory.supplyBuilderFor(props, null)),
-                () -> assertThrows(NullPointerException.class, () -> FlussSourceFactory.supplyFor(null, TEST_SCHEMA)),
-                () -> assertThrows(NullPointerException.class, () -> FlussSourceFactory.supplyFor(props, null))
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> FlussSourceFactory.supplyBuilderFor(null, TEST_SCHEMA));
+                    assertEquals("config must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> FlussSourceFactory.supplyBuilderFor(props, null));
+                    assertEquals("deserializationSchema must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> FlussSourceFactory.supplyFor(null, TEST_SCHEMA));
+                    assertEquals("config must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> FlussSourceFactory.supplyFor(props, null));
+                    assertEquals("deserializationSchema must not be null", ex.getMessage());
+                }
             );
         }
     }

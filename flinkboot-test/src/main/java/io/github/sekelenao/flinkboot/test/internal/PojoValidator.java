@@ -19,12 +19,13 @@ import java.util.Set;
 public final class PojoValidator {
 
     private final ArrayDeque<PojoValidationTask<?>> tasks = new ArrayDeque<>();
+
     private final Set<TypeInformation<?>> visited = new HashSet<>();
 
-    public void validate(Class<?> clazz) {
-        Objects.requireNonNull(clazz, "Class to assert must not be null");
-        var typeInfo = TypeExtractor.createTypeInfo(clazz);
-        tasks.add(new PojoValidationTask<>(clazz.getName(), typeInfo));
+    public void validate(Class<?> type) {
+        Objects.requireNonNull(type, "Class to assert must not be null");
+        var typeInfo = TypeExtractor.createTypeInfo(type);
+        tasks.add(new PojoValidationTask<>(type.getName(), typeInfo));
         while (!tasks.isEmpty()) {
             processTask(tasks.pop());
         }

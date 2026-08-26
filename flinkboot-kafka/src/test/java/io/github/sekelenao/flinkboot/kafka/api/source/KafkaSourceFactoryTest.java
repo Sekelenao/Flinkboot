@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -208,10 +209,22 @@ class KafkaSourceFactoryTest {
             );
 
             assertAll(
-                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor((KafkaSourceTopicListProperties) null, TEST_SCHEMA)),
-                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor(config, null)),
-                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor((KafkaSourceTopicListProperties) null, TEST_SCHEMA)),
-                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor(config, null))
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor((KafkaSourceTopicListProperties) null, TEST_SCHEMA));
+                    assertEquals("config must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor(config, null));
+                    assertEquals("schema must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor((KafkaSourceTopicListProperties) null, TEST_SCHEMA));
+                    assertEquals("config must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor(config, null));
+                    assertEquals("schema must not be null", ex.getMessage());
+                }
             );
         }
     }
@@ -289,10 +302,22 @@ class KafkaSourceFactoryTest {
             );
 
             assertAll(
-                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor((KafkaSourceTopicPatternProperties) null, TEST_SCHEMA)),
-                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor(config, null)),
-                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor((KafkaSourceTopicPatternProperties) null, TEST_SCHEMA)),
-                () -> assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor(config, null))
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor((KafkaSourceTopicPatternProperties) null, TEST_SCHEMA));
+                    assertEquals("config must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyFor(config, null));
+                    assertEquals("schema must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor((KafkaSourceTopicPatternProperties) null, TEST_SCHEMA));
+                    assertEquals("config must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> KafkaSourceFactory.supplyBuilderFor(config, null));
+                    assertEquals("schema must not be null", ex.getMessage());
+                }
             );
         }
     }

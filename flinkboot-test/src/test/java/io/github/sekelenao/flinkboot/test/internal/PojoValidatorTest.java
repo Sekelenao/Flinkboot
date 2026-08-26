@@ -422,9 +422,10 @@ class PojoValidatorTest {
     }
 
     @Test
-    @DisplayName("Should throw NullPointerException when class is null")
-    void shouldThrowWhenClassIsNull() {
-        assertThrows(NullPointerException.class, () -> validator.validate(null));
+    @DisplayName("Should throw NullPointerException when type is null")
+    void shouldThrowWhenTypeIsNull() {
+        var exception = assertThrows(NullPointerException.class, () -> validator.validate(null));
+        assertEquals("Class to assert must not be null", exception.getMessage());
     }
 
     @Nested

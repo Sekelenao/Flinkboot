@@ -41,8 +41,8 @@ public final class FlussSourceFactory {
         FlussSourceProperties config,
         FlussDeserializationSchema<T> deserializationSchema
     ) {
-        Objects.requireNonNull(config);
-        Objects.requireNonNull(deserializationSchema);
+        Objects.requireNonNull(config, "config must not be null");
+        Objects.requireNonNull(deserializationSchema, "deserializationSchema must not be null");
 
         var flussConfig = new Configuration();
         config.properties().forEach(flussConfig::setString);

@@ -31,7 +31,8 @@ class ResourceTest {
         @Test
         @DisplayName("Should throw NullPointerException when location is null")
         void shouldThrowExceptionWhenLocationIsNull() {
-            assertThrows(NullPointerException.class, () -> Resource.of(null));
+            var exception = assertThrows(NullPointerException.class, () -> Resource.of(null));
+            assertEquals("location must not be null", exception.getMessage());
         }
 
         @ParameterizedTest

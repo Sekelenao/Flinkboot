@@ -37,7 +37,7 @@ public interface Resource {
      * @throws UnrecognizedResourceException   if {@code location} lacks a valid scheme prefix or has an empty path
      */
     static Resource of(String location) {
-        Objects.requireNonNull(location);
+        Objects.requireNonNull(location, "location must not be null");
         var trimmedLocation = location.strip();
         var index = trimmedLocation.indexOf(':');
         if (index <= 0) {

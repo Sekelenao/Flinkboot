@@ -15,16 +15,16 @@ import java.util.Objects;
  */
 public final class ClassAssert {
 
-    private final Class<?> actual;
+    private final Class<?> type;
 
     /**
      * Creates a new {@link ClassAssert} for the given target class.
      *
-     * @param actual the target class to validate
-     * @throws NullPointerException if {@code actual} is {@code null}
+     * @param type the target class to validate
+     * @throws NullPointerException if {@code type} is {@code null}
      */
-    public ClassAssert(Class<?> actual) {
-        this.actual = Objects.requireNonNull(actual, "Class to assert must not be null");
+    public ClassAssert(Class<?> type) {
+        this.type = Objects.requireNonNull(type, "Class to assert must not be null");
     }
 
     /**
@@ -37,7 +37,7 @@ public final class ClassAssert {
      * @throws AssertionError if the class or any nested field violates Flink POJO rules
      */
     public ClassAssert isPojo() {
-        new PojoValidator().validate(actual);
+        new PojoValidator().validate(type);
         return this;
     }
 

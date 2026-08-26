@@ -59,6 +59,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Single Responsibility Separation**:
   - Extracted POJO validation assertions out of `FlinkbootTest` into `FlinkbootAssertions`, focusing `FlinkbootTest` exclusively on test configuration loading (`FlinkbootTest.configuration(...)`).
 
+#### Multi-Module Public APIs
+- **Standardized `Objects.requireNonNull` Messages**:
+  - Unified `NullPointerException` parameter messages across all public entry points (`Flinkboot`, `Resource`, `KafkaSourceFactory`, `KafkaSinkFactory`, `FlussSourceFactory`, `FlussSinkFactory`, `FlinkbootTest`) with consistent `<param> must not be null` messages.
+
 
 ### Fixed
 

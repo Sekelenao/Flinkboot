@@ -41,8 +41,8 @@ public final class FlussSinkFactory {
         FlussSinkProperties config,
         FlussSerializationSchema<T> serializationSchema
     ) {
-        Objects.requireNonNull(config);
-        Objects.requireNonNull(serializationSchema);
+        Objects.requireNonNull(config, "config must not be null");
+        Objects.requireNonNull(serializationSchema, "serializationSchema must not be null");
 
         var options = new HashMap<>(config.properties());
         config.batchSize().ifPresent(batchSize -> options.put("client.writer.bucket.batch.size", String.valueOf(batchSize)));

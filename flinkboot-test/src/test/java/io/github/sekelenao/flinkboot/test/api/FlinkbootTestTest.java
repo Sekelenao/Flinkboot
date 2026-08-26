@@ -81,8 +81,14 @@ class FlinkbootTestTest {
         @DisplayName("Should throw NullPointerException when parameters are null")
         void shouldThrowExceptionWhenParametersAreNull() {
             assertAll(
-                () -> assertThrows(NullPointerException.class, () -> configuration(null, "classpath:path.yaml")),
-                () -> assertThrows(NullPointerException.class, () -> configuration(JobProperties.class, (String[]) null))
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> configuration(null, "classpath:path.yaml"));
+                    assertEquals("configurationClass must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> configuration(JobProperties.class, (String[]) null));
+                    assertEquals("paths must not be null", ex.getMessage());
+                }
             );
         }
     }
