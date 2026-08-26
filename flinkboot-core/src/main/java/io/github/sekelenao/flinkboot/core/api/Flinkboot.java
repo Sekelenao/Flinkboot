@@ -63,7 +63,7 @@ public final class Flinkboot {
      * @throws NullPointerException if {@code args} is {@code null}
      */
     public static Flinkboot initialize(String[] args){
-        Objects.requireNonNull(args);
+        Objects.requireNonNull(args, "args must not be null");
         return new Flinkboot(args);
     }
 
@@ -76,7 +76,7 @@ public final class Flinkboot {
      * @throws NullPointerException if {@code flag} is {@code null}
      */
     public boolean flag(String flag){
-        Objects.requireNonNull(flag);
+        Objects.requireNonNull(flag, "flag must not be null");
         return startupEnvironment.flag(flag);
     }
 
@@ -89,7 +89,7 @@ public final class Flinkboot {
      * @throws NullPointerException if {@code parameter} is {@code null}
      */
     public Optional<String> parameter(String parameter){
-        Objects.requireNonNull(parameter);
+        Objects.requireNonNull(parameter, "parameter must not be null");
         return startupEnvironment.get(parameter);
     }
 
@@ -118,7 +118,7 @@ public final class Flinkboot {
      * @throws ConfigurationValidationException if bean validation constraints are violated
      */
     public <C> C configuration(Class<C> configurationClass) throws IOException {
-        Objects.requireNonNull(configurationClass);
+        Objects.requireNonNull(configurationClass, "configurationClass must not be null");
         try(var parser = new YamlParser(startupEnvironment.parserFeatures())) {
             return readConfigurations(configurationClass, parser);
         }
@@ -137,8 +137,8 @@ public final class Flinkboot {
      * @throws ConfigurationValidationException if bean validation constraints are violated
      */
     public <C> C configuration(Class<C> configurationClass, Consumer<YAMLMapper.Builder> customizer) throws IOException {
-        Objects.requireNonNull(configurationClass);
-        Objects.requireNonNull(customizer);
+        Objects.requireNonNull(configurationClass, "configurationClass must not be null");
+        Objects.requireNonNull(customizer, "customizer must not be null");
         try(var parser = new YamlParser(customizer, startupEnvironment.parserFeatures())) {
             return readConfigurations(configurationClass, parser);
         }
@@ -157,8 +157,8 @@ public final class Flinkboot {
      * @throws ConfigurationValidationException if bean validation constraints are violated
      */
     public <C> C configuration(Class<C> configurationClass, YAMLMapper mapper) throws IOException {
-        Objects.requireNonNull(configurationClass);
-        Objects.requireNonNull(mapper);
+        Objects.requireNonNull(configurationClass, "configurationClass must not be null");
+        Objects.requireNonNull(mapper, "mapper must not be null");
         try(var parser = new YamlParser(mapper, startupEnvironment.parserFeatures())) {
             return readConfigurations(configurationClass, parser);
         }

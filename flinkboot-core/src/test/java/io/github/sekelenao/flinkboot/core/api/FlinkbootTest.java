@@ -74,7 +74,8 @@ class FlinkbootTest {
         @Test
         @DisplayName("Should throw NullPointerException when args is null")
         void shouldThrowExceptionWhenArgsIsNull() {
-            assertThrows(NullPointerException.class, () -> Flinkboot.initialize(null));
+            var exception = assertThrows(NullPointerException.class, () -> Flinkboot.initialize(null));
+            assertEquals("args must not be null", exception.getMessage());
         }
 
         @Test
@@ -171,11 +172,26 @@ class FlinkbootTest {
             var flinkboot = Flinkboot.initialize(new String[0]);
             var mapper = new YAMLMapper();
             assertAll(
-                () -> assertThrows(NullPointerException.class, () -> flinkboot.configuration(null)),
-                () -> assertThrows(NullPointerException.class, () -> flinkboot.configuration(TestConfig.class, (Consumer<YAMLMapper.Builder>) null)),
-                () -> assertThrows(NullPointerException.class, () -> flinkboot.configuration(null, builder -> {})),
-                () -> assertThrows(NullPointerException.class, () -> flinkboot.configuration(TestConfig.class, (YAMLMapper) null)),
-                () -> assertThrows(NullPointerException.class, () -> flinkboot.configuration(null, mapper))
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> flinkboot.configuration(null));
+                    assertEquals("configurationClass must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> flinkboot.configuration(TestConfig.class, (Consumer<YAMLMapper.Builder>) null));
+                    assertEquals("customizer must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> flinkboot.configuration(null, builder -> {}));
+                    assertEquals("configurationClass must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> flinkboot.configuration(TestConfig.class, (YAMLMapper) null));
+                    assertEquals("mapper must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> flinkboot.configuration(null, mapper));
+                    assertEquals("configurationClass must not be null", ex.getMessage());
+                }
             );
         }
 
@@ -189,7 +205,8 @@ class FlinkbootTest {
         @DisplayName("Should throw NullPointerException when parameter name is null")
         void shouldThrowExceptionWhenParameterNameIsNull() {
             var flinkboot = Flinkboot.initialize(new String[0]);
-            assertThrows(NullPointerException.class, () -> flinkboot.parameter(null));
+            var exception = assertThrows(NullPointerException.class, () -> flinkboot.parameter(null));
+            assertEquals("parameter must not be null", exception.getMessage());
         }
 
         @Test
@@ -215,7 +232,8 @@ class FlinkbootTest {
         @DisplayName("Should throw NullPointerException when flag name is null")
         void shouldThrowExceptionWhenFlagNameIsNull() {
             var flinkboot = Flinkboot.initialize(new String[0]);
-            assertThrows(NullPointerException.class, () -> flinkboot.flag(null));
+            var exception = assertThrows(NullPointerException.class, () -> flinkboot.flag(null));
+            assertEquals("flag must not be null", exception.getMessage());
         }
 
         @Test

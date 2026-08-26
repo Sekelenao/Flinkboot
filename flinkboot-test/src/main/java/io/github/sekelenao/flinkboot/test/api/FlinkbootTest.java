@@ -37,8 +37,8 @@ public final class FlinkbootTest {
      * @throws NullPointerException if {@code configurationClass} or {@code paths} is {@code null}
      */
     public static <C> C configuration(Class<C> configurationClass, String... paths) {
-        Objects.requireNonNull(configurationClass, "Configuration class must not be null");
-        Objects.requireNonNull(paths, "Configuration paths must not be null");
+        Objects.requireNonNull(configurationClass, "configurationClass must not be null");
+        Objects.requireNonNull(paths, "paths must not be null");
         var joinedPaths = String.join(",", paths);
         try {
             return Flinkboot.initialize(new String[]{"-flinkboot-configurations", joinedPaths})

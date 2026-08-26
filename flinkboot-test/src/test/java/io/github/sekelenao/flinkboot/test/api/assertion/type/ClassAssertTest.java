@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -34,7 +35,8 @@ class ClassAssertTest {
         @Test
         @DisplayName("Should throw NullPointerException when class is null")
         void shouldThrowExceptionWhenClassIsNull() {
-            assertThrows(NullPointerException.class, () -> new ClassAssert(null));
+            var exception = assertThrows(NullPointerException.class, () -> new ClassAssert(null));
+            assertEquals("Class to assert must not be null", exception.getMessage());
         }
     }
 

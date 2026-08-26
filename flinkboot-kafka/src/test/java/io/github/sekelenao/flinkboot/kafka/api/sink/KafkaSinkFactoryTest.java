@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -145,10 +146,22 @@ class KafkaSinkFactoryTest {
             );
 
             assertAll(
-                () -> assertThrows(NullPointerException.class, () -> KafkaSinkFactory.supplyFor((KafkaSinkProperties) null, TEST_SCHEMA)),
-                () -> assertThrows(NullPointerException.class, () -> KafkaSinkFactory.supplyFor(config, null)),
-                () -> assertThrows(NullPointerException.class, () -> KafkaSinkFactory.supplyBuilderFor((KafkaSinkProperties) null, TEST_SCHEMA)),
-                () -> assertThrows(NullPointerException.class, () -> KafkaSinkFactory.supplyBuilderFor(config, null))
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> KafkaSinkFactory.supplyFor((KafkaSinkProperties) null, TEST_SCHEMA));
+                    assertEquals("config must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> KafkaSinkFactory.supplyFor(config, null));
+                    assertEquals("serializationSchema must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> KafkaSinkFactory.supplyBuilderFor((KafkaSinkProperties) null, TEST_SCHEMA));
+                    assertEquals("config must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> KafkaSinkFactory.supplyBuilderFor(config, null));
+                    assertEquals("serializationSchema must not be null", ex.getMessage());
+                }
             );
         }
     }

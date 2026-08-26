@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -96,10 +97,22 @@ class FlussSinkFactoryTest {
             );
 
             assertAll(
-                () -> assertThrows(NullPointerException.class, () -> FlussSinkFactory.supplyBuilderFor(null, TEST_SCHEMA)),
-                () -> assertThrows(NullPointerException.class, () -> FlussSinkFactory.supplyBuilderFor(props, null)),
-                () -> assertThrows(NullPointerException.class, () -> FlussSinkFactory.supplyFor(null, TEST_SCHEMA)),
-                () -> assertThrows(NullPointerException.class, () -> FlussSinkFactory.supplyFor(props, null))
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> FlussSinkFactory.supplyBuilderFor(null, TEST_SCHEMA));
+                    assertEquals("config must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> FlussSinkFactory.supplyBuilderFor(props, null));
+                    assertEquals("serializationSchema must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> FlussSinkFactory.supplyFor(null, TEST_SCHEMA));
+                    assertEquals("config must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> FlussSinkFactory.supplyFor(props, null));
+                    assertEquals("serializationSchema must not be null", ex.getMessage());
+                }
             );
         }
     }

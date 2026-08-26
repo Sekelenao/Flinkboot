@@ -60,7 +60,7 @@ To write compliance tests, import the Flinkboot BOM in your `<dependencyManageme
 
 ## 3. Usage in JUnit 5
 
-Use `FlinkbootAssertions.assertThat(Class<?> clazz).isPojo()` to verify your model classes:
+Use `FlinkbootAssertions.assertThat(Class<?> type).isPojo()` to verify your model classes:
 
 ### Example Data Class
 

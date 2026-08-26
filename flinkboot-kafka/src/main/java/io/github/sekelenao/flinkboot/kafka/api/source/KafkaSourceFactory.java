@@ -43,8 +43,8 @@ public final class KafkaSourceFactory {
         KafkaSourceTopicListProperties config,
         KafkaRecordDeserializationSchema<T> schema
     ) {
-        Objects.requireNonNull(config);
-        Objects.requireNonNull(schema);
+        Objects.requireNonNull(config, "config must not be null");
+        Objects.requireNonNull(schema, "schema must not be null");
 
         var additionalProperties = new Properties();
         additionalProperties.putAll(config.properties());
@@ -88,8 +88,8 @@ public final class KafkaSourceFactory {
         KafkaSourceTopicPatternProperties config,
         KafkaRecordDeserializationSchema<T> schema
     ) {
-        Objects.requireNonNull(config);
-        Objects.requireNonNull(schema);
+        Objects.requireNonNull(config, "config must not be null");
+        Objects.requireNonNull(schema, "schema must not be null");
 
         var additionalProperties = new Properties();
         additionalProperties.putAll(config.properties());

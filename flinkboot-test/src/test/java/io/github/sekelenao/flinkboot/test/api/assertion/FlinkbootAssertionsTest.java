@@ -10,6 +10,7 @@ import java.lang.reflect.Modifier;
 
 import static io.github.sekelenao.flinkboot.test.api.assertion.FlinkbootAssertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -52,7 +53,8 @@ class FlinkbootAssertionsTest {
         @Test
         @DisplayName("Should throw NullPointerException when target class is null")
         void shouldThrowExceptionWhenClassIsNull() {
-            assertThrows(NullPointerException.class, () -> assertThat(null));
+            var exception = assertThrows(NullPointerException.class, () -> assertThat(null));
+            assertEquals("Class to assert must not be null", exception.getMessage());
         }
 
         @Test
