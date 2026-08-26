@@ -71,97 +71,179 @@ flink run MyJob.jar
 
 ---
 
-## 2. YAML Properties & Structure
+## 2. Approach 1: Using Built-in Flinkboot Models (`JobProperties`)
 
-Define your configuration properties in your YAML file (`job-configuration.yaml`):
+For jobs that only require standard Flink execution settings (parallelism, checkpointing, restart strategies, state backend), you can directly bind your YAML file to Flinkboot's built-in `JobProperties`.
+
+### YAML Structure (`job-configuration.yaml`)
 
 ```yaml
-job-name: "my-analytics-pipeline"
-parallelism: 8
-buffer-timeout: "PT0.1S"
+name: "transactions-monitoring-job"
+environment:
+  execution:
+    parallelism: 4
+    buffer-timeout: "PT0.1S"
+  checkpointing:
+    enabled: true
+    interval: "PT10S"
+    mode: "EXACTLY_ONCE"
+    timeout: "PT1M"
+  restart-strategy:
+    type: "EXPONENTIAL_DELAY"
+    exponential-delay:
+      initial-backoff: "PT1S"
+      max-backoff: "PT30S"
+```
+
+### Loading in Java
+
+Use `boot.configuration(JobProperties.class)` to load and validate the configuration, then pass it directly to `boot.executionEnvironment(...)` to construct a fully configured `StreamExecutionEnvironment`:
+
+```java
+import io.github.sekelenao.flinkboot.core.api.Flinkboot;
+import io.github.sekelenao.flinkboot.core.api.properties.JobProperties;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+
+public class TransactionJob {
+    public static void main(String[] args) throws Exception {
+        // 1. Initialize Flinkboot with CLI arguments
+        var boot = Flinkboot.initialize(args);
+
+        // 2. Load built-in JobProperties (defaults to classpath:job-configuration.yaml)
+        var jobProps = boot.configuration(JobProperties.class);
+
+        // 3. Create pre-configured StreamExecutionEnvironment
+        var env = boot.executionEnvironment(jobProps);
+
+        // 4. Assemble and execute your streaming pipeline
+        env.fromData("event-1", "event-2").print();
+
+        env.execute(jobProps.name());
+    }
+}
+```
+
+> [!TIP]
+> For a full reference of all supported execution settings, check the [How to Configure the Execution Environment](configure-execution-environment.md) guide.
+
+---
+
+## 3. Approach 2: Composing Custom Application Configurations
+
+Real-world streaming applications often combine custom business logic parameters (alert thresholds, window durations, external database URLs) with Flinkboot's built-in connectors and execution settings.
+
+You can compose these into a single root configuration model using a standard Java Record or Class.
+
+### YAML Structure (`job-configuration.yaml`)
+
+```yaml
+app:
+  window-duration: "PT5M"
+  alert-threshold: 100
+  database-url: "jdbc:postgresql://${DB_HOST}:5432/${DB_NAME}"
+
+job:
+  name: "fraud-detection-pipeline"
+  environment:
+    execution:
+      parallelism: 8
+      buffer-timeout: "PT0.05S"
+    checkpointing:
+      interval: "PT30S"
+
+kafka-source:
+  name: "transactions-source"
+  bootstrap-servers:
+    - "${KAFKA_BOOTSTRAP_SERVERS}"
+  group-id: "fraud-detector-group"
+  topics:
+    - "transactions"
+  startup-mode: "EARLIEST"
+```
+
+### Defining the Composed Java Model (Record)
+
+```java
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.sekelenao.flinkboot.core.api.properties.JobProperties;
+import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceTopicListProperties;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import java.time.Duration;
+
+public record AppConfig(
+    @Valid @NotNull @JsonProperty("app") BusinessProperties app,
+    @Valid @NotNull @JsonProperty("job") JobProperties job,
+    @Valid @JsonProperty("kafka-source") KafkaSourceTopicListProperties kafkaSource
+) {
+
+    public record BusinessProperties(
+        @NotNull @JsonProperty("window-duration") Duration windowDuration,
+        @Positive @JsonProperty("alert-threshold") int alertThreshold,
+        @NotBlank @JsonProperty("database-url") String databaseUrl
+    ) {}
+}
+```
+
+### Loading and Wiring the Application in Java
+
+```java
+import io.github.sekelenao.flinkboot.core.api.Flinkboot;
+import io.github.sekelenao.flinkboot.kafka.api.source.KafkaSourceFactory;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+
+public class FraudDetectionJob {
+    public static void main(String[] args) throws Exception {
+        var boot = Flinkboot.initialize(args);
+
+        // 1. Load the composed configuration model
+        var config = boot.configuration(AppConfig.class);
+
+        // 2. Initialize Flink execution environment from built-in job properties
+        var env = boot.executionEnvironment(config.job());
+
+        // 3. Build Kafka Source connector using Flinkboot factory
+        var source = KafkaSourceFactory.supplyFor(
+            config.kafkaSource(),
+            KafkaRecordDeserializationSchema.valueOnly(TransactionDeserializationSchema.class)
+        );
+
+        // 4. Assemble the streaming pipeline using business properties
+        var transactions = env.fromSource(source, WatermarkStrategy.noWatermarks(), config.kafkaSource().name());
+
+        transactions
+            .filter(transaction -> transaction.amount() > config.app().alertThreshold())
+            .print();
+
+        env.execute(config.job().name());
+    }
+}
 ```
 
 ---
 
-## 3. Java Model & Loading
+## 4. Customizing the Jackson YAML Mapper
 
-### Defining Your Configuration Model
-
-Define your configuration model as an immutable Java class (or Record) annotated with Jackson and Jakarta Bean Validation annotations:
-
-```java
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import java.time.Duration;
-
-public final class MyJobConfig {
-
-    @NotBlank
-    private final String jobName;
-
-    @Min(1)
-    private final int parallelism;
-
-    private final Duration bufferTimeout;
-
-    @JsonCreator
-    public MyJobConfig(
-        @JsonProperty("job-name") String jobName,
-        @JsonProperty("parallelism") int parallelism,
-        @JsonProperty("buffer-timeout") Duration bufferTimeout
-    ) {
-        this.jobName = jobName;
-        this.parallelism = parallelism;
-        this.bufferTimeout = bufferTimeout;
-    }
-
-    public String jobName() { return jobName; }
-    public int parallelism() { return parallelism; }
-    public Duration bufferTimeout() { return bufferTimeout; }
-}
-```
-
-
-### Loading in Java
-
-Use `Flinkboot.initialize(args).configuration(...)` in your main class to load, merge, and validate your configuration:
-
-```java
-import io.github.sekelenao.flinkboot.core.api.Flinkboot;
-
-public class MyFlinkJob {
-    public static void main(String[] args) throws Exception {
-        // Initialize Flinkboot with CLI args
-        Flinkboot boot = Flinkboot.initialize(args);
-
-        // Load configuration (defaults to classpath:job-configuration.yaml)
-        MyJobConfig config = boot.configuration(MyJobConfig.class);
-
-        System.out.println("Loaded Job: " + config.jobName());
-    }
-}
-```
-
-### Customizing the Jackson YAML Mapper
-
-If you need custom Jackson deserialization features, pass a customizer `Consumer<YAMLMapper.Builder>` or a pre-configured `YAMLMapper`:
+If your models require custom Jackson deserialization features or custom modules, pass a builder customizer `Consumer<YAMLMapper.Builder>` or a pre-configured `YAMLMapper`:
 
 ```java
 // Option A: Using a builder customizer
-MyJobConfig config = boot.configuration(MyJobConfig.class, builder -> {
+AppConfig config = boot.configuration(AppConfig.class, builder -> {
     builder.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
 });
 
 // Option B: Using a pre-configured mapper
 YAMLMapper customMapper = new YAMLMapper();
-MyJobConfig config = boot.configuration(MyJobConfig.class, customMapper);
+AppConfig config = boot.configuration(AppConfig.class, customMapper);
 ```
 
 ---
 
-## 4. Environment Variable Placeholders
+## 5. Environment Variable Placeholders
 
 You can interpolate environment variables directly in your YAML configuration files using the `${VARIABLE_NAME}` syntax:
 
@@ -178,7 +260,7 @@ kafka-source:
 ```
 
 ### Strict Fail-Fast Policy
-To prevent silent production misconfigurations (e.g. connecting to a default cluster due to a forgotten environment variable), Flinkboot adheres to a **strict fail-fast principle**:
+To prevent silent production misconfigurations (e.g. connecting to an unintended default endpoint due to a missing environment variable), Flinkboot adheres to a **strict fail-fast principle**:
 - If any referenced environment variable is missing, Flinkboot will **immediately abort startup** and throw an `UnresolvedPropertyPlaceholderException` indicating the missing variable name.
 - Default fallback syntax (e.g. `${VAR:default}`) is intentionally unsupported.
 
@@ -200,7 +282,7 @@ storage:
 
 ---
 
-## 5. Merging Semantics & CLI Flags
+## 6. Merging Semantics & CLI Flags
 
 When multiple files are specified (e.g. `file:base.yaml,file:override.yaml`), Flinkboot merges them sequentially from left to right.
 
@@ -218,6 +300,7 @@ You can customize the merging behavior using command-line flags or environment v
 Use `--flinkboot-configuration-override` (or `FLINKBOOT_CONFIGURATION_OVERRIDE=true`) to allow properties to be overwritten by subsequent files:
 
 ```bash
+# Via CLI
 flink run MyJob.jar -flinkboot-configurations "file:base.yaml,file:env-override.yaml" --flinkboot-configuration-override
 ```
 
@@ -245,7 +328,7 @@ topics:
 
 ---
 
-## 6. Validation & Parsing Behaviors
+## 7. Validation & Parsing Behaviors
 
 - **Fail-Fast & Multi-Line Validation:** After loading and merging files, Flinkboot validates the root object against Jakarta Bean Validation annotations. If validation fails, a `ConfigurationValidationException` is thrown displaying violations as a structured, alphabetically-sorted bullet list.
 - **Configurable Violations Log Size:** By default, up to 10 validation errors are displayed before summary truncation (`- ... and X more violation(s)`) to prevent terminal and log pollution. This threshold can be adjusted using `-flinkboot-configuration-violations-log-size <number>` (or `FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE=<number>`).
