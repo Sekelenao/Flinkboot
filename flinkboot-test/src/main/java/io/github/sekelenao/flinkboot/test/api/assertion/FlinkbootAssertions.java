@@ -29,13 +29,13 @@ public final class FlinkbootAssertions {
     /**
      * Creates a new instance of {@link ClassAssert} to assert on the specified class.
      *
-     * @param actual the target class to assert
+     * @param type the target class to assert
      * @return the created {@link ClassAssert} assertion object
-     * @throws NullPointerException if {@code actual} is {@code null}
+     * @throws NullPointerException if {@code type} is {@code null}
      */
-    public static ClassAssert assertThat(Class<?> actual) {
-        Objects.requireNonNull(actual, "Class to assert must not be null");
-        return new ClassAssert(actual);
+    public static ClassAssert assertThat(Class<?> type) {
+        Objects.requireNonNull(type, "Class to assert must not be null");
+        return new ClassAssert(type);
     }
 
 }
