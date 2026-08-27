@@ -8,8 +8,8 @@ This document outlines the compatibility between Flinkboot, Apache Flink version
 
 | Flinkboot Version | Apache Flink Version | Java Runtime | Status           |
 |:------------------|:---------------------|:-------------|:-----------------|
-| `0.4.x-1.20`      | `1.20.x`             | Java 11+     | In Development   |
-| `0.3.x-1.20`      | `1.20.x`             | Java 11+     | Active / Current |
+| `0.4.x-1.20`      | `1.20.x`             | Java 11+     | Active / Current |
+| `0.3.x-1.20`      | `1.20.x`             | Java 11+     | Supported        |
 | `0.2.x-1.20`      | `1.20.x`             | Java 11+     | Supported        |
 | `0.1.x-1.20`      | `1.20.x`             | Java 11+     | Deprecated (EOL) |
 
