@@ -128,3 +128,46 @@ public class MyJob {
     }
 }
 ```
+
+---
+
+## 5. Java 17+ & Apache Arrow JVM Options
+
+Apache Fluss utilizes **Apache Arrow** for high-performance off-heap direct buffer memory management. On Java 17 and later (Java 17, Java 21+), Java's strong encapsulation of JDK internals requires opening `java.nio` to unnamed modules.
+
+### Local Execution & IDE (VM Options)
+
+When running or debugging your Flink job locally from an IDE (IntelliJ IDEA, Eclipse, VS Code) or via `java -jar`, add the following JVM option to your **Run / Debug VM Options**:
+
+```bash
+--add-opens=java.base/java.nio=ALL-UNNAMED
+```
+
+Or configure it in your terminal environment:
+
+```bash
+export JAVA_TOOL_OPTIONS="--add-opens=java.base/java.nio=ALL-UNNAMED"
+```
+
+### Unit & Integration Testing (Maven Surefire)
+
+When writing integration tests with Fluss or running test suites on Java 17+, configure the `maven-surefire-plugin` in your application `pom.xml`:
+
+```xml
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <configuration>
+        <argLine>--add-opens=java.base/java.nio=ALL-UNNAMED</argLine>
+    </configuration>
+</plugin>
+```
+
+### Production Flink Cluster (Kubernetes & Standalone)
+
+Apache Flink 1.20+ official startup scripts and container images automatically inject required `--add-opens` flags. If you are deploying via custom base images or configuring `flink-conf.yaml` / `config.yaml`, ensure the JVM options include:
+
+```yaml
+env.java.opts.all: "--add-opens=java.base/java.nio=ALL-UNNAMED"
+```
+```
