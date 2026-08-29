@@ -1,4 +1,10 @@
-# Flinkboot
+<p align="center">
+  <img src="static/icon.svg" width="200" alt="logo">
+</p>
+
+<h1 align="center">
+Flinkboot
+</h1>
 
 > **Enterprise-Grade Safety & Zero-Boilerplate Runtime for Apache Flink.** Fail fast, serialize natively, and ship bulletproof streaming applications to production.
 
