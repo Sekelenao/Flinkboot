@@ -83,7 +83,7 @@ class SavepointRestorePropertiesTest {
         void shouldPassValidation() {
             var config = new SavepointRestoreProperties("/tmp/savepoint-1", true, RestoreMode.NO_CLAIM);
 
-            Set<ConstraintViolation<SavepointRestoreProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
 
             assertTrue(violations.isEmpty(), "Should have no violations");
         }
@@ -93,15 +93,19 @@ class SavepointRestorePropertiesTest {
         void shouldFailValidationWhenSavepointPathIsBlank() {
             var config = new SavepointRestoreProperties("   ", true, RestoreMode.CLAIM);
 
-            Set<ConstraintViolation<SavepointRestoreProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
 
             assertFalse(violations.isEmpty(), "Should have validation violations");
         }
 
         @Test
-        @DisplayName("Should throw NullPointerException when savepointPath is null")
-        void shouldThrowExceptionWhenSavepointPathIsNull() {
-            assertThrows(NullPointerException.class, () -> new SavepointRestoreProperties(null, true, RestoreMode.CLAIM));
+        @DisplayName("Should fail validation when savepointPath is null")
+        void shouldFailValidationWhenSavepointPathIsNull() {
+            var config = new SavepointRestoreProperties(null, true, RestoreMode.CLAIM);
+
+            var violations = validator.validate(config);
+
+            assertFalse(violations.isEmpty(), "Should have validation violations when savepointPath is null");
         }
     }
 

@@ -38,7 +38,7 @@ public final class TopicPartitionOffsetProperties implements Serializable {
         @JsonProperty("partition") int partition,
         @JsonProperty("offset") long offset
     ) {
-        this.topic = Objects.requireNonNull(topic);
+        this.topic = topic;
         this.partition = partition;
         this.offset = offset;
     }

@@ -48,9 +48,9 @@ public class StandardProperties implements Serializable {
         @JsonProperty("description") String description,
         @JsonProperty("properties") Map<String, String> properties
     ) {
-        this.name = Objects.requireNonNull(name);
-        this.bootstrapServers = Objects.requireNonNull(bootstrapServers);
-        this.mode = Objects.requireNonNull(mode);
+        this.name = name;
+        this.bootstrapServers = bootstrapServers;
+        this.mode = mode;
         this.timestamp = timestamp;
         this.description = description;
         this.properties = properties;
@@ -58,6 +58,9 @@ public class StandardProperties implements Serializable {
     }
 
     private void validate() {
+        if (mode == null) {
+            return;
+        }
         if (mode == SampleMode.CUSTOM) {
             if (timestamp == null) {
                 throw new IllegalArgumentException("timestamp is required when mode is CUSTOM");

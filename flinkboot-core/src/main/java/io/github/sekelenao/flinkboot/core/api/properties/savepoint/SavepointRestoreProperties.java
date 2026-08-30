@@ -34,7 +34,7 @@ public final class SavepointRestoreProperties implements Serializable {
         @JsonProperty("allow-non-restored-state") Boolean allowNonRestoredState,
         @JsonProperty("restore-mode") RestoreMode restoreMode
     ) {
-        this.savepointPath = Objects.requireNonNull(savepointPath);
+        this.savepointPath = savepointPath;
         this.allowNonRestoredState = allowNonRestoredState;
         this.restoreMode = restoreMode;
     }
