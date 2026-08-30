@@ -8,7 +8,6 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.hibernate.validator.constraints.time.DurationMin;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.io.Serializable;
 import java.time.Duration;
@@ -91,7 +90,7 @@ public class FlussSinkProperties implements Serializable {
      * @return the bootstrap servers list
      */
     public List<String> bootstrapServers() {
-        if(CollectionUtils.isEmpty(bootstrapServers)) {
+        if(bootstrapServers == null) {
             return Collections.emptyList();
         }
         return Collections.unmodifiableList(bootstrapServers);
