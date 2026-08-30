@@ -1,14 +1,48 @@
 package io.github.sekelenao.flinkboot.kafka.api.properties.source;
 
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("TopicPartitionConfiguration")
+@DisplayName("TopicPartitionOffsetProperties")
 class TopicPartitionOffsetPropertiesTest {
+
+    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+
+    @Test
+    @DisplayName("Getters should return expected values")
+    void testGetters() {
+        var config = new TopicPartitionOffsetProperties("topic-a", 2, 500L);
+        assertAll(
+            () -> assertEquals("topic-a", config.topic()),
+            () -> assertEquals(2, config.partition()),
+            () -> assertEquals(500L, config.offset())
+        );
+    }
+
+    @Test
+    @DisplayName("Validation should pass with valid properties")
+    void testValidationPasses() {
+        var config = new TopicPartitionOffsetProperties("topic-a", 0, 100L);
+        var violations = validator.validate(config);
+        assertTrue(violations.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Validation should fail when topic is null or blank")
+    void testValidationFailsOnBlankOrNullTopic() {
+        assertAll(
+            () -> assertFalse(validator.validate(new TopicPartitionOffsetProperties(null, 0, 100L)).isEmpty()),
+            () -> assertFalse(validator.validate(new TopicPartitionOffsetProperties("   ", 0, 100L)).isEmpty())
+        );
+    }
 
     @Test
     @DisplayName("Equals and HashCode should work correctly across all branches")

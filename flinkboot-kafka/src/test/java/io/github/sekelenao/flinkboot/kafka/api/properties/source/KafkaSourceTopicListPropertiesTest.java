@@ -186,7 +186,7 @@ class KafkaSourceTopicListPropertiesTest {
                 null
             );
 
-            Set<ConstraintViolation<KafkaSourceTopicListProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
             assertTrue(violations.isEmpty(), "Should have no validation violations");
         }
 
@@ -204,7 +204,7 @@ class KafkaSourceTopicListPropertiesTest {
                 null
             );
 
-            Set<ConstraintViolation<KafkaSourceTopicListProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
             assertAll(
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("name")))
@@ -225,7 +225,7 @@ class KafkaSourceTopicListPropertiesTest {
                 null
             );
 
-            Set<ConstraintViolation<KafkaSourceTopicListProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
             assertAll(
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("bootstrapServers")))
@@ -246,7 +246,7 @@ class KafkaSourceTopicListPropertiesTest {
                 null
             );
 
-            Set<ConstraintViolation<KafkaSourceTopicListProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
             assertAll(
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("groupId")))
@@ -267,7 +267,7 @@ class KafkaSourceTopicListPropertiesTest {
                 null
             );
 
-            Set<ConstraintViolation<KafkaSourceTopicListProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
             assertAll(
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("topics")))
@@ -275,20 +275,23 @@ class KafkaSourceTopicListPropertiesTest {
         }
 
         @Test
-        @DisplayName("Should throw NullPointerException when starting-offsets is null")
+        @DisplayName("Should fail validation when starting-offsets is null")
         void shouldFailWhenStartingOffsetsIsNull() {
-            assertThrows(
-                NullPointerException.class,
-                () -> new KafkaSourceTopicListProperties(
-                    "my-source",
-                    List.of("localhost:9092"),
-                    "my-group",
-                    List.of("topic-a"),
-                    null,
-                    null,
-                    null,
-                    null
-                )
+            var config = new KafkaSourceTopicListProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                List.of("topic-a"),
+                null,
+                null,
+                null,
+                null
+            );
+
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("startingOffsets")))
             );
         }
 
@@ -306,7 +309,7 @@ class KafkaSourceTopicListPropertiesTest {
                 null
             );
 
-            Set<ConstraintViolation<KafkaSourceTopicListProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
             assertFalse(violations.isEmpty(), "Should fail validation due to invalid nested values");
         }
 
@@ -324,7 +327,7 @@ class KafkaSourceTopicListPropertiesTest {
                 null
             );
 
-            Set<ConstraintViolation<KafkaSourceTopicListProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
             assertAll(
                 // Should have validation violations
                 () -> assertFalse(violations.isEmpty()),

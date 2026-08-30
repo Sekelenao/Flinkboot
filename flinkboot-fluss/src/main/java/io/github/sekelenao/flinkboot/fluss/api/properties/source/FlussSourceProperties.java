@@ -65,17 +65,20 @@ public class FlussSourceProperties implements Serializable {
         @JsonProperty("startup-timestamp") Long startupTimestamp,
         @JsonProperty("properties") Map<String, String> properties
     ) {
-        this.name = Objects.requireNonNull(name);
-        this.bootstrapServers = Objects.requireNonNull(bootstrapServers);
-        this.database = Objects.requireNonNull(database);
-        this.table = Objects.requireNonNull(table);
-        this.startupMode = Objects.requireNonNull(startupMode);
+        this.name = name;
+        this.bootstrapServers = bootstrapServers;
+        this.database = database;
+        this.table = table;
+        this.startupMode = startupMode;
         this.startupTimestamp = startupTimestamp;
         this.properties = properties;
         validate();
     }
 
     private void validate() {
+        if (startupMode == null) {
+            return;
+        }
         if (startupMode == FlussStartupMode.TIMESTAMP) {
             if (startupTimestamp == null) {
                 throw new InvalidFlussSourcePropertiesException("startup-timestamp is required when startup-mode is TIMESTAMP");

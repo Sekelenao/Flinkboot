@@ -127,7 +127,7 @@ class FlussSourcePropertiesTest {
                 Map.of()
             );
 
-            Set<ConstraintViolation<FlussSourceProperties>> violations = validator.validate(props);
+            var violations = validator.validate(props);
             assertTrue(violations.isEmpty());
         }
 
@@ -144,7 +144,7 @@ class FlussSourcePropertiesTest {
                 Map.of()
             );
 
-            Set<ConstraintViolation<FlussSourceProperties>> violations = validator.validate(props);
+            var violations = validator.validate(props);
             assertFalse(violations.isEmpty());
         }
 
@@ -161,7 +161,7 @@ class FlussSourcePropertiesTest {
                 Map.of()
             );
 
-            Set<ConstraintViolation<FlussSourceProperties>> violations = validator.validate(props);
+            var violations = validator.validate(props);
             assertFalse(violations.isEmpty());
         }
 
@@ -178,7 +178,7 @@ class FlussSourcePropertiesTest {
                 Map.of()
             );
 
-            Set<ConstraintViolation<FlussSourceProperties>> violations = validator.validate(props);
+            var violations = validator.validate(props);
             assertFalse(violations.isEmpty());
         }
 
@@ -215,6 +215,18 @@ class FlussSourcePropertiesTest {
             );
             assertEquals("startup-timestamp must not be specified when startup-mode is EARLIEST", exception.getMessage());
         }
+
+        @Test
+        @DisplayName("Should fail validation when required fields are null")
+        void shouldFailWhenRequiredFieldsAreNull() {
+            assertAll(
+                () -> assertFalse(validator.validate(new FlussSourceProperties(null, List.of("s"), "d", "t", FlussStartupMode.EARLIEST, null, null)).isEmpty()),
+                () -> assertFalse(validator.validate(new FlussSourceProperties("n", null, "d", "t", FlussStartupMode.EARLIEST, null, null)).isEmpty()),
+                () -> assertFalse(validator.validate(new FlussSourceProperties("n", List.of("s"), null, "t", FlussStartupMode.EARLIEST, null, null)).isEmpty()),
+                () -> assertFalse(validator.validate(new FlussSourceProperties("n", List.of("s"), "d", null, FlussStartupMode.EARLIEST, null, null)).isEmpty()),
+                () -> assertFalse(validator.validate(new FlussSourceProperties("n", List.of("s"), "d", "t", null, null, null)).isEmpty())
+            );
+        }
     }
 
     @Nested
@@ -222,15 +234,10 @@ class FlussSourcePropertiesTest {
     class ConstructorTests {
 
         @Test
-        @DisplayName("Should throw NullPointerException when required fields are null")
-        void shouldThrowNpeWhenRequiredFieldsAreNull() {
-            assertAll(
-                () -> assertThrows(NullPointerException.class, () -> new FlussSourceProperties(null, List.of("s"), "d", "t", FlussStartupMode.EARLIEST, null, null)),
-                () -> assertThrows(NullPointerException.class, () -> new FlussSourceProperties("n", null, "d", "t", FlussStartupMode.EARLIEST, null, null)),
-                () -> assertThrows(NullPointerException.class, () -> new FlussSourceProperties("n", List.of("s"), null, "t", FlussStartupMode.EARLIEST, null, null)),
-                () -> assertThrows(NullPointerException.class, () -> new FlussSourceProperties("n", List.of("s"), "d", null, FlussStartupMode.EARLIEST, null, null)),
-                () -> assertThrows(NullPointerException.class, () -> new FlussSourceProperties("n", List.of("s"), "d", "t", null, null, null))
-            );
+        @DisplayName("Should instantiate successfully without throwing exceptions even with null parameters")
+        void shouldInstantiateSuccessfully() {
+            var props = new FlussSourceProperties(null, null, null, null, null, null, null);
+            assertNotNull(props);
         }
     }
 

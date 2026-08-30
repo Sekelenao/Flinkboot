@@ -78,6 +78,17 @@ class FlinkbootTestTest {
         }
 
         @Test
+        @DisplayName("Should fallback to default classpath job-configuration.yaml when no paths are provided")
+        void shouldFallbackToDefaultClasspathWhenNoPathsProvided() {
+            var jobProperties = configuration(JobProperties.class);
+
+            assertAll(
+                () -> assertNotNull(jobProperties),
+                () -> assertEquals("default-classpath-test-job", jobProperties.name())
+            );
+        }
+
+        @Test
         @DisplayName("Should throw NullPointerException when parameters are null")
         void shouldThrowExceptionWhenParametersAreNull() {
             assertAll(

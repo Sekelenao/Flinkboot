@@ -108,8 +108,18 @@ class KafkaSinkPropertiesTest {
                 null
             );
 
-            Set<ConstraintViolation<KafkaSinkProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
             assertTrue(violations.isEmpty(), "Should have no validation violations");
+        }
+
+        @Test
+        @DisplayName("Should fail validation when required fields are null")
+        void shouldFailWhenRequiredFieldsAreNull() {
+            assertAll(
+                () -> assertFalse(validator.validate(new KafkaSinkProperties(null, List.of("localhost:9092"), "t", null, null, null)).isEmpty()),
+                () -> assertFalse(validator.validate(new KafkaSinkProperties("s", null, "t", null, null, null)).isEmpty()),
+                () -> assertFalse(validator.validate(new KafkaSinkProperties("s", List.of("localhost:9092"), null, null, null, null)).isEmpty())
+            );
         }
 
         @Test
@@ -124,7 +134,7 @@ class KafkaSinkPropertiesTest {
                 null
             );
 
-            Set<ConstraintViolation<KafkaSinkProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
             assertAll(
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("name")))
@@ -143,7 +153,7 @@ class KafkaSinkPropertiesTest {
                 null
             );
 
-            Set<ConstraintViolation<KafkaSinkProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
             assertAll(
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("bootstrapServers")))
@@ -162,7 +172,7 @@ class KafkaSinkPropertiesTest {
                 null
             );
 
-            Set<ConstraintViolation<KafkaSinkProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
             assertAll(
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("topic")))
@@ -215,7 +225,7 @@ class KafkaSinkPropertiesTest {
                 properties
             );
 
-            Set<ConstraintViolation<KafkaSinkProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
             assertAll(
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().contains("properties")))
