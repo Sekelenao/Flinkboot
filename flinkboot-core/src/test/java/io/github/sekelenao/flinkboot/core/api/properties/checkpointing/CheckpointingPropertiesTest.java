@@ -81,11 +81,21 @@ class CheckpointingPropertiesTest {
     class ValidationTests {
 
         @Test
-        @DisplayName("Should pass validation when parameters are valid or null")
+        @DisplayName("Should pass validation when parameters are valid")
         void shouldPassValidationWhenValid() {
             var config = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
                 ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, false, Duration.ZERO, "s3://bucket"
+            );
+            var violations = validator.validate(config);
+            assertTrue(violations.isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should pass validation when all duration fields are null")
+        void shouldPassValidationWhenDurationsAreNull() {
+            var config = new CheckpointingProperties(
+                null, null, null, null, null, null, null, null, null, null
             );
             var violations = validator.validate(config);
             assertTrue(violations.isEmpty());

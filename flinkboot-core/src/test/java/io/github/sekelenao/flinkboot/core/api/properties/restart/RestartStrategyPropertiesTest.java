@@ -132,6 +132,19 @@ class RestartStrategyPropertiesTest {
         }
 
         @Test
+        @DisplayName("Should pass validation when strategy sub-configurations have null durations")
+        void shouldPassValidationWhenDurationsAreNull() {
+            var fixed = new FixedDelayRestartProperties(null, null);
+            var failure = new FailureRateRestartProperties(null, null, null);
+            var expo = new ExponentialDelayRestartProperties(null, null, null, null, null);
+            assertAll(
+                () -> assertTrue(validator.validate(fixed).isEmpty()),
+                () -> assertTrue(validator.validate(failure).isEmpty()),
+                () -> assertTrue(validator.validate(expo).isEmpty())
+            );
+        }
+
+        @Test
         @DisplayName("Should throw Exception when sub-config provided for NO_RESTART")
         void shouldThrowExceptionWhenSubConfigProvidedForNoRestart() {
             var fixed = new FixedDelayRestartProperties(3, Duration.ofSeconds(5));

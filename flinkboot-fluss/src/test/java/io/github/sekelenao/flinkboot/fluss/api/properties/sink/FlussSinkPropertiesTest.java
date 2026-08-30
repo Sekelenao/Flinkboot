@@ -115,6 +115,23 @@ class FlussSinkPropertiesTest {
         }
 
         @Test
+        @DisplayName("Should pass validation when optional batchTimeout is null")
+        void shouldPassValidationWhenBatchTimeoutIsNull() {
+            var props = new FlussSinkProperties(
+                "my-sink",
+                List.of("localhost:9123"),
+                "my_db",
+                "my_table",
+                1024L,
+                null,
+                Map.of()
+            );
+
+            Set<ConstraintViolation<FlussSinkProperties>> violations = validator.validate(props);
+            assertTrue(violations.isEmpty());
+        }
+
+        @Test
         @DisplayName("Should fail validation when name is blank")
         void shouldFailWhenNameIsBlank() {
             var props = new FlussSinkProperties(
