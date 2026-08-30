@@ -90,7 +90,7 @@ public class FlussSinkProperties implements Serializable {
      * @return the bootstrap servers list
      */
     public List<String> bootstrapServers() {
-        if(bootstrapServers == null) {
+        if (bootstrapServers == null) {
             return Collections.emptyList();
         }
         return Collections.unmodifiableList(bootstrapServers);
