@@ -66,10 +66,10 @@ public class FlussSinkProperties implements Serializable {
         @JsonProperty("batch-timeout") Duration batchTimeout,
         @JsonProperty("properties") Map<String, String> properties
     ) {
-        this.name = Objects.requireNonNull(name);
-        this.bootstrapServers = Objects.requireNonNull(bootstrapServers);
-        this.database = Objects.requireNonNull(database);
-        this.table = Objects.requireNonNull(table);
+        this.name = name;
+        this.bootstrapServers = bootstrapServers;
+        this.database = database;
+        this.table = table;
         this.batchSize = batchSize;
         this.batchTimeout = batchTimeout;
         this.properties = properties;

@@ -110,7 +110,7 @@ class FlussSinkPropertiesTest {
                 Map.of()
             );
 
-            Set<ConstraintViolation<FlussSinkProperties>> violations = validator.validate(props);
+            var violations = validator.validate(props);
             assertTrue(violations.isEmpty());
         }
 
@@ -127,7 +127,7 @@ class FlussSinkPropertiesTest {
                 Map.of()
             );
 
-            Set<ConstraintViolation<FlussSinkProperties>> violations = validator.validate(props);
+            var violations = validator.validate(props);
             assertTrue(violations.isEmpty());
         }
 
@@ -144,7 +144,7 @@ class FlussSinkPropertiesTest {
                 Map.of()
             );
 
-            Set<ConstraintViolation<FlussSinkProperties>> violations = validator.validate(props);
+            var violations = validator.validate(props);
             assertFalse(violations.isEmpty());
         }
 
@@ -161,7 +161,7 @@ class FlussSinkPropertiesTest {
                 Map.of()
             );
 
-            Set<ConstraintViolation<FlussSinkProperties>> violations = validator.validate(props);
+            var violations = validator.validate(props);
             assertFalse(violations.isEmpty());
         }
 
@@ -178,8 +178,19 @@ class FlussSinkPropertiesTest {
                 Map.of()
             );
 
-            Set<ConstraintViolation<FlussSinkProperties>> violations = validator.validate(props);
+            var violations = validator.validate(props);
             assertFalse(violations.isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should fail validation when required fields are null")
+        void shouldFailWhenRequiredFieldsAreNull() {
+            assertAll(
+                () -> assertFalse(validator.validate(new FlussSinkProperties(null, List.of("s"), "d", "t", null, null, null)).isEmpty()),
+                () -> assertFalse(validator.validate(new FlussSinkProperties("n", null, "d", "t", null, null, null)).isEmpty()),
+                () -> assertFalse(validator.validate(new FlussSinkProperties("n", List.of("s"), null, "t", null, null, null)).isEmpty()),
+                () -> assertFalse(validator.validate(new FlussSinkProperties("n", List.of("s"), "d", null, null, null, null)).isEmpty())
+            );
         }
 
         @Test
@@ -195,7 +206,7 @@ class FlussSinkPropertiesTest {
                 Map.of()
             );
 
-            Set<ConstraintViolation<FlussSinkProperties>> violations = validator.validate(props);
+            var violations = validator.validate(props);
             assertFalse(violations.isEmpty());
         }
     }
@@ -205,14 +216,10 @@ class FlussSinkPropertiesTest {
     class ConstructorTests {
 
         @Test
-        @DisplayName("Should throw NullPointerException when required fields are null")
-        void shouldThrowNpeWhenRequiredFieldsAreNull() {
-            assertAll(
-                () -> assertThrows(NullPointerException.class, () -> new FlussSinkProperties(null, List.of("s"), "d", "t", null, null, null)),
-                () -> assertThrows(NullPointerException.class, () -> new FlussSinkProperties("n", null, "d", "t", null, null, null)),
-                () -> assertThrows(NullPointerException.class, () -> new FlussSinkProperties("n", List.of("s"), null, "t", null, null, null)),
-                () -> assertThrows(NullPointerException.class, () -> new FlussSinkProperties("n", List.of("s"), "d", null, null, null, null))
-            );
+        @DisplayName("Should instantiate successfully without throwing exceptions even with null parameters")
+        void shouldInstantiateSuccessfully() {
+            var props = new FlussSinkProperties(null, null, null, null, null, null, null);
+            assertNotNull(props);
         }
     }
 

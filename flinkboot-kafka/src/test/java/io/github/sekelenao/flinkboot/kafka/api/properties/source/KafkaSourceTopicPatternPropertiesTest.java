@@ -155,7 +155,7 @@ class KafkaSourceTopicPatternPropertiesTest {
                 null
             );
 
-            Set<ConstraintViolation<KafkaSourceTopicPatternProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
             assertTrue(violations.isEmpty(), "Should have no validation violations");
         }
 
@@ -173,7 +173,7 @@ class KafkaSourceTopicPatternPropertiesTest {
                 null
             );
 
-            Set<ConstraintViolation<KafkaSourceTopicPatternProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
             assertAll(
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("name")))
@@ -194,7 +194,7 @@ class KafkaSourceTopicPatternPropertiesTest {
                 null
             );
 
-            Set<ConstraintViolation<KafkaSourceTopicPatternProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
             assertAll(
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("bootstrapServers")))
@@ -215,7 +215,7 @@ class KafkaSourceTopicPatternPropertiesTest {
                 null
             );
 
-            Set<ConstraintViolation<KafkaSourceTopicPatternProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
             assertAll(
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("groupId")))
@@ -223,20 +223,23 @@ class KafkaSourceTopicPatternPropertiesTest {
         }
 
         @Test
-        @DisplayName("Should throw NullPointerException when topic-pattern is null")
+        @DisplayName("Should fail validation when topic-pattern is null")
         void shouldFailWhenTopicPatternIsNull() {
-            assertThrows(
-                NullPointerException.class,
-                () -> new KafkaSourceTopicPatternProperties(
-                    "my-source",
-                    List.of("localhost:9092"),
-                    "my-group",
-                    null,
-                    KafkaOffsetInitializer.LATEST,
-                    null,
-                    null,
-                    null
-                )
+            var config = new KafkaSourceTopicPatternProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                null,
+                KafkaOffsetInitializer.LATEST,
+                null,
+                null,
+                null
+            );
+
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("topicPattern")))
             );
         }
 
@@ -254,7 +257,7 @@ class KafkaSourceTopicPatternPropertiesTest {
                 null
             );
 
-            Set<ConstraintViolation<KafkaSourceTopicPatternProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
             assertAll(
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("topicPattern")))
@@ -262,20 +265,23 @@ class KafkaSourceTopicPatternPropertiesTest {
         }
 
         @Test
-        @DisplayName("Should throw NullPointerException when starting-offsets is null")
+        @DisplayName("Should fail validation when starting-offsets is null")
         void shouldFailWhenStartingOffsetsIsNull() {
-            assertThrows(
-                NullPointerException.class,
-                () -> new KafkaSourceTopicPatternProperties(
-                    "my-source",
-                    List.of("localhost:9092"),
-                    "my-group",
-                    "^my-topic-.*$",
-                    null,
-                    null,
-                    null,
-                    null
-                )
+            var config = new KafkaSourceTopicPatternProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                "^my-topic-.*$",
+                null,
+                null,
+                null,
+                null
+            );
+
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("startingOffsets")))
             );
         }
 
@@ -293,7 +299,7 @@ class KafkaSourceTopicPatternPropertiesTest {
                 null
             );
 
-            Set<ConstraintViolation<KafkaSourceTopicPatternProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
             assertFalse(violations.isEmpty(), "Should fail validation due to invalid nested values");
         }
 
@@ -311,7 +317,7 @@ class KafkaSourceTopicPatternPropertiesTest {
                 null
             );
 
-            Set<ConstraintViolation<KafkaSourceTopicPatternProperties>> violations = validator.validate(config);
+            var violations = validator.validate(config);
             assertAll(
                 // Should have validation violations
                 () -> assertFalse(violations.isEmpty()),

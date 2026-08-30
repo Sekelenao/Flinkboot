@@ -17,8 +17,8 @@ In Flinkboot, all configuration classes that bind to YAML/JSON configuration fil
 
 - **`@JsonCreator`**: Annotate the primary constructor with `@JsonCreator`.
 - **`@JsonProperty`**: Annotate **every** parameter with `@JsonProperty("kebab-case-name")`.
-- **Constructor Null Checks**: Use `Objects.requireNonNull(...)` on mandatory fields (fields that must not be null at construction time).
-- **Cross-Field Validation**: Call a private `validate()` method in the constructor when fields have interdependent requirements (e.g. `mode == TIMESTAMP` requires `timestamp != null`).
+- **NO Constructor Null Checks**: Do **NOT** use `Objects.requireNonNull(...)` on constructor parameters. Allow Jackson to construct the DTO with `null` fields so that Jakarta Bean Validation (`@NotNull`, `@NotBlank`, `@NotEmpty`) can inspect the full object graph and report all missing/invalid keys simultaneously.
+- **Cross-Field Validation**: Call a private `validate()` method in the constructor when fields have interdependent requirements (e.g. `mode == TIMESTAMP` requires `timestamp != null`). Ensure `validate()` handles or ignores `null` fields when interdependencies are not applicable.
 
 ## 3. Validation Guidelines (Jakarta vs Constructor)
 

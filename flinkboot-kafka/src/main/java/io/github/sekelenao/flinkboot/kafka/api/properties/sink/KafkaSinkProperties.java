@@ -59,9 +59,9 @@ public class KafkaSinkProperties implements Serializable {
         @JsonProperty("transactional-id-prefix") String transactionalIdPrefix,
         @JsonProperty("properties") Map<String, String> properties
     ) {
-        this.name = Objects.requireNonNull(name);
-        this.bootstrapServers = Objects.requireNonNull(bootstrapServers);
-        this.topic = Objects.requireNonNull(topic);
+        this.name = name;
+        this.bootstrapServers = bootstrapServers;
+        this.topic = topic;
         this.deliveryGuarantee = deliveryGuarantee;
         this.transactionalIdPrefix = transactionalIdPrefix;
         this.properties = properties;

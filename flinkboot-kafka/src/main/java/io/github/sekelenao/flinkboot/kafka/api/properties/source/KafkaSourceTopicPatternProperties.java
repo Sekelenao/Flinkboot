@@ -71,11 +71,11 @@ public class KafkaSourceTopicPatternProperties implements OffsetInitializerPrope
         @JsonProperty("starting-offsets-partition-offsets") List<TopicPartitionOffsetProperties> startingOffsetsPartitionOffsets,
         @JsonProperty("properties") Map<String, String> properties
     ) {
-        this.name = Objects.requireNonNull(name);
-        this.bootstrapServers = Objects.requireNonNull(bootstrapServers);
-        this.groupId = Objects.requireNonNull(groupId);
-        this.topicPattern = Objects.requireNonNull(topicPattern);
-        this.startingOffsets = Objects.requireNonNull(startingOffsets);
+        this.name = name;
+        this.bootstrapServers = bootstrapServers;
+        this.groupId = groupId;
+        this.topicPattern = topicPattern;
+        this.startingOffsets = startingOffsets;
         this.startingOffsetsTimestamp = startingOffsetsTimestamp;
         this.startingOffsetsPartitionOffsets = startingOffsetsPartitionOffsets;
         this.properties = properties;
