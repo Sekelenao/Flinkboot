@@ -164,6 +164,23 @@ class FlussSinkPropertiesTest {
             Set<ConstraintViolation<FlussSinkProperties>> violations = validator.validate(props);
             assertFalse(violations.isEmpty());
         }
+
+        @Test
+        @DisplayName("Should fail validation when batchTimeout is negative")
+        void shouldFailWhenBatchTimeoutIsNegative() {
+            var props = new FlussSinkProperties(
+                "my-sink",
+                List.of("localhost:9123"),
+                "my_db",
+                "my_table",
+                1024L,
+                Duration.ofSeconds(-1),
+                Map.of()
+            );
+
+            Set<ConstraintViolation<FlussSinkProperties>> violations = validator.validate(props);
+            assertFalse(violations.isEmpty());
+        }
     }
 
     @Nested

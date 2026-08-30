@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.Positive;
+import org.hibernate.validator.constraints.time.DurationMin;
 
 import java.io.Serializable;
 import java.time.Duration;
@@ -21,8 +22,10 @@ public final class FailureRateRestartProperties implements Serializable {
     @Positive
     private final Integer maxFailuresPerInterval;
 
+    @DurationMin(millis = 1)
     private final Duration failureInterval;
 
+    @DurationMin(millis = 0)
     private final Duration delay;
 
     /**

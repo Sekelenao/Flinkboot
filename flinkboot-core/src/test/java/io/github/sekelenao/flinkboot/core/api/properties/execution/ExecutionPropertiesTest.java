@@ -110,6 +110,22 @@ class ExecutionPropertiesTest {
             Set<ConstraintViolation<ExecutionProperties>> violations = validator.validate(config);
             assertEquals(2, violations.size());
         }
+
+        @Test
+        @DisplayName("Should fail validation when durations are negative")
+        void shouldFailValidationWithNegativeDurations() {
+            var config = new ExecutionProperties(
+                ExecutionRuntimeMode.STREAMING,
+                1,
+                1,
+                Duration.ofSeconds(-1),
+                Duration.ofSeconds(-2),
+                true
+            );
+
+            Set<ConstraintViolation<ExecutionProperties>> violations = validator.validate(config);
+            assertEquals(2, violations.size());
+        }
     }
 
     @Nested

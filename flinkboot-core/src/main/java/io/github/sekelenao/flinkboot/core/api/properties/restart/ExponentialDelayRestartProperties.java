@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import org.hibernate.validator.constraints.time.DurationMin;
 
 import java.io.Serializable;
 import java.time.Duration;
@@ -19,13 +20,16 @@ public final class ExponentialDelayRestartProperties implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @DurationMin(millis = 1)
     private final Duration initialBackoff;
 
+    @DurationMin(millis = 1)
     private final Duration maxBackoff;
 
     @DecimalMin("1.0")
     private final Double backoffMultiplier;
 
+    @DurationMin(millis = 1)
     private final Duration resetBackoffThreshold;
 
     @DecimalMin("0.0")

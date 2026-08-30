@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.Positive;
+import org.hibernate.validator.constraints.time.DurationMin;
 
 import java.io.Serializable;
 import java.time.Duration;
@@ -23,12 +24,15 @@ public final class CheckpointingProperties implements Serializable {
 
     private final Boolean enabled;
 
+    @DurationMin(millis = 1)
     private final Duration interval;
 
     private final CheckpointingMode mode;
 
+    @DurationMin(millis = 1)
     private final Duration timeout;
 
+    @DurationMin(millis = 0)
     private final Duration minPauseBetweenCheckpoints;
 
     @Positive
@@ -38,6 +42,7 @@ public final class CheckpointingProperties implements Serializable {
 
     private final Boolean unalignedCheckpoints;
 
+    @DurationMin(millis = 0)
     private final Duration alignedCheckpointTimeout;
 
     private final String storageUri;

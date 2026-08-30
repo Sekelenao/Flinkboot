@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.Positive;
+import org.hibernate.validator.constraints.time.DurationMin;
 
 import java.io.Serializable;
 import java.time.Duration;
@@ -27,8 +28,10 @@ public final class ExecutionProperties implements Serializable {
     @Positive
     private final Integer maxParallelism;
 
+    @DurationMin(millis = 0)
     private final Duration bufferTimeout;
 
+    @DurationMin(millis = 0)
     private final Duration autoWatermarkInterval;
 
     private final Boolean objectReuse;

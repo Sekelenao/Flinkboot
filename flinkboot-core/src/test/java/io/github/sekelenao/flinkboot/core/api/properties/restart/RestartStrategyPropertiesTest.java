@@ -195,11 +195,42 @@ class RestartStrategyPropertiesTest {
         }
 
         @Test
-        @DisplayName("Should fail Bean Validation on negative attempts in FixedDelay")
+        @DisplayName("Should fail Bean Validation on negative attempts or negative delay in FixedDelay")
         void shouldFailBeanValidationOnNegativeAttempts() {
-            var fixed = new FixedDelayRestartProperties(-1, Duration.ofSeconds(5));
-            var violations = validator.validate(fixed);
-            assertFalse(violations.isEmpty());
+            var fixedNegativeAttempts = new FixedDelayRestartProperties(-1, Duration.ofSeconds(5));
+            var fixedNegativeDelay = new FixedDelayRestartProperties(3, Duration.ofSeconds(-1));
+            assertAll(
+                () -> assertFalse(validator.validate(fixedNegativeAttempts).isEmpty()),
+                () -> assertFalse(validator.validate(fixedNegativeDelay).isEmpty())
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail Bean Validation on zero or negative durations in FailureRate")
+        void shouldFailBeanValidationOnInvalidFailureRateDurations() {
+            var zeroInterval = new FailureRateRestartProperties(3, Duration.ZERO, Duration.ofSeconds(1));
+            var negativeInterval = new FailureRateRestartProperties(3, Duration.ofSeconds(-1), Duration.ofSeconds(1));
+            var negativeDelay = new FailureRateRestartProperties(3, Duration.ofSeconds(5), Duration.ofSeconds(-1));
+            assertAll(
+                () -> assertFalse(validator.validate(zeroInterval).isEmpty()),
+                () -> assertFalse(validator.validate(negativeInterval).isEmpty()),
+                () -> assertFalse(validator.validate(negativeDelay).isEmpty())
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail Bean Validation on zero or negative durations in ExponentialDelay")
+        void shouldFailBeanValidationOnInvalidExponentialDurations() {
+            var zeroInitial = new ExponentialDelayRestartProperties(Duration.ZERO, Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
+            var zeroMax = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ZERO, 2.0, Duration.ofHours(1), 0.1);
+            var zeroReset = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ZERO, 0.1);
+            var negativeInitial = new ExponentialDelayRestartProperties(Duration.ofSeconds(-1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
+            assertAll(
+                () -> assertFalse(validator.validate(zeroInitial).isEmpty()),
+                () -> assertFalse(validator.validate(zeroMax).isEmpty()),
+                () -> assertFalse(validator.validate(zeroReset).isEmpty()),
+                () -> assertFalse(validator.validate(negativeInitial).isEmpty())
+            );
         }
 
         @Test
