@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
+import org.hibernate.validator.constraints.time.DurationMin;
 
 import java.io.Serializable;
 import java.time.Duration;
@@ -39,6 +40,7 @@ public class FlussSinkProperties implements Serializable {
     @PositiveOrZero
     private final Long batchSize;
 
+    @DurationMin(millis = 0)
     private final Duration batchTimeout;
 
     private final Map<@NotNull String, @NotNull String> properties;

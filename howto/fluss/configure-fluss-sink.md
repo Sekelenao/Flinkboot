@@ -63,15 +63,15 @@ properties:
 
 ## 2. Configuration Parameters Reference
 
-| Property Key        | Type                  | Required | Validation         | Description                                                     |
-|:--------------------|:----------------------|:---------|:-------------------|:----------------------------------------------------------------|
-| `name`              | `String`              | **Yes**  | `@NotBlank`        | Unique operator identifier in the Flink DAG execution graph.    |
-| `bootstrap-servers` | `List<String>`        | **Yes**  | `@NotEmpty`        | List of Fluss coordinator addresses (e.g. `localhost:9123`).    |
-| `database`          | `String`              | **Yes**  | `@NotBlank`        | Target Fluss database name.                                     |
-| `table`             | `String`              | **Yes**  | `@NotBlank`        | Target Fluss table name.                                        |
-| `batch-size`        | `Long`                | No       | `@PositiveOrZero`  | Writer bucket batch size in bytes.                              |
-| `batch-timeout`     | `Duration`            | No       | ISO-8601           | Writer bucket batch timeout, e.g. `"PT0.05S"`.                  |
-| `properties`        | `Map<String, String>` | No       | `@NotNull` entries | Additional custom Fluss client/writer configuration properties. |
+| Property Key        | Type                  | Required | Validation                 | Description                                                     |
+|:--------------------|:----------------------|:---------|:---------------------------|:----------------------------------------------------------------|
+| `name`              | `String`              | **Yes**  | `@NotBlank`                | Unique operator identifier in the Flink DAG execution graph.    |
+| `bootstrap-servers` | `List<String>`        | **Yes**  | `@NotEmpty`                | List of Fluss coordinator addresses (e.g. `localhost:9123`).    |
+| `database`          | `String`              | **Yes**  | `@NotBlank`                | Target Fluss database name.                                     |
+| `table`             | `String`              | **Yes**  | `@NotBlank`                | Target Fluss table name.                                        |
+| `batch-size`        | `Long`                | No       | `@PositiveOrZero`          | Writer bucket batch size in bytes.                              |
+| `batch-timeout`     | `Duration`            | No       | `@DurationMin(millis = 0)` | Writer bucket batch timeout, e.g. `"PT0.05S"`.                  |
+| `properties`        | `Map<String, String>` | No       | `@NotNull` entries         | Additional custom Fluss client/writer configuration properties. |
 
 
 ---

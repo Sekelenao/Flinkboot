@@ -80,7 +80,7 @@ class ExecutionPropertiesTest {
     class ValidationTests {
 
         @Test
-        @DisplayName("Should pass validation when all fields are valid or null")
+        @DisplayName("Should pass validation when all fields are valid")
         void shouldPassValidationWithValidValues() {
             var config = new ExecutionProperties(
                 ExecutionRuntimeMode.BATCH,
@@ -96,6 +96,14 @@ class ExecutionPropertiesTest {
         }
 
         @Test
+        @DisplayName("Should pass validation when all duration fields are null")
+        void shouldPassValidationWhenDurationsAreNull() {
+            var config = new ExecutionProperties(null, null, null, null, null, null);
+            Set<ConstraintViolation<ExecutionProperties>> violations = validator.validate(config);
+            assertTrue(violations.isEmpty());
+        }
+
+        @Test
         @DisplayName("Should fail validation when parallelism is non-positive")
         void shouldFailValidationWithInvalidParallelism() {
             var config = new ExecutionProperties(
@@ -104,6 +112,22 @@ class ExecutionPropertiesTest {
                 -1,
                 Duration.ofMillis(100),
                 Duration.ofMillis(200),
+                true
+            );
+
+            Set<ConstraintViolation<ExecutionProperties>> violations = validator.validate(config);
+            assertEquals(2, violations.size());
+        }
+
+        @Test
+        @DisplayName("Should fail validation when durations are negative")
+        void shouldFailValidationWithNegativeDurations() {
+            var config = new ExecutionProperties(
+                ExecutionRuntimeMode.STREAMING,
+                1,
+                1,
+                Duration.ofSeconds(-1),
+                Duration.ofSeconds(-2),
                 true
             );
 
