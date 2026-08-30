@@ -10,6 +10,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -251,6 +253,70 @@ class FlussSourcePropertiesTest {
                 () -> assertNotEquals("string", props1),
                 () -> assertTrue(props1.toString().contains("FlussSourceProperties"))
             );
+        }
+    }
+
+    @Nested
+    @DisplayName("Bootstrap servers")
+    class BootstrapServersTests {
+
+        @Test
+        @DisplayName("Should return empty unmodifiable list when constructed with empty bootstrap-servers")
+        void shouldReturnEmptyUnmodifiableListForEmptyBootstrapServers() {
+            var props = new FlussSourceProperties(
+                    "src",
+                    Collections.emptyList(),
+                    "db",
+                    "tbl",
+                    FlussStartupMode.EARLIEST,
+                    null,
+                    Map.of()
+            );
+
+            var servers = props.bootstrapServers();
+            assertNotNull(servers, "bootstrapServers() should never return null");
+            assertTrue(servers.isEmpty(), "Expected empty list when constructed with empty list");
+            assertThrows(UnsupportedOperationException.class, () -> servers.add("x"), "Returned list must be unmodifiable");
+        }
+
+        @Test
+        @DisplayName("Should return empty list when internal bootstrapServers field is null (defensive getter)")
+        void shouldHandleNullInternalBootstrapServersField() throws Exception {
+            var props = new FlussSourceProperties(
+                    "src",
+                    List.of("host:9123"),
+                    "db",
+                    "tbl",
+                    FlussStartupMode.EARLIEST,
+                    null,
+                    Map.of()
+            );
+
+            // force the private field to null to simulate a mutated/deserialized object
+            setPrivateFieldToNull(props, "bootstrapServers");
+
+            var servers = props.bootstrapServers();
+            assertNotNull(servers, "bootstrapServers() should never return null even if internal field is null");
+            assertTrue(servers.isEmpty(), "Expected empty list when internal field is null");
+        }
+
+        // helper to set a private field to null for testing purposes
+        private void setPrivateFieldToNull(Object target, String fieldName) throws Exception {
+            Class<?> cls = target.getClass();
+            Field f = null;
+            while (cls != null) {
+                try {
+                    f = cls.getDeclaredField(fieldName);
+                    break;
+                } catch (NoSuchFieldException e) {
+                    cls = cls.getSuperclass();
+                }
+            }
+            if (f == null) {
+                throw new NoSuchFieldException("Field '" + fieldName + "' not found on " + target.getClass());
+            }
+            f.setAccessible(true);
+            f.set(target, null);
         }
     }
 }
