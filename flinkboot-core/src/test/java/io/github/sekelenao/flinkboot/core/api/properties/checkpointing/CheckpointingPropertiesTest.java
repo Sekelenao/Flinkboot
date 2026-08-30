@@ -81,7 +81,7 @@ class CheckpointingPropertiesTest {
     class ValidationTests {
 
         @Test
-        @DisplayName("Should pass validation when parameters are valid or null")
+        @DisplayName("Should pass validation when parameters are valid")
         void shouldPassValidationWhenValid() {
             var config = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
@@ -89,6 +89,74 @@ class CheckpointingPropertiesTest {
             );
             var violations = validator.validate(config);
             assertTrue(violations.isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should pass validation when all duration fields are null")
+        void shouldPassValidationWhenDurationsAreNull() {
+            var config = new CheckpointingProperties(
+                null, null, null, null, null, null, null, null, null, null
+            );
+            var violations = validator.validate(config);
+            assertTrue(violations.isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should fail validation when interval is zero or negative")
+        void shouldFailValidationWhenIntervalZeroOrNegative() {
+            var zeroInterval = new CheckpointingProperties(
+                true, Duration.ZERO, CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, false, Duration.ZERO, null
+            );
+            var negativeInterval = new CheckpointingProperties(
+                true, Duration.ofSeconds(-1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, false, Duration.ZERO, null
+            );
+
+            assertAll(
+                () -> assertEquals(1, validator.validate(zeroInterval).size()),
+                () -> assertEquals(1, validator.validate(negativeInterval).size())
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when timeout is zero or negative")
+        void shouldFailValidationWhenTimeoutZeroOrNegative() {
+            var zeroTimeout = new CheckpointingProperties(
+                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ZERO, Duration.ZERO, 1,
+                null, false, Duration.ZERO, null
+            );
+            var negativeTimeout = new CheckpointingProperties(
+                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(-10), Duration.ZERO, 1,
+                null, false, Duration.ZERO, null
+            );
+
+            assertAll(
+                () -> assertEquals(1, validator.validate(zeroTimeout).size()),
+                () -> assertEquals(1, validator.validate(negativeTimeout).size())
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when minPauseBetweenCheckpoints is negative")
+        void shouldFailValidationWhenMinPauseNegative() {
+            var negativeMinPause = new CheckpointingProperties(
+                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ofSeconds(-1), 1,
+                null, false, Duration.ZERO, null
+            );
+
+            assertEquals(1, validator.validate(negativeMinPause).size());
+        }
+
+        @Test
+        @DisplayName("Should fail validation when alignedCheckpointTimeout is negative")
+        void shouldFailValidationWhenAlignedCheckpointTimeoutNegative() {
+            var negativeTimeout = new CheckpointingProperties(
+                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, false, Duration.ofSeconds(-5), null
+            );
+
+            assertEquals(1, validator.validate(negativeTimeout).size());
         }
     }
 

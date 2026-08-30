@@ -103,29 +103,29 @@ environment:
 
 ### Execution Settings (`ExecutionProperties`)
 
-| Property Key              | Type       | Required | Validation  | Description                                                                                           |
-|:--------------------------|:-----------|:---------|:------------|:------------------------------------------------------------------------------------------------------|
-| `runtime-mode`            | Enum       | No       | Enum        | Execution runtime mode: `STREAMING`, `BATCH`, or `AUTOMATIC` (`ExecutionOptions.RUNTIME_MODE`).       |
-| `parallelism`             | Integer    | No       | `@Positive` | Default execution parallelism (`CoreOptions.DEFAULT_PARALLELISM`). Must be > 0.                       |
-| `max-parallelism`         | Integer    | No       | `@Positive` | Maximum parallelism for key groups rescale (`PipelineOptions.MAX_PARALLELISM`). Must be > 0.          |
-| `buffer-timeout`          | `Duration` | No       | ISO-8601    | Buffer timeout (`ExecutionOptions.BUFFER_TIMEOUT`), e.g. `"PT0.1S"`. Trade-off latency vs throughput. |
-| `auto-watermark-interval` | `Duration` | No       | ISO-8601    | Periodic watermark emission interval (`PipelineOptions.AUTO_WATERMARK_INTERVAL`), e.g. `"PT0.2S"`.    |
-| `object-reuse`            | Boolean    | No       | Boolean     | Enable object reuse optimization (`PipelineOptions.OBJECT_REUSE`). Defaults to false in Flink.        |
+| Property Key              | Type       | Required | Validation                  | Description                                                                                           |
+|:--------------------------|:-----------|:---------|:----------------------------|:------------------------------------------------------------------------------------------------------|
+| `runtime-mode`            | Enum       | No       | Enum                        | Execution runtime mode: `STREAMING`, `BATCH`, or `AUTOMATIC` (`ExecutionOptions.RUNTIME_MODE`).       |
+| `parallelism`             | Integer    | No       | `@Positive`                 | Default execution parallelism (`CoreOptions.DEFAULT_PARALLELISM`). Must be > 0.                       |
+| `max-parallelism`         | Integer    | No       | `@Positive`                 | Maximum parallelism for key groups rescale (`PipelineOptions.MAX_PARALLELISM`). Must be > 0.          |
+| `buffer-timeout`          | `Duration` | No       | `@DurationMin(millis = 0)`  | Buffer timeout (`ExecutionOptions.BUFFER_TIMEOUT`), e.g. `"PT0.1S"`. Trade-off latency vs throughput. |
+| `auto-watermark-interval` | `Duration` | No       | `@DurationMin(millis = 0)`  | Periodic watermark emission interval (`PipelineOptions.AUTO_WATERMARK_INTERVAL`), e.g. `"PT0.2S"`.    |
+| `object-reuse`            | Boolean    | No       | Boolean                     | Enable object reuse optimization (`PipelineOptions.OBJECT_REUSE`). Defaults to false in Flink.        |
 
 ### Checkpointing Settings (`CheckpointingProperties`)
 
-| Property Key                      | Type       | Required | Validation  | Description                                                                                                                   |
-|:----------------------------------|:-----------|:---------|:------------|:------------------------------------------------------------------------------------------------------------------------------|
-| `enabled`                         | Boolean    | No       | Boolean     | Enable checkpointing (`CheckpointingOptions.CHECKPOINTING_INTERVAL`).                                                         |
-| `interval`                        | `Duration` | No       | ISO-8601    | Time interval between checkpoints (`CheckpointingOptions.CHECKPOINTING_INTERVAL`), e.g. `"PT10S"`.                            |
-| `mode`                            | Enum       | No       | Enum        | Checkpointing consistency mode: `EXACTLY_ONCE` or `AT_LEAST_ONCE` (`CheckpointingOptions.CHECKPOINTING_CONSISTENCY_MODE`).    |
-| `timeout`                         | `Duration` | No       | ISO-8601    | Maximum duration for a checkpoint before aborting (`CheckpointingOptions.CHECKPOINTING_TIMEOUT`), e.g. `"PT1M"`.              |
-| `min-pause-between-checkpoints`   | `Duration` | No       | ISO-8601    | Minimum rest duration between consecutive checkpoints (`CheckpointingOptions.MIN_PAUSE_BETWEEN_CHECKPOINTS`).                 |
-| `max-concurrent-checkpoints`      | Integer    | No       | `@Positive` | Maximum concurrent checkpoints allowed (`CheckpointingOptions.MAX_CONCURRENT_CHECKPOINTS`). Must be > 0.                      |
-| `externalized-checkpoint-cleanup` | Enum       | No       | Enum        | Cleanup retention mode on cancellation: `RETAIN_ON_CANCELLATION`, `DELETE_ON_CANCELLATION`, or `NO_EXTERNALIZED_CHECKPOINTS`. |
-| `unaligned-checkpoints`           | Boolean    | No       | Boolean     | Enable unaligned checkpoints (`CheckpointingOptions.ENABLE_UNALIGNED`).                                                       |
-| `aligned-checkpoint-timeout`      | `Duration` | No       | ISO-8601    | Timeout before switching to unaligned checkpoints (`CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT`), e.g. `"PT1S"`.         |
-| `storage-uri`                     | String     | No       | String      | Target checkpoint storage directory URI, e.g. `s3://bucket/checkpoints` (`CheckpointingOptions.CHECKPOINTS_DIRECTORY`).       |
+| Property Key                      | Type       | Required | Validation                  | Description                                                                                                                   |
+|:----------------------------------|:-----------|:---------|:----------------------------|:------------------------------------------------------------------------------------------------------------------------------|
+| `enabled`                         | Boolean    | No       | Boolean                     | Enable checkpointing (`CheckpointingOptions.CHECKPOINTING_INTERVAL`).                                                         |
+| `interval`                        | `Duration` | No       | `@DurationMin(millis = 1)`  | Time interval between checkpoints (`CheckpointingOptions.CHECKPOINTING_INTERVAL`), e.g. `"PT10S"`. Must be > 0.               |
+| `mode`                            | Enum       | No       | Enum                        | Checkpointing consistency mode: `EXACTLY_ONCE` or `AT_LEAST_ONCE` (`CheckpointingOptions.CHECKPOINTING_CONSISTENCY_MODE`).    |
+| `timeout`                         | `Duration` | No       | `@DurationMin(millis = 1)`  | Maximum duration for a checkpoint before aborting (`CheckpointingOptions.CHECKPOINTING_TIMEOUT`), e.g. `"PT1M"`. Must be > 0. |
+| `min-pause-between-checkpoints`   | `Duration` | No       | `@DurationMin(millis = 0)`  | Minimum rest duration between consecutive checkpoints (`CheckpointingOptions.MIN_PAUSE_BETWEEN_CHECKPOINTS`).                 |
+| `max-concurrent-checkpoints`      | Integer    | No       | `@Positive`                 | Maximum concurrent checkpoints allowed (`CheckpointingOptions.MAX_CONCURRENT_CHECKPOINTS`). Must be > 0.                      |
+| `externalized-checkpoint-cleanup` | Enum       | No       | Enum                        | Cleanup retention mode on cancellation: `RETAIN_ON_CANCELLATION`, `DELETE_ON_CANCELLATION`, or `NO_EXTERNALIZED_CHECKPOINTS`. |
+| `unaligned-checkpoints`           | Boolean    | No       | Boolean                     | Enable unaligned checkpoints (`CheckpointingOptions.ENABLE_UNALIGNED`).                                                       |
+| `aligned-checkpoint-timeout`      | `Duration` | No       | `@DurationMin(millis = 0)`  | Timeout before switching to unaligned checkpoints (`CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT`), e.g. `"PT1S"`.         |
+| `storage-uri`                     | String     | No       | String                      | Target checkpoint storage directory URI, e.g. `s3://bucket/checkpoints` (`CheckpointingOptions.CHECKPOINTS_DIRECTORY`).       |
 
 ### Restart Strategy Settings (`RestartStrategyProperties`)
 
@@ -145,27 +145,27 @@ The `restart-strategy` block accepts a `type` property (`NO_RESTART`, `FIXED_DEL
 
 ##### 1. Fixed Delay (`type: FIXED_DELAY` $\rightarrow$ `fixed-delay:`)
 
-| Property Key | Type       | Required | Validation  | Description                                                                                       |
-|:-------------|:-----------|:---------|:------------|:--------------------------------------------------------------------------------------------------|
-| `attempts`   | Integer    | No       | `@Positive` | Number of restart attempts (`RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS`).      |
-| `delay`      | `Duration` | No       | ISO-8601    | Delay between restart attempts (`RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_DELAY`).     |
+| Property Key | Type       | Required | Validation                 | Description                                                                                   |
+|:-------------|:-----------|:---------|:---------------------------|:----------------------------------------------------------------------------------------------|
+| `attempts`   | Integer    | No       | `@Positive`                | Number of restart attempts (`RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS`).  |
+| `delay`      | `Duration` | No       | `@DurationMin(millis = 0)` | Delay between restart attempts (`RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_DELAY`). |
 
 ##### 2. Failure Rate (`type: FAILURE_RATE` $\rightarrow$ `failure-rate:`)
 
-| Property Key                | Type       | Required | Validation  | Description                                                                                                              |
-|:----------------------------|:-----------|:---------|:------------|:-------------------------------------------------------------------------------------------------------------------------|
-| `max-failures-per-interval` | Integer    | No       | `@Positive` | Max failures allowed within interval (`RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_MAX_FAILURES_PER_INTERVAL`). |
-| `failure-interval`          | `Duration` | No       | ISO-8601    | Time window evaluating failure rate (`RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_FAILURE_RATE_INTERVAL`).      |
-| `delay`                     | `Duration` | No       | ISO-8601    | Delay between attempts (`RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_DELAY`).                                   |
+| Property Key                | Type       | Required | Validation                 | Description                                                                                                              |
+|:----------------------------|:-----------|:---------|:---------------------------|:-------------------------------------------------------------------------------------------------------------------------|
+| `max-failures-per-interval` | Integer    | No       | `@Positive`                | Max failures allowed within interval (`RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_MAX_FAILURES_PER_INTERVAL`). |
+| `failure-interval`          | `Duration` | No       | `@DurationMin(millis = 1)` | Time window evaluating failure rate (`RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_FAILURE_RATE_INTERVAL`).      |
+| `delay`                     | `Duration` | No       | `@DurationMin(millis = 0)` | Delay between attempts (`RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_DELAY`).                                   |
 
 ##### 3. Exponential Delay (`type: EXPONENTIAL_DELAY` $\rightarrow$ `exponential-delay:`)
 
 | Property Key              | Type       | Required | Validation                                 | Description                                                                                                             |
 |:--------------------------|:-----------|:---------|:-------------------------------------------|:------------------------------------------------------------------------------------------------------------------------|
-| `initial-backoff`         | `Duration` | No       | ISO-8601                                   | Initial backoff delay (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_INITIAL_BACKOFF`).                    |
+| `initial-backoff`         | `Duration` | No       | `@DurationMin(millis = 1)`                 | Initial backoff delay (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_INITIAL_BACKOFF`).                    |
 | `max-backoff`             | `Duration` | No       | $\ge$ `initial-backoff`                    | Maximum backoff delay cap (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_MAX_BACKOFF`).                    |
 | `backoff-multiplier`      | Double     | No       | `@DecimalMin("1.0")`                       | Exponential backoff multiplier (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_BACKOFF_MULTIPLIER`).        |
-| `reset-backoff-threshold` | `Duration` | No       | ISO-8601                                   | Reset backoff threshold duration (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_RESET_BACKOFF_THRESHOLD`). |
+| `reset-backoff-threshold` | `Duration` | No       | `@DurationMin(millis = 1)`                 | Reset backoff threshold duration (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_RESET_BACKOFF_THRESHOLD`). |
 | `jitter-factor`           | Double     | No       | `@DecimalMin("0.0")`, `@DecimalMax("1.0")` | Jitter factor for delay randomization (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_JITTER_FACTOR`).      |
 
 
