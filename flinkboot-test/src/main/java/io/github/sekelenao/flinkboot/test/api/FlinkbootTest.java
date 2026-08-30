@@ -39,10 +39,12 @@ public final class FlinkbootTest {
     public static <C> C configuration(Class<C> configurationClass, String... paths) {
         Objects.requireNonNull(configurationClass, "configurationClass must not be null");
         Objects.requireNonNull(paths, "paths must not be null");
-        var joinedPaths = String.join(",", paths);
+        var args = new String[0];
+        if (paths.length > 0) {
+            args = new String[]{"-flinkboot-configurations", String.join(",", paths)};
+        }
         try {
-            return Flinkboot.initialize(new String[]{"-flinkboot-configurations", joinedPaths})
-                .configuration(configurationClass);
+            return Flinkboot.initialize(args).configuration(configurationClass);
         } catch (IOException exception) {
             throw new UncheckedIOException(exception);
         }
