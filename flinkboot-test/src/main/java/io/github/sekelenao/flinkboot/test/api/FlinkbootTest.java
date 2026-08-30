@@ -27,10 +27,12 @@ public final class FlinkbootTest {
     /**
      * Reads, parses, and validates a configuration targeting the specified resource locations.
      * <p>
-     * Each path must explicitly include a resource scheme prefix (e.g. {@code "classpath:app.yaml"} or {@code "file:/tmp/app.yaml"}).
+     * When no {@code paths} are specified, this method defaults to loading {@code "classpath:job-configuration.yaml"}.
+     * <p>
+     * When paths are provided, each path must explicitly include a resource scheme prefix (e.g. {@code "classpath:app.yaml"} or {@code "file:/tmp/app.yaml"}).
      *
      * @param configurationClass the target configuration class
-     * @param paths              varargs of configuration resource locations
+     * @param paths              optional varargs of configuration resource locations (defaults to {@code classpath:job-configuration.yaml} if omitted)
      * @param <C>                type of the configuration
      * @return the deserialized and validated configuration object
      * @throws UncheckedIOException if an I/O error occurs while reading configuration files
@@ -39,10 +41,12 @@ public final class FlinkbootTest {
     public static <C> C configuration(Class<C> configurationClass, String... paths) {
         Objects.requireNonNull(configurationClass, "configurationClass must not be null");
         Objects.requireNonNull(paths, "paths must not be null");
-        var joinedPaths = String.join(",", paths);
+        var args = new String[0];
+        if (paths.length > 0) {
+            args = new String[]{"-flinkboot-configurations", String.join(",", paths)};
+        }
         try {
-            return Flinkboot.initialize(new String[]{"-flinkboot-configurations", joinedPaths})
-                .configuration(configurationClass);
+            return Flinkboot.initialize(args).configuration(configurationClass);
         } catch (IOException exception) {
             throw new UncheckedIOException(exception);
         }

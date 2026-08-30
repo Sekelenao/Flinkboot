@@ -89,6 +89,22 @@ class ApplicationConfigTest {
 
 ---
 
+### Loading the Default Classpath Configuration
+
+If your test relies on the default configuration file (`src/test/resources/job-configuration.yaml`), you can omit the `paths` argument entirely:
+
+```java
+@Test
+@DisplayName("Should load default configuration from classpath:job-configuration.yaml")
+void testLoadDefaultConfiguration() {
+    MyApplicationConfig config = FlinkbootTest.configuration(MyApplicationConfig.class);
+
+    assertNotNull(config);
+}
+```
+
+---
+
 ### Loading Multiple Configuration Files
 
 You can pass multiple configuration paths as varargs to test profile overrides or multi-file setups:
