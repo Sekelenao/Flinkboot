@@ -21,7 +21,7 @@ body:
     id: flinkboot-version
     attributes:
       label: Flinkboot Version
-      placeholder: "e.g. 0.4.0-1.20"
+      placeholder: "e.g. 0.5.0-1.20"
     validations:
       required: true
 
