@@ -226,6 +226,54 @@ class FlussSourcePropertiesTest {
                 () -> assertFalse(validator.validate(new FlussSourceProperties("n", List.of("s"), "d", "t", null, null, null)).isEmpty())
             );
         }
+
+        @Test
+        @DisplayName("Should fail validation when bootstrap-servers contains a blank element")
+        void shouldFailWhenBootstrapServersContainsBlankElement() {
+            var props = new FlussSourceProperties(
+                "my-source",
+                List.of("   "),
+                "my_db",
+                "my_table",
+                FlussStartupMode.EARLIEST,
+                null,
+                Map.of()
+            );
+
+            var violations = validator.validate(props);
+
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(
+                    violations.stream()
+                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrapServers"))
+                )
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when bootstrap-servers contains a null element")
+        void shouldFailWhenBootstrapServersContainsNullElement() {
+            var props = new FlussSourceProperties(
+                "my-source",
+                Collections.singletonList(null),
+                "my_db",
+                "my_table",
+                FlussStartupMode.EARLIEST,
+                null,
+                Map.of()
+            );
+
+            var violations = validator.validate(props);
+
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(
+                    violations.stream()
+                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrapServers"))
+                )
+            );
+        }
     }
 
     @Nested

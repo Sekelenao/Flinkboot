@@ -27,7 +27,7 @@ public class FlussSourceProperties implements Serializable {
     private final String name;
 
     @NotEmpty
-    private final List<String> bootstrapServers;
+    private final List<@NotBlank String> bootstrapServers;
 
     @NotBlank
     private final String database;

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -332,6 +333,106 @@ class KafkaSourceTopicListPropertiesTest {
                 // Should have validation violations
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("startingOffsetsTimestamp")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when bootstrap-servers contains a blank element")
+        void shouldFailWhenBootstrapServersContainsBlankElement() {
+            var config = new KafkaSourceTopicListProperties(
+                "my-source",
+                List.of("   "),
+                "my-group",
+                List.of("topic-a"),
+                KafkaOffsetInitializer.LATEST,
+                null,
+                null,
+                null
+            );
+
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(
+                    violations.stream()
+                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrapServers"))
+                )
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when bootstrap-servers contains a null element")
+        void shouldFailWhenBootstrapServersContainsNullElement() {
+            var config = new KafkaSourceTopicListProperties(
+                "my-source",
+                Collections.singletonList(null),
+                "my-group",
+                List.of("topic-a"),
+                KafkaOffsetInitializer.LATEST,
+                null,
+                null,
+                null
+            );
+
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(
+                    violations.stream()
+                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrapServers"))
+                )
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when topics contains a blank element")
+        void shouldFailWhenTopicsContainsBlankElement() {
+            var config = new KafkaSourceTopicListProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                List.of("   "),
+                KafkaOffsetInitializer.LATEST,
+                null,
+                null,
+                null
+            );
+
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(
+                    violations.stream()
+                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("topics"))
+                )
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when topics contains a null element")
+        void shouldFailWhenTopicsContainsNullElement() {
+            var config = new KafkaSourceTopicListProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                Collections.singletonList(null),
+                KafkaOffsetInitializer.LATEST,
+                null,
+                null,
+                null
+            );
+
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(
+                    violations.stream()
+                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("topics"))
+                )
             );
         }
     }

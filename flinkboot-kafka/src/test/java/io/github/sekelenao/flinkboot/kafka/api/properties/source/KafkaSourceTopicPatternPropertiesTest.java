@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -322,6 +323,56 @@ class KafkaSourceTopicPatternPropertiesTest {
                 // Should have validation violations
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("startingOffsetsTimestamp")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when bootstrap-servers contains a blank element")
+        void shouldFailWhenBootstrapServersContainsBlankElement() {
+            var config = new KafkaSourceTopicPatternProperties(
+                "my-source",
+                List.of("   "),
+                "my-group",
+                "^my-topic-.*$",
+                KafkaOffsetInitializer.LATEST,
+                null,
+                null,
+                null
+            );
+
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(
+                    violations.stream()
+                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrapServers"))
+                )
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when bootstrap-servers contains a null element")
+        void shouldFailWhenBootstrapServersContainsNullElement() {
+            var config = new KafkaSourceTopicPatternProperties(
+                "my-source",
+                Collections.singletonList(null),
+                "my-group",
+                "^my-topic-.*$",
+                KafkaOffsetInitializer.LATEST,
+                null,
+                null,
+                null
+            );
+
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(
+                    violations.stream()
+                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrapServers"))
+                )
             );
         }
     }
