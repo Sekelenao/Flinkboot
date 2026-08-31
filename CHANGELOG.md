@@ -5,6 +5,35 @@ All notable user-facing changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0-1.20]
+
+### Added
+
+#### Configuration Validation
+- **Strict Duration Validation (`@DurationMin`)**:
+  - Validates `Duration` configuration properties across all modules using `@DurationMin`.
+  - Rejects negative and zero values on intervals and timeouts (`interval`, `timeout`, `failure-interval`, `auto-watermark-interval`, `batch-timeout`).
+  - Rejects negative values on pause and delay properties (`min-pause-between-checkpoints`, `aligned-checkpoint-timeout`, `delay`, `initial-backoff`, `max-backoff`).
+
+### Changed
+
+#### Configuration Diagnostics
+- **Exhaustive Multi-Field Validation Reporting**:
+  - Configuration loading now reports all missing and invalid fields simultaneously in a structured multi-line report, instead of failing on the first missing field.
+
+### Fixed
+
+#### `flinkboot-core`
+- **Uniform Parsing Exception & FQCN Diagnostic**:
+  - Ensures all Jackson conversion errors (including `IllegalArgumentException`) are wrapped in `YamlParsingException`.
+  - Displays Fully Qualified Class Names (FQCN) in configuration mapping error messages for immediate identification in cluster logs.
+
+#### `flinkboot-test`
+- **Classpath Fallback in `FlinkbootTest`**:
+  - Calling `FlinkbootTest.configuration(Class<?> type)` without arguments now correctly falls back to `classpath:job-configuration.yaml`.
+
+---
+
 ## [0.4.0-1.20]
 
 ### Added
