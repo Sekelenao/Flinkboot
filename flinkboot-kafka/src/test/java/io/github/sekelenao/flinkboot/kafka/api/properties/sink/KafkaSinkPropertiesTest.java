@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -229,6 +230,52 @@ class KafkaSinkPropertiesTest {
             assertAll(
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().contains("properties")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when bootstrap-servers contains a blank element")
+        void shouldFailWhenBootstrapServersContainsBlankElement() {
+            var config = new KafkaSinkProperties(
+                "my-sink",
+                List.of("   "),
+                "my-topic",
+                KafkaDeliveryGuarantee.AT_LEAST_ONCE,
+                null,
+                null
+            );
+
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(
+                    violations.stream()
+                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrapServers"))
+                )
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when bootstrap-servers contains a null element")
+        void shouldFailWhenBootstrapServersContainsNullElement() {
+            var config = new KafkaSinkProperties(
+                "my-sink",
+                Collections.singletonList(null),
+                "my-topic",
+                KafkaDeliveryGuarantee.AT_LEAST_ONCE,
+                null,
+                null
+            );
+
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(
+                    violations.stream()
+                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrapServers"))
+                )
             );
         }
     }

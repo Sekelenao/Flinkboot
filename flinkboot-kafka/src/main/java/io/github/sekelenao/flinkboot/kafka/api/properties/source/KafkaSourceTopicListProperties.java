@@ -29,13 +29,13 @@ public class KafkaSourceTopicListProperties implements OffsetInitializerProperti
     private final String name;
 
     @NotEmpty
-    private final List<String> bootstrapServers;
+    private final List<@NotBlank String> bootstrapServers;
 
     @NotBlank
     private final String groupId;
 
     @NotEmpty
-    private final List<String> topics;
+    private final List<@NotBlank String> topics;
 
     @NotNull
     private final KafkaOffsetInitializer startingOffsets;

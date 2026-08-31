@@ -286,6 +286,54 @@ class FlussSinkPropertiesTest {
             assertNotNull(servers, "bootstrapServers() should never return null even if supplied null in ctor");
             assertTrue(servers.isEmpty(), "Expected empty list when bootstrapServers is null");
         }
+
+        @Test
+        @DisplayName("Should fail validation when bootstrap-servers contains a blank element")
+        void shouldFailWhenBootstrapServersContainsBlankElement() {
+            var props = new FlussSinkProperties(
+                "my-sink",
+                List.of("   "),
+                "my_db",
+                "my_table",
+                1024L,
+                Duration.ofMillis(50),
+                Map.of()
+            );
+
+            var violations = validator.validate(props);
+
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(
+                    violations.stream()
+                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrapServers"))
+                )
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when bootstrap-servers contains a null element")
+        void shouldFailWhenBootstrapServersContainsNullElement() {
+            var props = new FlussSinkProperties(
+                "my-sink",
+                Collections.singletonList(null),
+                "my_db",
+                "my_table",
+                1024L,
+                Duration.ofMillis(50),
+                Map.of()
+            );
+
+            var violations = validator.validate(props);
+
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(
+                    violations.stream()
+                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrapServers"))
+                )
+            );
+        }
     }
 }
 
