@@ -3,7 +3,11 @@ package io.github.sekelenao.flinkboot.core.internal.parser.yaml;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.ConfigurationValidationException;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.UnresolvedPropertyPlaceholderException;
@@ -342,6 +346,27 @@ class YamlParserTest {
         void shouldThrowExceptionWhenConfigurationResolvesToNull() {
             try (var parser = new YamlParser(STANDARD_FEATURES)) {
                 assertThrows(YamlParsingException.class, () -> parser.convertTo(Void.class));
+            }
+        }
+
+        @Test
+        @DisplayName("Should wrap IllegalArgumentException raised during conversion into YamlParsingException")
+        void shouldWrapIllegalArgumentExceptionRaisedDuringConversion() {
+            var failingModule = new SimpleModule().addDeserializer(TestConfig.class, new FailingDeserializer());
+            Consumer<YAMLMapper.Builder> additionalConfigurations = builder -> builder.addModule(failingModule);
+            var yamlContent = "name: \"Flink Job\"\nvalue: 42\n";
+            var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
+            try (var parser = new YamlParser(additionalConfigurations, STANDARD_FEATURES)) {
+                parser.parse(stream);
+                var exception = assertThrows(YamlParsingException.class, () -> parser.convertTo(TestConfig.class));
+                assertAll(
+                    () -> assertEquals(FailingDeserializer.MESSAGE, exception.getMessage()),
+                    () -> assertInstanceOf(
+                        IllegalArgumentException.class,
+                        exception.getCause(),
+                        "Exception cause should be the original IllegalArgumentException"
+                    )
+                );
             }
         }
 
@@ -717,6 +742,16 @@ class YamlParserTest {
 
         public LocalDate date() {
             return date;
+        }
+    }
+
+    static final class FailingDeserializer extends JsonDeserializer<TestConfig> {
+
+        static final String MESSAGE = "Deserializer rejected the configuration";
+
+        @Override
+        public TestConfig deserialize(JsonParser parser, DeserializationContext context) {
+            throw new IllegalArgumentException(MESSAGE);
         }
     }
 
