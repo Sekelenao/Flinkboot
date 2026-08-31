@@ -85,18 +85,12 @@ public final class YamlParser implements AutoCloseable {
         try {
             var yaml = mapper.treeToValue(root, type);
             if (yaml == null) {
-                throw new YamlParsingException(
-                    "Configuration could not be mapped to target class: "
-                        + type.getSimpleName()
-                );
+                throw new YamlParsingException("Configuration could not be mapped to target class: " + type.getName());
             }
             validator.validate(yaml);
             return yaml;
         } catch (IOException | IllegalArgumentException exception) {
-            throw new YamlParsingException(
-                exception.getMessage(),
-                exception
-            );
+            throw new YamlParsingException(exception.getMessage(), exception);
         }
     }
 

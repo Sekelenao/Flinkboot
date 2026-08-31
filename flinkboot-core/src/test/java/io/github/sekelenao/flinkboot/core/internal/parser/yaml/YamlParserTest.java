@@ -360,7 +360,7 @@ class YamlParserTest {
                 parser.parse(stream);
                 var exception = assertThrows(YamlParsingException.class, () -> parser.convertTo(TestConfig.class));
                 assertAll(
-                    () -> assertEquals(FailingDeserializer.MESSAGE, exception.getMessage()),
+                    () -> assertEquals(FailingDeserializer.FAILING_DESERIALIZER_EXCEPTION_MESSAGE, exception.getMessage()),
                     () -> assertInstanceOf(
                         IllegalArgumentException.class,
                         exception.getCause(),
@@ -747,11 +747,11 @@ class YamlParserTest {
 
     static final class FailingDeserializer extends JsonDeserializer<TestConfig> {
 
-        static final String MESSAGE = "Deserializer rejected the configuration";
+        static final String FAILING_DESERIALIZER_EXCEPTION_MESSAGE = "Deserializer rejected the configuration";
 
         @Override
         public TestConfig deserialize(JsonParser parser, DeserializationContext context) {
-            throw new IllegalArgumentException(MESSAGE);
+            throw new IllegalArgumentException(FAILING_DESERIALIZER_EXCEPTION_MESSAGE);
         }
     }
 
