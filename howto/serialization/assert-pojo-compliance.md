@@ -108,5 +108,53 @@ class UserActivityTest {
 
 If the class violates any of Flink's requirements or contains fields falling back to Kryo serialization, the assertion fails immediately with a descriptive error message indicating the exact path of the invalid field (e.g., `UserActivity.timestamp`).
 
+---
 
+## 4. Asserting Generic Types
 
+A `Class` literal erases generic parameters, so `assertThat(Map.class)` cannot tell Flink which key and
+value types are involved. Use a `TypeHint` to keep them, exactly as you would when hinting a Flink operator:
+
+```java
+import org.apache.flink.api.common.typeinfo.TypeHint;
+
+import static io.github.sekelenao.flinkboot.test.api.assertion.FlinkbootAssertions.assertThat;
+
+class UserActivityTest {
+
+    @Test
+    @DisplayName("Activities grouped by user should comply with Flink POJO serialization rules")
+    void testGenericPojoCompliance() {
+        assertThat(new TypeHint<Map<String, List<UserActivity>>>() {}).isPojo();
+    }
+}
+```
+
+Every nested type is validated recursively, so the assertion fails if the key type, the value type, or any
+field of `UserActivity` falls back to Kryo.
+
+---
+
+## 5. Asserting an Existing `TypeInformation`
+
+When a type description already exists — produced by a custom `TypeInfoFactory`, by
+`TypeInformation.of(...)`, or returned by a Flink operator — pass it directly:
+
+```java
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+
+import static io.github.sekelenao.flinkboot.test.api.assertion.FlinkbootAssertions.assertThat;
+
+class UserActivityTypeInfoTest {
+
+    @Test
+    @DisplayName("Custom type information should comply with Flink POJO serialization rules")
+    void testTypeInformationCompliance() {
+        TypeInformation<UserActivity> typeInfo = TypeInformation.of(UserActivity.class);
+        assertThat(typeInfo).isPojo();
+    }
+}
+```
+
+This is the most direct way to check that a custom factory really produces a native Flink serializer
+instead of a Kryo fallback.

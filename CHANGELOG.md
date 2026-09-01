@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### `flinkboot-test`
+- **Assertions on Generic and Custom Types**:
+  - Added `FlinkbootAssertions.assertThat(TypeHint<T>)` to verify types whose generic parameters would be erased by a `Class` literal, such as `new TypeHint<Map<String, UserActivity>>() {}`.
+  - Added `FlinkbootAssertions.assertThat(TypeInformation<T>)` to verify a type description produced by a custom `TypeInfoFactory` or by Flink itself.
+  - Added the matching `ClassAssert(TypeHint<?>)` and `ClassAssert(TypeInformation<?>)` constructors.
+
 #### Configuration Validation
 - **Strict Duration Validation (`@DurationMin`)**:
   - Validates `Duration` configuration properties across all modules using `@DurationMin`.

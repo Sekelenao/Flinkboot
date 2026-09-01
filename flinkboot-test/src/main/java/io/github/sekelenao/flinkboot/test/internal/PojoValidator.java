@@ -24,8 +24,16 @@ public final class PojoValidator {
 
     public void validate(Class<?> type) {
         Objects.requireNonNull(type, "Class to assert must not be null");
-        var typeInfo = TypeExtractor.createTypeInfo(type);
-        tasks.add(new PojoValidationTask<>(type.getName(), typeInfo));
+        validate(TypeExtractor.createTypeInfo(type), type.getName());
+    }
+
+    public void validate(TypeInformation<?> typeInfo) {
+        Objects.requireNonNull(typeInfo, "TypeInformation to assert must not be null");
+        validate(typeInfo, typeInfo.getTypeClass().getName());
+    }
+
+    private void validate(TypeInformation<?> typeInfo, String rootPath) {
+        tasks.add(new PojoValidationTask<>(rootPath, typeInfo));
         while (!tasks.isEmpty()) {
             processTask(tasks.pop());
         }

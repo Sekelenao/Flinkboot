@@ -7,6 +7,7 @@ import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTimeTypeInfoF
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTypeInfoFactory;
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalTimeTypeInfoFactory;
 import org.apache.flink.api.common.serialization.SerializerConfigImpl;
+import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInfoFactory;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -424,8 +425,40 @@ class PojoValidatorTest {
     @Test
     @DisplayName("Should throw NullPointerException when type is null")
     void shouldThrowWhenTypeIsNull() {
-        var exception = assertThrows(NullPointerException.class, () -> validator.validate(null));
+        var exception = assertThrows(NullPointerException.class, () -> validator.validate((Class<?>) null));
         assertEquals("Class to assert must not be null", exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @MethodSource("validPojoProvider")
+    @DisplayName("Should pass validation when type information describes a valid POJO")
+    void shouldPassWhenValidPojoTypeInformation(Class<?> validPojoClass) {
+        var typeInfo = TypeExtractor.createTypeInfo(validPojoClass);
+        assertDoesNotThrow(() -> validator.validate(typeInfo));
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidPojoProvider")
+    @DisplayName("Should fail validation when type information describes an invalid POJO")
+    void shouldFailWhenInvalidPojoTypeInformation(Class<?> invalidPojoClass) {
+        var typeInfo = TypeExtractor.createTypeInfo(invalidPojoClass);
+        assertThrows(AssertionFailedError.class, () -> validator.validate(typeInfo));
+    }
+
+    @Test
+    @DisplayName("Should fail validation when generic type information is nested in a type hint")
+    void shouldFailWhenTypeHintContainsUnsupportedType() {
+        var typeInfo = TypeInformation.of(new TypeHint<Tuple3<String, OffsetDateTime, Integer>>() {});
+        assertThrows(AssertionFailedError.class, () -> validator.validate(typeInfo));
+    }
+
+    @Test
+    @DisplayName("Should throw NullPointerException when type information is null")
+    void shouldThrowWhenTypeInformationIsNull() {
+        var exception = assertThrows(
+            NullPointerException.class, () -> validator.validate((TypeInformation<?>) null)
+        );
+        assertEquals("TypeInformation to assert must not be null", exception.getMessage());
     }
 
     @Nested
