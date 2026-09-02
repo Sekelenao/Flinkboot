@@ -60,7 +60,7 @@
         <dependency.junit.version>5.14.4</dependency.junit.version>
         <dependency.mockito.version>5.23.0</dependency.mockito.version>
         <dependency.jackson.version>2.22.2</dependency.jackson.version>
-        <dependency.validation.version>8.0.4.Final</dependency.validation.version>
+        <dependency.validation.version>8.0.5.Final</dependency.validation.version>
         <dependency.expressly.version>5.0.0</dependency.expressly.version>
         <dependency.flink-connector-kafka.version>3.4.0-1.20</dependency.flink-connector-kafka.version>
         <dependency.kafka-clients.version>3.4.0</dependency.kafka-clients.version>
