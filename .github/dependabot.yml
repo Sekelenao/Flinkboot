@@ -11,6 +11,10 @@ updates:
     commit-message:
       prefix: "chore(deps)"
     open-pull-requests-limit: 10
+    ignore:
+      # Ignore all major version upgrades across all dependencies
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   # GitHub Actions workflows
   - package-ecosystem: "github-actions"
@@ -23,3 +27,7 @@ updates:
     commit-message:
       prefix: "chore(deps)"
     open-pull-requests-limit: 5
+    ignore:
+      # Ignore major version bumps for GitHub Actions
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
