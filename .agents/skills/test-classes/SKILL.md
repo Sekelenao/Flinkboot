@@ -23,10 +23,11 @@ When writing unit tests for `*Properties` classes, organize into structured `@Ne
 
 1. **`@Nested @DisplayName("Constructor")`**:
    - Verify successful instantiation with valid arguments.
-   - Verify `NullPointerException` on mandatory parameters via `Objects.requireNonNull`.
 2. **`@Nested @DisplayName("Validation")`**:
-   - Verify cross-field validation exceptions (e.g. invalid combinations throwing domain exceptions).
+   - Verify cross-field validation exceptions in constructor (e.g. invalid combinations throwing domain exceptions).
    - Verify Jakarta Bean Validation violations using `Validation.buildDefaultValidatorFactory().getValidator()`.
+   - Verify single-field constraints (`@NotBlank`, `@NotEmpty`, `@NotNull`, `@PositiveOrZero`, `@Positive`).
+   - Verify container element validation (e.g. lists containing `null`, empty `""`, or blank `"   "` elements fail validation).
 3. **`@Nested @DisplayName("Getters")`**:
    - Verify all field accessors return expected values.
    - Verify `Optional.empty()` / `OptionalLong.empty()` when fields are null vs `Optional.of(...)` when present.

@@ -27,7 +27,7 @@ public class StandardProperties implements Serializable {
     private final String name;
 
     @NotEmpty
-    private final List<String> bootstrapServers;
+    private final List<@NotBlank String> bootstrapServers;
 
     @NotNull
     private final SampleMode mode;
@@ -109,9 +109,6 @@ public class StandardProperties implements Serializable {
     @Override
     @Generated
     public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
         if (!(other instanceof StandardProperties)) {
             return false;
         }

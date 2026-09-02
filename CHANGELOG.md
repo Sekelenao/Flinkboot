@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+#### `flinkboot-kafka`
+- **Unified `KafkaSourceProperties` DTO**:
+  - Consolidated `KafkaSourceTopicListProperties` and `KafkaSourceTopicPatternProperties` into a single unified `KafkaSourceProperties` DTO.
+  - Enforces strict mutual exclusivity between `topics` and `topic-pattern`.
+  - Simplified `KafkaSourceFactory` by providing single `supplyFor` and `supplyBuilderFor` entry points.
+
 #### Configuration Diagnostics
 - **Exhaustive Multi-Field Validation Reporting**:
   - Configuration loading now reports all missing and invalid fields simultaneously in a structured multi-line report, instead of failing on the first missing field.

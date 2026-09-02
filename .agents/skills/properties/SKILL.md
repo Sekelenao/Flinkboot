@@ -24,6 +24,10 @@ In Flinkboot, all configuration classes that bind to YAML/JSON configuration fil
 
 - **Single-Field Constraints** $\rightarrow$ **Jakarta Bean Validation**:
   - Place constraints on fields: `@NotBlank`, `@NotEmpty`, `@NotNull`, `@PositiveOrZero`, `@Positive`, `@Pattern`, `@Valid`.
+  - **Container Element Validation**: Always validate elements inside generic collections:
+    - **String collections** (e.g. `bootstrapServers`, `topics`): Must use `@NotEmpty private final List<@NotBlank String> items;` to strictly reject `null`, empty `""`, and blank `"   "` elements.
+    - **Maps** (e.g. `properties`): Must use `private final Map<@NotNull String, @NotNull String> properties;` to reject null keys and values.
+    - **Nested DTO collections**: Must use `private final List<@NotNull @Valid MyNestedProperties> items;` to reject null elements and trigger recursive Bean Validation.
   - **NEVER** write duplicate manual checks in the constructor (e.g. do **NOT** write `if (batchSize < 0)` in constructor if `@PositiveOrZero` is present).
 - **Cross-Field Interdependencies** $\rightarrow$ **Constructor `validate()`**:
   - Put cross-field validation in `private void validate()`.
@@ -57,7 +61,6 @@ In Flinkboot, all configuration classes that bind to YAML/JSON configuration fil
 - **`@Generated`**: Always annotate `equals(Object other)`, `hashCode()`, and `toString()` with `io.github.sekelenao.flinkboot.core.internal.annotation.Generated`.
 - **`equals` Pattern**:
   - Parameter named `other` (type `Object`).
-  - `if (this == other) { return true; }`
   - `if (!(other instanceof ClassName)) { return false; }`
   - `var o = (ClassName) other;`
   - Use `Objects.equals(...)` for objects/collections and `==` for enums and primitive values.
