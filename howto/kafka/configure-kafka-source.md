@@ -40,9 +40,9 @@ Import the Flinkboot BOM in your `<dependencyManagement>` and add the Flinkboot 
 
 ## 1. YAML Configuration Properties & Structure
 
-You can configure your Kafka Source using either a static list of topics or a topic pattern regex:
+You can configure your Kafka Source using either a static list of topics or a topic pattern regex with `KafkaSourceProperties`:
 
-### Option A: Static List of Topics (`KafkaSourceTopicListProperties`)
+### Option A: Static List of Topics
 
 ```yaml
 name: "my-kafka-source"
@@ -57,7 +57,7 @@ properties:
   session.timeout.ms: "45000"
 ```
 
-### Option B: Topic Pattern Regex (`KafkaSourceTopicPatternProperties`)
+### Option B: Topic Pattern Regex
 
 ```yaml
 name: "my-kafka-source"
@@ -72,17 +72,17 @@ starting-offsets: "LATEST"
 
 ## 2. Configuration Parameters Reference
 
-| Property Key                         | Type            | Required                    | Validation                     | Description                                                                                                                                         |
-|:-------------------------------------|:----------------|:----------------------------|:-------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `name`                               | String          | **Yes**                     | `@NotBlank`                    | Logical name of the Kafka source configuration.                                                                                                     |
-| `bootstrap-servers`                  | List of Strings | **Yes**                     | `@NotEmpty`, items `@NotBlank` | Kafka bootstrap broker hosts/ports (e.g. `localhost:9092`).                                                                                         |
-| `group-id`                           | String          | **Yes**                     | `@NotBlank`                    | Consumer group ID.                                                                                                                                  |
-| `topics`                             | List of Strings | **Yes** (Only for Option A) | `@NotEmpty`, items `@NotBlank` | Static list of topics to subscribe to.                                                                                                              |
-| `topic-pattern`                      | String          | **Yes** (Only for Option B) | `@NotBlank`                    | Regex pattern to match topic subscriptions.                                                                                                         |
-| `starting-offsets`                   | Enum            | **Yes**                     | `@NotNull` Enum                | Strategy to start consuming. Supported values: `EARLIEST`, `LATEST`, `COMMITTED`, `COMMITTED_EARLIEST`, `COMMITTED_LATEST`, `TIMESTAMP`, `OFFSETS`. |
-| `starting-offsets-timestamp`         | Long            | No                          | `@PositiveOrZero`              | Timestamp in epoch milliseconds. **Mandatory** only if `starting-offsets` is set to `TIMESTAMP` (otherwise ignored). Must be positive or zero.      |
-| `starting-offsets-partition-offsets` | List            | No                          | `@Valid` list items            | Specific partition offset offsets mapping. **Mandatory** only if `starting-offsets` is set to `OFFSETS` (otherwise ignored).                        |
-| `properties`                         | Map             | No                          | Keys/values `@NotBlank`        | Custom Kafka client consumer properties (e.g. `session.timeout.ms`). Keys and values must be non-null.                                              |
+| Property Key                         | Type            | Required                     | Validation                     | Description                                                                                                                                         |
+|:-------------------------------------|:----------------|:-----------------------------|:-------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `name`                               | String          | **Yes**                      | `@NotBlank`                    | Logical name of the Kafka source configuration.                                                                                                     |
+| `bootstrap-servers`                  | List of Strings | **Yes**                      | `@NotEmpty`, items `@NotBlank` | Kafka bootstrap broker hosts/ports (e.g. `localhost:9092`).                                                                                         |
+| `group-id`                           | String          | **Yes**                      | `@NotBlank`                    | Consumer group ID.                                                                                                                                  |
+| `topics`                             | List of Strings | **Yes** (Mutually exclusive) | items `@NotBlank`              | Static list of topics to subscribe to (mutually exclusive with `topic-pattern`).                                                                    |
+| `topic-pattern`                      | String          | **Yes** (Mutually exclusive) | Regex String                   | Regex pattern to match topic subscriptions (mutually exclusive with `topics`).                                                                      |
+| `starting-offsets`                   | Enum            | **Yes**                      | `@NotNull` Enum                | Strategy to start consuming. Supported values: `EARLIEST`, `LATEST`, `COMMITTED`, `COMMITTED_EARLIEST`, `COMMITTED_LATEST`, `TIMESTAMP`, `OFFSETS`. |
+| `starting-offsets-timestamp`         | Long            | No                           | `@PositiveOrZero`              | Timestamp in epoch milliseconds. **Mandatory** only if `starting-offsets` is set to `TIMESTAMP` (otherwise ignored). Must be positive or zero.      |
+| `starting-offsets-partition-offsets` | List            | No                           | `@Valid` list items            | Specific partition offset offsets mapping. **Mandatory** only if `starting-offsets` is set to `OFFSETS` (otherwise ignored).                        |
+| `properties`                         | Map             | No                           | Keys/values `@NotNull`         | Custom Kafka client consumer properties (e.g. `session.timeout.ms`). Keys and values must be non-null.                                              |
 
 ---
 
@@ -122,14 +122,14 @@ starting-offsets-partition-offsets:
 
 ## 4. Java Integration
 
-Embed `KafkaSourceTopicListProperties` inside your application's root configuration class:
+Embed `KafkaSourceProperties` inside your application's root configuration class:
 
 ### Step 1: Define Root Configuration POJO
 
 ```java
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceTopicListProperties;
+import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceProperties;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
@@ -137,14 +137,14 @@ public final class MyJobConfig {
 
     @Valid
     @NotNull
-    private final KafkaSourceTopicListProperties kafka;
+    private final KafkaSourceProperties kafka;
 
     @JsonCreator
-    public MyJobConfig(@JsonProperty("kafka") KafkaSourceTopicListProperties kafka) {
+    public MyJobConfig(@JsonProperty("kafka") KafkaSourceProperties kafka) {
         this.kafka = kafka;
     }
 
-    public KafkaSourceTopicListProperties kafka() { return kafka; }
+    public KafkaSourceProperties kafka() { return kafka; }
 }
 ```
 
@@ -189,5 +189,6 @@ KafkaSource<String> customKafkaSource = KafkaSourceFactory.supplyBuilderFor(conf
 
 ## 5. Fail-Fast Validation & Exceptions
 
+- **Mutual Exclusivity:** Configuring both `topics` and `topic-pattern` or configuring neither will immediately throw `InvalidKafkaSourcePropertiesException`.
 - **Nested Bean Validation:** If any property violates constraints (e.g. negative partition or blank topic), a `PropertiesValidationException` is thrown at startup.
 - **Invalid Offset Strategy:** If `starting-offsets` is set to `TIMESTAMP` or `OFFSETS` without providing the required timestamp or partition offset list, Flinkboot fails fast with an `InvalidKafkaSourcePropertiesException`.
