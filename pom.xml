@@ -57,7 +57,7 @@
         <flink.version>1.20.5</flink.version>
 
         <!-- Dependency versions -->
-        <dependency.junit.version>5.11.4</dependency.junit.version>
+        <dependency.junit.version>5.14.4</dependency.junit.version>
         <dependency.mockito.version>5.23.0</dependency.mockito.version>
         <dependency.jackson.version>2.22.2</dependency.jackson.version>
         <dependency.validation.version>8.0.4.Final</dependency.validation.version>
