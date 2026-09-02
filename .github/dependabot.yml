@@ -12,7 +12,7 @@ updates:
       prefix: "chore(deps)"
     open-pull-requests-limit: 10
     ignore:
-      # Ignore all major version upgrades across all dependencies
+      # Ignore all major version upgrades across all dependencies (e.g., JUnit 5 -> 6)
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
 
@@ -27,7 +27,3 @@ updates:
     commit-message:
       prefix: "chore(deps)"
     open-pull-requests-limit: 5
-    ignore:
-      # Ignore major version bumps for GitHub Actions
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
