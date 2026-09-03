@@ -2,9 +2,6 @@
 
 This section contains step-by-step guides to help you implement specific features and configurations in Flinkboot.
 
-> [!TIP]
-> **Looking for a ready-to-run template?** Explore the [Flinkboot Quickstart repository](https://github.com/Sekelenao/Flinkboot-Quickstart) for a complete end-to-end streaming application showcasing multi-source configuration, Kafka connectors, and native POJO serialization.
-
 > [!NOTE]
 > **Version-Specific Guides**: These guides reflect the `main` branch (latest development state). If you are using a published version of Flinkboot, please **switch to your version's Git tag** (e.g. [`v0.4.0-1.20`](https://github.com/Sekelenao/Flinkboot/releases)) to ensure configuration keys and APIs match your dependencies.
 
