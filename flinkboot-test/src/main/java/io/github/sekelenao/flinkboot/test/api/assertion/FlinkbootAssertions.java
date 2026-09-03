@@ -1,6 +1,7 @@
 package io.github.sekelenao.flinkboot.test.api.assertion;
 
 import io.github.sekelenao.flinkboot.test.api.assertion.type.ClassAssert;
+import io.github.sekelenao.flinkboot.test.api.assertion.type.TypeInformationAssert;
 
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -45,35 +46,36 @@ public final class FlinkbootAssertions {
     }
 
     /**
-     * Creates a new instance of {@link ClassAssert} to assert on the type captured by the specified
-     * {@link TypeHint}.
+     * Creates a new instance of {@link TypeInformationAssert} to assert on the type captured by the
+     * specified {@link TypeHint}.
      * <p>
      * Use it to keep generic parameters that a {@link Class} literal would erase, such as
      * {@code new TypeHint<List<UserActivity>>() {}}.
      *
      * @param typeHint the type hint describing the target type to assert
      * @param <T> the type described by the hint
-     * @return the created {@link ClassAssert} assertion object
+     * @return the created {@link TypeInformationAssert} assertion object
      * @throws NullPointerException if {@code typeHint} is {@code null}
      */
-    public static <T> ClassAssert assertThat(TypeHint<T> typeHint) {
+    public static <T> TypeInformationAssert<T> assertThat(TypeHint<T> typeHint) {
         Objects.requireNonNull(typeHint, "TypeHint to assert must not be null");
-        return new ClassAssert(typeHint);
+        return new TypeInformationAssert<>(typeHint);
     }
 
     /**
-     * Creates a new instance of {@link ClassAssert} to assert on the specified {@link TypeInformation}.
+     * Creates a new instance of {@link TypeInformationAssert} to assert on the specified
+     * {@link TypeInformation}.
      * <p>
      * Use it to assert on a type description produced by a custom
      * {@link org.apache.flink.api.common.typeinfo.TypeInfoFactory} or by Flink itself.
      *
      * @param typeInfo the target type information to assert
      * @param <T> the described type
-     * @return the created {@link ClassAssert} assertion object
+     * @return the created {@link TypeInformationAssert} assertion object
      * @throws NullPointerException if {@code typeInfo} is {@code null}
      */
-    public static <T> ClassAssert assertThat(TypeInformation<T> typeInfo) {
+    public static <T> TypeInformationAssert<T> assertThat(TypeInformation<T> typeInfo) {
         Objects.requireNonNull(typeInfo, "TypeInformation to assert must not be null");
-        return new ClassAssert(typeInfo);
+        return new TypeInformationAssert<>(typeInfo);
     }
 }

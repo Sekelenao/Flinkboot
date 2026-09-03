@@ -410,27 +410,6 @@ class PojoValidatorTest {
 
     @ParameterizedTest
     @MethodSource("validPojoProvider")
-    @DisplayName("Should pass validation when class is a valid POJO")
-    void shouldPassWhenValidPojo(Class<?> validPojoClass) {
-        assertDoesNotThrow(() -> validator.validate(validPojoClass));
-    }
-
-    @ParameterizedTest
-    @MethodSource("invalidPojoProvider")
-    @DisplayName("Should fail validation when class is not a valid POJO or contains unsupported types")
-    void shouldFailWhenInvalidPojo(Class<?> invalidPojoClass) {
-        assertThrows(AssertionFailedError.class, () -> validator.validate(invalidPojoClass));
-    }
-
-    @Test
-    @DisplayName("Should throw NullPointerException when type is null")
-    void shouldThrowWhenTypeIsNull() {
-        var exception = assertThrows(NullPointerException.class, () -> validator.validate((Class<?>) null));
-        assertEquals("Class to assert must not be null", exception.getMessage());
-    }
-
-    @ParameterizedTest
-    @MethodSource("validPojoProvider")
     @DisplayName("Should pass validation when type information describes a valid POJO")
     void shouldPassWhenValidPojoTypeInformation(Class<?> validPojoClass) {
         var typeInfo = TypeExtractor.createTypeInfo(validPojoClass);

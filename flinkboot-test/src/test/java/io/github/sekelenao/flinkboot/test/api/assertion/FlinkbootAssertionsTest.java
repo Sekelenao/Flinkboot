@@ -1,5 +1,8 @@
 package io.github.sekelenao.flinkboot.test.api.assertion;
 
+import io.github.sekelenao.flinkboot.test.api.assertion.type.ClassAssert;
+import io.github.sekelenao.flinkboot.test.api.assertion.type.TypeInformationAssert;
+
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -15,7 +18,6 @@ import static io.github.sekelenao.flinkboot.test.api.assertion.FlinkbootAssertio
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -49,8 +51,7 @@ class FlinkbootAssertionsTest {
         @Test
         @DisplayName("Should return ClassAssert instance when class is valid")
         void shouldReturnClassAssert() {
-            var classAssert = assertThat(ValidPojo.class);
-            assertNotNull(classAssert);
+            assertInstanceOf(ClassAssert.class, assertThat(ValidPojo.class));
         }
 
         @Test
@@ -78,10 +79,10 @@ class FlinkbootAssertionsTest {
     class AssertThatTypeHintTests {
 
         @Test
-        @DisplayName("Should return ClassAssert instance when type hint is valid")
-        void shouldReturnClassAssert() {
-            var classAssert = assertThat(new TypeHint<ValidPojo>() {});
-            assertNotNull(classAssert);
+        @DisplayName("Should return TypeInformationAssert instance when type hint is valid")
+        void shouldReturnTypeInformationAssert() {
+            TypeInformationAssert<ValidPojo> typeInfoAssert = assertThat(new TypeHint<ValidPojo>() {});
+            assertInstanceOf(TypeInformationAssert.class, typeInfoAssert);
         }
 
         @Test
@@ -112,10 +113,10 @@ class FlinkbootAssertionsTest {
     class AssertThatTypeInformationTests {
 
         @Test
-        @DisplayName("Should return ClassAssert instance when type information is valid")
-        void shouldReturnClassAssert() {
-            var classAssert = assertThat(TypeInformation.of(ValidPojo.class));
-            assertNotNull(classAssert);
+        @DisplayName("Should return TypeInformationAssert instance when type information is valid")
+        void shouldReturnTypeInformationAssert() {
+            TypeInformationAssert<ValidPojo> typeInfoAssert = assertThat(TypeInformation.of(ValidPojo.class));
+            assertInstanceOf(TypeInformationAssert.class, typeInfoAssert);
         }
 
         @Test

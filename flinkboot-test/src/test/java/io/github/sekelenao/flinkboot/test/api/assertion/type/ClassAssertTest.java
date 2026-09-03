@@ -1,12 +1,11 @@
 package io.github.sekelenao.flinkboot.test.api.assertion.type;
 
-import org.apache.flink.api.common.typeinfo.TypeHint;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -37,36 +36,16 @@ class ClassAssertTest {
         @Test
         @DisplayName("Should throw NullPointerException when class is null")
         void shouldThrowExceptionWhenClassIsNull() {
-            var exception = assertThrows(NullPointerException.class, () -> new ClassAssert((Class<?>) null));
+            var exception = assertThrows(NullPointerException.class, () -> new ClassAssert(null));
             assertEquals("Class to assert must not be null", exception.getMessage());
         }
 
         @Test
-        @DisplayName("Should instantiate successfully with non-null type hint")
-        void shouldInstantiateWithNonNullTypeHint() {
-            assertDoesNotThrow(() -> new ClassAssert(new TypeHint<ValidPojo>() {}));
-        }
-
-        @Test
-        @DisplayName("Should throw NullPointerException when type hint is null")
-        void shouldThrowExceptionWhenTypeHintIsNull() {
-            var exception = assertThrows(NullPointerException.class, () -> new ClassAssert((TypeHint<?>) null));
-            assertEquals("TypeHint to assert must not be null", exception.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should instantiate successfully with non-null type information")
-        void shouldInstantiateWithNonNullTypeInformation() {
-            assertDoesNotThrow(() -> new ClassAssert(TypeInformation.of(ValidPojo.class)));
-        }
-
-        @Test
-        @DisplayName("Should throw NullPointerException when type information is null")
-        void shouldThrowExceptionWhenTypeInformationIsNull() {
-            var exception = assertThrows(
-                NullPointerException.class, () -> new ClassAssert((TypeInformation<?>) null)
-            );
-            assertEquals("TypeInformation to assert must not be null", exception.getMessage());
+        @DisplayName("Should expose a single Class based constructor and no generic type entry point")
+        void shouldOnlyExposeClassConstructor() {
+            var constructors = ClassAssert.class.getConstructors();
+            assertEquals(1, constructors.length, "ClassAssert must stay focused on Class<?>");
+            assertArrayEquals(new Class<?>[] {Class.class}, constructors[0].getParameterTypes());
         }
     }
 
@@ -86,34 +65,6 @@ class ClassAssertTest {
         @DisplayName("Should fail with AssertionFailedError for invalid POJO")
         void shouldFailForInvalidPojo() {
             var classAssert = new ClassAssert(InvalidPojo.class);
-            assertThrows(AssertionFailedError.class, classAssert::isPojo);
-        }
-
-        @Test
-        @DisplayName("Should pass for valid POJO described by a type hint")
-        void shouldPassForValidPojoTypeHint() {
-            var classAssert = new ClassAssert(new TypeHint<ValidPojo>() {});
-            assertSame(classAssert, classAssert.isPojo());
-        }
-
-        @Test
-        @DisplayName("Should fail for invalid POJO described by a type hint")
-        void shouldFailForInvalidPojoTypeHint() {
-            var classAssert = new ClassAssert(new TypeHint<InvalidPojo>() {});
-            assertThrows(AssertionFailedError.class, classAssert::isPojo);
-        }
-
-        @Test
-        @DisplayName("Should pass for valid POJO described by type information")
-        void shouldPassForValidPojoTypeInformation() {
-            var classAssert = new ClassAssert(TypeInformation.of(ValidPojo.class));
-            assertSame(classAssert, classAssert.isPojo());
-        }
-
-        @Test
-        @DisplayName("Should fail for invalid POJO described by type information")
-        void shouldFailForInvalidPojoTypeInformation() {
-            var classAssert = new ClassAssert(TypeInformation.of(InvalidPojo.class));
             assertThrows(AssertionFailedError.class, classAssert::isPojo);
         }
     }
