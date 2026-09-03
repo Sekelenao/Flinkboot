@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Validates `Duration` configuration properties across all modules using `@DurationMin`.
   - Rejects negative and zero values on intervals and timeouts (`interval`, `timeout`, `failure-interval`, `auto-watermark-interval`, `batch-timeout`).
   - Rejects negative values on pause and delay properties (`min-pause-between-checkpoints`, `aligned-checkpoint-timeout`, `delay`, `initial-backoff`, `max-backoff`).
+- **Container Element Validation**:
+  - Enforces `@NotBlank` on string collection elements across `flinkboot-kafka` and `flinkboot-fluss` (`bootstrap-servers`, `topics`) to reject empty or blank strings.
+  - Enforces `@NotNull` keys and values in `ExecutionEnvironmentProperties.properties` map to prevent unhandled `null` states.
 
 ### Changed
 
