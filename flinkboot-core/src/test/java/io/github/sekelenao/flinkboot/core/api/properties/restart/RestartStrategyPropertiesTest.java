@@ -104,6 +104,21 @@ class RestartStrategyPropertiesTest {
         }
 
         @Test
+        @DisplayName("Should pass validation with zero attempts in fixed delay strategy")
+        void shouldPassWithZeroAttemptsFixedDelay() {
+            var fixed = new FixedDelayRestartProperties(0, Duration.ofSeconds(5));
+            var config = new RestartStrategyProperties(RestartStrategyType.FIXED_DELAY, fixed, null, null);
+
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertTrue(violations.isEmpty()),
+                () -> assertEquals(RestartStrategyType.FIXED_DELAY, config.type().orElseThrow()),
+                () -> assertEquals(fixed, config.fixedDelay().orElseThrow()),
+                () -> assertEquals(0, config.fixedDelay().orElseThrow().attempts().orElseThrow())
+            );
+        }
+
+        @Test
         @DisplayName("Should pass validation with valid failure rate strategy")
         void shouldPassWithValidFailureRate() {
             var failure = new FailureRateRestartProperties(3, Duration.ofMinutes(1), Duration.ofSeconds(1));
