@@ -8,7 +8,6 @@ import org.apache.flink.api.java.typeutils.ListTypeInfo;
 import org.apache.flink.api.java.typeutils.MapTypeInfo;
 import org.apache.flink.api.java.typeutils.ObjectArrayTypeInfo;
 import org.apache.flink.api.java.typeutils.PojoTypeInfo;
-import org.apache.flink.api.java.typeutils.TypeExtractor;
 import org.junit.jupiter.api.Assertions;
 
 import java.util.ArrayDeque;
@@ -22,10 +21,9 @@ public final class PojoValidator {
 
     private final Set<TypeInformation<?>> visited = new HashSet<>();
 
-    public void validate(Class<?> type) {
-        Objects.requireNonNull(type, "Class to assert must not be null");
-        var typeInfo = TypeExtractor.createTypeInfo(type);
-        tasks.add(new PojoValidationTask<>(type.getName(), typeInfo));
+    public void validate(TypeInformation<?> typeInfo) {
+        Objects.requireNonNull(typeInfo, "TypeInformation to assert must not be null");
+        tasks.add(new PojoValidationTask<>(typeInfo.getTypeClass().getName(), typeInfo));
         while (!tasks.isEmpty()) {
             processTask(tasks.pop());
         }

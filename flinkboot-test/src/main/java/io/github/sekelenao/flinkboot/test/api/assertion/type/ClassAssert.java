@@ -2,10 +2,17 @@ package io.github.sekelenao.flinkboot.test.api.assertion.type;
 
 import io.github.sekelenao.flinkboot.test.internal.PojoValidator;
 
+import org.apache.flink.api.java.typeutils.TypeExtractor;
+
 import java.util.Objects;
 
 /**
  * Fluent assertion provider for verifying Apache Flink serialization rules and class structures.
+ * <p>
+ * This assertion targets {@link Class} literals only, so any generic parameter is erased. Use
+ * {@link TypeInformationAssert} to assert on generic or composite types described by a
+ * {@link org.apache.flink.api.common.typeinfo.TypeHint} or a
+ * {@link org.apache.flink.api.common.typeinfo.TypeInformation}.
  *
  * <h3>Example:</h3>
  * <pre>{@code
@@ -37,7 +44,7 @@ public final class ClassAssert {
      * @throws AssertionError if the class or any nested field violates Flink POJO rules
      */
     public ClassAssert isPojo() {
-        new PojoValidator().validate(type);
+        new PojoValidator().validate(TypeExtractor.createTypeInfo(type));
         return this;
     }
 

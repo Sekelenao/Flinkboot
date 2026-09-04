@@ -4,6 +4,7 @@ target/
 # IDEs and editors
 .idea/
 *.iml
+.vscode/settings.json
 
 # Local todo/networking tracking
 .private/**
