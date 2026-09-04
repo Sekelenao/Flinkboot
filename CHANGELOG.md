@@ -33,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 #### `flinkboot-core`
+- **Zero Restart Attempts Support (`@PositiveOrZero`)**:
+  - Enforces `@PositiveOrZero` on `FixedDelayRestartProperties.attempts` to allow zero restart attempts (fail immediately on first failure without retries).
 - **Uniform Parsing Exception & FQCN Diagnostic**:
   - Ensures all Jackson conversion errors (including `IllegalArgumentException`) are wrapped in `YamlParsingException`.
   - Displays Fully Qualified Class Names (FQCN) in configuration mapping error messages for immediate identification in cluster logs.
