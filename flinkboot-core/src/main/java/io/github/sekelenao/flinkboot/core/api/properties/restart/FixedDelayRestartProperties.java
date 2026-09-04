@@ -3,7 +3,7 @@ package io.github.sekelenao.flinkboot.core.api.properties.restart;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import org.hibernate.validator.constraints.time.DurationMin;
 
 import java.io.Serializable;
@@ -19,7 +19,7 @@ public final class FixedDelayRestartProperties implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Positive
+    @PositiveOrZero
     private final Integer attempts;
 
     @DurationMin(millis = 0)

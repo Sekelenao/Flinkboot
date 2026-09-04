@@ -18,8 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Configuration Validation
 - **Strict Duration Validation (`@DurationMin`)**:
   - Validates `Duration` configuration properties across all modules using `@DurationMin`.
-  - Rejects negative and zero values on intervals and timeouts (`interval`, `timeout`, `failure-interval`, `auto-watermark-interval`, `batch-timeout`).
-  - Rejects negative values on pause and delay properties (`min-pause-between-checkpoints`, `aligned-checkpoint-timeout`, `delay`, `initial-backoff`, `max-backoff`).
+  - Rejects negative and zero values on strict intervals and timeouts (`interval`, `timeout`, `failure-interval`, `initial-backoff`, `reset-backoff-threshold`).
+  - Rejects negative values on pause, delay, and buffer properties (`min-pause-between-checkpoints`, `aligned-checkpoint-timeout`, `buffer-timeout`, `auto-watermark-interval`, `delay`, `batch-timeout`, `max-backoff`).
 - **Container Element Validation**:
   - Enforces `@NotBlank` on string collection elements across `flinkboot-kafka` and `flinkboot-fluss` (`bootstrap-servers`, `topics`) to reject empty or blank strings.
   - Enforces `@NotNull` keys and values in `ExecutionEnvironmentProperties.properties` map to prevent unhandled `null` states.
@@ -39,6 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 #### `flinkboot-core`
+- **Zero Restart Attempts Support (`@PositiveOrZero`)**:
+  - Enforces `@PositiveOrZero` on `FixedDelayRestartProperties.attempts` to allow zero restart attempts (fail immediately on first failure without retries).
 - **Uniform Parsing Exception & FQCN Diagnostic**:
   - Ensures all Jackson conversion errors (including `IllegalArgumentException`) are wrapped in `YamlParsingException`.
   - Displays Fully Qualified Class Names (FQCN) in configuration mapping error messages for immediate identification in cluster logs.

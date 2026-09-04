@@ -147,7 +147,7 @@ The `restart-strategy` block accepts a `type` property (`NO_RESTART`, `FIXED_DEL
 
 | Property Key | Type       | Required | Validation                 | Description                                                                                   |
 |:-------------|:-----------|:---------|:---------------------------|:----------------------------------------------------------------------------------------------|
-| `attempts`   | Integer    | No       | `@Positive`                | Number of restart attempts (`RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS`).  |
+| `attempts`   | Integer    | No       | `@PositiveOrZero`          | Number of restart attempts (`RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS`).  |
 | `delay`      | `Duration` | No       | `@DurationMin(millis = 0)` | Delay between restart attempts (`RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_DELAY`). |
 
 ##### 2. Failure Rate (`type: FAILURE_RATE` $\rightarrow$ `failure-rate:`)
@@ -198,7 +198,7 @@ The `restart-strategy` block accepts a `type` property (`NO_RESTART`, `FIXED_DEL
 
 ### Escape-Hatch Custom Properties (`properties`)
 
-Arbitrary Flink configuration key-value pairs (`Map<String, String>`) applied directly onto Flink's native `Configuration` object:
+Arbitrary Flink configuration key-value pairs (`Map<String, String>`) applied directly onto Flink's native `Configuration` object. Keys and values must be non-null:
 
 ```yaml
 environment:

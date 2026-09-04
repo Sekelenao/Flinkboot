@@ -15,6 +15,6 @@ public class UnrecognizedResourceException extends FlinkbootException {
      * @param location the unrecognized resource location string
      */
     public UnrecognizedResourceException(String location) {
-        super("Location should start with either 'classpath:' or 'file:' but was: " + location);
+        super("Location should start with 'classpath:', 'resource:', or 'file:' but was: " + location);
     }
 }
