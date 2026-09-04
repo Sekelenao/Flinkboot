@@ -198,7 +198,7 @@ The `restart-strategy` block accepts a `type` property (`NO_RESTART`, `FIXED_DEL
 
 ### Escape-Hatch Custom Properties (`properties`)
 
-Arbitrary Flink configuration key-value pairs (`Map<String, String>`) applied directly onto Flink's native `Configuration` object:
+Arbitrary Flink configuration key-value pairs (`Map<String, String>`) applied directly onto Flink's native `Configuration` object. Keys and values must be non-null:
 
 ```yaml
 environment:
