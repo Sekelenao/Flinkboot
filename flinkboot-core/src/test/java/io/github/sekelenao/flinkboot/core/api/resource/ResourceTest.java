@@ -89,7 +89,9 @@ class ResourceTest {
         @Test
         @DisplayName("Should throw UnrecognizedResourceException when prefix is unsupported")
         void shouldThrowExceptionForUnsupportedPrefix() {
-            assertThrows(UnrecognizedResourceException.class, () -> Resource.of("http://localhost/config.yaml"));
+            var location = "http://localhost/config.yaml";
+            var exception = assertThrows(UnrecognizedResourceException.class, () -> Resource.of(location));
+            assertEquals("Location should start with 'classpath:', 'resource:', or 'file:' but was: " + location, exception.getMessage());
         }
     }
 
