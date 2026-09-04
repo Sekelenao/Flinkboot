@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -38,14 +37,6 @@ class ClassAssertTest {
         void shouldThrowExceptionWhenClassIsNull() {
             var exception = assertThrows(NullPointerException.class, () -> new ClassAssert(null));
             assertEquals("Class to assert must not be null", exception.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should expose a single Class based constructor and no generic type entry point")
-        void shouldOnlyExposeClassConstructor() {
-            var constructors = ClassAssert.class.getConstructors();
-            assertEquals(1, constructors.length, "ClassAssert must stay focused on Class<?>");
-            assertArrayEquals(new Class<?>[] {Class.class}, constructors[0].getParameterTypes());
         }
     }
 

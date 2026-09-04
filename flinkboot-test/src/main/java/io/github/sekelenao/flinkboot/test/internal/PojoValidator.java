@@ -23,12 +23,7 @@ public final class PojoValidator {
 
     public void validate(TypeInformation<?> typeInfo) {
         Objects.requireNonNull(typeInfo, "TypeInformation to assert must not be null");
-
-        tasks.add(new PojoValidationTask<>(
-                typeInfo.getTypeClass().getName(),
-                typeInfo
-        ));
-
+        tasks.add(new PojoValidationTask<>(typeInfo.getTypeClass().getName(), typeInfo));
         while (!tasks.isEmpty()) {
             processTask(tasks.pop());
         }
