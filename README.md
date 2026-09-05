@@ -6,7 +6,7 @@
 Flinkboot
 </h1>
 
-> **Enterprise-Grade Safety & Zero-Boilerplate Runtime for Apache Flink.** Fail fast, serialize natively, and ship bulletproof streaming applications to production.
+> **The Bootstrapping & Reliability Framework for Apache Flink.** Fail fast on configuration, serialize natively without Kryo, and bootstrap stream pipelines with zero boilerplate.
 
 [![Java](https://img.shields.io/badge/Java_11%2B-%23ED8B00.svg?logo=openjdk&logoColor=white)](https://docs.oracle.com/en/java/javase/11/docs/api/index.html)
 [![Flink](https://img.shields.io/badge/Flink_1.20-%23E6526F.svg?logo=apacheflink&logoColor=white)](https://flink.apache.org/)
