@@ -26,7 +26,7 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        run: mvn -B verify --file pom.xml
+        run: mvn -B verify -T 1C --file pom.xml
 
       - name: Extract test count and create badge
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
