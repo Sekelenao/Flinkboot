@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 
 public final class StartupEnvironment {
 
+    private static final String VIOLATIONS_LOG_SIZE = "flinkboot-configuration-violations-log-size";
+
     private final CommandLine commandLine;
 
     private final EnvVarResolver envVarResolver;
@@ -48,15 +50,29 @@ public final class StartupEnvironment {
     }
 
     public ParserFeatures parserFeatures(){
-        var validationCapacity = get("flinkboot-configuration-violations-log-size")
-            .map(Integer::parseInt)
-            .filter(size -> size > 0)
+        var validationCapacity = get(VIOLATIONS_LOG_SIZE)
+            .map(StartupEnvironment::parseValidationCapacity)
             .orElse(10);
         return ParserFeatures.builder()
             .permitOverride(flag("flinkboot-configuration-override"))
             .listMerging(flag("flinkboot-configuration-list-merging"))
             .validationCapacity(validationCapacity)
             .build();
+    }
+
+    private static int parseValidationCapacity(String rawValue) {
+        try {
+            var capacity = Integer.parseInt(rawValue);
+            if (capacity > 0) {
+                return capacity;
+            }
+        } catch (NumberFormatException ignored) {
+            // Translate malformed and out-of-range values into one option-specific error.
+        }
+        throw new IllegalArgumentException(
+            "Invalid value for '" + VIOLATIONS_LOG_SIZE
+                + "': must be a strictly positive integer, but was '" + rawValue + "'"
+        );
     }
 
 }

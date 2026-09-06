@@ -45,6 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 #### `flinkboot-core`
+- **Fail-Fast Violations Log Size Validation**:
+  - Rejects malformed, zero, and negative explicit values for `flinkboot-configuration-violations-log-size` with a contextual startup error while preserving the default value of 10 when the option is absent.
 - **Zero Restart Attempts Support (`@PositiveOrZero`)**:
   - Enforces `@PositiveOrZero` on `FixedDelayRestartProperties.attempts` to allow zero restart attempts (fail immediately on first failure without retries).
 - **Uniform Parsing Exception & FQCN Diagnostic**:
