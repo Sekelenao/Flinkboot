@@ -325,14 +325,14 @@ class StateBackendPropertiesTest {
         @Test
         @DisplayName("Should deserialize ROCKSDB state backend with asymmetric booleans from JSON")
         void shouldDeserializeRocksDbFromJson() throws Exception {
-            String json = "{\n" +
+            var json = "{\n" +
                 "  \"type\": \"ROCKSDB\",\n" +
                 "  \"checkpoint-storage\": \"FILESYSTEM\",\n" +
                 "  \"incremental\": true,\n" +
                 "  \"latency-tracking\": false\n" +
                 "}";
 
-            StateBackendProperties config = mapper.readValue(json, StateBackendProperties.class);
+            var config = mapper.readValue(json, StateBackendProperties.class);
 
             assertAll(
                 () -> assertNotNull(config),
@@ -347,7 +347,7 @@ class StateBackendPropertiesTest {
         @Test
         @DisplayName("Should deserialize CUSTOM state backend with custom-class from JSON")
         void shouldDeserializeCustomBackendFromJson() throws Exception {
-            String json = "{\n" +
+            var json = "{\n" +
                 "  \"type\": \"CUSTOM\",\n" +
                 "  \"checkpoint-storage\": \"FILESYSTEM\",\n" +
                 "  \"incremental\": false,\n" +
@@ -355,7 +355,7 @@ class StateBackendPropertiesTest {
                 "  \"custom-class\": \"com.example.MyCustomStateBackend\"\n" +
                 "}";
 
-            StateBackendProperties config = mapper.readValue(json, StateBackendProperties.class);
+            var config = mapper.readValue(json, StateBackendProperties.class);
 
             assertAll(
                 () -> assertNotNull(config),
@@ -370,12 +370,12 @@ class StateBackendPropertiesTest {
         @Test
         @DisplayName("Should deserialize CHANGELOG state backend with JOBMANAGER storage from JSON")
         void shouldDeserializeChangelogWithJobManagerStorageFromJson() throws Exception {
-            String json = "{\n" +
+            var json = "{\n" +
                 "  \"type\": \"CHANGELOG\",\n" +
                 "  \"checkpoint-storage\": \"JOBMANAGER\"\n" +
                 "}";
 
-            StateBackendProperties config = mapper.readValue(json, StateBackendProperties.class);
+            var config = mapper.readValue(json, StateBackendProperties.class);
 
             assertAll(
                 () -> assertNotNull(config),
@@ -390,7 +390,7 @@ class StateBackendPropertiesTest {
         @Test
         @DisplayName("Should deserialize empty JSON object with all empty optionals")
         void shouldDeserializeEmptyJsonObject() throws Exception {
-            StateBackendProperties config = mapper.readValue("{}", StateBackendProperties.class);
+            var config = mapper.readValue("{}", StateBackendProperties.class);
 
             assertAll(
                 () -> assertNotNull(config),
