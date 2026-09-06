@@ -19,7 +19,7 @@ import java.util.Optional;
 /**
  * Configuration properties for Kafka producer sinks in Apache Flink.
  */
-public class KafkaSinkProperties implements Serializable {
+public final class KafkaSinkProperties implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
