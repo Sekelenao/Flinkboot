@@ -5,7 +5,7 @@ import io.github.sekelenao.flinkboot.core.api.exception.FlinkbootException;
 /**
  * Exception thrown when configuration properties violate Jakarta Bean Validation constraints.
  */
-public class ConfigurationValidationException extends FlinkbootException {
+public final class ConfigurationValidationException extends FlinkbootException {
 
     private static final long serialVersionUID = 1L;
 

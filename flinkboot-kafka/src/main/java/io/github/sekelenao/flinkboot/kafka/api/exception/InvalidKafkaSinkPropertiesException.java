@@ -5,7 +5,7 @@ import io.github.sekelenao.flinkboot.core.api.exception.FlinkbootException;
 /**
  * Exception thrown when Kafka sink configuration properties are invalid or inconsistent.
  */
-public class InvalidKafkaSinkPropertiesException extends FlinkbootException {
+public final class InvalidKafkaSinkPropertiesException extends FlinkbootException {
 
     private static final long serialVersionUID = 1L;
 

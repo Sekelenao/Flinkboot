@@ -5,7 +5,7 @@ import io.github.sekelenao.flinkboot.core.api.exception.FlinkbootException;
 /**
  * Exception thrown when an error occurs while accessing or opening a resource.
  */
-public class ResourceAccessException extends FlinkbootException {
+public final class ResourceAccessException extends FlinkbootException {
 
     private static final long serialVersionUID = 1L;
 

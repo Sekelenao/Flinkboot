@@ -5,7 +5,7 @@ import io.github.sekelenao.flinkboot.core.api.exception.FlinkbootException;
 /**
  * Exception thrown when a boolean configuration value cannot be parsed strictly.
  */
-public class BooleanParsingException extends FlinkbootException {
+public final class BooleanParsingException extends FlinkbootException {
 
     private static final long serialVersionUID = 1L;
 

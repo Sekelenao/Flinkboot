@@ -5,7 +5,7 @@ import io.github.sekelenao.flinkboot.core.api.exception.FlinkbootException;
 /**
  * Exception thrown when a requested resource cannot be located.
  */
-public class ResourceNotFoundException extends FlinkbootException {
+public final class ResourceNotFoundException extends FlinkbootException {
 
     private static final long serialVersionUID = 1L;
 

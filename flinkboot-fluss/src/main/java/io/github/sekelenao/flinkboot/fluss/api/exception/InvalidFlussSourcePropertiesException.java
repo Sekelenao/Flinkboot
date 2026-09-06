@@ -5,7 +5,7 @@ import io.github.sekelenao.flinkboot.core.api.exception.FlinkbootException;
 /**
  * Exception thrown when Apache Fluss source configuration properties are invalid or inconsistent.
  */
-public class InvalidFlussSourcePropertiesException extends FlinkbootException {
+public final class InvalidFlussSourcePropertiesException extends FlinkbootException {
 
     private static final long serialVersionUID = 1L;
 

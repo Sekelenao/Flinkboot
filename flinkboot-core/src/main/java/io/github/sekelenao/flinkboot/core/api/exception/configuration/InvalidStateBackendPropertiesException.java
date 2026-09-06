@@ -5,7 +5,7 @@ import io.github.sekelenao.flinkboot.core.api.exception.FlinkbootException;
 /**
  * Exception thrown when state backend configuration properties are invalid or inconsistent.
  */
-public class InvalidStateBackendPropertiesException extends FlinkbootException {
+public final class InvalidStateBackendPropertiesException extends FlinkbootException {
 
     private static final long serialVersionUID = 1L;
 
