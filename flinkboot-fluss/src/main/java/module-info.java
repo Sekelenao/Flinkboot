@@ -14,6 +14,4 @@ module io.github.sekelenao.flinkboot.fluss {
 
     opens io.github.sekelenao.flinkboot.fluss.api.properties.source;
     opens io.github.sekelenao.flinkboot.fluss.api.properties.sink;
-    opens io.github.sekelenao.flinkboot.fluss.api.source;
-    opens io.github.sekelenao.flinkboot.fluss.api.sink;
 }

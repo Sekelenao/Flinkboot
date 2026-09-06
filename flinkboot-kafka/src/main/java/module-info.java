@@ -13,6 +13,4 @@ module io.github.sekelenao.flinkboot.kafka {
 
     opens io.github.sekelenao.flinkboot.kafka.api.properties.source;
     opens io.github.sekelenao.flinkboot.kafka.api.properties.sink;
-    opens io.github.sekelenao.flinkboot.kafka.api.source;
-    opens io.github.sekelenao.flinkboot.kafka.api.sink;
 }
