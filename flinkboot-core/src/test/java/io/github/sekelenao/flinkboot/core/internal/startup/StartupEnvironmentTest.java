@@ -317,27 +317,35 @@ class StartupEnvironmentTest {
 
         @ParameterizedTest(name = "value = {0}")
         @ValueSource(strings = {"0", "-1", "-10"})
-        @DisplayName("Should fallback to default capacity when validation capacity is zero or negative in CommandLine")
-        void shouldFallbackToDefaultWhenValidationCapacityIsZeroOrNegativeInCommandLine(String size) {
+        @DisplayName("Should throw IllegalArgumentException when validation capacity is zero or negative in CommandLine")
+        void shouldThrowExceptionWhenValidationCapacityIsZeroOrNegativeInCommandLine(String size) {
             var cmd = CommandLine.parse(new String[]{"-flinkboot-configuration-violations-log-size", size});
             var resolver = new EnvVarResolver(k -> null);
             var startupEnv = new StartupEnvironment(cmd, resolver);
-            assertEquals(10, startupEnv.parserFeatures().validationCapacity());
+            var exception = assertThrows(IllegalArgumentException.class, startupEnv::parserFeatures);
+            assertEquals(
+                "Invalid value for 'flinkboot-configuration-violations-log-size': must be a strictly positive integer, but was '" + size + "'",
+                exception.getMessage()
+            );
         }
 
         @ParameterizedTest(name = "value = {0}")
         @ValueSource(strings = {"0", "-1", "-10"})
-        @DisplayName("Should fallback to default capacity when validation capacity is zero or negative in env variables")
-        void shouldFallbackToDefaultWhenValidationCapacityIsZeroOrNegativeInEnv(String size) {
+        @DisplayName("Should throw IllegalArgumentException when validation capacity is zero or negative in env variables")
+        void shouldThrowExceptionWhenValidationCapacityIsZeroOrNegativeInEnv(String size) {
             var cmd = CommandLine.parse(new String[0]);
             var resolver = new EnvVarResolver(k -> "FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE".equals(k) ? size : null);
             var startupEnv = new StartupEnvironment(cmd, resolver);
-            assertEquals(10, startupEnv.parserFeatures().validationCapacity());
+            var exception = assertThrows(IllegalArgumentException.class, startupEnv::parserFeatures);
+            assertEquals(
+                "Invalid value for 'flinkboot-configuration-violations-log-size': must be a strictly positive integer, but was '" + size + "'",
+                exception.getMessage()
+            );
         }
 
         @Test
-        @DisplayName("Should throw NumberFormatException when validation capacity is not a number in CommandLine or env variables")
-        void shouldThrowNumberFormatExceptionWhenValidationCapacityIsNotANumber() {
+        @DisplayName("Should throw contextualized IllegalArgumentException when validation capacity is not a number")
+        void shouldThrowContextualizedExceptionWhenValidationCapacityIsNotANumber() {
             var cmd = CommandLine.parse(new String[]{"-flinkboot-configuration-violations-log-size", "ABC"});
             var resolver = new EnvVarResolver(k -> null);
             var startupEnvCmd = new StartupEnvironment(cmd, resolver);
@@ -347,8 +355,20 @@ class StartupEnvironmentTest {
             var startupEnvEnv = new StartupEnvironment(cmdEmpty, resolverEnv);
 
             assertAll(
-                () -> assertThrows(NumberFormatException.class, startupEnvCmd::parserFeatures),
-                () -> assertThrows(NumberFormatException.class, startupEnvEnv::parserFeatures)
+                () -> {
+                    var exception = assertThrows(IllegalArgumentException.class, startupEnvCmd::parserFeatures);
+                    assertEquals(
+                        "Invalid value for 'flinkboot-configuration-violations-log-size': must be a strictly positive integer, but was 'ABC'",
+                        exception.getMessage()
+                    );
+                },
+                () -> {
+                    var exception = assertThrows(IllegalArgumentException.class, startupEnvEnv::parserFeatures);
+                    assertEquals(
+                        "Invalid value for 'flinkboot-configuration-violations-log-size': must be a strictly positive integer, but was 'ABC'",
+                        exception.getMessage()
+                    );
+                }
             );
         }
     }

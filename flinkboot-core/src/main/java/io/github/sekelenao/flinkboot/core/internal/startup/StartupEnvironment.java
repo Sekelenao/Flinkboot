@@ -49,8 +49,23 @@ public final class StartupEnvironment {
 
     public ParserFeatures parserFeatures(){
         var validationCapacity = get("flinkboot-configuration-violations-log-size")
-            .map(Integer::parseInt)
-            .filter(size -> size > 0)
+            .map(rawValue -> {
+                final int size;
+                try {
+                    size = Integer.parseInt(rawValue);
+                } catch (NumberFormatException exception) {
+                    throw new IllegalArgumentException(
+                        "Invalid value for 'flinkboot-configuration-violations-log-size': must be a strictly positive integer, but was '"
+                            + rawValue + "'",
+                        exception);
+                }
+                if (size <= 0) {
+                    throw new IllegalArgumentException(
+                        "Invalid value for 'flinkboot-configuration-violations-log-size': must be a strictly positive integer, but was '"
+                            + rawValue + "'");
+                }
+                return size;
+            })
             .orElse(10);
         return ParserFeatures.builder()
             .permitOverride(flag("flinkboot-configuration-override"))
