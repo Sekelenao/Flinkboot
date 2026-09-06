@@ -1,5 +1,6 @@
 package io.github.sekelenao.flinkboot.core.internal.execution;
 
+import io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidLocalWebUiPropertiesException;
 import io.github.sekelenao.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
 import io.github.sekelenao.flinkboot.core.api.properties.JobProperties;
 import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.CheckpointingMode;
@@ -43,6 +44,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("ExecutionEnvironmentFactory Tests")
@@ -288,13 +291,12 @@ class ExecutionEnvironmentFactoryTest {
             var envProps = new ExecutionEnvironmentProperties(null, null, null, null, null, localWebUiConfig, null);
             var jobConfig = new JobProperties("local-webui-cluster-job", envProps);
 
-            var mockClusterEnv = org.mockito.Mockito.mock(StreamExecutionEnvironment.class);
-            try (var mockedStatic = org.mockito.Mockito.mockStatic(StreamExecutionEnvironment.class)) {
+            var mockClusterEnv = mock(StreamExecutionEnvironment.class);
+            try (var mockedStatic = mockStatic(StreamExecutionEnvironment.class)) {
                 mockedStatic.when(StreamExecutionEnvironment::getExecutionEnvironment).thenReturn(mockClusterEnv);
 
                 var factory = new ExecutionEnvironmentFactory();
-                assertThrows(io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidLocalWebUiPropertiesException.class,
-                    () -> factory.create(jobConfig));
+                assertThrows(InvalidLocalWebUiPropertiesException.class, () -> factory.create(jobConfig));
             }
         }
 

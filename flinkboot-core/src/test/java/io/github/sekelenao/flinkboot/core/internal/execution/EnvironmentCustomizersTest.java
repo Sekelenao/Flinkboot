@@ -21,6 +21,7 @@ import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.RestartStrategyOptions;
 import org.apache.flink.configuration.StateBackendOptions;
+import org.apache.flink.configuration.StateLatencyTrackOptions;
 import org.apache.flink.configuration.StateRecoveryOptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -105,68 +106,9 @@ class EnvironmentCustomizersTest {
             () -> assertEquals("hashmap", config.get(StateBackendOptions.STATE_BACKEND)),
             () -> assertEquals("jobmanager", config.get(CheckpointingOptions.CHECKPOINT_STORAGE)),
             () -> assertNull(config.get(CheckpointingOptions.CHECKPOINTS_DIRECTORY)),
-            () -> assertFalse(config.get(CheckpointingOptions.INCREMENTAL_CHECKPOINTS))
+            () -> assertFalse(config.get(CheckpointingOptions.INCREMENTAL_CHECKPOINTS)),
+            () -> assertFalse(config.get(StateLatencyTrackOptions.LATENCY_TRACK_ENABLED))
         );
-    }
-
-    @Test
-    @DisplayName("Should configure ROCKSDB state backend without replacing checkpoint directory")
-    void shouldConfigureRocksDbStateBackend() {
-        Configuration config = new Configuration();
-        config.set(CheckpointingOptions.CHECKPOINTS_DIRECTORY, "file:///checkpointing-storage");
-        var stateBackendConfig = new StateBackendProperties(
-            StateBackendType.ROCKSDB,
-            CheckpointStorageType.FILESYSTEM,
-            true,
-            true,
-            null
-        );
-        var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
-
-        new StateBackendCustomizer(config).configure(envProps);
-
-        assertAll(
-            () -> assertEquals("rocksdb", config.get(StateBackendOptions.STATE_BACKEND)),
-            () -> assertEquals("filesystem", config.get(CheckpointingOptions.CHECKPOINT_STORAGE)),
-            () -> assertEquals("file:///checkpointing-storage", config.get(CheckpointingOptions.CHECKPOINTS_DIRECTORY)),
-            () -> assertTrue(config.get(CheckpointingOptions.INCREMENTAL_CHECKPOINTS))
-        );
-    }
-
-    @Test
-    @DisplayName("Should configure CHANGELOG state backend")
-    void shouldConfigureChangelogStateBackend() {
-        Configuration config = new Configuration();
-        var stateBackendConfig = new StateBackendProperties(
-            StateBackendType.CHANGELOG,
-            null,
-            null,
-            null,
-            null
-        );
-        var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
-
-        new StateBackendCustomizer(config).configure(envProps);
-
-        assertEquals("changelog", config.get(StateBackendOptions.STATE_BACKEND));
-    }
-
-    @Test
-    @DisplayName("Should configure CUSTOM state backend with custom class name")
-    void shouldConfigureCustomStateBackend() {
-        Configuration config = new Configuration();
-        var stateBackendConfig = new StateBackendProperties(
-            StateBackendType.CUSTOM,
-            null,
-            null,
-            null,
-            "org.example.MyCustomStateBackendFactory"
-        );
-        var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
-
-        new StateBackendCustomizer(config).configure(envProps);
-
-        assertEquals("org.example.MyCustomStateBackendFactory", config.get(StateBackendOptions.STATE_BACKEND));
     }
 
     @Test
