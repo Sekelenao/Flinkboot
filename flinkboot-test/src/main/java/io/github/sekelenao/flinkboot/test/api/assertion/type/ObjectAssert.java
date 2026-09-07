@@ -1,10 +1,8 @@
 package io.github.sekelenao.flinkboot.test.api.assertion.type;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import io.github.sekelenao.flinkboot.test.internal.SerializationValidator;
+
 import java.io.NotSerializableException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Objects;
 
 /**
@@ -26,10 +24,12 @@ import java.util.Objects;
  *         .isSerializable();
  * }
  * }</pre>
+ *
+ * @param <T> the type of the object under assertion
  */
-public final class ObjectAssert {
+public final class ObjectAssert<T> {
 
-    private final Object actual;
+    private final T actual;
 
     /**
      * Creates a new {@link ObjectAssert} for the given target object.
@@ -37,7 +37,7 @@ public final class ObjectAssert {
      * @param actual the object to assert
      * @throws NullPointerException if {@code actual} is {@code null}
      */
-    public ObjectAssert(Object actual) {
+    public ObjectAssert(T actual) {
         this.actual = Objects.requireNonNull(actual, "Object to assert must not be null");
     }
 
@@ -45,8 +45,7 @@ public final class ObjectAssert {
      * Verifies that the target object can be cleanly serialized and
      * deserialized via standard Java serialization.
      * <p>
-     * Performs a round-trip through {@link ObjectOutputStream} and
-     * {@link ObjectInputStream} against an in-memory byte buffer. A common
+     * Performs a round-trip through an in-memory byte buffer. A common
      * failure cause is an unintentionally captured non-serializable field
      * (e.g. a database connection, open file handle, logger instance, or
      * outer class {@code this} reference in a non-static inner class).
@@ -54,29 +53,8 @@ public final class ObjectAssert {
      * @return this assertion object for method chaining
      * @throws AssertionError if the object is not serializable
      */
-    public ObjectAssert isSerializable() {
-        try (
-                ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
-                ObjectOutputStream objectOutput = new ObjectOutputStream(byteOutput)
-        ) {
-            objectOutput.writeObject(actual);
-            objectOutput.flush();
-
-            try (
-                    ByteArrayInputStream byteInput = new ByteArrayInputStream(byteOutput.toByteArray());
-                    ObjectInputStream objectInput = new ObjectInputStream(byteInput)
-            ) {
-                objectInput.readObject();
-            }
-        } catch (Exception exception) {
-            throw new AssertionError(
-                    "Expected instance of "
-                            + actual.getClass().getName()
-                            + " to be serializable, but it was not: "
-                            + exception.getMessage(),
-                    exception
-            );
-        }
+    public ObjectAssert<T> isSerializable() {
+        new SerializationValidator().validate(actual);
         return this;
     }
 }

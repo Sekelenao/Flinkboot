@@ -51,12 +51,13 @@ public final class FlinkbootAssertions {
      * specified object, such as verifying Java serialization compliance.
      *
      * @param actual the object to assert
+     * @param <T> the type of the object under assertion
      * @return the created {@link ObjectAssert} assertion object
      * @throws NullPointerException if {@code actual} is {@code null}
      */
-    public static ObjectAssert assertThat(Object actual) {
+    public static <T> ObjectAssert<T> assertThat(T actual) {
         Objects.requireNonNull(actual, "Object to assert must not be null");
-        return new ObjectAssert(actual);
+        return new ObjectAssert<>(actual);
     }
 
     /**

@@ -1,12 +1,18 @@
 package io.github.sekelenao.flinkboot.test.api.assertion.type;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 import java.io.Serializable;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@DisplayName("ObjectAssert")
 class ObjectAssertTest {
 
     static class SerializableSample implements Serializable {
@@ -17,24 +23,41 @@ class ObjectAssertTest {
         private final Object value = new Object();
     }
 
-    @Test
-    void isSerializable_serializableObject_passesAndReturnsThis() {
-        ObjectAssert objectAssert = new ObjectAssert(new SerializableSample());
+    @Nested
+    @DisplayName("Constructor")
+    class ConstructorTests {
 
-        ObjectAssert result = objectAssert.isSerializable();
+        @Test
+        @DisplayName("Should instantiate successfully with non-null object")
+        void shouldInstantiateWithNonNullObject() {
+            assertDoesNotThrow(() -> new ObjectAssert<>(new SerializableSample()));
+        }
 
-        assertSame(objectAssert, result);
+        @Test
+        @DisplayName("Should throw NullPointerException when object is null")
+        void shouldThrowExceptionWhenObjectIsNull() {
+            var exception = assertThrows(NullPointerException.class, () -> new ObjectAssert<>(null));
+            assertEquals("Object to assert must not be null", exception.getMessage());
+        }
     }
 
-    @Test
-    void isSerializable_nonSerializableObject_throwsAssertionError() {
-        ObjectAssert objectAssert = new ObjectAssert(new NonSerializableSample());
+    @Nested
+    @DisplayName("isSerializable")
+    class IsSerializableTests {
 
-        assertThrows(AssertionError.class, objectAssert::isSerializable);
-    }
+        @Test
+        @DisplayName("Should pass for a serializable object and return same ObjectAssert instance for fluent chaining")
+        void shouldPassForSerializableObjectAndReturnThis() {
+            var objectAssert = new ObjectAssert<>(new SerializableSample());
+            var result = objectAssert.isSerializable();
+            assertSame(objectAssert, result);
+        }
 
-    @Test
-    void constructor_nullObject_throwsNullPointerException() {
-        assertThrows(NullPointerException.class, () -> new ObjectAssert(null));
+        @Test
+        @DisplayName("Should fail with AssertionFailedError for a non-serializable object")
+        void shouldFailForNonSerializableObject() {
+            var objectAssert = new ObjectAssert<>(new NonSerializableSample());
+            assertThrows(AssertionFailedError.class, objectAssert::isSerializable);
+        }
     }
 }
