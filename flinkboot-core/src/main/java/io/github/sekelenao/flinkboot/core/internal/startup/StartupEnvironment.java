@@ -2,6 +2,7 @@ package io.github.sekelenao.flinkboot.core.internal.startup;
 
 import io.github.sekelenao.flinkboot.core.internal.annotation.VisibleForTesting;
 import io.github.sekelenao.flinkboot.core.internal.parser.bool.StrictBooleanParser;
+import io.github.sekelenao.flinkboot.core.internal.parser.integer.IntegerParser;
 import io.github.sekelenao.flinkboot.core.internal.parser.yaml.ParserFeatures;
 
 import java.util.Arrays;
@@ -51,28 +52,16 @@ public final class StartupEnvironment {
 
     public ParserFeatures parserFeatures(){
         var validationCapacity = get(VIOLATIONS_LOG_SIZE)
-            .map(StartupEnvironment::parseValidationCapacity)
+            .map(value -> IntegerParser.parseStrictlyPositive(value, () -> new IllegalArgumentException(
+                "Invalid value for '" + VIOLATIONS_LOG_SIZE
+                    + "': must be a strictly positive integer, but was '" + value + "'"
+            )))
             .orElse(10);
         return ParserFeatures.builder()
             .permitOverride(flag("flinkboot-configuration-override"))
             .listMerging(flag("flinkboot-configuration-list-merging"))
             .validationCapacity(validationCapacity)
             .build();
-    }
-
-    private static int parseValidationCapacity(String rawValue) {
-        try {
-            var capacity = Integer.parseInt(rawValue);
-            if (capacity > 0) {
-                return capacity;
-            }
-        } catch (NumberFormatException ignored) {
-            // Translate malformed and out-of-range values into one option-specific error.
-        }
-        throw new IllegalArgumentException(
-            "Invalid value for '" + VIOLATIONS_LOG_SIZE
-                + "': must be a strictly positive integer, but was '" + rawValue + "'"
-        );
     }
 
 }
