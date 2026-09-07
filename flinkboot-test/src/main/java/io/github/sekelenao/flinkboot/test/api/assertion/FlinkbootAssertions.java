@@ -2,6 +2,7 @@ package io.github.sekelenao.flinkboot.test.api.assertion;
 
 import io.github.sekelenao.flinkboot.test.api.assertion.type.ClassAssert;
 import io.github.sekelenao.flinkboot.test.api.assertion.type.TypeInformationAssert;
+import io.github.sekelenao.flinkboot.test.api.assertion.type.ObjectAssert;
 
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -43,6 +44,19 @@ public final class FlinkbootAssertions {
     public static ClassAssert assertThat(Class<?> type) {
         Objects.requireNonNull(type, "Class to assert must not be null");
         return new ClassAssert(type);
+    }
+
+    /**
+     * Creates a new instance of {@link ObjectAssert} to assert on the
+     * specified object, such as verifying Java serialization compliance.
+     *
+     * @param actual the object to assert
+     * @return the created {@link ObjectAssert} assertion object
+     * @throws NullPointerException if {@code actual} is {@code null}
+     */
+    public static ObjectAssert assertThat(Object actual) {
+        Objects.requireNonNull(actual, "Object to assert must not be null");
+        return new ObjectAssert(actual);
     }
 
     /**
