@@ -315,10 +315,30 @@ class StartupEnvironmentTest {
             );
         }
 
-        @ParameterizedTest(name = "value = {0}")
-        @ValueSource(strings = {"0", "-1", "-10"})
-        @DisplayName("Should reject zero or negative validation capacity in CommandLine")
-        void shouldRejectZeroOrNegativeValidationCapacityInCommandLine(String size) {
+        @ParameterizedTest(name = "capacity = {0}")
+        @ValueSource(ints = {1, 10, 25, 100, Integer.MAX_VALUE})
+        @DisplayName("Should accept strictly positive validation capacity in CommandLine")
+        void shouldAcceptValidValidationCapacityInCommandLine(int capacity) {
+            var cmd = CommandLine.parse(new String[]{"-flinkboot-configuration-violations-log-size", String.valueOf(capacity)});
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertEquals(capacity, startupEnv.parserFeatures().validationCapacity());
+        }
+
+        @Test
+        @DisplayName("Should prefer CommandLine option over EnvVarResolver for validation capacity")
+        void shouldPreferCommandLineOverEnvForValidationCapacity() {
+            var cmd = CommandLine.parse(new String[]{"-flinkboot-configuration-violations-log-size", "20"});
+            var env = Map.of("FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE", "50");
+            var resolver = new EnvVarResolver(env::get);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertEquals(20, startupEnv.parserFeatures().validationCapacity());
+        }
+
+        @ParameterizedTest(name = "value = \"{0}\"")
+        @ValueSource(strings = {"0", "-1", "-10", "ABC", "12.5", " ", ""})
+        @DisplayName("Should reject invalid validation capacity in CommandLine")
+        void shouldRejectInvalidValidationCapacityInCommandLine(String size) {
             var cmd = CommandLine.parse(new String[]{"-flinkboot-configuration-violations-log-size", size});
             var resolver = new EnvVarResolver(k -> null);
             var startupEnv = new StartupEnvironment(cmd, resolver);
@@ -329,38 +349,10 @@ class StartupEnvironmentTest {
             );
         }
 
-        @ParameterizedTest(name = "value = {0}")
-        @ValueSource(strings = {"0", "-1", "-10"})
-        @DisplayName("Should reject zero or negative validation capacity in env variables")
-        void shouldRejectZeroOrNegativeValidationCapacityInEnv(String size) {
-            var cmd = CommandLine.parse(new String[0]);
-            var resolver = new EnvVarResolver(k -> "FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE".equals(k) ? size : null);
-            var startupEnv = new StartupEnvironment(cmd, resolver);
-            var exception = assertThrows(IllegalArgumentException.class, startupEnv::parserFeatures);
-            assertEquals(
-                "Invalid value for 'flinkboot-configuration-violations-log-size': must be a strictly positive integer, but was '" + size + "'",
-                exception.getMessage()
-            );
-        }
-
-        @ParameterizedTest(name = "value = {0}")
-        @ValueSource(strings = {"ABC", "12.5", " "})
-        @DisplayName("Should reject non-numeric validation capacity in CommandLine")
-        void shouldRejectNonNumericValidationCapacityInCommandLine(String size) {
-            var cmd = CommandLine.parse(new String[]{"-flinkboot-configuration-violations-log-size", size});
-            var resolver = new EnvVarResolver(k -> null);
-            var startupEnv = new StartupEnvironment(cmd, resolver);
-            var exception = assertThrows(IllegalArgumentException.class, startupEnv::parserFeatures);
-            assertEquals(
-                "Invalid value for 'flinkboot-configuration-violations-log-size': must be a strictly positive integer, but was '" + size + "'",
-                exception.getMessage()
-            );
-        }
-
-        @ParameterizedTest(name = "value = {0}")
-        @ValueSource(strings = {"ABC", "12.5", " "})
-        @DisplayName("Should reject non-numeric validation capacity in env variables")
-        void shouldRejectNonNumericValidationCapacityInEnv(String size) {
+        @ParameterizedTest(name = "value = \"{0}\"")
+        @ValueSource(strings = {"0", "-1", "-10", "ABC", "12.5", " ", ""})
+        @DisplayName("Should reject invalid validation capacity in env variables")
+        void shouldRejectInvalidValidationCapacityInEnv(String size) {
             var cmd = CommandLine.parse(new String[0]);
             var resolver = new EnvVarResolver(k -> "FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE".equals(k) ? size : null);
             var startupEnv = new StartupEnvironment(cmd, resolver);
