@@ -2,6 +2,7 @@ package io.github.sekelenao.flinkboot.core.internal.startup;
 
 import io.github.sekelenao.flinkboot.core.internal.annotation.VisibleForTesting;
 import io.github.sekelenao.flinkboot.core.internal.parser.bool.StrictBooleanParser;
+import io.github.sekelenao.flinkboot.core.internal.parser.integer.IntegerParser;
 import io.github.sekelenao.flinkboot.core.internal.parser.yaml.ParserFeatures;
 
 import java.util.Arrays;
@@ -12,6 +13,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public final class StartupEnvironment {
+
+    private static final String VIOLATIONS_LOG_SIZE = "flinkboot-configuration-violations-log-size";
 
     private final CommandLine commandLine;
 
@@ -48,9 +51,11 @@ public final class StartupEnvironment {
     }
 
     public ParserFeatures parserFeatures(){
-        var validationCapacity = get("flinkboot-configuration-violations-log-size")
-            .map(Integer::parseInt)
-            .filter(size -> size > 0)
+        var validationCapacity = get(VIOLATIONS_LOG_SIZE)
+            .map(value -> IntegerParser.parseStrictlyPositive(value, () -> new IllegalArgumentException(
+                "Invalid value for '" + VIOLATIONS_LOG_SIZE
+                    + "': must be a strictly positive integer, but was '" + value + "'"
+            )))
             .orElse(10);
         return ParserFeatures.builder()
             .permitOverride(flag("flinkboot-configuration-override"))
