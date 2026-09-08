@@ -23,7 +23,7 @@ import java.util.OptionalLong;
  * Unified configuration properties for Apache Flink Kafka sources consuming from an explicit list of topics
  * or dynamic topics matching a regex pattern.
  */
-public class KafkaSourceProperties implements OffsetInitializerProperties, Serializable {
+public final class KafkaSourceProperties implements OffsetInitializerProperties, Serializable {
 
     private static final long serialVersionUID = 1L;
 

@@ -28,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+#### `flinkboot-core`
+- **Single Checkpoint Storage Path**:
+  - Removed `state-backend.storage-path`; configure the checkpoint directory only with `checkpointing.storage-uri`.
+
 #### `flinkboot-kafka`
 - **Unified `KafkaSourceProperties` DTO**:
   - Consolidated `KafkaSourceTopicListProperties` and `KafkaSourceTopicPatternProperties` into a single unified `KafkaSourceProperties` DTO.
@@ -47,6 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### `flinkboot-core`
 - **Fail-Fast Violations Log Size Validation**:
   - Rejects malformed, zero, and negative explicit values for `flinkboot-configuration-violations-log-size` with a contextual startup error while preserving the default value of 10 when the option is absent.
+- **Checkpointing Disable Flag**:
+  - An explicit `checkpointing.enabled: false` now prevents all settings in the checkpointing block from being applied.
 - **Zero Restart Attempts Support (`@PositiveOrZero`)**:
   - Enforces `@PositiveOrZero` on `FixedDelayRestartProperties.attempts` to allow zero restart attempts (fail immediately on first failure without retries).
 - **Uniform Parsing Exception & FQCN Diagnostic**:

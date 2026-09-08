@@ -19,7 +19,7 @@ import java.util.OptionalLong;
 /**
  * Configuration properties for Apache Fluss sources in Apache Flink.
  */
-public class FlussSourceProperties implements Serializable {
+public final class FlussSourceProperties implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

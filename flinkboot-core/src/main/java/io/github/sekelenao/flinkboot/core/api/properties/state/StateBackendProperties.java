@@ -21,7 +21,6 @@ public final class StateBackendProperties implements Serializable {
 
     private final StateBackendType type;
     private final CheckpointStorageType checkpointStorage;
-    private final String storagePath;
     private final Boolean incremental;
     private final Boolean latencyTracking;
     private final String customClass;
@@ -31,7 +30,6 @@ public final class StateBackendProperties implements Serializable {
      *
      * @param type              the state backend type (HASHMAP, ROCKSDB, CHANGELOG, CUSTOM)
      * @param checkpointStorage the checkpoint storage type (JOBMANAGER, FILESYSTEM)
-     * @param storagePath       the root storage path for checkpoints
      * @param incremental       whether incremental checkpoints are enabled (RocksDB)
      * @param latencyTracking   whether state access latency tracking metrics are enabled (RocksDB)
      * @param customClass       fully qualified class name of custom state backend factory
@@ -41,14 +39,12 @@ public final class StateBackendProperties implements Serializable {
     public StateBackendProperties(
         @JsonProperty("type") StateBackendType type,
         @JsonProperty("checkpoint-storage") CheckpointStorageType checkpointStorage,
-        @JsonProperty("storage-path") String storagePath,
         @JsonProperty("incremental") Boolean incremental,
         @JsonProperty("latency-tracking") Boolean latencyTracking,
         @JsonProperty("custom-class") String customClass
     ) {
         this.type = type;
         this.checkpointStorage = checkpointStorage;
-        this.storagePath = storagePath;
         this.incremental = incremental;
         this.latencyTracking = latencyTracking;
         this.customClass = customClass;
@@ -71,15 +67,6 @@ public final class StateBackendProperties implements Serializable {
      */
     public Optional<CheckpointStorageType> checkpointStorage() {
         return Optional.ofNullable(checkpointStorage);
-    }
-
-    /**
-     * Returns the optional checkpoint storage directory path.
-     *
-     * @return an {@link Optional} containing the storage path string, or empty if not specified
-     */
-    public Optional<String> storagePath() {
-        return Optional.ofNullable(storagePath);
     }
 
     /**
@@ -132,7 +119,6 @@ public final class StateBackendProperties implements Serializable {
         var o = (StateBackendProperties) other;
         return type == o.type
             && checkpointStorage == o.checkpointStorage
-            && Objects.equals(storagePath, o.storagePath)
             && Objects.equals(incremental, o.incremental)
             && Objects.equals(latencyTracking, o.latencyTracking)
             && Objects.equals(customClass, o.customClass);
@@ -144,7 +130,6 @@ public final class StateBackendProperties implements Serializable {
         return Objects.hash(
             type,
             checkpointStorage,
-            storagePath,
             incremental,
             latencyTracking,
             customClass
@@ -157,7 +142,6 @@ public final class StateBackendProperties implements Serializable {
         return "StateBackendProperties{" +
             "type=" + type +
             ", checkpointStorage=" + checkpointStorage +
-            ", storagePath='" + storagePath + '\'' +
             ", incremental=" + incremental +
             ", latencyTracking=" + latencyTracking +
             ", customClass='" + customClass + '\'' +

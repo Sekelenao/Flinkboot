@@ -22,7 +22,9 @@ public final class CheckpointingCustomizer implements EnvironmentCustomizer {
     @Override
     public void configure(ExecutionEnvironmentProperties configuration) {
         Objects.requireNonNull(configuration);
-        configuration.checkpointing().ifPresent(this::apply);
+        configuration.checkpointing()
+            .filter(checkpointing -> checkpointing.enabled().orElse(true))
+            .ifPresent(this::apply);
     }
 
     private void apply(CheckpointingProperties checkpointingConfig) {
