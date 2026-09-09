@@ -246,6 +246,7 @@ class StartupEnvironmentTest {
             assertAll(
                 () -> assertFalse(features.permitOverride()),
                 () -> assertFalse(features.listMerging()),
+                () -> assertFalse(features.disableValidation()),
                 () -> assertEquals(10, features.validationCapacity())
             );
         }
@@ -260,6 +261,7 @@ class StartupEnvironmentTest {
             assertAll(
                 () -> assertTrue(features.permitOverride()),
                 () -> assertFalse(features.listMerging()),
+                () -> assertFalse(features.disableValidation()),
                 () -> assertEquals(10, features.validationCapacity())
             );
         }
@@ -274,6 +276,22 @@ class StartupEnvironmentTest {
             assertAll(
                 () -> assertFalse(features.permitOverride()),
                 () -> assertTrue(features.listMerging()),
+                () -> assertFalse(features.disableValidation()),
+                () -> assertEquals(10, features.validationCapacity())
+            );
+        }
+
+        @Test
+        @DisplayName("Should return disableValidation=true when only disableValidation is set")
+        void shouldReturnAsymmetricFeaturesWhenOnlyDisableValidationIsSet() {
+            var cmd = CommandLine.parse(new String[]{"--flinkboot-configuration-disable-validation"});
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            var features = startupEnv.parserFeatures();
+            assertAll(
+                () -> assertFalse(features.permitOverride()),
+                () -> assertFalse(features.listMerging()),
+                () -> assertTrue(features.disableValidation()),
                 () -> assertEquals(10, features.validationCapacity())
             );
         }
@@ -284,6 +302,7 @@ class StartupEnvironmentTest {
             var cmd = CommandLine.parse(new String[]{
                 "--flinkboot-configuration-override",
                 "--flinkboot-configuration-list-merging",
+                "--flinkboot-configuration-disable-validation",
                 "-flinkboot-configuration-violations-log-size", "25"
             });
             var resolver = new EnvVarResolver(k -> null);
@@ -292,6 +311,7 @@ class StartupEnvironmentTest {
             assertAll(
                 () -> assertTrue(features.permitOverride()),
                 () -> assertTrue(features.listMerging()),
+                () -> assertTrue(features.disableValidation()),
                 () -> assertEquals(25, features.validationCapacity())
             );
         }
@@ -303,6 +323,7 @@ class StartupEnvironmentTest {
             var env = Map.of(
                 "FLINKBOOT_CONFIGURATION_OVERRIDE", "true",
                 "FLINKBOOT_CONFIGURATION_LIST_MERGING", "true",
+                "FLINKBOOT_CONFIGURATION_DISABLE_VALIDATION", "true",
                 "FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE", "50"
             );
             var resolver = new EnvVarResolver(env::get);
@@ -311,6 +332,7 @@ class StartupEnvironmentTest {
             assertAll(
                 () -> assertTrue(features.permitOverride()),
                 () -> assertTrue(features.listMerging()),
+                () -> assertTrue(features.disableValidation()),
                 () -> assertEquals(50, features.validationCapacity())
             );
         }

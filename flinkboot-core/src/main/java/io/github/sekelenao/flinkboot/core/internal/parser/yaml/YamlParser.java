@@ -25,6 +25,8 @@ public final class YamlParser implements AutoCloseable {
 
     private final MergeProcessor mergeProcessor;
 
+    private final ParserFeatures parserFeatures;
+
     public YamlParser(ParserFeatures features) {
         this(additionalConfiguration -> {}, Objects.requireNonNull(features));
     }
@@ -36,7 +38,7 @@ public final class YamlParser implements AutoCloseable {
     @VisibleForTesting
     YamlParser(Consumer<YAMLMapper.Builder> additionalConfiguration, ParserFeatures features, PlaceholderResolver placeholderResolver) {
         Objects.requireNonNull(additionalConfiguration);
-        Objects.requireNonNull(features);
+        this.parserFeatures = Objects.requireNonNull(features);
         Objects.requireNonNull(placeholderResolver);
         var builder = YAMLMapper.builder()
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
@@ -56,7 +58,7 @@ public final class YamlParser implements AutoCloseable {
 
     @VisibleForTesting
     YamlParser(YAMLMapper mapper, ParserFeatures parserFeatures, PlaceholderResolver placeholderResolver){
-        Objects.requireNonNull(parserFeatures);
+        this.parserFeatures = Objects.requireNonNull(parserFeatures);
         Objects.requireNonNull(placeholderResolver);
         this.mapper = Objects.requireNonNull(mapper);
         this.root = mapper.createObjectNode();
@@ -87,7 +89,9 @@ public final class YamlParser implements AutoCloseable {
             if (yaml == null) {
                 throw new YamlParsingException("Configuration could not be mapped to target class: " + type.getName());
             }
-            validator.validate(yaml);
+            if (!parserFeatures.disableValidation()) {
+                validator.validate(yaml);
+            }
             return yaml;
         } catch (IOException | IllegalArgumentException exception) {
             throw new YamlParsingException(exception.getMessage(), exception);
