@@ -60,6 +60,7 @@ public final class StartupEnvironment {
         return ParserFeatures.builder()
             .permitOverride(flag("flinkboot-configuration-override"))
             .listMerging(flag("flinkboot-configuration-list-merging"))
+            .disableValidation(flag("flinkboot-configuration-disable-validation"))
             .validationCapacity(validationCapacity)
             .build();
     }

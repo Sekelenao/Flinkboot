@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### `flinkboot-core`
+- **Disable Configuration Validation Flag**:
+  - Added `--flinkboot-configuration-disable-validation` CLI flag and `FLINKBOOT_CONFIGURATION_DISABLE_VALIDATION` environment variable to bypass Jakarta Bean Validation during configuration deserialization.
+
 #### `flinkboot-test`
 - **Assertions on Generic and Custom Types**:
   - Added `TypeInformationAssert<T>`, a dedicated assert object for generic and composite types, with its `isPojo()` assertion and the `TypeInformationAssert(TypeInformation<T>)` and `TypeInformationAssert(TypeHint<T>)` constructors. `ClassAssert` stays focused on `Class<?>`.

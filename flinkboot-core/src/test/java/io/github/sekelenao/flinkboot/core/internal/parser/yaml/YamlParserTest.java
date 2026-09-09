@@ -50,6 +50,7 @@ class YamlParserTest {
     private static final ParserFeatures STANDARD_FEATURES = ParserFeatures.builder()
         .permitOverride(false)
         .listMerging(false)
+        .disableValidation(false)
         .validationCapacity(10)
         .build();
 
@@ -245,7 +246,7 @@ class YamlParserTest {
             var baseYaml = "name: \"BaseApp\"\nvalue: 42\n";
             var overrideYaml = "value: 100\n";
 
-            var features = ParserFeatures.builder().permitOverride(true).listMerging(false).validationCapacity(10).build();
+            var features = ParserFeatures.builder().permitOverride(true).listMerging(false).disableValidation(false).validationCapacity(10).build();
             try (var parser = new YamlParser(features)) {
                 parser.parse(new ByteArrayInputStream(baseYaml.getBytes(StandardCharsets.UTF_8)));
                 parser.parse(new ByteArrayInputStream(overrideYaml.getBytes(StandardCharsets.UTF_8)));
@@ -291,6 +292,29 @@ class YamlParserTest {
                     () -> assertNotNull(exception.getMessage()),
                     () -> assertTrue(exception.getMessage().contains("name")),
                     () -> assertTrue(exception.getMessage().contains("value"))
+                );
+            }
+        }
+
+        @Test
+        @DisplayName("Should not throw ConfigurationValidationException when validation is disabled")
+        void shouldNotThrowWhenValidationIsDisabled() {
+            var yamlContent = "name: \"\"\nvalue: 0\n";
+            var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
+            var features = ParserFeatures.builder()
+                .permitOverride(false)
+                .listMerging(false)
+                .disableValidation(true)
+                .validationCapacity(10)
+                .build();
+
+            try (var parser = new YamlParser(features)) {
+                parser.parse(stream);
+                var config = parser.convertTo(TestConfig.class);
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertEquals("", config.name()),
+                    () -> assertEquals(0, config.value())
                 );
             }
         }
@@ -386,7 +410,7 @@ class YamlParserTest {
             var baseYaml = "items:\n  - \"item1\"\n  - \"item2\"\n";
             var overrideYaml = "items:\n  - \"item3\"\n";
 
-            var features = ParserFeatures.builder().permitOverride(false).listMerging(true).validationCapacity(10).build();
+            var features = ParserFeatures.builder().permitOverride(false).listMerging(true).disableValidation(false).validationCapacity(10).build();
             try (var parser = new YamlParser(features)) {
                 parser.parse(new ByteArrayInputStream(baseYaml.getBytes(StandardCharsets.UTF_8)));
                 parser.parse(new ByteArrayInputStream(overrideYaml.getBytes(StandardCharsets.UTF_8)));
@@ -407,7 +431,7 @@ class YamlParserTest {
         @Test
         @DisplayName("With permitOverride=false and listMerging=false: should throw exception on any override or list merge")
         void shouldThrowExceptionOnAnyOverrideOrListMerge() {
-            var features = ParserFeatures.builder().permitOverride(false).listMerging(false).validationCapacity(10).build();
+            var features = ParserFeatures.builder().permitOverride(false).listMerging(false).disableValidation(false).validationCapacity(10).build();
             var yaml1 = "name: \"Base\"\nvalue: 42\n";
             var yaml2 = "value: 100\n";
             var yamlList1 = "items:\n  - \"a\"\n";
@@ -429,7 +453,7 @@ class YamlParserTest {
         @Test
         @DisplayName("With permitOverride=true and listMerging=false: should override scalars and replace lists")
         void shouldOverrideScalarsAndReplaceLists() {
-            var features = ParserFeatures.builder().permitOverride(true).listMerging(false).validationCapacity(10).build();
+            var features = ParserFeatures.builder().permitOverride(true).listMerging(false).disableValidation(false).validationCapacity(10).build();
             var yaml1 = "name: \"Base\"\nvalue: 42\n";
             var yaml2 = "value: 100\n";
             var yamlList1 = "items:\n  - \"a\"\n";
@@ -460,7 +484,7 @@ class YamlParserTest {
         @Test
         @DisplayName("With permitOverride=false and listMerging=true: should throw on scalar override but append lists")
         void shouldThrowOnScalarOverrideButAppendLists() {
-            var features = ParserFeatures.builder().permitOverride(false).listMerging(true).validationCapacity(10).build();
+            var features = ParserFeatures.builder().permitOverride(false).listMerging(true).disableValidation(false).validationCapacity(10).build();
             var yaml1 = "name: \"Base\"\nvalue: 42\n";
             var yaml2 = "value: 100\n";
             var yamlList1 = "items:\n  - \"a\"\n";
@@ -486,7 +510,7 @@ class YamlParserTest {
         @Test
         @DisplayName("With permitOverride=true and listMerging=true: should override scalars and append lists")
         void shouldOverrideScalarsAndAppendLists() {
-            var features = ParserFeatures.builder().permitOverride(true).listMerging(true).validationCapacity(10).build();
+            var features = ParserFeatures.builder().permitOverride(true).listMerging(true).disableValidation(false).validationCapacity(10).build();
             var yamlScalar1 = "name: \"Base\"\nvalue: 42\n";
             var yamlScalar2 = "value: 100\n";
             var yamlList1 = "items:\n  - \"a\"\n";
@@ -520,6 +544,7 @@ class YamlParserTest {
             var features = ParserFeatures.builder()
                 .permitOverride(true)
                 .listMerging(true)
+                .disableValidation(false)
                 .validationCapacity(10)
                 .build();
 

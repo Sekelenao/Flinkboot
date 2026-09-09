@@ -6,11 +6,14 @@ public final class ParserFeatures {
 
     private final boolean listMerging;
 
+    private final boolean disableValidation;
+
     private final int validationCapacity;
 
-    private ParserFeatures(boolean permitOverride, boolean listMerging, int validationCapacity) {
+    private ParserFeatures(boolean permitOverride, boolean listMerging, boolean disableValidation, int validationCapacity) {
         this.permitOverride = permitOverride;
         this.listMerging = listMerging;
+        this.disableValidation = disableValidation;
         this.validationCapacity = validationCapacity;
     }
 
@@ -20,6 +23,10 @@ public final class ParserFeatures {
 
     public boolean listMerging() {
         return listMerging;
+    }
+
+    public boolean disableValidation() {
+        return disableValidation;
     }
 
     public int validationCapacity() {
@@ -39,6 +46,10 @@ public final class ParserFeatures {
     }
 
     public interface StepThree {
+        StepFour disableValidation(boolean disableValidation);
+    }
+
+    public interface StepFour {
         Build validationCapacity(int validationCapacity);
     }
 
@@ -46,9 +57,10 @@ public final class ParserFeatures {
         ParserFeatures build();
     }
 
-    private static final class Builder implements StepOne, StepTwo, StepThree, Build {
+    private static final class Builder implements StepOne, StepTwo, StepThree, StepFour, Build {
         private boolean permitOverride;
         private boolean listMerging;
+        private boolean disableValidation;
         private int validationCapacity;
 
         @Override
@@ -64,6 +76,12 @@ public final class ParserFeatures {
         }
 
         @Override
+        public StepFour disableValidation(boolean disableValidation) {
+            this.disableValidation = disableValidation;
+            return this;
+        }
+
+        @Override
         public Build validationCapacity(int validationCapacity) {
             if (validationCapacity <= 0) {
                 throw new IllegalArgumentException("Validation capacity must be strictly positive");
@@ -74,7 +92,7 @@ public final class ParserFeatures {
 
         @Override
         public ParserFeatures build() {
-            return new ParserFeatures(permitOverride, listMerging, validationCapacity);
+            return new ParserFeatures(permitOverride, listMerging, disableValidation, validationCapacity);
         }
     }
 }

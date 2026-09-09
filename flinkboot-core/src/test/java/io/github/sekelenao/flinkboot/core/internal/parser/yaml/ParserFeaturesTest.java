@@ -23,12 +23,14 @@ class ParserFeaturesTest {
             var features = ParserFeatures.builder()
                 .permitOverride(true)
                 .listMerging(true)
+                .disableValidation(true)
                 .validationCapacity(25)
                 .build();
 
             assertAll(
                 () -> assertTrue(features.permitOverride()),
                 () -> assertTrue(features.listMerging()),
+                () -> assertTrue(features.disableValidation()),
                 () -> assertEquals(25, features.validationCapacity())
             );
         }
@@ -39,13 +41,33 @@ class ParserFeaturesTest {
             var features = ParserFeatures.builder()
                 .permitOverride(false)
                 .listMerging(false)
+                .disableValidation(false)
                 .validationCapacity(10)
                 .build();
 
             assertAll(
                 () -> assertFalse(features.permitOverride()),
                 () -> assertFalse(features.listMerging()),
+                () -> assertFalse(features.disableValidation()),
                 () -> assertEquals(10, features.validationCapacity())
+            );
+        }
+
+        @Test
+        @DisplayName("Should successfully build ParserFeatures with asymmetric flags")
+        void shouldBuildWithAsymmetricFlags() {
+            var features = ParserFeatures.builder()
+                .permitOverride(false)
+                .listMerging(false)
+                .disableValidation(true)
+                .validationCapacity(15)
+                .build();
+
+            assertAll(
+                () -> assertFalse(features.permitOverride()),
+                () -> assertFalse(features.listMerging()),
+                () -> assertTrue(features.disableValidation()),
+                () -> assertEquals(15, features.validationCapacity())
             );
         }
 
@@ -54,10 +76,10 @@ class ParserFeaturesTest {
         void shouldThrowWhenValidationCapacityIsInvalid() {
             assertAll(
                 () -> assertThrows(IllegalArgumentException.class, () ->
-                    ParserFeatures.builder().permitOverride(true).listMerging(true).validationCapacity(0)
+                    ParserFeatures.builder().permitOverride(true).listMerging(true).disableValidation(false).validationCapacity(0)
                 ),
                 () -> assertThrows(IllegalArgumentException.class, () ->
-                    ParserFeatures.builder().permitOverride(true).listMerging(true).validationCapacity(-5)
+                    ParserFeatures.builder().permitOverride(true).listMerging(true).disableValidation(false).validationCapacity(-5)
                 )
             );
         }
