@@ -152,6 +152,68 @@ class YamlParserTest {
     }
 
     @Nested
+    @DisplayName("Constructor")
+    class Constructor {
+
+        @Test
+        @DisplayName("Should create instance with custom YAMLMapper and ParserFeatures")
+        void shouldCreateInstanceWithCustomMapperAndFeatures() {
+            var mapper = new YAMLMapper();
+            var parser = new YamlParser(mapper, STANDARD_FEATURES);
+            assertNotNull(parser);
+            assertDoesNotThrow(parser::close);
+        }
+
+        @Test
+        @DisplayName("Should create instance with custom YAMLMapper, ParserFeatures and PlaceholderResolver")
+        void shouldCreateInstanceWithCustomMapperFeaturesAndResolver() {
+            var mapper = new YAMLMapper();
+            var resolver = new PlaceholderResolver(new EnvVarResolver(key -> null));
+            var parser = new YamlParser(mapper, STANDARD_FEATURES, resolver);
+            assertNotNull(parser);
+            assertDoesNotThrow(parser::close);
+        }
+
+        @Test
+        @DisplayName("Should parse and convert successfully when created with custom YAMLMapper")
+        void shouldParseSuccessfullyWithCustomMapper() {
+            var mapper = new YAMLMapper();
+            var yaml = "name: \"CustomMapperApp\"\nvalue: 99\n";
+            try (var parser = new YamlParser(mapper, STANDARD_FEATURES)) {
+                parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+                var config = parser.convertTo(TestConfig.class);
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertEquals("CustomMapperApp", config.name()),
+                    () -> assertEquals(99, config.value())
+                );
+            }
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when constructor arguments are null")
+        void shouldThrowExceptionWhenConstructorArgsAreNull() {
+            var mapper = new YAMLMapper();
+            var resolver = new PlaceholderResolver(new EnvVarResolver(key -> null));
+            Consumer<YAMLMapper.Builder> customizer = builder -> {};
+
+            assertAll(
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser((ParserFeatures) null)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser((Consumer<YAMLMapper.Builder>) null, STANDARD_FEATURES)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser(customizer, null)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser((Consumer<YAMLMapper.Builder>) null, STANDARD_FEATURES, resolver)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser(customizer, null, resolver)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser(customizer, STANDARD_FEATURES, null)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser((YAMLMapper) null, STANDARD_FEATURES)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser(mapper, null)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser((YAMLMapper) null, STANDARD_FEATURES, resolver)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser(mapper, null, resolver)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser(mapper, STANDARD_FEATURES, null))
+            );
+        }
+    }
+
+    @Nested
     @DisplayName("Parse")
     class Parse {
 
@@ -315,6 +377,27 @@ class YamlParserTest {
                     () -> assertNotNull(config),
                     () -> assertEquals("", config.name()),
                     () -> assertEquals(0, config.value())
+                );
+            }
+        }
+
+        @Test
+        @DisplayName("Should truncate validation errors according to configured validationCapacity")
+        void shouldTruncateValidationErrorsAccordingToValidationCapacity() {
+            var yaml = "name: \"\"\nvalue: 0\n";
+            var features = ParserFeatures.builder()
+                .permitOverride(false)
+                .listMerging(false)
+                .disableValidation(false)
+                .validationCapacity(1)
+                .build();
+
+            try (var parser = new YamlParser(features)) {
+                parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+                var exception = assertThrows(ConfigurationValidationException.class, () -> parser.convertTo(TestConfig.class));
+                assertAll(
+                    () -> assertTrue(exception.getMessage().contains("violation(s):")),
+                    () -> assertTrue(exception.getMessage().contains("... and 1 more violation(s)"))
                 );
             }
         }
@@ -631,7 +714,7 @@ class YamlParserTest {
 
     @Nested
     @DisplayName("Java Date and Time Types")
-    class JavaDateTimeTests {
+    class JavaDateTime {
 
         @Test
         @DisplayName("Should successfully parse Duration, Instant and LocalDate from YAML")
@@ -656,7 +739,7 @@ class YamlParserTest {
 
     @Nested
     @DisplayName("Placeholder Resolution")
-    class PlaceholderResolutionTests {
+    class PlaceholderResolution {
 
         @Test
         @DisplayName("Should resolve placeholders in scalar fields from environment variables")
