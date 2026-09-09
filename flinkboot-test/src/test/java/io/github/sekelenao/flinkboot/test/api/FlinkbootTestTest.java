@@ -4,6 +4,8 @@ import io.github.sekelenao.flinkboot.core.api.properties.JobProperties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.nio.file.Files;
 
@@ -33,6 +35,26 @@ class FlinkbootTestTest {
     @Nested
     @DisplayName("Configuration Helper")
     class ConfigurationHelperTests {
+
+        @Test
+        @DisplayName("Should reject a single null path before loading configuration")
+        void shouldRejectSingleNullPath() {
+            assertThrows(NullPointerException.class, () -> configuration(JobProperties.class, (String) null));
+        }
+
+        @ParameterizedTest
+        @ValueSource(ints = {0, 1, 2})
+        @DisplayName("Should reject null at any position before loading configuration")
+        void shouldRejectNullPathAtAnyPosition(int nullIndex) {
+            var paths = new String[]{
+                "classpath:job-configuration.yaml",
+                "classpath:job-configuration.yaml",
+                "classpath:job-configuration.yaml"
+            };
+            paths[nullIndex] = null;
+
+            assertThrows(NullPointerException.class, () -> configuration(JobProperties.class, paths));
+        }
 
         @Test
         @DisplayName("Should load configuration directly from single temp YAML file using varargs")

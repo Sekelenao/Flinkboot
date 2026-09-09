@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.5.0-1.20]
 
+### Fixed
+
+#### `flinkboot-test`
+- Reject null configuration path elements with `NullPointerException` before attempting to load resources.
+
 ### Added
 
 #### `flinkboot-test`
