@@ -102,5 +102,35 @@ class CommandLineTest {
                 () -> assertFalse(cmd.flag(""))
             );
         }
+
+        @Test
+        @DisplayName("Should ignore arguments without a leading hyphen")
+        void shouldIgnoreArgumentsWithoutLeadingHyphen() {
+            String[] args = {"run", "job"};
+            var cmd = CommandLine.parse(args);
+            assertAll(
+                () -> assertTrue(cmd.option("run").isEmpty()),
+                () -> assertFalse(cmd.flag("run")),
+                () -> assertTrue(cmd.option("job").isEmpty()),
+                () -> assertFalse(cmd.flag("job")),
+                () -> assertTrue(cmd.option("any").isEmpty()),
+                () -> assertFalse(cmd.flag("any"))
+            );
+        }
+
+        @Test
+        @DisplayName("Should parse options and flags while ignoring positional arguments")
+        void shouldParseOptionsAndFlagsWhileIgnoringPositionalArguments() {
+            String[] args = {"run", "-key", "value", "--verbose", "job"};
+            var cmd = CommandLine.parse(args);
+            assertAll(
+                () -> assertEquals("value", cmd.option("key").orElseThrow()),
+                () -> assertTrue(cmd.flag("verbose")),
+                () -> assertTrue(cmd.option("run").isEmpty()),
+                () -> assertFalse(cmd.flag("run")),
+                () -> assertTrue(cmd.option("job").isEmpty()),
+                () -> assertFalse(cmd.flag("job"))
+            );
+        }
     }
 }
