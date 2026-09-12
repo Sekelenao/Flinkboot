@@ -2,6 +2,7 @@ package io.github.sekelenao.flinkboot.core.api.properties.execution;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidExecutionPropertiesException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -17,6 +18,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("ExecutionProperties Tests")
@@ -109,14 +111,36 @@ class ExecutionPropertiesTest {
             var config = new ExecutionProperties(
                 ExecutionRuntimeMode.STREAMING,
                 0,
+                null,
+                Duration.ofMillis(100),
+                Duration.ofMillis(200),
+                true
+            );
+
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("parallelism")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when max-parallelism is non-positive")
+        void shouldFailValidationWithInvalidMaxParallelism() {
+            var config = new ExecutionProperties(
+                ExecutionRuntimeMode.STREAMING,
+                null,
                 -1,
                 Duration.ofMillis(100),
                 Duration.ofMillis(200),
                 true
             );
 
-            Set<ConstraintViolation<ExecutionProperties>> violations = validator.validate(config);
-            assertEquals(2, violations.size());
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("maxParallelism")))
+            );
         }
 
         @Test
@@ -133,6 +157,41 @@ class ExecutionPropertiesTest {
 
             Set<ConstraintViolation<ExecutionProperties>> violations = validator.validate(config);
             assertEquals(2, violations.size());
+        }
+
+        @Test
+        @DisplayName("Should pass validation when parallelism and max-parallelism are equal")
+        void shouldPassValidationWhenParallelismEqualsMaxParallelism() {
+            var config = new ExecutionProperties(null, 8, 8, null, null, null);
+            assertTrue(validator.validate(config).isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should pass validation when parallelism is null")
+        void shouldPassValidationWhenParallelismIsNull() {
+            var config = new ExecutionProperties(null, null, 8, null, null, null);
+            assertTrue(validator.validate(config).isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should pass validation when max-parallelism is null")
+        void shouldPassValidationWhenMaxParallelismIsNull() {
+            var config = new ExecutionProperties(null, 8, null, null, null, null);
+            assertTrue(validator.validate(config).isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should throw InvalidExecutionPropertiesException when parallelism exceeds max-parallelism")
+        void shouldThrowExceptionWhenParallelismExceedsMaxParallelism() {
+            var exception = assertThrows(
+                InvalidExecutionPropertiesException.class,
+                () -> new ExecutionProperties(null, 16, 8, null, null, null)
+            );
+
+            assertEquals(
+                "parallelism (16) cannot exceed max-parallelism (8)",
+                exception.getMessage()
+            );
         }
     }
 
@@ -186,4 +245,3 @@ class ExecutionPropertiesTest {
         }
     }
 }
-

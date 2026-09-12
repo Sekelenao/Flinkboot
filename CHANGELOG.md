@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.5.0-1.20]
 
+### Fixed
+
+#### `flinkboot-core`
+- Normalize leading slashes before Windows drive letters in `FileSystemResource` to support standard URI and multi-slash path formats on Windows.
+
+#### `flinkboot-test`
+- Reject null configuration path elements with `NullPointerException` before attempting to load resources.
+
 ### Added
 
 #### `flinkboot-core`

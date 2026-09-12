@@ -56,8 +56,8 @@ public final class FlussSourceFactory {
 
         if (config.startupMode() == FlussStartupMode.TIMESTAMP) {
             builder.setStartingOffsets(FlussStartupMode.fromTimestamp(config.startupTimestamp().orElseThrow()));
-        } else if (config.startupMode().offsetsInitializer() != null) {
-            builder.setStartingOffsets(config.startupMode().offsetsInitializer());
+        } else {
+            config.startupMode().offsetsInitializer().ifPresent(builder::setStartingOffsets);
         }
 
         return builder;

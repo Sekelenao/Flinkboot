@@ -38,6 +38,7 @@ public final class StartupEnvironment {
     }
 
     public Optional<String> get(String key){
+        Objects.requireNonNull(key, "key must not be null");
         return commandLine.option(key).or(() -> envVarResolver.get(key));
     }
 

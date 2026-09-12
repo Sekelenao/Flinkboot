@@ -72,7 +72,10 @@ class ResourceTest {
         @ValueSource(strings = {
             "file:/path/to/config.yaml",
             "File:/path/to/config.yaml",
-            "FILE:config.yaml"
+            "FILE:config.yaml",
+            "file:///C:/path/to/config.yaml",
+            "file:/C:/path/to/config.yaml",
+            "file:C:/path/to/config.yaml"
         })
         @DisplayName("Should return FileSystemResource when prefixed with file:")
         void shouldReturnFileSystemResourceWithPrefix(String location) {
