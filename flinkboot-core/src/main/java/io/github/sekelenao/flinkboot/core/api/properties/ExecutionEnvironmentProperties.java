@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -138,9 +139,9 @@ public final class ExecutionEnvironmentProperties implements Serializable {
      */
     public Map<String, String> properties() {
         if (properties == null) {
-            return Map.of();
+            return Collections.emptyMap();
         }
-        return Map.copyOf(properties);
+        return Collections.unmodifiableMap(properties);
     }
 
     @Override

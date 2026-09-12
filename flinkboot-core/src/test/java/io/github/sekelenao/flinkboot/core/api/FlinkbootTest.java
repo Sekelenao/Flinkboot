@@ -3,9 +3,11 @@ package io.github.sekelenao.flinkboot.core.api;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import io.github.sekelenao.flinkboot.core.api.exception.configuration.ConfigurationValidationException;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.UnresolvedPropertyPlaceholderException;
 import io.github.sekelenao.flinkboot.core.api.properties.JobProperties;
 import jakarta.validation.constraints.NotBlank;
+import org.apache.flink.configuration.PipelineOptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -84,6 +87,18 @@ class FlinkbootTest {
             var flinkboot = Flinkboot.initialize(new String[0]);
             assertNotNull(flinkboot);
         }
+
+        @Test
+        @DisplayName("Should bind and propagate arguments upon initialization")
+        void shouldBindArgumentsUponInitialization() {
+            var args = new String[]{"--active-flag", "-custom-param", "custom-val"};
+            var flinkboot = Flinkboot.initialize(args);
+            assertAll(
+                () -> assertNotNull(flinkboot),
+                () -> assertTrue(flinkboot.flag("active-flag")),
+                () -> assertEquals("custom-val", flinkboot.parameter("custom-param").orElseThrow())
+            );
+        }
     }
 
     @Nested
@@ -111,8 +126,10 @@ class FlinkbootTest {
             Files.writeString(file, YAML);
             var args = new String[]{"-flinkboot-configurations", "file:" + file.toAbsolutePath()};
             var flinkboot = Flinkboot.initialize(args);
-            var config = flinkboot.configuration(TestConfig.class, builder -> {});
+            var customizerInvoked = new AtomicBoolean(false);
+            var config = flinkboot.configuration(TestConfig.class, builder -> customizerInvoked.set(true));
             assertAll(
+                () -> assertTrue(customizerInvoked.get(), "Customizer must be invoked"),
                 () -> assertNotNull(config),
                 () -> assertEquals(YAML_VALUE, config.name())
             );
@@ -164,6 +181,35 @@ class FlinkbootTest {
 
             var exception = assertThrows(UnresolvedPropertyPlaceholderException.class, () -> flinkboot.configuration(TestConfig.class));
             assertTrue(exception.getMessage().contains("NON_EXISTENT_VAR_NAME"));
+        }
+
+        @Test
+        @DisplayName("Should throw ConfigurationValidationException when configuration violates validation constraints")
+        void shouldThrowConfigurationValidationExceptionWhenInvalid(@TempDir Path tempDir) throws IOException {
+            var file = tempDir.resolve("invalid-config.yaml");
+            Files.writeString(file, "name: \"\"");
+            var args = new String[]{"-flinkboot-configurations", "file:" + file.toAbsolutePath()};
+            var flinkboot = Flinkboot.initialize(args);
+
+            assertThrows(ConfigurationValidationException.class, () -> flinkboot.configuration(TestConfig.class));
+        }
+
+        @Test
+        @DisplayName("Should bypass validation and load invalid configuration when disable-validation flag is enabled")
+        void shouldBypassValidationWhenDisableValidationFlagProvided(@TempDir Path tempDir) throws IOException {
+            var file = tempDir.resolve("invalid-config.yaml");
+            Files.writeString(file, "name: \"\"");
+            var args = new String[]{
+                "-flinkboot-configurations", "file:" + file.toAbsolutePath(),
+                "--flinkboot-configuration-disable-validation"
+            };
+            var flinkboot = Flinkboot.initialize(args);
+            var config = flinkboot.configuration(TestConfig.class);
+
+            assertAll(
+                () -> assertNotNull(config),
+                () -> assertEquals("", config.name())
+            );
         }
 
         @Test
@@ -269,7 +315,10 @@ class FlinkbootTest {
             var flinkboot = Flinkboot.initialize(new String[0]);
             var jobProps = new JobProperties("my-test-job", null);
             var env = flinkboot.executionEnvironment(jobProps);
-            assertNotNull(env);
+            assertAll(
+                () -> assertNotNull(env),
+                () -> assertEquals("my-test-job", env.getConfiguration().get(PipelineOptions.NAME))
+            );
         }
     }
 }

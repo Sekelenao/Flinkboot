@@ -35,6 +35,17 @@ class StartupEnvironmentTest {
         }
 
         @Test
+        @DisplayName("Should initialize properly with empty args array")
+        void shouldInitializeWithEmptyArgs() {
+            var startupEnv = new StartupEnvironment(new String[0]);
+            assertAll(
+                () -> assertFalse(startupEnv.flag("any-flag")),
+                () -> assertTrue(startupEnv.get("any-key").isEmpty()),
+                () -> assertEquals(List.of("classpath:job-configuration.yaml"), startupEnv.configurationResourceLocations())
+            );
+        }
+
+        @Test
         @DisplayName("Should throw NullPointerException when args array is null")
         void shouldThrowExceptionWhenArgsIsNull() {
             assertThrows(NullPointerException.class, () -> new StartupEnvironment(null));
@@ -159,6 +170,16 @@ class StartupEnvironmentTest {
             var startupEnv = new StartupEnvironment(cmd, resolver);
             assertTrue(startupEnv.get("key").isEmpty());
         }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when key is null")
+        void shouldThrowExceptionWhenKeyIsNull() {
+            var cmd = CommandLine.parse(new String[0]);
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            var exception = assertThrows(NullPointerException.class, () -> startupEnv.get(null));
+            assertEquals("key must not be null", exception.getMessage());
+        }
     }
 
     @Nested
@@ -246,6 +267,7 @@ class StartupEnvironmentTest {
             assertAll(
                 () -> assertFalse(features.permitOverride()),
                 () -> assertFalse(features.listMerging()),
+                () -> assertFalse(features.disableValidation()),
                 () -> assertEquals(10, features.validationCapacity())
             );
         }
@@ -260,6 +282,7 @@ class StartupEnvironmentTest {
             assertAll(
                 () -> assertTrue(features.permitOverride()),
                 () -> assertFalse(features.listMerging()),
+                () -> assertFalse(features.disableValidation()),
                 () -> assertEquals(10, features.validationCapacity())
             );
         }
@@ -274,6 +297,38 @@ class StartupEnvironmentTest {
             assertAll(
                 () -> assertFalse(features.permitOverride()),
                 () -> assertTrue(features.listMerging()),
+                () -> assertFalse(features.disableValidation()),
+                () -> assertEquals(10, features.validationCapacity())
+            );
+        }
+
+        @Test
+        @DisplayName("Should return disableValidation=true when only disableValidation is set")
+        void shouldReturnAsymmetricFeaturesWhenOnlyDisableValidationIsSet() {
+            var cmd = CommandLine.parse(new String[]{"--flinkboot-configuration-disable-validation"});
+            var resolver = new EnvVarResolver(k -> null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            var features = startupEnv.parserFeatures();
+            assertAll(
+                () -> assertFalse(features.permitOverride()),
+                () -> assertFalse(features.listMerging()),
+                () -> assertTrue(features.disableValidation()),
+                () -> assertEquals(10, features.validationCapacity())
+            );
+        }
+
+        @Test
+        @DisplayName("Should return disableValidation=true when only disableValidation is set in env variables")
+        void shouldReturnAsymmetricFeaturesWhenOnlyDisableValidationIsSetInEnv() {
+            var cmd = CommandLine.parse(new String[0]);
+            var env = Map.of("FLINKBOOT_CONFIGURATION_DISABLE_VALIDATION", "true");
+            var resolver = new EnvVarResolver(env::get);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            var features = startupEnv.parserFeatures();
+            assertAll(
+                () -> assertFalse(features.permitOverride()),
+                () -> assertFalse(features.listMerging()),
+                () -> assertTrue(features.disableValidation()),
                 () -> assertEquals(10, features.validationCapacity())
             );
         }
@@ -284,6 +339,7 @@ class StartupEnvironmentTest {
             var cmd = CommandLine.parse(new String[]{
                 "--flinkboot-configuration-override",
                 "--flinkboot-configuration-list-merging",
+                "--flinkboot-configuration-disable-validation",
                 "-flinkboot-configuration-violations-log-size", "25"
             });
             var resolver = new EnvVarResolver(k -> null);
@@ -292,6 +348,7 @@ class StartupEnvironmentTest {
             assertAll(
                 () -> assertTrue(features.permitOverride()),
                 () -> assertTrue(features.listMerging()),
+                () -> assertTrue(features.disableValidation()),
                 () -> assertEquals(25, features.validationCapacity())
             );
         }
@@ -303,6 +360,7 @@ class StartupEnvironmentTest {
             var env = Map.of(
                 "FLINKBOOT_CONFIGURATION_OVERRIDE", "true",
                 "FLINKBOOT_CONFIGURATION_LIST_MERGING", "true",
+                "FLINKBOOT_CONFIGURATION_DISABLE_VALIDATION", "true",
                 "FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE", "50"
             );
             var resolver = new EnvVarResolver(env::get);
@@ -311,6 +369,7 @@ class StartupEnvironmentTest {
             assertAll(
                 () -> assertTrue(features.permitOverride()),
                 () -> assertTrue(features.listMerging()),
+                () -> assertTrue(features.disableValidation()),
                 () -> assertEquals(50, features.validationCapacity())
             );
         }
@@ -336,7 +395,7 @@ class StartupEnvironmentTest {
         }
 
         @ParameterizedTest(name = "value = \"{0}\"")
-        @ValueSource(strings = {"0", "-1", "-10", "ABC", "12.5", " ", ""})
+        @ValueSource(strings = {"0", "-1", "-10", "ABC", "12.5", " ", "", "2147483648"})
         @DisplayName("Should reject invalid validation capacity in CommandLine")
         void shouldRejectInvalidValidationCapacityInCommandLine(String size) {
             var cmd = CommandLine.parse(new String[]{"-flinkboot-configuration-violations-log-size", size});
@@ -350,7 +409,7 @@ class StartupEnvironmentTest {
         }
 
         @ParameterizedTest(name = "value = \"{0}\"")
-        @ValueSource(strings = {"0", "-1", "-10", "ABC", "12.5", " ", ""})
+        @ValueSource(strings = {"0", "-1", "-10", "ABC", "12.5", " ", "", "2147483648"})
         @DisplayName("Should reject invalid validation capacity in env variables")
         void shouldRejectInvalidValidationCapacityInEnv(String size) {
             var cmd = CommandLine.parse(new String[0]);
