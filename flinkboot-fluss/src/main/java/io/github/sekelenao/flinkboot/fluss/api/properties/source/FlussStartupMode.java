@@ -41,7 +41,7 @@ public enum FlussStartupMode {
      * @return an {@link Optional} containing the initializer for static modes, or empty for timestamp-based mode
      */
     public Optional<OffsetsInitializer> offsetsInitializer() {
-        return this == TIMESTAMP ? Optional.empty() : Optional.of(offsetsInitializer);
+        return Optional.ofNullable(offsetsInitializer);
     }
 
     /**
