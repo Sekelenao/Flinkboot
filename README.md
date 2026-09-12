@@ -77,7 +77,7 @@ Every bug fix, test addition, and architectural improvement from the community m
 Sincere appreciation to all contributors who have shaped and strengthened this codebase:
 
 <a href="https://github.com/Sekelenao/Flinkboot/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=Sekelenao/Flinkboot" alt="Flinkboot Contributors" />
+  <img src="https://contrib.rocks/image?repo=Sekelenao/Flinkboot&max=12" alt="Flinkboot Contributors" />
 </a>
 
 ---
