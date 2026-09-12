@@ -17,7 +17,7 @@ public class FileSystemResource implements Resource {
     private final String location;
 
     public FileSystemResource(String location) {
-        this.location = Objects.requireNonNull(location).replaceFirst("^/+(?=[a-zA-Z]:)", "");
+        this.location = Objects.requireNonNull(FileSystemSupports.normalize(location));
     }
 
     @Override
