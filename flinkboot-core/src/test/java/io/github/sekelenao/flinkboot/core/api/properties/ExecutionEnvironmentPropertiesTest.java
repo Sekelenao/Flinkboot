@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -54,13 +55,26 @@ class ExecutionEnvironmentPropertiesTest {
         }
 
         @Test
-        @DisplayName("Should return unmodifiable defensive copy of properties map")
+        @DisplayName("Should return unmodifiable defensive view of properties map")
         void shouldReturnUnmodifiablePropertiesMap() {
             var mutableMap = new HashMap<String, String>();
             mutableMap.put("key", "value");
             var config = withProperties(mutableMap);
 
             assertThrows(UnsupportedOperationException.class, () -> config.properties().put("other", "value"));
+        }
+
+        @Test
+        @DisplayName("Should return properties map containing a null value without throwing")
+        void shouldReturnPropertiesMapContainingNullValue() {
+            var properties = new HashMap<String, String>();
+            properties.put("custom.flag", null);
+            var config = withProperties(properties);
+
+            assertAll(
+                () -> assertTrue(config.properties().containsKey("custom.flag")),
+                () -> assertNull(config.properties().get("custom.flag"))
+            );
         }
     }
 
@@ -140,6 +154,23 @@ class ExecutionEnvironmentPropertiesTest {
                 () -> assertEquals(2, config.properties().size()),
                 () -> assertEquals("2g", config.properties().get("taskmanager.memory.process.size")),
                 () -> assertEquals("true", config.properties().get("pipeline.operator-chaining.enabled"))
+            );
+        }
+
+        @Test
+        @DisplayName("Should deserialize an empty property value as a null map value without throwing")
+        void shouldDeserializeEmptyPropertyValueAsNull() throws Exception {
+            String json = "{\n" +
+                "  \"properties\": {\n" +
+                "    \"custom.flag\": null\n" +
+                "  }\n" +
+                "}";
+
+            ExecutionEnvironmentProperties config = mapper.readValue(json, ExecutionEnvironmentProperties.class);
+
+            assertAll(
+                () -> assertTrue(config.properties().containsKey("custom.flag")),
+                () -> assertNull(config.properties().get("custom.flag"))
             );
         }
     }
