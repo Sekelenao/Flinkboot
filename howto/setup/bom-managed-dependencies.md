@@ -53,7 +53,7 @@ Once imported, child dependencies can be declared **without specifying `<version
 
 ## Managed Dependencies Breakdown
 
-The Flinkboot BOM categorizes dependencies into six logical groups:
+The Flinkboot BOM categorizes dependencies into six logical groups. Exact versions are centrally managed by the Flinkboot BOM and strictly align with the project's root pom.xml.
 
 ### 1. Flinkboot Modules
 
@@ -70,18 +70,18 @@ The Flinkboot BOM categorizes dependencies into six logical groups:
 
 All standard Flink execution components are pre-configured with **`provided`** scope to prevent packaging duplicate Flink runtime classes into your application fat JAR.
 
-| Group ID           | Artifact ID             | Managed Version    | Pre-configured Scope | Purpose                                                  |
-|:-------------------|:------------------------|:-------------------|:---------------------|:---------------------------------------------------------|
-| `org.apache.flink` | `flink-streaming-java`  | `1.20.5`           | `provided`           | Flink DataStream API runtime.                            |
-| `org.apache.flink` | `flink-core`            | `1.20.5`           | `provided`           | Core Flink abstractions, type extractors, serializers.   |
-| `org.apache.flink` | `flink-clients`         | `1.20.5`           | `provided`           | Local MiniCluster runner and job submission client.      |
-| `org.apache.flink` | `flink-connector-base`  | `1.20.5`           | `provided`           | Base interfaces for modern Flink 1.20+ connectors.       |
-| `org.apache.flink` | `flink-table-common`    | `1.20.5`           | `provided`           | Flink Table & SQL common types and logical structures.   |
-| `org.apache.flink` | `flink-runtime-web`     | `1.20.5`           | `provided`           | Embedded Web Dashboard runtime for local execution.      |
-| `org.apache.flink` | `flink-connector-kafka` | `3.4.0-1.20`       | `compile`            | Apache Kafka Source and Sink connector for Flink 1.20.   |
-| `org.apache.kafka` | `kafka-clients`         | `3.4.0`            | `compile`            | Official Apache Kafka Java client.                       |
-| `org.apache.fluss` | `fluss-flink-1.20`      | `0.9.1-incubating` | `compile`            | Apache Fluss streaming storage connector for Flink 1.20. |
-| `org.apache.fluss` | `fluss-client`          | `0.9.1-incubating` | `compile`            | Official Apache Fluss Java client.                       |
+| Group ID           | Artifact ID             | Pre-configured Scope | Purpose                                                  |
+|:-------------------|:------------------------|:---------------------|:---------------------------------------------------------|
+| `org.apache.flink` | `flink-streaming-java`  | `provided`           | Flink DataStream API runtime.                            |
+| `org.apache.flink` | `flink-core`            | `provided`           | Core Flink abstractions, type extractors, serializers.   |
+| `org.apache.flink` | `flink-clients`         | `provided`           | Local MiniCluster runner and job submission client.      |
+| `org.apache.flink` | `flink-connector-base`  | `provided`           | Base interfaces for modern Flink 1.20+ connectors.       |
+| `org.apache.flink` | `flink-table-common`    | `provided`           | Flink Table & SQL common types and logical structures.   |
+| `org.apache.flink` | `flink-runtime-web`     | `provided`           | Embedded Web Dashboard runtime for local execution.      |
+| `org.apache.flink` | `flink-connector-kafka` | `compile`            | Apache Kafka Source and Sink connector for Flink 1.20.   |
+| `org.apache.kafka` | `kafka-clients`         | `compile`            | Official Apache Kafka Java client.                       |
+| `org.apache.fluss` | `fluss-flink-1.20`      | `compile`            | Apache Fluss streaming storage connector for Flink 1.20. |
+| `org.apache.fluss` | `fluss-client`          | `compile`            | Official Apache Fluss Java client.                       |
 
 ---
 
@@ -89,12 +89,12 @@ All standard Flink execution components are pre-configured with **`provided`** s
 
 Flinkboot relies on Jackson for deserializing YAML configurations and Java 8 Date/Time types.
 
-| Group ID                           | Artifact ID               | Managed Version | Default Scope | Purpose                                                             |
-|:-----------------------------------|:--------------------------|:----------------|:--------------|:--------------------------------------------------------------------|
-| `com.fasterxml.jackson.dataformat` | `jackson-dataformat-yaml` | `2.22.2`        | `compile`     | YAML parser engine.                                                 |
-| `com.fasterxml.jackson.core`       | `jackson-databind`        | `2.22.2`        | `compile`     | Object mapper and data binding.                                     |
-| `com.fasterxml.jackson.core`       | `jackson-core`            | `2.22.2`        | `compile`     | Streaming JSON/YAML parser abstractions.                            |
-| `com.fasterxml.jackson.datatype`   | `jackson-datatype-jsr310` | `2.22.2`        | `compile`     | `java.time.*` (`Instant`, `Duration`, `LocalDate`) deserialization. |
+| Group ID                           | Artifact ID               | Default Scope | Purpose                                                             |
+|:-----------------------------------|:--------------------------|:--------------|:--------------------------------------------------------------------|
+| `com.fasterxml.jackson.dataformat` | `jackson-dataformat-yaml` | `compile`     | YAML parser engine.                                                 |
+| `com.fasterxml.jackson.core`       | `jackson-databind`        | `compile`     | Object mapper and data binding.                                     |
+| `com.fasterxml.jackson.core`       | `jackson-core`            | `compile`     | Streaming JSON/YAML parser abstractions.                            |
+| `com.fasterxml.jackson.datatype`   | `jackson-datatype-jsr310` | `compile`     | `java.time.*` (`Instant`, `Duration`, `LocalDate`) deserialization. |
 
 > [!IMPORTANT]
 > When building your fat JAR for deployment to a Flink cluster, Jackson must be relocated (shaded) to prevent version conflicts with Flink's internal Jackson classes. See [How to Avoid Dependency Conflicts](avoid-dependency-conflicts.md).
@@ -103,10 +103,10 @@ Flinkboot relies on Jackson for deserializing YAML configurations and Java 8 Dat
 
 ### 4. Validation (Jakarta Bean Validation)
 
-| Group ID | Artifact ID | Managed Version | Default Scope | Purpose |
-| :--- | :--- | :--- | :--- | :--- |
-| `org.hibernate.validator` | `hibernate-validator` | `8.0.4.Final` | `compile` | JSR-380 reference implementation for `@NotNull`, `@Min`, `@Pattern`, etc. |
-| `org.glassfish.expressly` | `expressly` | `5.0.0` | `compile` | Jakarta Expression Language (EL) engine required for dynamic validation messages. |
+| Group ID | Artifact ID | Default Scope | Purpose |
+| :--- | :--- | :--- | :--- |
+| `org.hibernate.validator` | `hibernate-validator` | `compile` | JSR-380 reference implementation for `@NotNull`, `@Min`, `@Pattern`, etc. |
+| `org.glassfish.expressly` | `expressly` | `compile` | Jakarta Expression Language (EL) engine required for dynamic validation messages. |
 
 ---
 
@@ -114,22 +114,22 @@ Flinkboot relies on Jackson for deserializing YAML configurations and Java 8 Dat
 
 All logging implementations are pre-marked **`provided`** so that your fat JAR uses the logging backend configured by the target Flink cluster without conflicts.
 
-| Group ID | Artifact ID | Managed Version | Pre-configured Scope | Purpose |
+| Group ID | Artifact ID | Pre-configured Scope | Purpose |
 | :--- | :--- | :--- | :--- | :--- |
-| `org.slf4j` | `slf4j-api` | `2.0.16` | `provided` | Unified logging API facade for application code. |
-| `org.apache.logging.log4j` | `log4j-api` | `2.24.3` | `provided` | Log4j 2 core API. |
-| `org.apache.logging.log4j` | `log4j-core` | `2.24.3` | `provided` | Log4j 2 implementation. |
-| `org.apache.logging.log4j` | `log4j-slf4j2-impl` | `2.24.3` | `provided` | SLF4J 2 binding for Log4j 2. |
+| `org.slf4j` | `slf4j-api` | `provided` | Unified logging API facade for application code. |
+| `org.apache.logging.log4j` | `log4j-api` | `provided` | Log4j 2 core API. |
+| `org.apache.logging.log4j` | `log4j-core` | `provided` | Log4j 2 implementation. |
+| `org.apache.logging.log4j` | `log4j-slf4j2-impl` | `provided` | SLF4J 2 binding for Log4j 2. |
 
 ---
 
 ### 6. Testing Libraries
 
-| Group ID | Artifact ID | Managed Version | Pre-configured Scope | Purpose |
+| Group ID | Artifact ID | Pre-configured Scope | Purpose |
 | :--- | :--- | :--- | :--- | :--- |
-| `org.junit.jupiter` | `junit-jupiter` | `5.11.4` | `test` | JUnit 5 testing engine and assertions. |
-| `org.mockito` | `mockito-core` | `5.23.0` | `test` | Mocking framework. |
-| `org.mockito` | `mockito-junit-jupiter` | `5.23.0` | `test` | Mockito JUnit 5 extension (`@ExtendWith(MockitoExtension.class)`). |
+| `org.junit.jupiter` | `junit-jupiter` | `test` | JUnit 5 testing engine and assertions. |
+| `org.mockito` | `mockito-core` | `test` | Mocking framework. |
+| `org.mockito` | `mockito-junit-jupiter` | `test` | Mockito JUnit 5 extension (`@ExtendWith(MockitoExtension.class)`). |
 
 ---
 
