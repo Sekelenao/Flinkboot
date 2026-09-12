@@ -146,6 +146,8 @@ void testLoadFromFileSystem() {
 
 ## 4. Scheme Prefix Requirement
 
+The configuration class, the paths array, and each path element must be non-null. A null value is rejected with `NullPointerException` before resources are loaded. Omitting the paths argument still loads the default classpath configuration.
+
 Each path passed to `FlinkbootTest.configuration(...)` **must explicitly specify a resource scheme prefix**:
 
 | Scheme Prefix | Target Location                                 | Example                        |
