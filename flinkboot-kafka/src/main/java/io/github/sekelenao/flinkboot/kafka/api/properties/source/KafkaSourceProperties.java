@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import io.github.sekelenao.flinkboot.kafka.api.exception.InvalidKafkaSourcePropertiesException;
-import io.github.sekelenao.flinkboot.kafka.internal.OffsetInitializerProperties;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -23,7 +22,7 @@ import java.util.OptionalLong;
  * Unified configuration properties for Apache Flink Kafka sources consuming from an explicit list of topics
  * or dynamic topics matching a regex pattern.
  */
-public final class KafkaSourceProperties implements OffsetInitializerProperties, Serializable {
+public final class KafkaSourceProperties implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
