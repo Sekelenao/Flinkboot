@@ -5,8 +5,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("FlussStartupMode")
 class FlussStartupModeTest {
@@ -16,13 +17,13 @@ class FlussStartupModeTest {
     class Resolution {
 
         @Test
-        @DisplayName("Should provide non-null OffsetsInitializer for static modes")
+        @DisplayName("Should provide non-empty Optional for static modes and empty for timestamp mode")
         void shouldProvideOffsetsInitializerForStaticModes() {
             assertAll(
-                () -> assertNotNull(FlussStartupMode.EARLIEST.offsetsInitializer()),
-                () -> assertNotNull(FlussStartupMode.LATEST.offsetsInitializer()),
-                () -> assertNotNull(FlussStartupMode.FULL.offsetsInitializer()),
-                () -> assertNull(FlussStartupMode.TIMESTAMP.offsetsInitializer())
+                () -> assertTrue(FlussStartupMode.EARLIEST.offsetsInitializer().isPresent()),
+                () -> assertTrue(FlussStartupMode.LATEST.offsetsInitializer().isPresent()),
+                () -> assertTrue(FlussStartupMode.FULL.offsetsInitializer().isPresent()),
+                () -> assertFalse(FlussStartupMode.TIMESTAMP.offsetsInitializer().isPresent())
             );
         }
 
