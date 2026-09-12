@@ -36,4 +36,23 @@ class ClasspathResourceTest {
         var resource = new ClasspathResource("non-existent-resource.txt");
         assertThrows(ResourceNotFoundException.class, resource::inputStream);
     }
+
+    @Test
+    @DisplayName("Should fallback to ClasspathResource classloader when context classloader is null")
+    void shouldFallbackToClassClassLoaderWhenContextClassLoaderIsNull() throws IOException {
+        var originalClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(null);
+
+            var path = "io/github/sekelenao/flinkboot/core/internal/resource/ClasspathResourceTest.class";
+            var resource = new ClasspathResource(path);
+            
+            try (var is = resource.inputStream()) {
+                assertNotNull(is);
+                assertTrue(is.readAllBytes().length > 0);
+            }
+        } finally {
+            Thread.currentThread().setContextClassLoader(originalClassLoader);
+        }
+    }
 }
