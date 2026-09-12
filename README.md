@@ -70,4 +70,17 @@ Follow these 3 essential steps to get started with Flinkboot:
 
 ---
 
+## Contributors
+
+Every bug fix, test addition, and architectural improvement from the community makes Flinkboot more reliable for everyone running Flink in production.
+
+Sincere appreciation to all contributors who have shaped and strengthened this codebase:
+
+<a href="https://github.com/Sekelenao/Flinkboot/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Sekelenao/Flinkboot" alt="Flinkboot Contributors" />
+</a>
+
+---
+
 *Apache®, Apache Flink®, Apache Kafka®, and Apache Fluss™ are trademarks of the Apache Software Foundation. Flinkboot is an independent open-source project and is not affiliated with, endorsed by, or sponsored by the Apache Software Foundation.*
+
