@@ -111,14 +111,36 @@ class ExecutionPropertiesTest {
             var config = new ExecutionProperties(
                 ExecutionRuntimeMode.STREAMING,
                 0,
+                null,
+                Duration.ofMillis(100),
+                Duration.ofMillis(200),
+                true
+            );
+
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("parallelism")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when max-parallelism is non-positive")
+        void shouldFailValidationWithInvalidMaxParallelism() {
+            var config = new ExecutionProperties(
+                ExecutionRuntimeMode.STREAMING,
+                null,
                 -1,
                 Duration.ofMillis(100),
                 Duration.ofMillis(200),
                 true
             );
 
-            Set<ConstraintViolation<ExecutionProperties>> violations = validator.validate(config);
-            assertEquals(2, violations.size());
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("maxParallelism")))
+            );
         }
 
         @Test
