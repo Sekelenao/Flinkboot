@@ -2,6 +2,7 @@ package io.github.sekelenao.flinkboot.core.api.properties.execution;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidExecutionPropertiesException;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.Positive;
 import org.hibernate.validator.constraints.time.DurationMin;
@@ -61,6 +62,15 @@ public final class ExecutionProperties implements Serializable {
         this.bufferTimeout = bufferTimeout;
         this.autoWatermarkInterval = autoWatermarkInterval;
         this.objectReuse = objectReuse;
+        validate();
+    }
+
+    private void validate() {
+        if (parallelism != null && maxParallelism != null && parallelism > maxParallelism) {
+            throw new InvalidExecutionPropertiesException(
+                "parallelism (" + parallelism + ") cannot exceed max-parallelism (" + maxParallelism + ")"
+            );
+        }
     }
 
     /**
@@ -157,4 +167,3 @@ public final class ExecutionProperties implements Serializable {
             '}';
     }
 }
-
