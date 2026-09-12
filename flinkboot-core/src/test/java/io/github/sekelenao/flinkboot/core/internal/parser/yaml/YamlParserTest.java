@@ -448,6 +448,54 @@ class YamlParserTest {
             }
         }
 
+        @ParameterizedTest
+        @ValueSource(strings = {
+            " \n ",
+            "   \n\n   ",
+            "# Only comments\n",
+            "# First comment\n# Second comment\n"
+        })
+        @DisplayName("Should silently ignore whitespace-only and comments-only YAML")
+        void shouldSilentlyIgnoreWhitespaceOnlyAndCommentsOnlyYaml(String yamlContent) {
+            var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
+            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+                assertDoesNotThrow(() -> parser.parse(stream));
+            }
+        }
+
+        @Test
+        @DisplayName("Should throw YamlParsingException when whitespace-only YAML contains tab characters")
+        void shouldThrowExceptionWhenWhitespaceOnlyYamlContainsTabs() {
+            var yamlContent = " \n\t ";
+            var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
+            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+                assertThrows(YamlParsingException.class, () -> parser.parse(stream));
+            }
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {
+            " \n ",
+            "   \n\n   ",
+            "# Only comments\n",
+            "# First comment\n# Second comment\n"
+        })
+        @DisplayName("Should preserve previously parsed configuration when parsing whitespace-only or comments-only YAML")
+        void shouldPreserveConfigurationWhenParsingWhitespaceOnlyOrCommentsOnlyYaml(String yamlContent) {
+            var baseYaml = "name: \"Flink Job\"\nvalue: 42\n";
+            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+                parser.parse(new ByteArrayInputStream(baseYaml.getBytes(StandardCharsets.UTF_8)));
+                var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
+                assertDoesNotThrow(() -> parser.parse(stream));
+                var config = parser.convertTo(TestConfig.class);
+                assertAll(
+                    () -> assertNotNull(config),
+                    () -> assertEquals("Flink Job", config.name()),
+                    () -> assertEquals(42, config.value())
+                );
+            }
+        }
+
         @Test
         @DisplayName("Should throw YamlParsingException when configuration resolves to null")
         void shouldThrowExceptionWhenConfigurationResolvesToNull() {
