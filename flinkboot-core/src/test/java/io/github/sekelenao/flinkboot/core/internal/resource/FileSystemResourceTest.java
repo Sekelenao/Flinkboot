@@ -6,6 +6,8 @@ import io.github.sekelenao.flinkboot.core.api.exception.resource.ResourceNotFoun
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -52,6 +54,20 @@ class FileSystemResourceTest {
     @DisplayName("Should throw ResourceNotFoundException when file does not exist")
     void shouldThrowExceptionWhenNotFound() {
         var resource = new FileSystemResource("/non/existent/path/file.yaml");
+        assertThrows(ResourceNotFoundException.class, resource::inputStream);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "///C:/non-existent-file.yaml",
+        "/C:/non-existent-file.yaml",
+        "///C:\\non-existent-file.yaml",
+        "///c:/non-existent-file.yaml",
+        "/D:/non-existent-file.yaml"
+    })
+    @DisplayName("Should normalize leading slashes before drive letter and throw ResourceNotFoundException instead of InvalidPathException")
+    void shouldNormalizeLeadingSlashesBeforeDriveLetter(String location) {
+        var resource = new FileSystemResource(location);
         assertThrows(ResourceNotFoundException.class, resource::inputStream);
     }
 
