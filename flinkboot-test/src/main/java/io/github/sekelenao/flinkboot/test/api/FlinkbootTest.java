@@ -4,7 +4,9 @@ import io.github.sekelenao.flinkboot.core.api.Flinkboot;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Testing utility providing helpers for loading and resolving configurations in tests.
@@ -36,14 +38,17 @@ public final class FlinkbootTest {
      * @param <C>                type of the configuration
      * @return the deserialized and validated configuration object
      * @throws UncheckedIOException if an I/O error occurs while reading configuration files
-     * @throws NullPointerException if {@code configurationClass} or {@code paths} is {@code null}
+     * @throws NullPointerException if {@code configurationClass}, {@code paths}, or any path element is {@code null}
      */
     public static <C> C configuration(Class<C> configurationClass, String... paths) {
         Objects.requireNonNull(configurationClass, "configurationClass must not be null");
         Objects.requireNonNull(paths, "paths must not be null");
         var args = new String[0];
         if (paths.length > 0) {
-            args = new String[]{"-flinkboot-configurations", String.join(",", paths)};
+            var locations = Arrays.stream(paths)
+                .map(Objects::requireNonNull)
+                .collect(Collectors.joining(","));
+            args = new String[]{"-flinkboot-configurations", locations};
         }
         try {
             return Flinkboot.initialize(args).configuration(configurationClass);
