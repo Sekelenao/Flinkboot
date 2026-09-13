@@ -1,5 +1,6 @@
 package io.github.sekelenao.flinkboot.kafka.api.source;
 
+import io.github.sekelenao.flinkboot.kafka.api.exception.InvalidKafkaSourcePropertiesException;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaOffsetInitializer;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceProperties;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.TopicPartitionOffsetProperties;
@@ -242,5 +243,54 @@ class KafkaSourceFactoryTest {
                 }
             );
         }
+    }
+
+    @Test
+    @DisplayName("Should reject duplicate partition offsets")
+    void shouldRejectDuplicatePartitionOffsets() {
+        var exception = assertThrows(
+            InvalidKafkaSourcePropertiesException.class,
+            () -> new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "test-group",
+                List.of("test-topic"),
+                null,
+                KafkaOffsetInitializer.OFFSETS,
+                null,
+                List.of(
+                    new TopicPartitionOffsetProperties("test-topic", 0, 100L),
+                    new TopicPartitionOffsetProperties("test-topic", 0, 500L)
+                ),
+                null
+            )
+        );
+
+        assertEquals(
+            "Duplicate partition offset configuration for topic 'test-topic' and partition 0",
+            exception.getMessage()
+        );
+    }
+
+    @Test
+    @DisplayName("Should allow partition offsets for different topic/partition pairs")
+    void shouldAllowUniquePartitionOffsets() {
+        var config = new KafkaSourceProperties(
+            "my-source",
+            List.of("localhost:9092"),
+            "test-group",
+            List.of("test-topic"),
+            null,
+            KafkaOffsetInitializer.OFFSETS,
+            null,
+            List.of(
+                new TopicPartitionOffsetProperties("test-topic", 0, 100L),
+                new TopicPartitionOffsetProperties("test-topic", 1, 500L),
+                new TopicPartitionOffsetProperties("other-topic", 0, 200L)
+            ),
+            null
+        );
+
+        assertNotNull(KafkaSourceFactory.supplyFor(config, TEST_SCHEMA));
     }
 }

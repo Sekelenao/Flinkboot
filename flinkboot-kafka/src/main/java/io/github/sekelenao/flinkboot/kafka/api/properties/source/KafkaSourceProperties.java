@@ -1,7 +1,19 @@
 package io.github.sekelenao.flinkboot.kafka.api.properties.source;
 
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.OptionalLong;
+
+import org.apache.kafka.common.TopicPartition;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import io.github.sekelenao.flinkboot.kafka.api.exception.InvalidKafkaSourcePropertiesException;
 import jakarta.validation.Valid;
@@ -9,14 +21,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
-
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.OptionalLong;
 
 /**
  * Unified configuration properties for Apache Flink Kafka sources consuming from an explicit list of topics
@@ -82,7 +86,7 @@ public final class KafkaSourceProperties implements Serializable {
         this.topicPattern = topicPattern;
         this.startingOffsets = startingOffsets;
         this.startingOffsetsTimestamp = startingOffsetsTimestamp;
-        this.startingOffsetsPartitionOffsets = startingOffsetsPartitionOffsets;
+        this.startingOffsetsPartitionOffsets = startingOffsetsPartitionOffsets == null ? null : List.copyOf(startingOffsetsPartitionOffsets);
         this.properties = properties;
         validate();
     }
@@ -118,6 +122,8 @@ public final class KafkaSourceProperties implements Serializable {
                     "starting-offsets-timestamp must not be specified when starting-offsets is OFFSETS"
                 );
             }
+
+            validateUniquePartitionOffsets();
         } else if (startingOffsets != null) {
             if (startingOffsetsTimestamp != null) {
                 throw new InvalidKafkaSourcePropertiesException(
@@ -269,5 +275,20 @@ public final class KafkaSourceProperties implements Serializable {
             ", startingOffsetsPartitionOffsets=" + startingOffsetsPartitionOffsets +
             ", properties=" + properties +
             '}';
+    }
+
+    private void validateUniquePartitionOffsets() {
+        var configuredPartitions = new HashSet<TopicPartition>();
+
+        for (var entry : startingOffsetsPartitionOffsets) {
+            var topicPartition = new TopicPartition(entry.topic(), entry.partition());
+
+            if (!configuredPartitions.add(topicPartition)) {
+                throw new InvalidKafkaSourcePropertiesException(
+                    String.format("Duplicate partition offset configuration for topic '%s' and partition %d",
+                    entry.topic(), entry.partition())
+                );
+            }
+        }
     }
 }

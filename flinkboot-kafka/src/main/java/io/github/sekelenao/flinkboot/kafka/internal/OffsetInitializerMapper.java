@@ -1,13 +1,13 @@
 package io.github.sekelenao.flinkboot.kafka.internal;
 
-import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaOffsetInitializer;
-import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceProperties;
-import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
-import org.apache.kafka.common.TopicPartition;
-
 import java.util.HashMap;
 import java.util.Objects;
 
+import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
+import org.apache.kafka.common.TopicPartition;
+
+import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaOffsetInitializer;
+import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceProperties;
 public final class OffsetInitializerMapper {
 
     private OffsetInitializerMapper() {
@@ -30,7 +30,14 @@ public final class OffsetInitializerMapper {
         var offsetInitializerConfiguration = new HashMap<TopicPartition, Long>();
         for (var entry : properties.startingOffsetsPartitionOffsets()) {
             var topicPartition = new TopicPartition(entry.topic(), entry.partition());
-            offsetInitializerConfiguration.put(topicPartition, entry.offset());
+            var previousOffset = offsetInitializerConfiguration.put(topicPartition, entry.offset());
+
+            if (previousOffset != null) {
+                throw new IllegalArgumentException(
+                    String.format("Duplicate partition offset configuration for topic '%s' and partition %d",
+                        entry.topic(), entry.partition())
+                );
+            }
         }
         return OffsetsInitializer.offsets(offsetInitializerConfiguration);
     }
