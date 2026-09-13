@@ -1,6 +1,7 @@
 package io.github.sekelenao.flinkboot.test.api.assertion;
 
 import io.github.sekelenao.flinkboot.test.api.assertion.type.ClassAssert;
+import io.github.sekelenao.flinkboot.test.api.assertion.type.ObjectAssert;
 import io.github.sekelenao.flinkboot.test.api.assertion.type.TypeInformationAssert;
 
 import org.apache.flink.api.common.typeinfo.TypeHint;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
@@ -31,6 +33,14 @@ class FlinkbootAssertionsTest {
 
     public static class InvalidPojo {
         private String name;
+    }
+
+    static class SerializableSample implements Serializable {
+        private final String value = "sample";
+    }
+
+    static class NonSerializableSample {
+        private final Object value = new Object();
     }
 
     @Test
@@ -71,6 +81,39 @@ class FlinkbootAssertionsTest {
         @DisplayName("Should throw AssertionFailedError when class violates POJO rules")
         void shouldFailForInvalidPojo() {
             assertThrows(AssertionFailedError.class, () -> assertThat(InvalidPojo.class).isPojo());
+        }
+    }
+
+    @Nested
+    @DisplayName("assertThat(Object)")
+    class AssertThatObjectTests {
+
+        @Test
+        @DisplayName("Should return ObjectAssert instance when object is valid")
+        void shouldReturnObjectAssert() {
+            assertInstanceOf(ObjectAssert.class, assertThat(new SerializableSample()));
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when target object is null")
+        void shouldThrowExceptionWhenObjectIsNull() {
+            var exception = assertThrows(NullPointerException.class, () -> assertThat((Object) null));
+            assertEquals("Object to assert must not be null", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should successfully validate a serializable object")
+        void shouldValidateSerializableObject() {
+            assertDoesNotThrow(() -> assertThat(new SerializableSample()).isSerializable());
+        }
+
+        @Test
+        @DisplayName("Should throw AssertionFailedError when object is not serializable")
+        void shouldFailForNonSerializableObject() {
+            assertThrows(
+                AssertionFailedError.class,
+                () -> assertThat(new NonSerializableSample()).isSerializable()
+            );
         }
     }
 
