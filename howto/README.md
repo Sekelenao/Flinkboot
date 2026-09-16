@@ -46,4 +46,5 @@ This section contains step-by-step guides to help you implement specific feature
 
 ## Testing
 
+- [How to Collect Stream Elements in Tests](testing/collect-stream-elements-in-tests.md) — Collect elements emitted by Flink streams for assertions in tests using the thread-safe `CollectingSink`.
 - [How to Load Configurations in Tests](testing/load-configurations-in-tests.md) — Load, merge, and validate YAML configurations within JUnit 5 unit tests.

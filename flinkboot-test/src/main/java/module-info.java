@@ -11,5 +11,3 @@ module io.github.sekelenao.flinkboot.test {
     opens io.github.sekelenao.flinkboot.test.api.assertion.type;
     opens io.github.sekelenao.flinkboot.test.internal to org.junit.platform.commons;
 }
-
-
