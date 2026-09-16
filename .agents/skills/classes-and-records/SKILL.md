@@ -23,9 +23,10 @@ Review `examples/` to see valid examples:
 
 ## Best practices
 
-### Prefer immutable objects
+### Prefer immutable objects and composition over inheritance
 
-- Use `final` class declaration when inheritance is not required.
+- **Declare classes as `final` when there is no legitimate reason to extend them**: Arbitrary inheritance is fragile and introduces tight coupling and hidden bugs; favor composition over inheritance. If a class is not deliberately designed for extension, declare it `final`.
+  - *Pragmatic exception*: Do not dogmatically lock classes integrating third-party framework SPIs or type systems (e.g., Flink `TypeInformation`, `TypeSerializer`) where downstream modules or users may legitimately need extension.
 - Prefer `private final` fields.
 - Use Optionals (`Optional<T>`, `OptionalLong`, `OptionalInt`) for methods that can return empty values.
 - Always check for nullability on mandatory constructor arguments with `Objects.requireNonNull()`.
