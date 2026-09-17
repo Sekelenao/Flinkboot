@@ -92,14 +92,16 @@ class CheckpointingPropertiesTest {
         }
 
         @Test
-        @DisplayName("Should pass validation when all duration fields are null")
-        void shouldPassValidationWhenDurationsAreNull() {
+        @DisplayName("Should fail validation when checkpointing is enabled by default but interval is null")
+        void shouldFailValidationWhenIntervalIsNull() {
             var config = new CheckpointingProperties(
-                null, null, null, null, null, null, null, null, null, null
-            );
-            var violations = validator.validate(config);
-            assertTrue(violations.isEmpty());
-        }
+            null, null, null, null, null, null, null, null, null, null
+        );
+
+       var violations = validator.validate(config);
+
+       assertEquals(1, violations.size());
+      }
 
         @Test
         @DisplayName("Should fail validation when interval is zero or negative")
