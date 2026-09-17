@@ -3,6 +3,7 @@ package io.github.sekelenao.flinkboot.core.api.properties.checkpointing;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import org.hibernate.validator.constraints.time.DurationMin;
 
@@ -45,6 +46,7 @@ public final class CheckpointingProperties implements Serializable {
     @DurationMin(millis = 0)
     private final Duration alignedCheckpointTimeout;
 
+    @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
     private final String storageUri;
 
     /**

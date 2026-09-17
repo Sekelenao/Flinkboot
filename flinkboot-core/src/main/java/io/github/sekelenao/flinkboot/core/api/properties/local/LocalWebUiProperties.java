@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import org.hibernate.validator.constraints.Range;
 
 import java.io.Serializable;
@@ -23,6 +24,7 @@ public final class LocalWebUiProperties implements Serializable {
 
     @Range(min = 0, max = 65535)
     private final Integer port;
+    @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
     private final String bindAddress;
 
     /**

@@ -111,6 +111,21 @@ class LocalWebUiPropertiesTest {
             assertTrue(violations.isEmpty(), "Should have no violations when bindAddress is null");
         }
 
+        @ParameterizedTest
+        @ValueSource(strings = {"", "   ", "\t\n"})
+        @DisplayName("Should fail validation when bindAddress is empty or blank")
+        void shouldFailValidationWhenBindAddressIsBlank(String bindAddress) {
+            var config = new LocalWebUiProperties(true, 8081, bindAddress);
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertEquals(1, violations.size(), "Should have exactly 1 violation for blank bindAddress"),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("bindAddress")
+                        && v.getMessage().equals("must not be blank")
+                ), "Violation should target 'bindAddress' with message 'must not be blank'")
+            );
+        }
+
         @Test
         @DisplayName("Should fail validation when enabled is null")
         void shouldFailValidationWhenEnabledIsNull() {
