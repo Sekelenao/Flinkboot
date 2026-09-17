@@ -7,6 +7,8 @@ import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Duration;
 
@@ -159,6 +161,36 @@ class CheckpointingPropertiesTest {
             );
 
             assertEquals(1, validator.validate(negativeTimeout).size());
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "   ", "\t\n"})
+        @DisplayName("Should fail validation when storageUri is empty or blank")
+        void shouldFailValidationWhenStorageUriBlank(String storageUri) {
+            var config = new CheckpointingProperties(
+                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, false, Duration.ZERO, storageUri
+            );
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("storageUri")
+                        && v.getMessage().equals("must not be blank")
+                ))
+            );
+        }
+
+        @Test
+        @DisplayName("Should pass validation when storageUri is null")
+        void shouldPassValidationWhenStorageUriNull() {
+            var config = new CheckpointingProperties(
+                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, false, Duration.ZERO, null
+            );
+            var violations = validator.validate(config);
+            assertTrue(violations.isEmpty());
         }
     }
 

@@ -4,8 +4,11 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.api.validation.ValidatableProperties;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
+import io.github.sekelenao.flinkboot.core.api.validation.ValidatableProperties;
+import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import io.github.sekelenao.flinkboot.core.internal.validation.properties.CheckpointingPropertiesValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import org.hibernate.validator.constraints.time.DurationMin;
 
@@ -48,6 +51,7 @@ public final class CheckpointingProperties implements ValidatableProperties, Ser
     @DurationMin(millis = 0)
     private final Duration alignedCheckpointTimeout;
 
+    @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
     private final String storageUri;
 
     /**
