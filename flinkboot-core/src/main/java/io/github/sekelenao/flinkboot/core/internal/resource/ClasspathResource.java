@@ -6,7 +6,7 @@ import java.util.Objects;
 import io.github.sekelenao.flinkboot.core.api.exception.resource.ResourceNotFoundException;
 import io.github.sekelenao.flinkboot.core.api.resource.Resource;
 
-public class ClasspathResource implements Resource {
+public final class ClasspathResource implements Resource {
 
     private final String location;
 
