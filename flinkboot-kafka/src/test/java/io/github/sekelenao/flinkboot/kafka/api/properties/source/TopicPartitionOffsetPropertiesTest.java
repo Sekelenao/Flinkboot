@@ -45,6 +45,20 @@ class TopicPartitionOffsetPropertiesTest {
     }
 
     @Test
+    @DisplayName("Validation should fail when partition is null")
+    void testValidationFailsOnNullPartition() {
+        var config = new TopicPartitionOffsetProperties("topic-a", null, 100L);
+        assertFalse(validator.validate(config).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Validation should fail when offset is null")
+    void testValidationFailsOnNullOffset() {
+        var config = new TopicPartitionOffsetProperties("topic-a", 0, null);
+        assertFalse(validator.validate(config).isEmpty());
+    }
+
+    @Test
     @DisplayName("Equals and HashCode should work correctly across all branches")
     void testEqualsAndHashCode() {
         var config1 = new TopicPartitionOffsetProperties("topic-a", 0, 100L);
