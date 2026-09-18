@@ -1,26 +1,27 @@
 package io.github.sekelenao.flinkboot.fluss.internal.validation.properties;
 
-import io.github.sekelenao.flinkboot.fluss.api.properties.source.FlussSourceProperties;
-import io.github.sekelenao.flinkboot.fluss.api.properties.source.FlussStartupMode;
-import jakarta.validation.ConstraintValidatorContext;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import io.github.sekelenao.flinkboot.fluss.api.properties.source.FlussSourceProperties;
+import io.github.sekelenao.flinkboot.fluss.api.properties.source.FlussStartupMode;
+import jakarta.validation.ConstraintValidatorContext;
 
 @DisplayName("FlussSourcePropertiesValidator")
 class FlussSourcePropertiesValidatorTest {
@@ -42,6 +43,40 @@ class FlussSourcePropertiesValidatorTest {
     @Nested
     @DisplayName("Validation")
     class Validation {
+
+        @Test
+        @DisplayName("Should throw NullPointerException when properties is null")
+        void shouldThrowWhenPropertiesIsNull() {
+            var context = mock(ConstraintValidatorContext.class);
+
+            var exception = assertThrows(
+                NullPointerException.class,
+                () -> FlussSourcePropertiesValidator.validate(null, context)
+            );
+
+            assertEquals("properties must not be null", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when context is null")
+        void shouldThrowWhenContextIsNull() {
+            var props = new FlussSourceProperties(
+                "fluss-source",
+                List.of("localhost:9123"),
+                "db",
+                "table",
+                null,
+                null,
+                Map.of()
+            );
+
+            var exception = assertThrows(
+                NullPointerException.class,
+                () -> FlussSourcePropertiesValidator.validate(props, null)
+            );
+
+            assertEquals("context must not be null", exception.getMessage());
+        }
 
         @Test
         @DisplayName("Should pass when startupMode is null")

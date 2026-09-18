@@ -1,21 +1,22 @@
 package io.github.sekelenao.flinkboot.core.internal.validation.properties;
 
-import io.github.sekelenao.flinkboot.core.api.properties.execution.ExecutionProperties;
-import jakarta.validation.ConstraintValidatorContext;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
 import java.lang.reflect.InvocationTargetException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import io.github.sekelenao.flinkboot.core.api.properties.execution.ExecutionProperties;
+import jakarta.validation.ConstraintValidatorContext;
 
 @DisplayName("ExecutionPropertiesValidator")
 class ExecutionPropertiesValidatorTest {
@@ -37,6 +38,32 @@ class ExecutionPropertiesValidatorTest {
     @Nested
     @DisplayName("Validation")
     class Validation {
+
+        @Test
+        @DisplayName("Should throw NullPointerException when properties is null")
+        void shouldThrowWhenPropertiesIsNull() {
+            var context = mock(ConstraintValidatorContext.class);
+
+            var exception = assertThrows(
+                NullPointerException.class,
+                () -> ExecutionPropertiesValidator.validate(null, context)
+            );
+
+            assertEquals("properties must not be null", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when context is null")
+        void shouldThrowWhenContextIsNull() {
+            var props = new ExecutionProperties(null, 4, 16, null, null, null);
+
+            var exception = assertThrows(
+                NullPointerException.class,
+                () -> ExecutionPropertiesValidator.validate(props, null)
+            );
+
+            assertEquals("context must not be null", exception.getMessage());
+        }
 
         @Test
         @DisplayName("Should return true when parallelism and maxParallelism are null")
