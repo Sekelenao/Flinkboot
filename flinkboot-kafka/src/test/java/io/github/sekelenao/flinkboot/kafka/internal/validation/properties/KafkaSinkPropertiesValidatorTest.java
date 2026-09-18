@@ -16,6 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -45,6 +46,39 @@ class KafkaSinkPropertiesValidatorTest {
     @Nested
     @DisplayName("Validation")
     class Validation {
+        
+        @Test
+        @DisplayName("Should throw NullPointerException when properties is null")
+        void shouldThrowWhenPropertiesIsNull() {
+            var context = mock(ConstraintValidatorContext.class);
+
+            var exception = assertThrows(
+                NullPointerException.class,
+                () -> KafkaSinkPropertiesValidator.validate(null, context)
+            );
+
+            assertEquals("properties must not be null", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when context is null")
+        void shouldThrowWhenContextIsNull() {
+            var props = new KafkaSinkProperties(
+                "sink",
+                List.of("localhost:9092"),
+                "topic",
+                KafkaDeliveryGuarantee.EXACTLY_ONCE,
+                "my-prefix",
+                Map.of()
+            );
+
+            var exception = assertThrows(
+                NullPointerException.class,
+                () -> KafkaSinkPropertiesValidator.validate(props, null)
+            );
+
+            assertEquals("context must not be null", exception.getMessage());
+        }
 
         @Test
         @DisplayName("Should pass when EXACTLY_ONCE is used with non-blank transactionalIdPrefix")
