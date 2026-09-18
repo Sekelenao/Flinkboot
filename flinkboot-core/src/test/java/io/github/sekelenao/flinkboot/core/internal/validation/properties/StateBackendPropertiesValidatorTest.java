@@ -60,7 +60,7 @@ class StateBackendPropertiesValidatorTest {
         @Test
         @DisplayName("Should throw NullPointerException when context is null")
         void shouldThrowWhenContextIsNull() {
-            var props = new StateBackendProperties(StateBackendType.ROCKSDB, CheckpointStorageType.FILESYSTEM, true, false, "");
+            var props = new StateBackendProperties(StateBackendType.ROCKSDB, CheckpointStorageType.FILESYSTEM, true, false, null);
 
             var exception = assertThrows(
                 NullPointerException.class,

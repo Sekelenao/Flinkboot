@@ -55,7 +55,7 @@ class ExecutionPropertiesValidatorTest {
         @Test
         @DisplayName("Should throw NullPointerException when context is null")
         void shouldThrowWhenContextIsNull() {
-            var props = new ExecutionProperties(null, 32, 16, null, null, null);
+            var props = new ExecutionProperties(null, 4, 16, null, null, null);
 
             var exception = assertThrows(
                 NullPointerException.class,
