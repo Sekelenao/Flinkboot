@@ -32,6 +32,7 @@ Your sole mission is to perform an exhaustive, rigorous inspection of the produc
 
 - **Production Code Only**: Focus strictly on `<module>/src/main/java`. Do NOT audit `src/test/java`, documentation files, or build scripts unless cross-referencing a production defect.
 - **Actionable Findings Only**: Do NOT report cosmetic trivia (e.g. whitespace, ordering of imports). Focus exclusively on issues that could cause runtime failures, bad developer experience, data corruption, broken contracts, or memory/resource leaks.
+- **Consult Refused Issues**: Always review [`.agents/refused_past_issues.md`](../../refused_past_issues.md) before flagging defects. Do NOT report findings that match these consciously rejected patterns, UNLESS you have compelling, concrete evidence of an actual runtime crash or broken contract not accounted for by the recorded rationale. If you challenge a refused item, explicitly explain why.
 
 ---
 
@@ -79,26 +80,30 @@ Consult [`.agents/skills/connectors/SKILL.md`](../../skills/connectors/SKILL.md)
 
 ## Step-by-Step Audit Workflow
 
-### 1. Inventory Production Files
+### 1. Load Intentional Design Memory
+Read [`.agents/refused_past_issues.md`](../../refused_past_issues.md) to understand consciously accepted trade-offs, architecture decisions, and rejected patterns.
+
+### 2. Inventory Production Files
 List all `.java` files in `<module>/src/main/java`:
 ```bash
 find <module>/src/main/java -name "*.java"
 ```
 
-### 2. Deep Static Analysis
-Inspect each production class method by method against the 4 defect vectors above:
+### 3. Deep Static Analysis
+Inspect each production class method by method against the 5 defect vectors above:
 - Cross-reference with project skills.
+- Filter out patterns recorded in `.agents/refused_past_issues.md` unless presenting novel proof of a real runtime failure.
 - Check edge-case inputs (null, empty, negative, boundary values).
 - Verify constructor behavior and getter return contracts.
 
-### 3. Local Verification (Optional)
+### 4. Local Verification (Optional)
 If a suspected bug can be validated through compilation or running existing tests:
 ```bash
 mvn test-compile -pl <module>
 ```
 
-### 4. Generate Audit Report
-Save the complete scan report into `.private/scan_<module>.md`.
+### 5. Generate Audit Report
+Save the complete scan report into `.private/scan/scan_<module>.md`.
 
 The report must contain:
 1. **Module Overview**: Target module, number of production files scanned, scan date.
@@ -110,5 +115,5 @@ The report must contain:
    - **Actionable Fix**: Concrete, copy-pasteable replacement code snippet.
 4. **Candidate GitHub Issues**: Pre-formatted title and description ready to create GitHub issues if applicable.
 
-### 5. Report to Caller
-Provide a high-level executive summary to the caller with the number of bugs found and a link to `.private/scan_<module>.md`.
+### 6. Report to Caller
+Provide a high-level executive summary to the caller with the number of bugs found and a link to `.private/scan/scan_<module>.md`.
