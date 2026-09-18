@@ -1,7 +1,16 @@
 package io.github.sekelenao.flinkboot.kafka.api.properties.source;
 
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.OptionalLong;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.github.sekelenao.flinkboot.core.api.validation.ValidatableProperties;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import io.github.sekelenao.flinkboot.kafka.internal.validation.properties.KafkaSourcePropertiesValidator;
@@ -12,14 +21,6 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
-
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.OptionalLong;
 
 /**
  * Unified configuration properties for Apache Flink Kafka sources consuming from an explicit list of topics
@@ -142,10 +143,7 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
      * @return an {@link Optional} containing the topic pattern regex string, or empty if not set
      */
     public Optional<String> topicPattern() {
-        if (topicPattern == null) {
-            return Optional.empty();
-        }
-        return Optional.of(topicPattern);
+        return Optional.ofNullable(topicPattern);
     }
 
     /**

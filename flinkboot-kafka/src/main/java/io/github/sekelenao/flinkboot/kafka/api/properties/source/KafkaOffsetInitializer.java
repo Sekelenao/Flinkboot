@@ -1,5 +1,7 @@
 package io.github.sekelenao.flinkboot.kafka.api.properties.source;
 
+import java.util.Optional;
+
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 
@@ -10,72 +12,45 @@ public enum KafkaOffsetInitializer {
     /**
      * Start consuming from the earliest available offset in each partition.
      */
-    EARLIEST {
-        @Override
-        public OffsetsInitializer offsetsInitializer() {
-            return OffsetsInitializer.earliest();
-        }
-    },
+    EARLIEST(OffsetsInitializer.earliest()),
     /**
      * Start consuming from the latest available offset (end) in each partition.
      */
-    LATEST {
-        @Override
-        public OffsetsInitializer offsetsInitializer() {
-            return OffsetsInitializer.latest();
-        }
-    },
+    LATEST(OffsetsInitializer.latest()),
     /**
      * Start consuming from committed consumer group offsets.
      */
-    COMMITTED {
-        @Override
-        public OffsetsInitializer offsetsInitializer() {
-            return OffsetsInitializer.committedOffsets();
-        }
-    },
+    COMMITTED(OffsetsInitializer.committedOffsets()),
     /**
      * Start consuming from committed consumer group offsets, falling back to earliest if none are committed.
      */
-    COMMITTED_EARLIEST {
-        @Override
-        public OffsetsInitializer offsetsInitializer() {
-            return OffsetsInitializer.committedOffsets(OffsetResetStrategy.EARLIEST);
-        }
-    },
+    COMMITTED_EARLIEST(OffsetsInitializer.committedOffsets(OffsetResetStrategy.EARLIEST)),
     /**
      * Start consuming from committed consumer group offsets, falling back to latest if none are committed.
      */
-    COMMITTED_LATEST {
-        @Override
-        public OffsetsInitializer offsetsInitializer() {
-            return OffsetsInitializer.committedOffsets(OffsetResetStrategy.LATEST);
-        }
-    },
+    COMMITTED_LATEST(OffsetsInitializer.committedOffsets(OffsetResetStrategy.LATEST)),
     /**
      * Start consuming from a specific timestamp (requires {@code starting-offsets-timestamp}).
      */
-    TIMESTAMP {
-        @Override
-        public OffsetsInitializer offsetsInitializer() {
-            throw new UnsupportedOperationException("TIMESTAMP offset initializer requires a timestamp parameter");
-        }
-    },
+    TIMESTAMP(null),
     /**
      * Start consuming from explicit partition offsets (requires {@code starting-offsets-partition-offsets}).
      */
-    OFFSETS {
-        @Override
-        public OffsetsInitializer offsetsInitializer() {
-            throw new UnsupportedOperationException("OFFSETS offset initializer requires partition offsets parameters");
-        }
-    };
+    OFFSETS(null);
+
+    private final OffsetsInitializer offsetsInitializer;
+
+    KafkaOffsetInitializer(OffsetsInitializer offsetsInitializer) {
+        this.offsetsInitializer = offsetsInitializer;
+    }
 
     /**
      * Creates the corresponding Flink {@link OffsetsInitializer}.
      *
-     * @return the {@link OffsetsInitializer} instance
-     * @throws UnsupportedOperationException if this strategy requires additional parameters (TIMESTAMP, OFFSETS)
+     * @return an {@link Optional} containing the corresponding initializer,
+     *         or empty if the strategy requires additional parameters
      */
-    public abstract OffsetsInitializer offsetsInitializer();
+    public Optional<OffsetsInitializer> offsetsInitializer() {
+        return Optional.ofNullable(offsetsInitializer);
+    }
 }

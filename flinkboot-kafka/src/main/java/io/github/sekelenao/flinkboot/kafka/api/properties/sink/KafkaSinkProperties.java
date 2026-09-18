@@ -1,7 +1,15 @@
 package io.github.sekelenao.flinkboot.kafka.api.properties.sink;
 
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.github.sekelenao.flinkboot.core.api.validation.ValidatableProperties;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import io.github.sekelenao.flinkboot.kafka.internal.validation.properties.KafkaSinkPropertiesValidator;
@@ -10,13 +18,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Configuration properties for Kafka producer sinks in Apache Flink.
@@ -118,10 +119,7 @@ public final class KafkaSinkProperties implements Serializable, ValidatablePrope
      * @return an {@link Optional} containing the prefix string, or empty if not specified
      */
     public Optional<String> transactionalIdPrefix() {
-        if (transactionalIdPrefix == null || transactionalIdPrefix.isBlank()) {
-            return Optional.empty();
-        }
-        return Optional.of(transactionalIdPrefix);
+        return Optional.ofNullable(transactionalIdPrefix);
     }
 
     /**

@@ -1,12 +1,10 @@
 package io.github.sekelenao.flinkboot.kafka.api.properties.source;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("KafkaOffsetInitializer")
 class KafkaOffsetInitializerTest {
@@ -16,23 +14,23 @@ class KafkaOffsetInitializerTest {
     class OffsetsInitializerResolution {
 
         @Test
-        @DisplayName("Should return non-null offsets initializer for each enum value")
-        void shouldReturnNonNullOffsetsInitializer() {
+        @DisplayName("Should return present optional for each parameterless initializer")
+        void shouldReturnPresentOptionalForParameterlessInitializers() {
             assertAll(
-                () -> assertNotNull(KafkaOffsetInitializer.EARLIEST.offsetsInitializer()),
-                () -> assertNotNull(KafkaOffsetInitializer.LATEST.offsetsInitializer()),
-                () -> assertNotNull(KafkaOffsetInitializer.COMMITTED.offsetsInitializer()),
-                () -> assertNotNull(KafkaOffsetInitializer.COMMITTED_EARLIEST.offsetsInitializer()),
-                () -> assertNotNull(KafkaOffsetInitializer.COMMITTED_LATEST.offsetsInitializer())
+                () -> assertTrue(KafkaOffsetInitializer.EARLIEST.offsetsInitializer().isPresent()),
+                () -> assertTrue(KafkaOffsetInitializer.LATEST.offsetsInitializer().isPresent()),
+                () -> assertTrue(KafkaOffsetInitializer.COMMITTED.offsetsInitializer().isPresent()),
+                () -> assertTrue(KafkaOffsetInitializer.COMMITTED_EARLIEST.offsetsInitializer().isPresent()),
+                () -> assertTrue(KafkaOffsetInitializer.COMMITTED_LATEST.offsetsInitializer().isPresent())
             );
         }
 
         @Test
-        @DisplayName("Should throw UnsupportedOperationException for TIMESTAMP and OFFSETS")
-        void shouldThrowExceptionForParameterizedInitializers() {
+        @DisplayName("Should return empty optional for parameterized initializers")
+        void shouldReturnEmptyOptionalForParameterizedInitializers() {
             assertAll(
-                () -> assertThrows(UnsupportedOperationException.class, KafkaOffsetInitializer.TIMESTAMP::offsetsInitializer),
-                () -> assertThrows(UnsupportedOperationException.class, KafkaOffsetInitializer.OFFSETS::offsetsInitializer)
+                () -> assertTrue(KafkaOffsetInitializer.TIMESTAMP.offsetsInitializer().isEmpty()),
+                () -> assertTrue(KafkaOffsetInitializer.OFFSETS.offsetsInitializer().isEmpty())
             );
         }
     }
