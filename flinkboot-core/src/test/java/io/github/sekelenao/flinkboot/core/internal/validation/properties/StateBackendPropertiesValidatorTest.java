@@ -1,26 +1,27 @@
 package io.github.sekelenao.flinkboot.core.internal.validation.properties;
 
-import io.github.sekelenao.flinkboot.core.api.properties.state.CheckpointStorageType;
-import io.github.sekelenao.flinkboot.core.api.properties.state.StateBackendProperties;
-import io.github.sekelenao.flinkboot.core.api.properties.state.StateBackendType;
-import jakarta.validation.ConstraintValidatorContext;
+import java.lang.reflect.InvocationTargetException;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullSource;
-
-import java.lang.reflect.InvocationTargetException;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import io.github.sekelenao.flinkboot.core.api.properties.state.CheckpointStorageType;
+import io.github.sekelenao.flinkboot.core.api.properties.state.StateBackendProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.state.StateBackendType;
+import jakarta.validation.ConstraintValidatorContext;
 
 @DisplayName("StateBackendPropertiesValidator")
 class StateBackendPropertiesValidatorTest {
@@ -42,6 +43,32 @@ class StateBackendPropertiesValidatorTest {
     @Nested
     @DisplayName("Validation")
     class Validation {
+
+        @Test
+        @DisplayName("Should throw NullPointerException when properties is null")
+        void shouldThrowWhenPropertiesIsNull() {
+            var context = mock(ConstraintValidatorContext.class);
+
+            var exception = assertThrows(
+                NullPointerException.class,
+                () -> StateBackendPropertiesValidator.validate(null, context)
+            );
+
+            assertEquals("properties must not be null", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when context is null")
+        void shouldThrowWhenContextIsNull() {
+            var props = new StateBackendProperties(StateBackendType.ROCKSDB, CheckpointStorageType.FILESYSTEM, true, false, "");
+
+            var exception = assertThrows(
+                NullPointerException.class,
+                () -> StateBackendPropertiesValidator.validate(props, null)
+            );
+
+            assertEquals("context must not be null", exception.getMessage());
+        }
 
         @Test
         @DisplayName("Should pass when state backend is null and customClass is null")

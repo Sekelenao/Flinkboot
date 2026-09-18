@@ -1,5 +1,7 @@
 package io.github.sekelenao.flinkboot.core.internal.validation.properties;
 
+import java.util.Objects;
+
 import io.github.sekelenao.flinkboot.core.api.properties.execution.ExecutionProperties;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -13,6 +15,8 @@ public final class ExecutionPropertiesValidator {
     }
 
     public static boolean validate(ExecutionProperties properties, ConstraintValidatorContext context) {
+        Objects.requireNonNull(properties, "properties must not be null");
+        Objects.requireNonNull(context, "context must not be null");
         var parallelism = properties.parallelism();
         var maxParallelism = properties.maxParallelism();
         if (parallelism.isEmpty() || maxParallelism.isEmpty()) {
