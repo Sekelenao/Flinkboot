@@ -97,13 +97,54 @@ class CheckpointingPropertiesTest {
         @DisplayName("Should fail validation when checkpointing is enabled by default but interval is null")
         void shouldFailValidationWhenIntervalIsNull() {
             var config = new CheckpointingProperties(
-            null, null, null, null, null, null, null, null, null, null
-        );
+                null, null, null, null, null, null, null, null, null, null
+            );
 
-       var violations = validator.validate(config);
+            var violations = validator.validate(config);
 
-       assertEquals(1, violations.size());
-      }
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertEquals("interval", violations.iterator().next().getPropertyPath().toString()),
+                () -> assertEquals(
+                    "interval must be specified when checkpointing is enabled",
+                    violations.iterator().next().getMessage()
+                )
+            );
+        }
+
+        @Test
+        @DisplayName("Should pass validation when checkpointing is disabled without an interval")
+        void shouldPassValidationWhenCheckpointingIsDisabledWithoutInterval() {
+            var config = new CheckpointingProperties(
+                false, null, null, null, null, null, null, null, null, null
+            );
+
+            var violations = validator.validate(config);
+
+            assertTrue(violations.isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should fail validation when checkpointing is explicitly enabled without an interval")
+        void shouldFailValidationWhenCheckpointingIsExplicitlyEnabledWithoutInterval() {
+            var config = new CheckpointingProperties(
+                true, null, null, null, null, null, null, null, null, null
+            );
+
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertEquals(
+                    "interval",
+                    violations.iterator().next().getPropertyPath().toString()
+                ),
+                () -> assertEquals(
+                    "interval must be specified when checkpointing is enabled",
+                    violations.iterator().next().getMessage()
+                )
+            );
+        }
 
         @Test
         @DisplayName("Should fail validation when interval is zero or negative")
@@ -248,4 +289,3 @@ class CheckpointingPropertiesTest {
         }
     }
 }
-
