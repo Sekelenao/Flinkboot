@@ -45,6 +45,22 @@ class TopicPartitionOffsetPropertiesTest {
     }
 
     @Test
+    @DisplayName("Validation should fail when partition is null")
+    void testValidationFailsOnNullPartition() {
+        var config = new TopicPartitionOffsetProperties("topic-a", null, 100L);
+
+        assertFalse(validator.validate(config).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Validation should fail when offset is null")
+    void testValidationFailsOnNullOffset() {
+        var config = new TopicPartitionOffsetProperties("topic-a", 0, null);
+
+        assertFalse(validator.validate(config).isEmpty());
+    }
+
+    @Test
     @DisplayName("Equals and HashCode should work correctly across all branches")
     void testEqualsAndHashCode() {
         var config1 = new TopicPartitionOffsetProperties("topic-a", 0, 100L);
@@ -76,6 +92,9 @@ class TopicPartitionOffsetPropertiesTest {
     @DisplayName("ToString should return the formatted string representation")
     void testToString() {
         var config = new TopicPartitionOffsetProperties("topic-a", 2, 500L);
-        assertEquals("TopicPartitionOffsetProperties{topic='topic-a', partition=2, offset=500}", config.toString());
+        assertEquals(
+            "TopicPartitionOffsetProperties{topic='topic-a', partition=2, offset=500}",
+            config.toString()
+        );
     }
 }
