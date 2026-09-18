@@ -8,6 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Duration;
@@ -93,13 +94,38 @@ class CheckpointingPropertiesTest {
             assertTrue(violations.isEmpty());
         }
 
-        @Test
-        @DisplayName("Should pass validation when all duration fields are null")
-        void shouldPassValidationWhenDurationsAreNull() {
+        @ParameterizedTest
+        @NullSource
+        @ValueSource(booleans = {true})
+        @DisplayName("Should fail validation when checkpointing is enabled or default without an interval")
+        void shouldFailValidationWhenCheckpointingIsEnabledWithoutInterval(Boolean enabled) {
             var config = new CheckpointingProperties(
-                null, null, null, null, null, null, null, null, null, null
+                enabled, null, null, null, null, null, null, null, null, null
             );
+
             var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(
+                    violations.stream().anyMatch(v ->
+                        v.getPropertyPath().toString().equals("interval")
+                            && v.getMessage().equals("interval must be specified when checkpointing is enabled")
+                    ),
+                    "Expected violation on property 'interval'"
+                )
+            );
+        }
+
+        @Test
+        @DisplayName("Should pass validation when checkpointing is disabled without an interval")
+        void shouldPassValidationWhenCheckpointingIsDisabledWithoutInterval() {
+            var config = new CheckpointingProperties(
+                false, null, null, null, null, null, null, null, null, null
+            );
+
+            var violations = validator.validate(config);
+
             assertTrue(violations.isEmpty());
         }
 
@@ -246,4 +272,3 @@ class CheckpointingPropertiesTest {
         }
     }
 }
-

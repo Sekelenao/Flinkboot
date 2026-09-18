@@ -2,7 +2,10 @@ package io.github.sekelenao.flinkboot.core.api.properties.checkpointing;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.sekelenao.flinkboot.core.api.validation.ValidatableProperties;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
+import io.github.sekelenao.flinkboot.core.internal.validation.properties.CheckpointingPropertiesValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import org.hibernate.validator.constraints.time.DurationMin;
@@ -19,7 +22,7 @@ import java.util.OptionalInt;
  * Configures interval, timeout, consistency mode, concurrency, unaligned checkpoints,
  * externalized checkpoint cleanup, and storage URI.
  */
-public final class CheckpointingProperties implements Serializable {
+public final class CheckpointingProperties implements ValidatableProperties, Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -86,6 +89,11 @@ public final class CheckpointingProperties implements Serializable {
         this.unalignedCheckpoints = unalignedCheckpoints;
         this.alignedCheckpointTimeout = alignedCheckpointTimeout;
         this.storageUri = storageUri;
+    }
+
+    @Override
+    public boolean validate(ConstraintValidatorContext context) {
+        return CheckpointingPropertiesValidator.validate(this, context);
     }
 
     /**
