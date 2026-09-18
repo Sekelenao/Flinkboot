@@ -5,9 +5,14 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Duration;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -44,8 +49,38 @@ class CheckpointingPropertiesValidatorTest {
     class Validation {
 
         @Test
-        @DisplayName("Should return false and register violation when checkpointing is enabled without an interval")
-        void shouldFailWhenCheckpointingIsEnabledWithoutInterval() {
+        @DisplayName("Should throw NullPointerException when properties is null")
+        void shouldThrowWhenPropertiesIsNull() {
+            var context = mock(ConstraintValidatorContext.class);
+
+            var exception = assertThrows(
+                NullPointerException.class,
+                () -> CheckpointingPropertiesValidator.validate(null, context)
+            );
+
+            assertEquals("properties must not be null", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when context is null")
+        void shouldThrowWhenContextIsNull() {
+            var props = new CheckpointingProperties(
+                true, Duration.ofSeconds(10), null, null, null, null, null, null, null, null
+            );
+
+            var exception = assertThrows(
+                NullPointerException.class,
+                () -> CheckpointingPropertiesValidator.validate(props, null)
+            );
+
+            assertEquals("context must not be null", exception.getMessage());
+        }
+
+        @ParameterizedTest
+        @NullSource
+        @ValueSource(booleans = {true})
+        @DisplayName("Should return false and register violation when checkpointing is enabled or default without an interval")
+        void shouldFailWhenCheckpointingIsEnabledWithoutInterval(Boolean enabled) {
             var context = mock(ConstraintValidatorContext.class);
             var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
             var nodeBuilder =
@@ -55,7 +90,7 @@ class CheckpointingPropertiesValidatorTest {
             when(builder.addPropertyNode("interval")).thenReturn(nodeBuilder);
 
             var props = new CheckpointingProperties(
-                true, null, null, null, null, null, null, null, null, null
+                enabled, null, null, null, null, null, null, null, null, null
             );
 
             assertFalse(CheckpointingPropertiesValidator.validate(props, context));
@@ -86,7 +121,7 @@ class CheckpointingPropertiesValidatorTest {
 
             var props = new CheckpointingProperties(
                 true,
-                java.time.Duration.ofSeconds(10),
+                Duration.ofSeconds(10),
                 null,
                 null,
                 null,

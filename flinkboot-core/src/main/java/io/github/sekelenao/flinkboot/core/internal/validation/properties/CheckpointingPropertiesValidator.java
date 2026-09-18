@@ -1,5 +1,7 @@
 package io.github.sekelenao.flinkboot.core.internal.validation.properties;
 
+import java.util.Objects;
+
 import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.CheckpointingProperties;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -13,8 +15,9 @@ public final class CheckpointingPropertiesValidator {
     }
 
     public static boolean validate(CheckpointingProperties properties, ConstraintValidatorContext context) {
-        var enabled = properties.enabled().orElse(true);
-
+        Objects.requireNonNull(properties, "properties must not be null");
+        Objects.requireNonNull(context, "context must not be null");
+        boolean enabled = properties.enabled().orElse(true);
         if (enabled && properties.interval().isEmpty()) {
             return PropertiesValidator.reject(
                 context,
@@ -22,7 +25,7 @@ public final class CheckpointingPropertiesValidator {
                 "interval must be specified when checkpointing is enabled"
             );
         }
-
         return true;
     }
+
 }

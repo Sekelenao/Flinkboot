@@ -8,6 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Duration;
@@ -93,21 +94,25 @@ class CheckpointingPropertiesTest {
             assertTrue(violations.isEmpty());
         }
 
-        @Test
-        @DisplayName("Should fail validation when checkpointing is enabled by default but interval is null")
-        void shouldFailValidationWhenIntervalIsNull() {
+        @ParameterizedTest
+        @NullSource
+        @ValueSource(booleans = {true})
+        @DisplayName("Should fail validation when checkpointing is enabled or default without an interval")
+        void shouldFailValidationWhenCheckpointingIsEnabledWithoutInterval(Boolean enabled) {
             var config = new CheckpointingProperties(
-                null, null, null, null, null, null, null, null, null, null
+                enabled, null, null, null, null, null, null, null, null, null
             );
 
             var violations = validator.validate(config);
 
             assertAll(
                 () -> assertEquals(1, violations.size()),
-                () -> assertEquals("interval", violations.iterator().next().getPropertyPath().toString()),
-                () -> assertEquals(
-                    "interval must be specified when checkpointing is enabled",
-                    violations.iterator().next().getMessage()
+                () -> assertTrue(
+                    violations.stream().anyMatch(v ->
+                        v.getPropertyPath().toString().equals("interval")
+                            && v.getMessage().equals("interval must be specified when checkpointing is enabled")
+                    ),
+                    "Expected violation on property 'interval'"
                 )
             );
         }
@@ -122,28 +127,6 @@ class CheckpointingPropertiesTest {
             var violations = validator.validate(config);
 
             assertTrue(violations.isEmpty());
-        }
-
-        @Test
-        @DisplayName("Should fail validation when checkpointing is explicitly enabled without an interval")
-        void shouldFailValidationWhenCheckpointingIsExplicitlyEnabledWithoutInterval() {
-            var config = new CheckpointingProperties(
-                true, null, null, null, null, null, null, null, null, null
-            );
-
-            var violations = validator.validate(config);
-
-            assertAll(
-                () -> assertEquals(1, violations.size()),
-                () -> assertEquals(
-                    "interval",
-                    violations.iterator().next().getPropertyPath().toString()
-                ),
-                () -> assertEquals(
-                    "interval must be specified when checkpointing is enabled",
-                    violations.iterator().next().getMessage()
-                )
-            );
         }
 
         @Test
