@@ -1,5 +1,7 @@
 package io.github.sekelenao.flinkboot.core.internal.validation.properties;
 
+import java.util.Objects;
+
 import io.github.sekelenao.flinkboot.core.api.properties.state.StateBackendProperties;
 import io.github.sekelenao.flinkboot.core.api.properties.state.StateBackendType;
 import jakarta.validation.ConstraintValidatorContext;
@@ -14,6 +16,8 @@ public final class StateBackendPropertiesValidator {
     }
 
     public static boolean validate(StateBackendProperties properties, ConstraintValidatorContext context) {
+        Objects.requireNonNull(properties, "properties must not be null");
+        Objects.requireNonNull(context, "context must not be null");
         var typeOpt = properties.type();
         var customClassOpt = properties.customClass();
         var isCustom = typeOpt.isPresent() && typeOpt.get() == StateBackendType.CUSTOM;

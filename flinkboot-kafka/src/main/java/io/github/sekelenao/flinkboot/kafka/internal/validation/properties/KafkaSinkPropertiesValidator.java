@@ -1,5 +1,7 @@
 package io.github.sekelenao.flinkboot.kafka.internal.validation.properties;
 
+import java.util.Objects;
+
 import io.github.sekelenao.flinkboot.core.internal.validation.properties.PropertiesValidator;
 import io.github.sekelenao.flinkboot.kafka.api.properties.sink.KafkaDeliveryGuarantee;
 import io.github.sekelenao.flinkboot.kafka.api.properties.sink.KafkaSinkProperties;
@@ -15,6 +17,8 @@ public final class KafkaSinkPropertiesValidator {
     }
 
     public static boolean validate(KafkaSinkProperties properties, ConstraintValidatorContext context) {
+        Objects.requireNonNull(properties, "properties must not be null");
+        Objects.requireNonNull(context, "context must not be null");
         var guarantee = properties.deliveryGuarantee().orElse(null);
         var isExactlyOnce = guarantee == KafkaDeliveryGuarantee.EXACTLY_ONCE;
         var hasPrefix = properties.transactionalIdPrefix().isPresent();

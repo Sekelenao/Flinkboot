@@ -1,5 +1,7 @@
 package io.github.sekelenao.flinkboot.fluss.internal.validation.properties;
 
+import java.util.Objects;
+
 import io.github.sekelenao.flinkboot.core.internal.validation.properties.PropertiesValidator;
 import io.github.sekelenao.flinkboot.fluss.api.properties.source.FlussSourceProperties;
 import io.github.sekelenao.flinkboot.fluss.api.properties.source.FlussStartupMode;
@@ -15,6 +17,8 @@ public final class FlussSourcePropertiesValidator {
     }
 
     public static boolean validate(FlussSourceProperties properties, ConstraintValidatorContext context) {
+        Objects.requireNonNull(properties, "properties must not be null");
+        Objects.requireNonNull(context, "context must not be null");
         var mode = properties.startupMode();
         if (mode == null) {
             return true;
