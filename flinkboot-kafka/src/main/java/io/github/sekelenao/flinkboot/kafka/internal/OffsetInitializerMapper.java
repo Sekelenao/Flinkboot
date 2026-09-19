@@ -23,7 +23,7 @@ public final class OffsetInitializerMapper {
         if (offset == KafkaOffsetInitializer.TIMESTAMP) {
             return timestampOffsets(properties);
         }
-        return offset.offsetsInitializer();
+        return offset.offsetsInitializer().orElseThrow();
     }
 
     private static OffsetsInitializer offsetsPerPartition(KafkaSourceProperties properties) {
