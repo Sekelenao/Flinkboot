@@ -2,11 +2,15 @@ package io.github.sekelenao.flinkboot.kafka.api.properties.source;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import static jakarta.validation.Validation.buildDefaultValidatorFactory;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -15,180 +19,208 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("TopicPartitionOffsetProperties")
 class TopicPartitionOffsetPropertiesTest {
 
-    private final Validator validator =
-        Validation.buildDefaultValidatorFactory().getValidator();
+    private static final Validator validator;
+
+    static {
+        try (var factory = buildDefaultValidatorFactory()) {
+            validator = factory.getValidator();
+        }
+    }
 
     private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
 
-    @Test
-    @DisplayName("Getters should return expected values")
-    void testGetters() {
-        var config = new TopicPartitionOffsetProperties("topic-a", 2, 500L);
+    @Nested
+    @DisplayName("Constructor and Getters")
+    class ConstructorAndGetters {
 
-        assertAll(
-            () -> assertEquals("topic-a", config.topic()),
-            () -> assertEquals(2, config.partition()),
-            () -> assertEquals(500L, config.offset())
-        );
+        @Test
+        @DisplayName("Should return expected property values from getters")
+        void shouldReturnExpectedValues() {
+            var config = new TopicPartitionOffsetProperties("topic-a", 2, 500L);
+
+            assertAll(
+                () -> assertEquals("topic-a", config.topic()),
+                () -> assertEquals(2, config.partition()),
+                () -> assertEquals(500L, config.offset())
+            );
+        }
     }
 
-    @Test
-    @DisplayName("Validation should pass with valid properties")
-    void testValidationPasses() {
-        var config = new TopicPartitionOffsetProperties("topic-a", 0, 100L);
-        var violations = validator.validate(config);
+    @Nested
+    @DisplayName("Validation")
+    class Validation {
 
-        assertTrue(violations.isEmpty());
+        @Test
+        @DisplayName("Should pass validation with valid properties")
+        void shouldPassValidationWithValidProperties() {
+            var config = new TopicPartitionOffsetProperties("topic-a", 0, 100L);
+            var violations = validator.validate(config);
+
+            assertTrue(violations.isEmpty(), "Expected no validation violations");
+        }
+
+        @ParameterizedTest
+        @NullAndEmptySource
+        @ValueSource(strings = {"   ", "\t\n"})
+        @DisplayName("Should fail validation when topic is null, empty, or blank")
+        void shouldFailWhenTopicIsNullOrEmptyOrBlank(String topic) {
+            var config = new TopicPartitionOffsetProperties(topic, 0, 100L);
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("topic")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when partition is null")
+        void shouldFailWhenPartitionIsNull() {
+            var config = new TopicPartitionOffsetProperties("topic-a", null, 100L);
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("partition")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when offset is null")
+        void shouldFailWhenOffsetIsNull() {
+            var config = new TopicPartitionOffsetProperties("topic-a", 0, null);
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("offset")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when partition is negative")
+        void shouldFailWhenPartitionIsNegative() {
+            var config = new TopicPartitionOffsetProperties("topic-a", -1, 100L);
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("partition")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when offset is negative")
+        void shouldFailWhenOffsetIsNegative() {
+            var config = new TopicPartitionOffsetProperties("topic-a", 0, -100L);
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("offset")))
+            );
+        }
     }
 
-    @Test
-    @DisplayName("Validation should fail when topic is null or blank")
-    void testValidationFailsOnBlankOrNullTopic() {
-        var nullTopicViolations = validator.validate(
-            new TopicPartitionOffsetProperties(null, 0, 100L)
-        );
-        var blankTopicViolations = validator.validate(
-            new TopicPartitionOffsetProperties("   ", 0, 100L)
-        );
+    @Nested
+    @DisplayName("Deserialization")
+    class Deserialization {
 
-        assertAll(
-            () -> assertTrue(
-                nullTopicViolations.stream()
-                    .anyMatch(v -> v.getPropertyPath().toString().equals("topic"))
-            ),
-            () -> assertTrue(
-                blankTopicViolations.stream()
-                    .anyMatch(v -> v.getPropertyPath().toString().equals("topic"))
-            )
-        );
+        @Test
+        @DisplayName("Should successfully deserialize from valid YAML")
+        void shouldDeserializeFromValidYaml() throws Exception {
+            var yaml = "topic: \"events\"\n"
+                + "partition: 3\n"
+                + "offset: 450\n";
+
+            var config = yamlMapper.readValue(yaml, TopicPartitionOffsetProperties.class);
+
+            assertAll(
+                () -> assertEquals("events", config.topic()),
+                () -> assertEquals(3, config.partition()),
+                () -> assertEquals(450L, config.offset()),
+                () -> assertTrue(validator.validate(config).isEmpty())
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when partition is omitted from YAML")
+        void shouldFailWhenPartitionIsMissingFromYaml() throws Exception {
+            var yaml = "topic: topic-a\n"
+                + "offset: 100\n";
+
+            var config = yamlMapper.readValue(yaml, TopicPartitionOffsetProperties.class);
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("partition")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when offset is omitted from YAML")
+        void shouldFailWhenOffsetIsMissingFromYaml() throws Exception {
+            var yaml = "topic: topic-a\n"
+                + "partition: 0\n";
+
+            var config = yamlMapper.readValue(yaml, TopicPartitionOffsetProperties.class);
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("offset")))
+            );
+        }
     }
 
-    @Test
-    @DisplayName("Validation should fail when partition is null")
-    void testValidationFailsOnNullPartition() {
-        var config = new TopicPartitionOffsetProperties("topic-a", null, 100L);
-        var violations = validator.validate(config);
+    @Nested
+    @DisplayName("Equals and HashCode")
+    class EqualsAndHashCode {
 
-        assertEquals(1, violations.size());
-        assertTrue(
-            violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("partition"))
-        );
-    }
+        @Test
+        @DisplayName("Should verify equality and hash code contracts across all branches")
+        void shouldVerifyEqualsAndHashCode() {
+            var config1 = new TopicPartitionOffsetProperties("topic-a", 200, 1000L);
+            var config2 = new TopicPartitionOffsetProperties("topic-a", 200, 1000L);
+            var configDifferentPartition = new TopicPartitionOffsetProperties("topic-a", 201, 1000L);
+            var configDifferentOffset = new TopicPartitionOffsetProperties("topic-a", 200, 1001L);
+            var configDifferentTopic = new TopicPartitionOffsetProperties("topic-b", 200, 1000L);
 
-    @Test
-    @DisplayName("Validation should fail when offset is null")
-    void testValidationFailsOnNullOffset() {
-        var config = new TopicPartitionOffsetProperties("topic-a", 0, null);
-        var violations = validator.validate(config);
+            assertAll(
+                // Same instance
+                () -> assertEquals(config1, config1),
 
-        assertEquals(1, violations.size());
-        assertTrue(
-            violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("offset"))
-        );
-    }
+                // Equal value
+                () -> assertEquals(config1, config2),
+                () -> assertEquals(config1.hashCode(), config2.hashCode()),
 
-    @Test
-    @DisplayName("Validation should fail when partition is negative")
-    void testValidationFailsOnNegativePartition() {
-        var config = new TopicPartitionOffsetProperties("topic-a", -1, 100L);
-        var violations = validator.validate(config);
+                // Null
+                () -> assertNotEquals(config1, null),
 
-        assertEquals(1, violations.size());
-        assertTrue(
-            violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("partition"))
-        );
-    }
+                // Different class
+                () -> assertNotEquals(config1, "not-a-config-object"),
 
-    @Test
-    @DisplayName("Validation should fail when offset is negative")
-    void testValidationFailsOnNegativeOffset() {
-        var config = new TopicPartitionOffsetProperties("topic-a", 0, -100L);
-        var violations = validator.validate(config);
+                // Different partition
+                () -> assertNotEquals(config1, configDifferentPartition),
 
-        assertEquals(1, violations.size());
-        assertTrue(
-            violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("offset"))
-        );
-    }
+                // Different offset
+                () -> assertNotEquals(config1, configDifferentOffset),
 
-    @Test
-    @DisplayName("Validation should fail when partition is omitted from YAML")
-    void testValidationFailsWhenPartitionIsMissingFromYaml() throws Exception {
-        var yaml = "topic: topic-a\n"
-            + "offset: 100\n";
+                // Different topic
+                () -> assertNotEquals(config1, configDifferentTopic)
+            );
+        }
 
-        var config = yamlMapper.readValue(yaml, TopicPartitionOffsetProperties.class);
-        var violations = validator.validate(config);
+        @Test
+        @DisplayName("Should return formatted string representation from toString")
+        void shouldReturnFormattedStringFromToString() {
+            var config = new TopicPartitionOffsetProperties("topic-a", 2, 500L);
 
-        assertEquals(1, violations.size());
-        assertTrue(
-            violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("partition"))
-        );
-    }
-
-    @Test
-    @DisplayName("Validation should fail when offset is omitted from YAML")
-    void testValidationFailsWhenOffsetIsMissingFromYaml() throws Exception {
-        var yaml = "topic: topic-a\n"
-            + "partition: 0\n";
-
-        var config = yamlMapper.readValue(yaml, TopicPartitionOffsetProperties.class);
-        var violations = validator.validate(config);
-
-        assertEquals(1, violations.size());
-        assertTrue(
-            violations.stream()
-                .anyMatch(v -> v.getPropertyPath().toString().equals("offset"))
-        );
-    }
-
-    @Test
-    @DisplayName("Equals and HashCode should work correctly across all branches")
-    void testEqualsAndHashCode() {
-        var config1 = new TopicPartitionOffsetProperties("topic-a", 200, 1000L);
-        var config2 = new TopicPartitionOffsetProperties("topic-a", 200, 1000L);
-        var configDifferentPartition = new TopicPartitionOffsetProperties("topic-a", 201, 1000L);
-        var configDifferentOffset = new TopicPartitionOffsetProperties("topic-a", 200, 1001L);
-        var configDifferentTopic = new TopicPartitionOffsetProperties("topic-b", 200, 1000L);
-
-        assertAll(
-            // Same instance
-            () -> assertEquals(config1, config1),
-
-            // Equal value
-            () -> assertEquals(config1, config2),
-            () -> assertEquals(config1.hashCode(), config2.hashCode()),
-
-            // Null
-            () -> assertNotEquals(config1, null),
-
-            // Different class
-            () -> assertNotEquals(config1, "not-a-config-object"),
-
-            // Different partition
-            () -> assertNotEquals(config1, configDifferentPartition),
-
-            // Different offset
-            () -> assertNotEquals(config1, configDifferentOffset),
-
-            // Different topic
-            () -> assertNotEquals(config1, configDifferentTopic)
-        );
-    }
-
-    @Test
-    @DisplayName("ToString should return the formatted string representation")
-    void testToString() {
-        var config = new TopicPartitionOffsetProperties("topic-a", 2, 500L);
-
-        assertEquals(
-            "TopicPartitionOffsetProperties{topic='topic-a', partition=2, offset=500}",
-            config.toString()
-        );
+            assertEquals(
+                "TopicPartitionOffsetProperties{topic='topic-a', partition=2, offset=500}",
+                config.toString()
+            );
+        }
     }
 }
