@@ -81,8 +81,8 @@ public final class TopicPartitionOffsetProperties implements Serializable {
         }
         var o = (TopicPartitionOffsetProperties) other;
         return Objects.equals(topic, o.topic)
-            && partition == o.partition
-            && offset == o.offset;
+           && Objects.equals(partition, o.partition)
+           && Objects.equals(offset, o.offset);
     }
 
     @Override
