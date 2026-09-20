@@ -20,6 +20,7 @@ This section contains step-by-step guides to help you implement specific feature
 - [How to Load Resources](configuration/load-resources.md) — Load files and assets seamlessly across classpath and file systems with unified URI syntax.
 - [Reserved Keys & Configuration Properties](configuration/reserved-keys.md) — View configuration keys and environment variables reserved by Flinkboot.
 - [How to Configure the Execution Environment](configuration/configure-execution-environment.md) — Configure and instantiate Flink's `StreamExecutionEnvironment` with zero boilerplate.
+- [How to Validate Custom Cross-Field Configurations](configuration/validate-custom-configurations.md) — Validate interdependent fields in your own configuration records with `ValidatableProperties`.
 
 ---
 
