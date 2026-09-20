@@ -4,6 +4,48 @@ Flinkboot provides the `ValidatableProperties` contract in `flinkboot-core` to e
 
 ---
 
+## Maven Dependencies
+
+Import the Flinkboot BOM in your `<dependencyManagement>` and add `flinkboot-core` in your `pom.xml`:
+
+```xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>io.github.sekelenao</groupId>
+            <artifactId>flinkboot</artifactId>
+            <version>${flinkboot.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+
+<dependencies>
+    <!-- Flinkboot Core (transitively provides Jakarta Bean Validation) -->
+    <dependency>
+        <groupId>io.github.sekelenao</groupId>
+        <artifactId>flinkboot-core</artifactId>
+    </dependency>
+
+    <!-- JUnit 5, for the unit test shown in Section 4 -->
+    <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <scope>test</scope>
+    </dependency>
+
+    <!-- Flinkboot Test Utilities, for the end-to-end YAML test mentioned in Section 4 -->
+    <dependency>
+        <groupId>io.github.sekelenao</groupId>
+        <artifactId>flinkboot-test</artifactId>
+        <scope>test</scope>
+    </dependency>
+</dependencies>
+```
+
+---
+
 ## 1. Overview
 
 `ValidatableProperties` is the contract for configuration records and classes whose fields constrain each other. Implement it, write your cross-field rule in the `validate` method, and Flinkboot reports every failure as a standard Jakarta Bean Validation violation.
@@ -22,6 +64,7 @@ Implementing the contract is enough. Never annotate your own record with `@Valid
 Declare a record that implements `ValidatableProperties` and put the cross-field rule inside `validate`:
 
 ```java
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.api.validation.ValidatableProperties;
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.constraints.NotNull;
@@ -29,27 +72,38 @@ import jakarta.validation.constraints.NotNull;
 import java.time.Duration;
 
 public record WindowedPipelineProperties(
-    @NotNull WindowType windowType,
-    @NotNull Duration windowSize,
-    Duration slideDuration
+    @NotNull @JsonProperty("window-type") WindowType windowType,
+    @NotNull @JsonProperty("window-size") Duration windowSize,
+    @JsonProperty("slide-duration") Duration slideDuration
 ) implements ValidatableProperties {
 
     @Override
     public boolean validate(ConstraintValidatorContext context) {
-        if (windowType == WindowType.SLIDING && (slideDuration == null || slideDuration.compareTo(windowSize) >= 0)) {
-            context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate(
-                       "slide-duration must be specified and strictly less than window-size for SLIDING windows")
-                   .addPropertyNode("slideDuration")
-                   .addConstraintViolation();
-            return false;
+        if (windowType == WindowType.SLIDING) {
+            if (slideDuration == null || (windowSize != null && slideDuration.compareTo(windowSize) >= 0)) {
+                context.disableDefaultConstraintViolation();
+                context.buildConstraintViolationWithTemplate(
+                           "slide-duration must be specified and strictly less than window-size for SLIDING windows")
+                       .addPropertyNode("slideDuration")
+                       .addConstraintViolation();
+                return false;
+            }
         }
         return true;
     }
 }
 ```
 
-`WindowType` is your own application enum. Return `true` when the cross-field rule holds, and `false` when it does not.
+`WindowType` is your own application enum, not a Flinkboot type:
+
+```java
+public enum WindowType {
+    TUMBLING,
+    SLIDING
+}
+```
+
+Return `true` when the cross-field rule holds, and `false` when it does not.
 
 Field-level constraints such as `@NotNull` keep working as usual: they are evaluated independently of your cross-field rule, and Flinkboot reports both kinds of violation together.
 
@@ -123,3 +177,6 @@ class WindowedPipelinePropertiesTest {
 `validator.validate(...)` returns the set of violations found on the instance. Assert on three things: the number of violations, the property path, and the message. The property path proves the violation is bound to the field you targeted, and the message proves your custom template is what users will actually read.
 
 This example drives validation through the standard `jakarta.validation.Validator`. The validator Flinkboot uses internally is not exported to application code, so always trigger validation through the standard API in your own tests.
+
+> [!NOTE]
+> For an end-to-end check that also exercises YAML binding and the surrounding configuration pipeline, use `FlinkbootTest.configuration(...)` from `flinkboot-test`, which throws `ConfigurationValidationException` when the loaded configuration is invalid. See the [How to Load Configurations in Tests](../testing/load-configurations-in-tests.md) guide for details.
