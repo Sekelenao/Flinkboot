@@ -1,10 +1,14 @@
 package io.github.sekelenao.flinkboot.kafka.api.properties.source;
 
+import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 @DisplayName("KafkaOffsetInitializer")
 class KafkaOffsetInitializerTest {
@@ -13,25 +17,40 @@ class KafkaOffsetInitializerTest {
     @DisplayName("OffsetsInitializer Resolution")
     class OffsetsInitializerResolution {
 
-        @Test
-        @DisplayName("Should return present optional for each parameterless initializer")
-        void shouldReturnPresentOptionalForParameterlessInitializers() {
-            assertAll(
-                () -> assertTrue(KafkaOffsetInitializer.EARLIEST.offsetsInitializer().isPresent()),
-                () -> assertTrue(KafkaOffsetInitializer.LATEST.offsetsInitializer().isPresent()),
-                () -> assertTrue(KafkaOffsetInitializer.COMMITTED.offsetsInitializer().isPresent()),
-                () -> assertTrue(KafkaOffsetInitializer.COMMITTED_EARLIEST.offsetsInitializer().isPresent()),
-                () -> assertTrue(KafkaOffsetInitializer.COMMITTED_LATEST.offsetsInitializer().isPresent())
-            );
+        @ParameterizedTest
+        @EnumSource(value = KafkaOffsetInitializer.class, names = {
+                "EARLIEST", "LATEST", "COMMITTED", "COMMITTED_EARLIEST", "COMMITTED_LATEST"
+        })
+        @DisplayName("Should return present optional for parameterless initializers")
+        void shouldReturnPresentOptionalForParameterlessInitializers(KafkaOffsetInitializer initializer) {
+            assertTrue(initializer.offsetsInitializer().isPresent());
         }
 
         @Test
-        @DisplayName("Should return empty optional for parameterized initializers")
-        void shouldReturnEmptyOptionalForParameterizedInitializers() {
+        @DisplayName("Should configure correct reset strategy for static offset initializers")
+        void shouldConfigureCorrectResetStrategy() {
             assertAll(
-                () -> assertTrue(KafkaOffsetInitializer.TIMESTAMP.offsetsInitializer().isEmpty()),
-                () -> assertTrue(KafkaOffsetInitializer.OFFSETS.offsetsInitializer().isEmpty())
-            );
+                    () -> assertEquals(OffsetResetStrategy.EARLIEST,
+                            KafkaOffsetInitializer.EARLIEST.offsetsInitializer().orElseThrow()
+                                    .getAutoOffsetResetStrategy()),
+                    () -> assertEquals(OffsetResetStrategy.LATEST,
+                            KafkaOffsetInitializer.LATEST.offsetsInitializer().orElseThrow()
+                                    .getAutoOffsetResetStrategy()),
+                    () -> assertEquals(OffsetResetStrategy.NONE,
+                            KafkaOffsetInitializer.COMMITTED.offsetsInitializer().orElseThrow()
+                                    .getAutoOffsetResetStrategy()),
+                    () -> assertEquals(OffsetResetStrategy.EARLIEST,
+                            KafkaOffsetInitializer.COMMITTED_EARLIEST.offsetsInitializer().orElseThrow()
+                                    .getAutoOffsetResetStrategy()),
+                    () -> assertEquals(OffsetResetStrategy.LATEST, KafkaOffsetInitializer.COMMITTED_LATEST
+                            .offsetsInitializer().orElseThrow().getAutoOffsetResetStrategy()));
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = KafkaOffsetInitializer.class, names = {"TIMESTAMP", "OFFSETS"})
+        @DisplayName("Should return empty optional for parameterized initializers")
+        void shouldReturnEmptyOptionalForParameterizedInitializers(KafkaOffsetInitializer initializer) {
+            assertTrue(initializer.offsetsInitializer().isEmpty());
         }
     }
 }
