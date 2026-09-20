@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 
 import java.io.Serializable;
@@ -19,11 +20,13 @@ public final class TopicPartitionOffsetProperties implements Serializable {
     @NotBlank
     private final String topic;
 
+    @NotNull
     @PositiveOrZero
-    private final int partition;
+    private final Integer partition;
 
+    @NotNull
     @PositiveOrZero
-    private final long offset;
+    private final Long offset;
 
     /**
      * Creates a new {@code TopicPartitionOffsetProperties} instance.
@@ -35,8 +38,8 @@ public final class TopicPartitionOffsetProperties implements Serializable {
     @JsonCreator
     public TopicPartitionOffsetProperties(
         @JsonProperty("topic") String topic,
-        @JsonProperty("partition") int partition,
-        @JsonProperty("offset") long offset
+        @JsonProperty("partition") Integer partition,
+        @JsonProperty("offset") Long offset
     ) {
         this.topic = topic;
         this.partition = partition;
@@ -78,8 +81,8 @@ public final class TopicPartitionOffsetProperties implements Serializable {
         }
         var o = (TopicPartitionOffsetProperties) other;
         return Objects.equals(topic, o.topic)
-            && partition == o.partition
-            && offset == o.offset;
+            && Objects.equals(partition, o.partition)
+            && Objects.equals(offset, o.offset);
     }
 
     @Override
@@ -97,5 +100,4 @@ public final class TopicPartitionOffsetProperties implements Serializable {
             ", offset=" + offset +
             '}';
     }
-
 }
