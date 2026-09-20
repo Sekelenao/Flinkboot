@@ -26,6 +26,9 @@ final class CommandLine {
         if(keyIndex + 1 >= args.length){
             throw new CommandLineParsingException("Option '" + args[keyIndex] + "' requires a value.");
         }
+        if(args[keyIndex + 1] == null){
+            throw new CommandLineParsingException("Argument at index " + (keyIndex + 1) + " must not be null.");
+        }
         return args[keyIndex + 1];
     }
 
@@ -35,6 +38,9 @@ final class CommandLine {
         var flags = new HashSet<String>();
         for (int i = 0; i < args.length; i++) {
             var argument = args[i];
+            if (argument == null){
+                throw new CommandLineParsingException("Argument at index " + i + " must not be null.");
+            }
             if (argument.startsWith("--")) {
                 if (argument.length() > 2) {
                     flags.add(argument.substring(2).toLowerCase(Locale.ROOT));
