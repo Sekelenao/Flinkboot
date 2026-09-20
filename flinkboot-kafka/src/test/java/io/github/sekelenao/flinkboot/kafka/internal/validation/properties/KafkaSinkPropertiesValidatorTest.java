@@ -112,10 +112,9 @@ class KafkaSinkPropertiesValidatorTest {
             assertTrue(KafkaSinkPropertiesValidator.validate(props, context));
         }
 
-        @ParameterizedTest
-        @NullSource
+        @Test
         @DisplayName("Should fail when EXACTLY_ONCE is used without transactionalIdPrefix")
-        void shouldFailWhenExactlyOnceWithoutPrefix(String prefix) {
+        void shouldFailWhenExactlyOnceWithoutPrefix() {
             var context = mock(ConstraintValidatorContext.class);
             var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
             var nodeBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
@@ -128,7 +127,7 @@ class KafkaSinkPropertiesValidatorTest {
                 List.of("localhost:9092"),
                 "topic",
                 KafkaDeliveryGuarantee.EXACTLY_ONCE,
-                prefix,
+                null,
                 Map.of()
             );
 

@@ -218,6 +218,27 @@ class KafkaSinkPropertiesTest {
         }
 
         @Test
+        @DisplayName("Should fail validation when delivery-guarantee is EXACTLY_ONCE and transactional-id-prefix is null")
+        void shouldFailWhenExactlyOnceAndTransactionalIdPrefixIsNull() {
+            var props = new KafkaSinkProperties(
+                "my-sink",
+                List.of("localhost:9092"),
+                "my-topic",
+                KafkaDeliveryGuarantee.EXACTLY_ONCE,
+                null,
+                null
+            );
+            var violations = validator.validate(props);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("transactionalIdPrefix")
+                        && v.getMessage().equals("transactional-id-prefix is required when delivery-guarantee is EXACTLY_ONCE")
+                ))
+            );
+        }
+
+        @Test
         @DisplayName("Should fail validation when transactional-id-prefix is specified for non-EXACTLY_ONCE guarantee")
         void shouldFailWhenTransactionalIdPrefixSpecifiedForNonExactlyOnce() {
             var props = new KafkaSinkProperties(
