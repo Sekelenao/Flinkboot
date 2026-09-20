@@ -1,4 +1,4 @@
-package io.github.sekelenao.flinkboot.test.internal;
+package io.github.sekelenao.flinkboot.test.internal.pojo;
 
 import io.github.sekelenao.flinkboot.core.api.typing.collection.ListTypeInfoFactory;
 import io.github.sekelenao.flinkboot.core.api.typing.collection.MapTypeInfoFactory;
@@ -6,14 +6,18 @@ import io.github.sekelenao.flinkboot.core.api.typing.time.DurationTypeInfoFactor
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTimeTypeInfoFactory;
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalDateTypeInfoFactory;
 import io.github.sekelenao.flinkboot.core.api.typing.time.LocalTimeTypeInfoFactory;
+import org.apache.flink.api.common.functions.InvalidTypesException;
 import org.apache.flink.api.common.serialization.SerializerConfigImpl;
+import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInfoFactory;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.typeutils.EitherTypeInfo;
+import org.apache.flink.api.java.typeutils.MissingTypeInfo;
 import org.apache.flink.api.java.typeutils.PojoTypeInfo;
+import org.apache.flink.api.java.typeutils.ListTypeInfo;
 import org.apache.flink.api.java.typeutils.TypeExtractor;
 import org.apache.flink.core.memory.DataInputDeserializer;
 import org.apache.flink.core.memory.DataOutputSerializer;
@@ -41,6 +45,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @DisplayName("PojoValidator")
 class PojoValidatorTest {
@@ -440,9 +447,44 @@ class PojoValidatorTest {
         assertEquals("TypeInformation to assert must not be null", exception.getMessage());
     }
 
+    @Test
+    @DisplayName("Should fail validation when root type is MissingTypeInfo")
+    void shouldFailWhenRootIsMissingTypeInfo() {
+        var missing = new MissingTypeInfo("missingFunc", new InvalidTypesException("Type of field could not be determined."));
+        var error = assertThrows(AssertionFailedError.class, () -> validator.validate(missing));
+        assertTrue(error.getMessage().contains("has missing type information (Type of field could not be determined.)"));
+    }
+
+    @Test
+    @DisplayName("Should fail validation when root type is MissingTypeInfo without underlying exception")
+    void shouldFailWhenRootIsMissingTypeInfoWithoutException() {
+        var missing = new MissingTypeInfo("missingFunc", null);
+        var error = assertThrows(AssertionFailedError.class, () -> validator.validate(missing));
+        assertTrue(error.getMessage().contains("has missing type information (unknown type erasure)"));
+    }
+
+    @Test
+    @DisplayName("Should fail validation when nested field in list type is MissingTypeInfo")
+    void shouldFailWhenNestedFieldIsMissingTypeInfo() {
+        var nestedType = new ListTypeInfo<>(
+            new MissingTypeInfo("erasedField", new InvalidTypesException("Erased generic parameter"))
+        );
+        var error = assertThrows(AssertionFailedError.class, () -> validator.validate(nestedType));
+        assertTrue(error.getMessage().contains("has missing type information (Erased generic parameter)"));
+    }
+
+    @Test
+    @DisplayName("Should handle TypeInformation with null typeClass at root without throwing NullPointerException")
+    void shouldHandleNullTypeClassAtRoot() {
+        TypeInformation<?> nullClassTypeInfo = mock(TypeInformation.class);
+        when(nullClassTypeInfo.getTypeClass()).thenReturn(null);
+        when(nullClassTypeInfo.toString()).thenReturn("CustomNullTypeInfo");
+        assertDoesNotThrow(() -> validator.validate(nullClassTypeInfo));
+    }
+
     @Nested
     @DisplayName("POJO Serialization and Deserialization")
-    class SerializationTests {
+    class Serialization {
 
         @Test
         @DisplayName("Should correctly serialize and deserialize a POJO with all @TypeInfo annotations")

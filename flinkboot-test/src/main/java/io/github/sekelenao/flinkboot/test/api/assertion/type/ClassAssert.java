@@ -1,6 +1,6 @@
 package io.github.sekelenao.flinkboot.test.api.assertion.type;
 
-import io.github.sekelenao.flinkboot.test.internal.PojoValidator;
+import io.github.sekelenao.flinkboot.test.internal.pojo.PojoValidator;
 
 import org.apache.flink.api.java.typeutils.TypeExtractor;
 

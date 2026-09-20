@@ -1,6 +1,7 @@
-package io.github.sekelenao.flinkboot.test.internal;
+package io.github.sekelenao.flinkboot.test.internal.pojo;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+
 import java.util.Objects;
 
 public final class PojoValidationTask<T> {
