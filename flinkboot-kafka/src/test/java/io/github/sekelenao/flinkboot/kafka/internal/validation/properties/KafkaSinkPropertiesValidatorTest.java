@@ -8,9 +8,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -115,8 +113,7 @@ class KafkaSinkPropertiesValidatorTest {
         }
 
         @ParameterizedTest
-        @NullAndEmptySource
-        @ValueSource(strings = {"   ", "\t\n"})
+        @NullSource
         @DisplayName("Should fail when EXACTLY_ONCE is used without transactionalIdPrefix")
         void shouldFailWhenExactlyOnceWithoutPrefix(String prefix) {
             var context = mock(ConstraintValidatorContext.class);
@@ -138,7 +135,7 @@ class KafkaSinkPropertiesValidatorTest {
             assertFalse(KafkaSinkPropertiesValidator.validate(props, context));
             verify(context).disableDefaultConstraintViolation();
             verify(context).buildConstraintViolationWithTemplate(
-                "transactional-id-prefix is required and cannot be empty when delivery-guarantee is EXACTLY_ONCE"
+                "transactional-id-prefix is required when delivery-guarantee is EXACTLY_ONCE"
             );
             verify(builder).addPropertyNode("transactionalIdPrefix");
             verify(nodeBuilder).addConstraintViolation();

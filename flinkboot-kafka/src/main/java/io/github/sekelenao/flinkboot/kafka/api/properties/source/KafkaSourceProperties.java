@@ -142,10 +142,7 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
      * @return an {@link Optional} containing the topic pattern regex string, or empty if not set
      */
     public Optional<String> topicPattern() {
-        if (topicPattern == null) {
-            return Optional.empty();
-        }
-        return Optional.of(topicPattern);
+        return Optional.ofNullable(topicPattern);
     }
 
     /**

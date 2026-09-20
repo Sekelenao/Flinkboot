@@ -2,8 +2,10 @@ package io.github.sekelenao.flinkboot.kafka.api.properties.sink;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -13,6 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -191,7 +194,7 @@ class KafkaSinkPropertiesTest {
             );
             var violations = validator.validate(props);
             assertAll(
-                () -> assertEquals(2, violations.size()),
+                () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("transactionalIdPrefix")))
             );
         }
@@ -209,7 +212,7 @@ class KafkaSinkPropertiesTest {
             );
             var violations = validator.validate(props);
             assertAll(
-                () -> assertEquals(2, violations.size()),
+                () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("transactionalIdPrefix")))
             );
         }
@@ -401,6 +404,21 @@ class KafkaSinkPropertiesTest {
             assertNotNull(servers, "bootstrapServers() should never return null");
             assertTrue(servers.isEmpty(), "Expected empty list when constructed with null list");
             assertThrows(UnsupportedOperationException.class, () -> servers.add("x"), "Returned list must be unmodifiable");
+        }
+
+        @Test
+        @DisplayName("Should return blank transactional ID prefix when it is blank")
+        void shouldReturnBlankTransactionalIdPrefix() {
+            var config = new KafkaSinkProperties(
+                "my-sink",
+                List.of("localhost:9092"),
+                "my-topic",
+                KafkaDeliveryGuarantee.EXACTLY_ONCE,
+                "   ",
+                Map.of()
+            );
+
+            assertEquals(Optional.of("   "), config.transactionalIdPrefix());
         }
     }
 

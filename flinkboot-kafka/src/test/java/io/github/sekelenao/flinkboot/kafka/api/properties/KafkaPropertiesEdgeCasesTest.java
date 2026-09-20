@@ -1,13 +1,5 @@
 package io.github.sekelenao.flinkboot.kafka.api.properties;
 
-import io.github.sekelenao.flinkboot.kafka.api.properties.sink.KafkaDeliveryGuarantee;
-import io.github.sekelenao.flinkboot.kafka.api.properties.sink.KafkaSinkProperties;
-import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaOffsetInitializer;
-import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceProperties;
-import io.github.sekelenao.flinkboot.kafka.api.properties.source.TopicPartitionOffsetProperties;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +8,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import io.github.sekelenao.flinkboot.kafka.api.properties.sink.KafkaDeliveryGuarantee;
+import io.github.sekelenao.flinkboot.kafka.api.properties.sink.KafkaSinkProperties;
+import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaOffsetInitializer;
+import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceProperties;
+import io.github.sekelenao.flinkboot.kafka.api.properties.source.TopicPartitionOffsetProperties;
 
 @DisplayName("Kafka Configuration Edge Cases Tests")
 class KafkaPropertiesEdgeCasesTest {
@@ -83,7 +83,7 @@ class KafkaPropertiesEdgeCasesTest {
     @Test
     @DisplayName("Should test getters with null or empty optional fields")
     void shouldTestGettersWithNullOrEmptyFields() {
-        var nullSinkConfig = new KafkaSinkProperties("sink-name", List.of("localhost:9092"), "topic", null, "", null);
+        var nullSinkConfig = new KafkaSinkProperties("sink-name", List.of("localhost:9092"), "topic", null, null, null);
         var nullListConfig = new KafkaSourceProperties("list-src", List.of("localhost:9092"), "group", List.of("topic"), null, KafkaOffsetInitializer.EARLIEST, null, null, null);
         var nullPatternConfig = new KafkaSourceProperties("pattern-src", List.of("localhost:9092"), "group", null, "^pattern$", KafkaOffsetInitializer.EARLIEST, null, null, null);
 

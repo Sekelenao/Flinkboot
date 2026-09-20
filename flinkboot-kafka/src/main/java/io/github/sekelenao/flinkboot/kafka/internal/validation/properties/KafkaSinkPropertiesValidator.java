@@ -27,7 +27,7 @@ public final class KafkaSinkPropertiesValidator {
             return PropertiesValidator.reject(
                 context,
                 "transactionalIdPrefix",
-                "transactional-id-prefix is required and cannot be empty when delivery-guarantee is EXACTLY_ONCE"
+                "transactional-id-prefix is required when delivery-guarantee is EXACTLY_ONCE"
             );
         }
 

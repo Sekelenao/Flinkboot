@@ -118,10 +118,7 @@ public final class KafkaSinkProperties implements Serializable, ValidatablePrope
      * @return an {@link Optional} containing the prefix string, or empty if not specified
      */
     public Optional<String> transactionalIdPrefix() {
-        if (transactionalIdPrefix == null || transactionalIdPrefix.isBlank()) {
-            return Optional.empty();
-        }
-        return Optional.of(transactionalIdPrefix);
+        return Optional.ofNullable(transactionalIdPrefix);
     }
 
     /**
