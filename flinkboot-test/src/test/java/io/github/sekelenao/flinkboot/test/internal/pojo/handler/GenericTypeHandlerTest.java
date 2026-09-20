@@ -75,7 +75,10 @@ class GenericTypeHandlerTest {
                 new GenericTypeInfo<>(OffsetDateTime.class)
             );
             var error = assertThrows(AssertionFailedError.class, () -> handler.handle(task, ignored -> {}));
-            assertTrue(error.getMessage().contains("Field or type 'root.unsupportedField' is recognized as GenericTypeInfo (java.time.OffsetDateTime), which falls back to Kryo serialization."));
+            assertEquals(
+                "Field or type 'root.unsupportedField' is recognized as GenericTypeInfo (java.time.OffsetDateTime), which falls back to Kryo serialization.",
+                error.getMessage()
+            );
         }
 
         @Test

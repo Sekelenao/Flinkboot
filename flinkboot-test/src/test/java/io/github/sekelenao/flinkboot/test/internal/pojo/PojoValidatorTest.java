@@ -46,8 +46,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @DisplayName("PojoValidator")
 class PojoValidatorTest {
@@ -474,12 +472,17 @@ class PojoValidatorTest {
     }
 
     @Test
-    @DisplayName("Should handle TypeInformation with null typeClass at root without throwing NullPointerException")
-    void shouldHandleNullTypeClassAtRoot() {
-        TypeInformation<?> nullClassTypeInfo = mock(TypeInformation.class);
-        when(nullClassTypeInfo.getTypeClass()).thenReturn(null);
-        when(nullClassTypeInfo.toString()).thenReturn("CustomNullTypeInfo");
-        assertDoesNotThrow(() -> validator.validate(nullClassTypeInfo));
+    @DisplayName("Should report dot-path notation when nested POJO field has unsupported type")
+    void shouldReportDotPathWhenNestedPojoFieldHasUnsupportedType() {
+        var typeInfo = TypeExtractor.createTypeInfo(UnsupportedTypePojo.class);
+        var error = assertThrows(AssertionFailedError.class, () -> validator.validate(typeInfo));
+        assertTrue(error.getMessage().contains("Field or type '$.time' is recognized as GenericTypeInfo"));
+    }
+
+    @Test
+    @DisplayName("Should pass validation when type information is not a composite or structural type")
+    void shouldPassWhenUnhandledLeafType() {
+        assertDoesNotThrow(() -> validator.validate(BasicTypeInfo.VOID_TYPE_INFO));
     }
 
     @Nested

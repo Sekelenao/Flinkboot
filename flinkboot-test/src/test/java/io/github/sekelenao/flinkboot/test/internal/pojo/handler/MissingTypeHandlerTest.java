@@ -74,7 +74,10 @@ class MissingTypeHandlerTest {
                 new MissingTypeInfo("func", new InvalidTypesException("Cannot determine type."))
             );
             var error = assertThrows(AssertionFailedError.class, () -> handler.handle(task, ignored -> {}));
-            assertTrue(error.getMessage().contains("Field or type 'root.field' has missing type information (Cannot determine type.)"));
+            assertEquals(
+                "Field or type 'root.field' has missing type information (Cannot determine type.) and cannot be serialized by Flink.",
+                error.getMessage()
+            );
         }
 
         @Test
@@ -82,7 +85,24 @@ class MissingTypeHandlerTest {
         void shouldFailWithFallbackMessageWhenTypeExceptionAbsent() {
             var task = new PojoValidationTask<>("root.field", new MissingTypeInfo("func", null));
             var error = assertThrows(AssertionFailedError.class, () -> handler.handle(task, ignored -> {}));
-            assertTrue(error.getMessage().contains("Field or type 'root.field' has missing type information (unknown type erasure)"));
+            assertEquals(
+                "Field or type 'root.field' has missing type information (unknown type erasure) and cannot be serialized by Flink.",
+                error.getMessage()
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail assertion with fallback message when type exception has null message")
+        void shouldFailWithFallbackMessageWhenTypeExceptionHasNullMessage() {
+            var task = new PojoValidationTask<>(
+                "root.field",
+                new MissingTypeInfo("func", new InvalidTypesException((String) null))
+            );
+            var error = assertThrows(AssertionFailedError.class, () -> handler.handle(task, ignored -> {}));
+            assertEquals(
+                "Field or type 'root.field' has missing type information (unknown type erasure) and cannot be serialized by Flink.",
+                error.getMessage()
+            );
         }
 
         @Test
