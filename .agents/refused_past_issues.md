@@ -50,3 +50,8 @@ All audit subagents (including `module-scanner` and `pr-reviewer`) must consult 
 - **Pattern**: Flagging `return true;` when a prerequisite field is `null` in cross-field validators (`*PropertiesValidator`).
 - **Status**: **REJECTED**
 - **Rationale**: Cross-field validators check interdependencies between present fields. Missing fields are the exclusive responsibility of single-field `@NotNull` annotations. Returning `true` prevents duplicate errors and confusing cascaded messages.
+
+## 10. Generic Properties Map Precedence (Escape Hatch Override)
+- **Pattern**: Reordering connector factory setters or `ExecutionEnvironmentFactory` customizers to force typed fields over `properties: Map<String, String>`.
+- **Status**: **REJECTED**
+- **Rationale**: In Flinkboot, `properties:` is consciously designed as the universal escape hatch. Applying generic properties last allows advanced users to deliberately override lower-level driver or runtime settings if required by non-standard operational environments, without framework interference.
