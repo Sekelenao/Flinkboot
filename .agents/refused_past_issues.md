@@ -55,3 +55,8 @@ All audit subagents (including `module-scanner` and `pr-reviewer`) must consult 
 - **Pattern**: Reordering connector factory setters or `ExecutionEnvironmentFactory` customizers to force typed fields over `properties: Map<String, String>`.
 - **Status**: **REJECTED**
 - **Rationale**: In Flinkboot, `properties:` is consciously designed as the universal escape hatch. Applying generic properties last allows advanced users to deliberately override lower-level driver or runtime settings if required by non-standard operational environments, without framework interference.
+
+## 11. Boxed Return Types in DTO Getters
+- **Pattern**: Demanding that getters return boxed wrapper types (`Integer`, `Long`, `Boolean`) instead of unboxed primitives or `OptionalInt` / `OptionalLong` to avoid auto-unboxing NPE risks.
+- **Status**: **BANNED**
+- **Rationale**: Flinkboot strictly forbids returning boxed object types (`Integer`, `Long`, `Boolean`) from public getters. Mandatory non-null properties must return primitive types (`int`, `long`, `boolean`). Optional properties must return `OptionalInt`, `OptionalLong`, or `Optional<T>`. Jakarta Bean Validation guarantees that mandatory properties are non-null before runtime consumers access the getters.
