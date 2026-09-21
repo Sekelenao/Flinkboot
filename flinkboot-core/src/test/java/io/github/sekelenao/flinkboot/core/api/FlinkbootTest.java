@@ -137,7 +137,7 @@ class FlinkbootTest {
         @Test
         @DisplayName("Should throw NullPointerException when args is null")
         void shouldThrowExceptionWhenArgsIsNull() {
-            var exception = assertThrows(NullPointerException.class, () -> Flinkboot.initialize(null));
+            var exception = assertThrows(NullPointerException.class, () -> Flinkboot.initialize((String[]) null));
             assertEquals("args must not be null", exception.getMessage());
         }
 
@@ -146,6 +146,30 @@ class FlinkbootTest {
         void shouldInitializeSuccessfully() {
             var flinkboot = Flinkboot.initialize(new String[0]);
             assertNotNull(flinkboot);
+        }
+
+        @Test
+        @DisplayName("Should initialize cleanly without arguments using varargs")
+        void shouldInitializeSuccessfullyWithoutArguments() {
+            var flinkboot = Flinkboot.initialize();
+            assertAll(
+                () -> assertNotNull(flinkboot),
+                () -> assertFalse(flinkboot.flag("unspecified-flag")),
+                () -> assertTrue(flinkboot.parameter("unspecified-param").isEmpty())
+            );
+        }
+
+        @Test
+        @DisplayName("Should initialize successfully with multiple arguments using varargs")
+        void shouldInitializeSuccessfullyWithVarargs() {
+            var flinkboot = Flinkboot.initialize("-key", "value", "--flag");
+            assertAll(
+                () -> assertNotNull(flinkboot),
+                () -> assertEquals("value", flinkboot.parameter("key").orElseThrow()),
+                () -> assertTrue(flinkboot.flag("flag")),
+                () -> assertFalse(flinkboot.flag("absent-flag")),
+                () -> assertTrue(flinkboot.parameter("absent-key").isEmpty())
+            );
         }
 
         @Test

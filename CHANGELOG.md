@@ -24,8 +24,10 @@ All notable user-facing changes to this project are documented in this file.
 - **[connectors] Final Configuration DTO Classes**: Enforced `final` class modifier on all connector configuration DTOs (`KafkaSourceProperties`, `KafkaSinkProperties`, `FlussSourceProperties`, `FlussSinkProperties`).
 - **[configuration] Removal of Domain Validation Exceptions**: Removed DTO-specific validation exceptions (`InvalidExecutionPropertiesException`, `InvalidRestartStrategyPropertiesException`, `InvalidStateBackendPropertiesException`, `InvalidFlussSourcePropertiesException`, `InvalidKafkaSinkPropertiesException`, `InvalidKafkaSourcePropertiesException`). Cross-field validations are now evaluated uniformly via Jakarta Bean Validation and reported through `ConfigurationValidationException`.
 - **[flinkboot-kafka & fluss] Removed Empty Exception Packages**: Removed packages `io.github.sekelenao.flinkboot.kafka.api.exception` and `io.github.sekelenao.flinkboot.fluss.api.exception` following the elimination of connector domain validation exceptions.
+- **[flinkboot-test] Removal of `FlinkbootTest`**: Removed the `FlinkbootTest` utility class. Configuration loading in tests is now performed directly via `Flinkboot.initialize(String... args)` in `flinkboot-core`, providing full parity with production runtime and supporting arbitrary CLI options, parameters, and flags.
 
 ### 🟢 Features & Enhancements
+- **[flinkboot-core] Varargs `Flinkboot.initialize(String... args)`**: Updated `Flinkboot.initialize` to accept varargs, enabling zero-boilerplate initialization (`Flinkboot.initialize()`) in tests and programmatic setups while remaining 100% binary and source compatible with `main(String[] args)`.
 - **[flinkboot-core] Disable Configuration Validation Flag**: Added `--flinkboot-configuration-disable-validation` CLI flag and `FLINKBOOT_CONFIGURATION_DISABLE_VALIDATION` environment variable to bypass Jakarta Bean Validation during configuration deserialization.
 - **[flinkboot-core] Self-Validating Configuration Contract (`@ValidConfiguration` & `ValidatableProperties`)**: Added `ValidConfiguration` constraint annotation and `ValidatableProperties` interface in package `io.github.sekelenao.flinkboot.core.api.validation` allowing configuration DTOs to declare cross-field Bean Validation rules evaluated during configuration loading.
 - **[flinkboot-core] Execution Parallelism Validation**: Enforces that `parallelism` cannot exceed `max-parallelism` when both are defined in `ExecutionProperties`.
@@ -46,8 +48,6 @@ All notable user-facing changes to this project are documented in this file.
 - **[flinkboot-core] Configurable Violations Log Size**: Validates positive values for `--flinkboot-configuration-violations-log-size` while preserving the default limit of 10.
 - **[flinkboot-core] Uniform Parsing Exception Diagnostic**: Wraps all Jackson conversion errors in `YamlParsingException` and displays Fully Qualified Class Names (FQCN) in mapping error messages.
 - **[flinkboot-core] Supported URI Schemes in Error Message**: Clarified supported URI prefixes (`classpath:`, `file:`) in `UnrecognizedResourceException` detail messages.
-- **[flinkboot-test] Classpath Fallback**: Calling `FlinkbootTest.configuration(Class<?> type)` without arguments correctly falls back to `classpath:job-configuration.yaml`.
-- **[flinkboot-test] Null Configuration Path Rejection**: Rejects null configuration path elements with `NullPointerException` before attempting to load resources.
 - **[configuration] Unified Cross-Field Error Reporting**: Cross-field configuration constraints are now collected and reported alongside field-level validation errors in a single diagnostic report instead of interrupting deserialization prematurely.
 
 ---
