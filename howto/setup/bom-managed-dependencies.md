@@ -114,22 +114,22 @@ Flinkboot relies on Jackson for deserializing YAML configurations and Java 8 Dat
 
 All logging implementations are pre-marked **`provided`** so that your fat JAR uses the logging backend configured by the target Flink cluster without conflicts.
 
-| Group ID | Artifact ID | Pre-configured Scope | Purpose |
-| :--- | :--- | :--- | :--- | :--- |
-| `org.slf4j` | `slf4j-api` | `provided` | Unified logging API facade for application code. |
-| `org.apache.logging.log4j` | `log4j-api` | `provided` | Log4j 2 core API. |
-| `org.apache.logging.log4j` | `log4j-core` | `provided` | Log4j 2 implementation. |
-| `org.apache.logging.log4j` | `log4j-slf4j2-impl` | `provided` | SLF4J 2 binding for Log4j 2. |
+| Group ID                   | Artifact ID          | Pre-configured Scope | Purpose                                          |
+|:---------------------------|:---------------------|:---------------------|:-------------------------------------------------|
+| `org.slf4j`                | `slf4j-api`          | `provided`           | Unified logging API facade for application code. |
+| `org.apache.logging.log4j` | `log4j-api`          | `provided`           | Log4j 2 core API.                                |
+| `org.apache.logging.log4j` | `log4j-core`         | `provided`           | Log4j 2 implementation.                          |
+| `org.apache.logging.log4j` | `log4j-slf4j2-impl`  | `provided`           | SLF4J 2 binding for Log4j 2.                     |
 
 ---
 
 ### 6. Testing Libraries
 
-| Group ID | Artifact ID | Pre-configured Scope | Purpose |
-| :--- | :--- | :--- | :--- | :--- |
-| `org.junit.jupiter` | `junit-jupiter` | `test` | JUnit 5 testing engine and assertions. |
-| `org.mockito` | `mockito-core` | `test` | Mocking framework. |
-| `org.mockito` | `mockito-junit-jupiter` | `test` | Mockito JUnit 5 extension (`@ExtendWith(MockitoExtension.class)`). |
+| Group ID             | Artifact ID             | Pre-configured Scope | Purpose                                                           |
+|:---------------------|:------------------------|:---------------------|:------------------------------------------------------------------|
+| `org.junit.jupiter`  | `junit-jupiter`         | `test`               | JUnit 5 testing engine and assertions.                            |
+| `org.mockito`        | `mockito-core`          | `test`               | Mocking framework.                                                |
+| `org.mockito`        | `mockito-junit-jupiter` | `test`               | Mockito JUnit 5 extension (`@ExtendWith(MockitoExtension.class)`). |
 
 ---
 
