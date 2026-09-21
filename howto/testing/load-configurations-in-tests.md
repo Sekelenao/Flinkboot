@@ -159,45 +159,11 @@ Each path passed to `FlinkbootTest.configuration(...)` **must explicitly specify
 > [!IMPORTANT]
 > Omitting the scheme prefix (e.g., passing `"job-test.yaml"` without `classpath:`) will throw an `UnrecognizedResourceException`. Always include `classpath:` or `file:`. See the [How to Load Resources](../configuration/load-resources.md) guide for more information on the underlying `Resource` abstraction.
 
+
 ---
 
-## 5. Verifying Configuration Serialization Compliance for Flink Operators
+## Related Guides
 
-In Apache Flink streaming architectures, user-defined functions (`ProcessFunction`, `MapFunction`, `Sink`, etc.) often store application configuration objects (`*Properties` or custom DTOs) directly in their fields.
-
-When submitting and running a streaming job, Flink uses standard Java serialization to distribute these operators and their captured fields from the Client/JobManager to remote TaskManagers. If any captured configuration object (or any nested field/type inside it) fails Java serialization, the job crashes immediately with a fatal `java.io.NotSerializableException`.
-
-Testing configuration serialization compliance manually by constructing dummy DTO instances in Java code is tedious and error-prone:
-* Instantiating complex configuration graphs requires extensive constructor boilerplate.
-* Minimal test fixtures often leave optional fields as `null`, masking non-serializable types until they are populated in production.
-
-By combining `FlinkbootTest.configuration(...)` with `FlinkbootAssertions.assertThat(config).isSerializable()`, you can verify the exact production deserialization pipeline and full object graph in just two lines of test code:
-
-```java
-import io.github.sekelenao.flinkboot.test.api.FlinkbootTest;
-import io.github.sekelenao.flinkboot.test.api.assertion.FlinkbootAssertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-class ApplicationConfigTest {
-
-    @Test
-    @DisplayName("Should verify that application configuration is serializable for Flink operators")
-    void shouldBeSerializable() {
-        MyApplicationConfig config = FlinkbootTest.configuration(
-            MyApplicationConfig.class,
-            "classpath:job-full-config.yaml"
-        );
-
-        FlinkbootAssertions.assertThat(config)
-            .isSerializable();
-    }
-}
-```
-
-### Best Practices
-
-* **Use a Complete YAML Fixture (`job-full-config.yaml`)**:
-  Ensure 100% of optional properties, sub-DTOs, and collections are populated in the test YAML so that Jackson instantiates the full object graph. This prevents blind spots caused by unpopulated `null` fields that would otherwise hide non-serializable types until runtime.
-* **End-to-End Reliability**:
-  This concise test validates the entire lifecycle in one pass: YAML parsing -> environment placeholder resolution -> Jakarta Bean Validation -> full Java serialization round-trip.
+* [How to Assert Java Serialization Compliance](assert-serialization-compliance.md)
+* [How to Assert Flink POJO Compliance](assert-pojo-compliance.md)
+* [How to Collect Stream Elements in Tests](collect-stream-elements-in-tests.md)

@@ -38,14 +38,16 @@ This section contains step-by-step guides to help you implement specific feature
 
 ---
 
-## Serialization & POJO Compliance
+## Serialization & Type Information
 
-- [How to Assert Flink POJO Compliance](serialization/assert-pojo-compliance.md) — Recursively verify that data classes serialize natively without Kryo fallback.
 - [How to Serialize Common JDK Types](serialization/serialize-jdk-types.md) — Serialize Java Date/Time, Duration, and Collections natively using Flinkboot's built-in factories.
 
 ---
 
 ## Testing
 
+- [How to Assert Flink POJO Compliance](testing/assert-pojo-compliance.md) — Recursively verify that data classes serialize natively without Kryo fallback.
+- [How to Assert Java Serialization Compliance](testing/assert-serialization-compliance.md) — Verify that configuration objects and Flink operators comply with standard Java serialization.
 - [How to Collect Stream Elements in Tests](testing/collect-stream-elements-in-tests.md) — Collect elements emitted by Flink streams for assertions in tests using the thread-safe `CollectingSink`.
 - [How to Load Configurations in Tests](testing/load-configurations-in-tests.md) — Load, merge, and validate YAML configurations within JUnit 5 unit tests.
+
