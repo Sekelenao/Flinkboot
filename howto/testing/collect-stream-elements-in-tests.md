@@ -9,7 +9,7 @@ Flinkboot provides the thread-safe `CollectingSink<T>` utility in `flinkboot-tes
 `CollectingSink<T>` is an in-memory Flink sink designed for tests. Add it to a `DataStream`, execute the job, and inspect the collected elements after the execution finishes.
 
 The public API consists of:
-* `CollectingSink.create()` creates a new sink.
+* `new CollectingSink<T>()` creates a new sink.
 * `sink.elements()` returns an immutable snapshot of the collected elements.
 * `sink.clear()` removes the elements collected by that sink.
 
@@ -57,10 +57,10 @@ Import the Flinkboot BOM in your `<dependencyManagement>` and add `flinkboot-tes
 
 ## 3. Collecting Stream Elements
 
-Create the sink, add it to the stream with `addSink(sink)`, and execute the environment before reading the collected elements:
+Create the sink, add it to the stream with `sinkTo(sink)`, and execute the environment before reading the collected elements:
 
 ```java
-import io.github.sekelenao.flinkboot.test.api.CollectingSink;
+import io.github.sekelenao.flinkboot.test.api.sink.CollectingSink;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -77,19 +77,20 @@ class StreamProcessingTest {
     @DisplayName("Should collect elements emitted by a Flink stream")
     void shouldCollectStreamElements() throws Exception {
         var env = StreamExecutionEnvironment.getExecutionEnvironment();
-        var sink = CollectingSink.<String>create();
 
-        env.fromElements("event-1", "event-2")
-                .addSink(sink)
-                .setParallelism(2);
-        env.execute();
+        try (var sink = new CollectingSink<String>()) {
+            env.fromData("event-1", "event-2")
+                    .sinkTo(sink)
+                    .setParallelism(2);
+            env.execute();
 
-        var elements = sink.elements();
+            var elements = sink.elements();
 
-        assertAll(
-            () -> assertEquals(2, elements.size()),
-            () -> assertTrue(elements.containsAll(List.of("event-1", "event-2")))
-        );
+            assertAll(
+                () -> assertEquals(2, elements.size()),
+                () -> assertTrue(elements.containsAll(List.of("event-1", "event-2")))
+            );
+        }
     }
 }
 ```
@@ -98,13 +99,26 @@ The sink supports parallel execution, but Flink does not guarantee a global elem
 
 ---
 
-## 4. Immutable Snapshots and Clearing the Sink
+## 4. Immutable Snapshots and Resource Cleanup
 
 Each call to `elements()` returns an immutable snapshot of the elements collected at that moment.
 
 A snapshot remains unchanged if more elements are collected later or if `clear()` is called.
 
-Use `clear()` when you want to reuse a sink without previously collected elements:
+### Automatic Cleanup with try-with-resources
+
+Because `CollectingSink<T>` implements `AutoCloseable`, managing it within a `try-with-resources` block guarantees that in-memory storage is automatically purged when the test finishes:
+
+```java
+try (var sink = new CollectingSink<String>()) {
+    // Pipeline execution and assertions
+}
+// Sink memory is automatically reclaimed on close
+```
+
+### Manual Cleanup with clear()
+
+Use `clear()` when you want to reuse a single sink across multiple sequential stream executions in the same test:
 
 ```java
 var snapshot = sink.elements();
