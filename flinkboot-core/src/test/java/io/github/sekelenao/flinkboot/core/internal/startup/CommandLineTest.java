@@ -25,6 +25,45 @@ class CommandLineTest {
         }
 
         @Test
+        @DisplayName("Should throw CommandLineParsingException when argument is null")
+        void shouldThrowExceptionWhenArgumentIsNull() {
+            String[] args = {"--verbose", null};
+
+            var exception = assertThrows(
+                    CommandLineParsingException.class,
+                    () -> CommandLine.parse(args)
+            );
+
+            assertEquals("Argument at index 1 must not be null.", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should throw CommandLineParsingException when option key is null")
+        void shouldThrowExceptionWhenOptionKeyIsNull() {
+            String[] args = {null, "value"};
+
+            var exception = assertThrows(
+                    CommandLineParsingException.class,
+                    () -> CommandLine.parse(args)
+            );
+
+            assertEquals("Argument at index 0 must not be null.", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should throw CommandLineParsingException when option value is null")
+        void shouldThrowExceptionWhenOptionValueIsNull() {
+            String[] args = {"-key", null};
+
+            var exception = assertThrows(
+                    CommandLineParsingException.class,
+                    () -> CommandLine.parse(args)
+            );
+
+            assertEquals("Argument at index 1 must not be null.", exception.getMessage());
+        }
+
+        @Test
         @DisplayName("Should parse empty arguments list")
         void shouldParseEmptyArgs() {
             var cmd = CommandLine.parse(new String[0]);
