@@ -65,7 +65,7 @@ This verifies that:
 * Every nested object, collection element, and referenced type in the object graph is serializable.
 * Custom `writeObject` or `readObject` hooks (if present) execute without errors.
 
-If any element fails serialization, the assertion fails immediately with an descriptive error detailing the root cause.
+If any element fails serialization, the assertion fails immediately with a descriptive error detailing the root cause.
 
 ---
 
@@ -145,6 +145,8 @@ class ThresholdAlertFunctionTest {
   When testing configuration classes loaded via `FlinkbootTest.configuration(...)`, ensure 100% of optional properties, nested DTOs, and collection elements are populated in the test YAML. Minimal fixtures that leave optional fields as `null` can mask non-serializable types until they are populated in production.
 * **Mark Non-Serializable Resources as `transient`**:
   Fields holding network connections, thread pools, or client handles should be marked `transient` and initialized inside the operator's `open(OpenContext context)` or `open(Configuration parameters)` lifecycle method instead of being serialized.
+* **Validate the Entire Lifecycle**:
+  Combining `FlinkbootTest.configuration(...)` with `isSerializable()` validates the complete configuration lifecycle end-to-end: YAML parsing, environment placeholder substitution, Jakarta Bean Validation, and standard Java serialization round-trip.
 * **Combine with POJO Assertions for Pipeline Elements**:
   Java serialization compliance (`isSerializable()`) is intended for **operators, functions, and configurations** shipped across the cluster. For **data records** traveling through Flink data streams, prefer [How to Assert Flink POJO Compliance](assert-pojo-compliance.md) to ensure high-performance native serialization without Kryo fallback.
 
