@@ -22,11 +22,11 @@ final class CommandLine {
         this.flags = flags;
     }
 
-    private static String retrieveValue(String[] args, int keyIndex){
-        if(keyIndex + 1 >= args.length){
+    private static String retrieveValue(String[] args, int keyIndex) {
+        if (keyIndex + 1 >= args.length) {
             throw new CommandLineParsingException("Option '" + args[keyIndex] + "' requires a value.");
         }
-        if(args[keyIndex + 1] == null){
+        if (args[keyIndex + 1] == null) {
             throw new CommandLineParsingException("Argument at index " + (keyIndex + 1) + " must not be null.");
         }
         return args[keyIndex + 1];
@@ -38,7 +38,7 @@ final class CommandLine {
         var flags = new HashSet<String>();
         for (int i = 0; i < args.length; i++) {
             var argument = args[i];
-            if (argument == null){
+            if (argument == null) {
                 throw new CommandLineParsingException("Argument at index " + i + " must not be null.");
             }
             if (argument.startsWith("--")) {
@@ -52,11 +52,11 @@ final class CommandLine {
         return new CommandLine(Collections.unmodifiableMap(options), Collections.unmodifiableSet(flags));
     }
 
-    public Optional<String> option(String option){
+    public Optional<String> option(String option) {
         return Optional.ofNullable(options.get(option.toLowerCase(Locale.ROOT)));
     }
 
-    public boolean flag(String flag){
+    public boolean flag(String flag) {
         return flags.contains(flag.toLowerCase(Locale.ROOT));
     }
 
