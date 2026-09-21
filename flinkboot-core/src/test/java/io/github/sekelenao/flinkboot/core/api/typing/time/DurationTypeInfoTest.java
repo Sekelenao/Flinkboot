@@ -1,6 +1,7 @@
 package io.github.sekelenao.flinkboot.core.api.typing.time;
 
 import org.apache.flink.api.common.ExecutionConfig;
+import org.apache.flink.api.common.serialization.SerializerConfigImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -37,8 +38,16 @@ class DurationTypeInfoTest {
         }
 
         @Test
-        @DisplayName("Should create DurationSerializer")
-        void shouldCreateSerializer() {
+        @DisplayName("Should create DurationSerializer with modern SerializerConfig")
+        void shouldCreateSerializerWithSerializerConfig() {
+            var serializer = typeInfo.createSerializer(new SerializerConfigImpl());
+            assertEquals(DurationSerializer.INSTANCE, serializer);
+        }
+
+        @Test
+        @SuppressWarnings({"deprecation", "removal"})
+        @DisplayName("Should create DurationSerializer with legacy ExecutionConfig")
+        void shouldCreateSerializerWithExecutionConfig() {
             var serializer = typeInfo.createSerializer(new ExecutionConfig());
             assertEquals(DurationSerializer.INSTANCE, serializer);
         }

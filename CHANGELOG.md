@@ -28,6 +28,7 @@ All notable user-facing changes to this project are documented in this file.
 
 ### 🟢 Features & Enhancements
 - **[flinkboot-core] Varargs `Flinkboot.initialize(String... args)`**: Updated `Flinkboot.initialize` to accept varargs, enabling zero-boilerplate initialization (`Flinkboot.initialize()`) in tests and programmatic setups while remaining 100% binary and source compatible with `main(String[] args)`.
+- **[flinkboot-core] Modern `SerializerConfig` SPI in `DurationTypeInfo`**: Implemented modern `createSerializer(SerializerConfig)` on `DurationTypeInfo` aligned with Apache Flink 1.20+ (FLIP-398), deprecating legacy `createSerializer(ExecutionConfig)` for removal in Flink 2.0.
 - **[flinkboot-core] Disable Configuration Validation Flag**: Added `--flinkboot-configuration-disable-validation` CLI flag and `FLINKBOOT_CONFIGURATION_DISABLE_VALIDATION` environment variable to bypass Jakarta Bean Validation during configuration deserialization.
 - **[flinkboot-core] Self-Validating Configuration Contract (`@ValidConfiguration` & `ValidatableProperties`)**: Added `ValidConfiguration` constraint annotation and `ValidatableProperties` interface in package `io.github.sekelenao.flinkboot.core.api.validation` allowing configuration DTOs to declare cross-field Bean Validation rules evaluated during configuration loading.
 - **[flinkboot-core] Execution Parallelism Validation**: Enforces that `parallelism` cannot exceed `max-parallelism` when both are defined in `ExecutionProperties`.

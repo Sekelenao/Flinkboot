@@ -1,6 +1,7 @@
 package io.github.sekelenao.flinkboot.core.api.typing.time;
 
 import org.apache.flink.api.common.ExecutionConfig;
+import org.apache.flink.api.common.serialization.SerializerConfig;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeutils.TypeSerializer;
 
@@ -49,6 +50,16 @@ public class DurationTypeInfo extends TypeInformation<Duration> {
     }
 
     @Override
+    public TypeSerializer<Duration> createSerializer(SerializerConfig config) {
+        return DurationSerializer.INSTANCE;
+    }
+
+    /**
+     * @deprecated since 0.5.0-1.20 in favor of {@link #createSerializer(SerializerConfig)}.
+     *             This method will be removed when upgrading to Flink 2.0.
+     */
+    @Override
+    @Deprecated(since = "0.5.0-1.20", forRemoval = true)
     public TypeSerializer<Duration> createSerializer(ExecutionConfig config) {
         return DurationSerializer.INSTANCE;
     }
