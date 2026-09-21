@@ -423,15 +423,51 @@ class KafkaSourcePropertiesTest {
             );
             var violations = validator.validate(props);
             assertAll(
-                () -> assertEquals(2, violations.size()),
-                () -> assertTrue(violations.stream().anyMatch(v ->
-                    v.getPropertyPath().toString().equals("topics")
-                        && v.getMessage().equals("Either 'topics' or 'topic-pattern' must be specified")
-                )),
-                () -> assertTrue(violations.stream().anyMatch(v ->
-                    v.getPropertyPath().toString().equals("startingOffsetsTimestamp")
-                        && v.getMessage().equals("starting-offsets-timestamp is required when starting-offsets is TIMESTAMP")
-                ))
+                () -> assertEquals(2, violations.size(), "Expected exactly 2 violations when subscription and starting offsets are both invalid"),
+                () -> assertTrue(
+                    violations.stream().anyMatch(v ->
+                        v.getPropertyPath().toString().equals("topics")
+                            && v.getMessage().equals("Either 'topics' or 'topic-pattern' must be specified")),
+                    "Expected violation on property 'topics' stating that topics or topic-pattern must be specified"
+                ),
+                () -> assertTrue(
+                    violations.stream().anyMatch(v ->
+                        v.getPropertyPath().toString().equals("startingOffsetsTimestamp")
+                            && v.getMessage().equals("starting-offsets-timestamp is required when starting-offsets is TIMESTAMP")),
+                    "Expected violation on property 'startingOffsetsTimestamp' stating timestamp is required for TIMESTAMP strategy"
+                )
+            );
+        }
+
+        @Test
+        @DisplayName("Should report both conflicting subscription and missing partition-offsets violations simultaneously")
+        void shouldReportBothConflictingSubscriptionAndMissingPartitionOffsetsViolationsSimultaneously() {
+            var props = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                List.of("topic-a"),
+                "^topic-.*$",
+                KafkaOffsetInitializer.OFFSETS,
+                null,
+                null,
+                null
+            );
+            var violations = validator.validate(props);
+            assertAll(
+                () -> assertEquals(2, violations.size(), "Expected exactly 2 violations for conflicting subscription and missing partition offsets"),
+                () -> assertTrue(
+                    violations.stream().anyMatch(v ->
+                        v.getPropertyPath().toString().equals("topicPattern")
+                            && v.getMessage().equals("Cannot configure both 'topics' and 'topic-pattern'")),
+                    "Expected violation on property 'topicPattern' stating cannot configure both topics and topic-pattern"
+                ),
+                () -> assertTrue(
+                    violations.stream().anyMatch(v ->
+                        v.getPropertyPath().toString().equals("startingOffsetsPartitionOffsets")
+                            && v.getMessage().equals("starting-offsets-partition-offsets is required and cannot be empty when starting-offsets is OFFSETS")),
+                    "Expected violation on property 'startingOffsetsPartitionOffsets' stating partition offsets are required for OFFSETS strategy"
+                )
             );
         }
 

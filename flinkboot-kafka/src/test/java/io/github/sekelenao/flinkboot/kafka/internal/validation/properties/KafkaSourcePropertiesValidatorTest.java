@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -479,11 +480,16 @@ class KafkaSourcePropertiesValidatorTest {
                 Map.of()
             );
 
-            assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
-
-            verify(context, times(2)).disableDefaultConstraintViolation();
-            verify(topicNode).addConstraintViolation();
-            verify(offsetNode).addConstraintViolation();
+            assertAll(
+                () -> assertFalse(KafkaSourcePropertiesValidator.validate(props, context)),
+                () -> verify(context, times(2)).disableDefaultConstraintViolation(),
+                () -> verify(context).buildConstraintViolationWithTemplate("Either 'topics' or 'topic-pattern' must be specified"),
+                () -> verify(topicBuilder).addPropertyNode("topics"),
+                () -> verify(topicNode).addConstraintViolation(),
+                () -> verify(context).buildConstraintViolationWithTemplate("starting-offsets-timestamp is required when starting-offsets is TIMESTAMP"),
+                () -> verify(offsetBuilder).addPropertyNode("startingOffsetsTimestamp"),
+                () -> verify(offsetNode).addConstraintViolation()
+            );
         }
     }
 }
