@@ -86,7 +86,7 @@ class FlinkbootAssertionsTest {
 
     @Nested
     @DisplayName("assertThat(Object)")
-    class AssertThatObjectTests {
+    class AssertThatObject {
 
         @Test
         @DisplayName("Should return ObjectAssert instance when object is valid")

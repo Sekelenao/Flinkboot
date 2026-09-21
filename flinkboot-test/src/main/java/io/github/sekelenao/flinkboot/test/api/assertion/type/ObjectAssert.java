@@ -1,6 +1,6 @@
 package io.github.sekelenao.flinkboot.test.api.assertion.type;
 
-import io.github.sekelenao.flinkboot.test.internal.SerializationValidator;
+import io.github.sekelenao.flinkboot.test.internal.serialization.SerializationValidator;
 
 import java.io.NotSerializableException;
 import java.util.Objects;
@@ -54,7 +54,7 @@ public final class ObjectAssert<T> {
      * @throws AssertionError if the object is not serializable
      */
     public ObjectAssert<T> isSerializable() {
-        new SerializationValidator().validate(actual);
+        SerializationValidator.validate(actual);
         return this;
     }
 }

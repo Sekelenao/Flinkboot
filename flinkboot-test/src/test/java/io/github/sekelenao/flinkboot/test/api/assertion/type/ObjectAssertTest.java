@@ -5,12 +5,18 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
+import java.io.InvalidObjectException;
+import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("ObjectAssert")
 class ObjectAssertTest {
@@ -19,13 +25,24 @@ class ObjectAssertTest {
         private final String value = "sample";
     }
 
+    static class SerializableWithTransientSample implements Serializable {
+        private final String value = "sample";
+        private final transient Object nonSerializable = new Object();
+    }
+
     static class NonSerializableSample {
         private final Object value = new Object();
     }
 
+    static class DeserializationFailureSample implements Serializable {
+        private void readObject(ObjectInputStream in) throws InvalidObjectException {
+            throw new InvalidObjectException("Deserialization rejected");
+        }
+    }
+
     @Nested
     @DisplayName("Constructor")
-    class ConstructorTests {
+    class Constructor {
 
         @Test
         @DisplayName("Should instantiate successfully with non-null object")
@@ -43,7 +60,7 @@ class ObjectAssertTest {
 
     @Nested
     @DisplayName("isSerializable")
-    class IsSerializableTests {
+    class IsSerializable {
 
         @Test
         @DisplayName("Should pass for a serializable object and return same ObjectAssert instance for fluent chaining")
@@ -54,10 +71,33 @@ class ObjectAssertTest {
         }
 
         @Test
-        @DisplayName("Should fail with AssertionFailedError for a non-serializable object")
+        @DisplayName("Should pass for a serializable object with transient non-serializable field")
+        void shouldPassForSerializableObjectWithTransientField() {
+            var objectAssert = new ObjectAssert<>(new SerializableWithTransientSample());
+            var result = objectAssert.isSerializable();
+            assertSame(objectAssert, result);
+        }
+
+        @Test
+        @DisplayName("Should fail with AssertionFailedError and NotSerializableException cause for non-serializable object")
         void shouldFailForNonSerializableObject() {
             var objectAssert = new ObjectAssert<>(new NonSerializableSample());
-            assertThrows(AssertionFailedError.class, objectAssert::isSerializable);
+            var exception = assertThrows(AssertionFailedError.class, objectAssert::isSerializable);
+            assertAll(
+                () -> assertTrue(exception.getMessage().contains(NonSerializableSample.class.getName())),
+                () -> assertInstanceOf(NotSerializableException.class, exception.getCause())
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail with AssertionFailedError and InvalidObjectException cause when deserialization fails")
+        void shouldFailWhenDeserializationFails() {
+            var objectAssert = new ObjectAssert<>(new DeserializationFailureSample());
+            var exception = assertThrows(AssertionFailedError.class, objectAssert::isSerializable);
+            assertAll(
+                () -> assertTrue(exception.getMessage().contains(DeserializationFailureSample.class.getName())),
+                () -> assertInstanceOf(InvalidObjectException.class, exception.getCause())
+            );
         }
     }
 }
