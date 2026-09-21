@@ -408,6 +408,34 @@ class KafkaSourcePropertiesTest {
         }
 
         @Test
+        @DisplayName("Should report both subscription and starting-offsets violations simultaneously")
+        void shouldReportBothSubscriptionAndStartingOffsetsViolationsSimultaneously() {
+            var props = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                null,
+                null,
+                KafkaOffsetInitializer.TIMESTAMP,
+                null,
+                null,
+                null
+            );
+            var violations = validator.validate(props);
+            assertAll(
+                () -> assertEquals(2, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("topics")
+                        && v.getMessage().equals("Either 'topics' or 'topic-pattern' must be specified")
+                )),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("startingOffsetsTimestamp")
+                        && v.getMessage().equals("starting-offsets-timestamp is required when starting-offsets is TIMESTAMP")
+                ))
+            );
+        }
+
+        @Test
         @DisplayName("Should fail validation when name is blank or null")
         void shouldFailWhenNameIsBlankOrNull() {
             var blankConfig = new KafkaSourceProperties(
