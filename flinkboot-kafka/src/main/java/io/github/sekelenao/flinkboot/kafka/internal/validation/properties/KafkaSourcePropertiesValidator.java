@@ -25,7 +25,9 @@ public final class KafkaSourcePropertiesValidator {
     }
 
     private boolean execute() {
-        return validateTopicSubscription() && validateStartingOffsets();
+        var validSubscription = validateTopicSubscription();
+        var validOffsets = validateStartingOffsets();
+        return validSubscription && validOffsets;
     }
 
     private boolean validateTopicSubscription() {
