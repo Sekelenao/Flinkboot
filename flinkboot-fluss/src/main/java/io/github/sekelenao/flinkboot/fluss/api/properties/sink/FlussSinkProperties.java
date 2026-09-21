@@ -6,17 +6,12 @@ import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
-import org.hibernate.validator.constraints.time.DurationMin;
 
 import java.io.Serializable;
-import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.OptionalLong;
 
 /**
  * Configuration properties for Apache Fluss sinks in Apache Flink.
@@ -37,12 +32,6 @@ public final class FlussSinkProperties implements Serializable {
     @NotBlank
     private final String table;
 
-    @PositiveOrZero
-    private final Long batchSize;
-
-    @DurationMin(millis = 0)
-    private final Duration batchTimeout;
-
     private final Map<@NotNull String, @NotNull String> properties;
 
     /**
@@ -52,8 +41,6 @@ public final class FlussSinkProperties implements Serializable {
      * @param bootstrapServers list of Fluss coordinator/server addresses
      * @param database         target Fluss database name
      * @param table            target Fluss table name
-     * @param batchSize        writer bucket batch size in bytes
-     * @param batchTimeout     writer bucket batch timeout duration
      * @param properties       additional Fluss writer configuration properties
      */
     @JsonCreator
@@ -62,16 +49,12 @@ public final class FlussSinkProperties implements Serializable {
         @JsonProperty("bootstrap-servers") List<String> bootstrapServers,
         @JsonProperty("database") String database,
         @JsonProperty("table") String table,
-        @JsonProperty("batch-size") Long batchSize,
-        @JsonProperty("batch-timeout") Duration batchTimeout,
         @JsonProperty("properties") Map<String, String> properties
     ) {
         this.name = name;
         this.bootstrapServers = bootstrapServers;
         this.database = database;
         this.table = table;
-        this.batchSize = batchSize;
-        this.batchTimeout = batchTimeout;
         this.properties = properties;
     }
 
@@ -115,27 +98,6 @@ public final class FlussSinkProperties implements Serializable {
     }
 
     /**
-     * Returns the writer bucket batch size in bytes, if configured.
-     *
-     * @return an {@link OptionalLong} containing the batch size in bytes, or empty if not set
-     */
-    public OptionalLong batchSize() {
-        if (batchSize == null) {
-            return OptionalLong.empty();
-        }
-        return OptionalLong.of(batchSize);
-    }
-
-    /**
-     * Returns the writer bucket batch timeout duration, if configured.
-     *
-     * @return an {@link Optional} containing the batch timeout duration, or empty if not set
-     */
-    public Optional<Duration> batchTimeout() {
-        return Optional.ofNullable(batchTimeout);
-    }
-
-    /**
      * Returns additional Fluss configuration properties.
      *
      * @return an unmodifiable map of properties
@@ -158,15 +120,13 @@ public final class FlussSinkProperties implements Serializable {
             && Objects.equals(bootstrapServers, o.bootstrapServers)
             && Objects.equals(database, o.database)
             && Objects.equals(table, o.table)
-            && Objects.equals(batchSize, o.batchSize)
-            && Objects.equals(batchTimeout, o.batchTimeout)
             && Objects.equals(properties, o.properties);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(name, bootstrapServers, database, table, batchSize, batchTimeout, properties);
+        return Objects.hash(name, bootstrapServers, database, table, properties);
     }
 
     @Override
@@ -177,10 +137,7 @@ public final class FlussSinkProperties implements Serializable {
             ", bootstrapServers=" + bootstrapServers +
             ", database='" + database + '\'' +
             ", table='" + table + '\'' +
-            ", batchSize=" + batchSize +
-            ", batchTimeout=" + batchTimeout +
             ", properties=" + properties +
             '}';
     }
 }
-

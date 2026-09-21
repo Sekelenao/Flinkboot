@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationTargetException;
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +41,7 @@ class FlussSinkFactoryTest {
 
     @Nested
     @DisplayName("supplyFor & supplyBuilderFor")
-    class SupplyTests {
+    class Supply {
 
         @Test
         @DisplayName("Should successfully create FlussSinkBuilder with all options")
@@ -52,11 +51,8 @@ class FlussSinkFactoryTest {
                 List.of("localhost:9123"),
                 "my_db",
                 "my_table",
-                1048576L,
-                Duration.ofMillis(50),
                 Map.of("custom.key", "custom.value")
             );
-
 
             var builder = FlussSinkFactory.supplyBuilderFor(props, TEST_SCHEMA);
             assertNotNull(builder);
@@ -72,9 +68,24 @@ class FlussSinkFactoryTest {
                 List.of("localhost:9123"),
                 "my_db",
                 "my_table",
-                null,
-                null,
                 null
+            );
+
+            var builder = FlussSinkFactory.supplyBuilderFor(props, TEST_SCHEMA);
+            assertNotNull(builder);
+
+            assertThrows(RuntimeException.class, () -> FlussSinkFactory.supplyFor(props, TEST_SCHEMA));
+        }
+
+        @Test
+        @DisplayName("Should successfully create FlussSinkBuilder with multiple bootstrap servers")
+        void shouldCreateBuilderWithMultipleBootstrapServers() {
+            var props = new FlussSinkProperties(
+                "my-sink",
+                List.of("host1:9123", "host2:9123"),
+                "my_db",
+                "my_table",
+                Map.of("custom.key", "custom.value")
             );
 
             var builder = FlussSinkFactory.supplyBuilderFor(props, TEST_SCHEMA);
@@ -91,8 +102,6 @@ class FlussSinkFactoryTest {
                 List.of("localhost:9123"),
                 "my_db",
                 "my_table",
-                null,
-                null,
                 null
             );
 

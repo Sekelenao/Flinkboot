@@ -1,12 +1,15 @@
 package io.github.sekelenao.flinkboot.kafka.api.properties.source;
 
+import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("KafkaOffsetInitializer")
 class KafkaOffsetInitializerTest {
@@ -15,25 +18,40 @@ class KafkaOffsetInitializerTest {
     @DisplayName("OffsetsInitializer Resolution")
     class OffsetsInitializerResolution {
 
-        @Test
-        @DisplayName("Should return non-null offsets initializer for each enum value")
-        void shouldReturnNonNullOffsetsInitializer() {
-            assertAll(
-                () -> assertNotNull(KafkaOffsetInitializer.EARLIEST.offsetsInitializer()),
-                () -> assertNotNull(KafkaOffsetInitializer.LATEST.offsetsInitializer()),
-                () -> assertNotNull(KafkaOffsetInitializer.COMMITTED.offsetsInitializer()),
-                () -> assertNotNull(KafkaOffsetInitializer.COMMITTED_EARLIEST.offsetsInitializer()),
-                () -> assertNotNull(KafkaOffsetInitializer.COMMITTED_LATEST.offsetsInitializer())
-            );
+        @ParameterizedTest
+        @EnumSource(value = KafkaOffsetInitializer.class, names = {
+                "EARLIEST", "LATEST", "COMMITTED", "COMMITTED_EARLIEST", "COMMITTED_LATEST"
+        })
+        @DisplayName("Should return present optional for parameterless initializers")
+        void shouldReturnPresentOptionalForParameterlessInitializers(KafkaOffsetInitializer initializer) {
+            assertTrue(initializer.offsetsInitializer().isPresent());
         }
 
         @Test
-        @DisplayName("Should throw UnsupportedOperationException for TIMESTAMP and OFFSETS")
-        void shouldThrowExceptionForParameterizedInitializers() {
+        @DisplayName("Should configure correct reset strategy for static offset initializers")
+        void shouldConfigureCorrectResetStrategy() {
             assertAll(
-                () -> assertThrows(UnsupportedOperationException.class, KafkaOffsetInitializer.TIMESTAMP::offsetsInitializer),
-                () -> assertThrows(UnsupportedOperationException.class, KafkaOffsetInitializer.OFFSETS::offsetsInitializer)
-            );
+                    () -> assertEquals(OffsetResetStrategy.EARLIEST,
+                            KafkaOffsetInitializer.EARLIEST.offsetsInitializer().orElseThrow()
+                                    .getAutoOffsetResetStrategy()),
+                    () -> assertEquals(OffsetResetStrategy.LATEST,
+                            KafkaOffsetInitializer.LATEST.offsetsInitializer().orElseThrow()
+                                    .getAutoOffsetResetStrategy()),
+                    () -> assertEquals(OffsetResetStrategy.NONE,
+                            KafkaOffsetInitializer.COMMITTED.offsetsInitializer().orElseThrow()
+                                    .getAutoOffsetResetStrategy()),
+                    () -> assertEquals(OffsetResetStrategy.EARLIEST,
+                            KafkaOffsetInitializer.COMMITTED_EARLIEST.offsetsInitializer().orElseThrow()
+                                    .getAutoOffsetResetStrategy()),
+                    () -> assertEquals(OffsetResetStrategy.LATEST, KafkaOffsetInitializer.COMMITTED_LATEST
+                            .offsetsInitializer().orElseThrow().getAutoOffsetResetStrategy()));
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = KafkaOffsetInitializer.class, names = {"TIMESTAMP", "OFFSETS"})
+        @DisplayName("Should return empty optional for parameterized initializers")
+        void shouldReturnEmptyOptionalForParameterizedInitializers(KafkaOffsetInitializer initializer) {
+            assertTrue(initializer.offsetsInitializer().isEmpty());
         }
     }
 }

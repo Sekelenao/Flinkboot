@@ -2,8 +2,10 @@ package io.github.sekelenao.flinkboot.kafka.api.properties.sink;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.sekelenao.flinkboot.core.api.validation.ValidatableProperties;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
-import io.github.sekelenao.flinkboot.kafka.api.exception.InvalidKafkaSinkPropertiesException;
+import io.github.sekelenao.flinkboot.kafka.internal.validation.properties.KafkaSinkPropertiesValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -19,7 +21,7 @@ import java.util.Optional;
 /**
  * Configuration properties for Kafka producer sinks in Apache Flink.
  */
-public final class KafkaSinkProperties implements Serializable {
+public final class KafkaSinkProperties implements Serializable, ValidatableProperties {
 
     private static final long serialVersionUID = 1L;
 
@@ -48,7 +50,6 @@ public final class KafkaSinkProperties implements Serializable {
      * @param deliveryGuarantee     delivery guarantee (NONE, AT_LEAST_ONCE, EXACTLY_ONCE)
      * @param transactionalIdPrefix prefix for Kafka transactions (required if deliveryGuarantee is EXACTLY_ONCE)
      * @param properties            additional Kafka producer client properties
-     * @throws InvalidKafkaSinkPropertiesException if delivery guarantee and transactional prefix conflict
      */
     @JsonCreator
     public KafkaSinkProperties(
@@ -65,20 +66,11 @@ public final class KafkaSinkProperties implements Serializable {
         this.deliveryGuarantee = deliveryGuarantee;
         this.transactionalIdPrefix = transactionalIdPrefix;
         this.properties = properties;
-        validate();
     }
 
-    private void validate() {
-        boolean exactlyOnce = deliveryGuarantee == KafkaDeliveryGuarantee.EXACTLY_ONCE;
-        boolean hasPrefix = transactionalIdPrefix != null && !transactionalIdPrefix.isBlank();
-
-        if (exactlyOnce && !hasPrefix) {
-            throw new InvalidKafkaSinkPropertiesException("transactional-id-prefix is required and cannot be empty when delivery-guarantee is EXACTLY_ONCE");
-        }
-
-        if (!exactlyOnce && hasPrefix) {
-            throw new InvalidKafkaSinkPropertiesException("transactional-id-prefix can only be specified when delivery-guarantee is EXACTLY_ONCE");
-        }
+    @Override
+    public boolean validate(ConstraintValidatorContext context) {
+        return KafkaSinkPropertiesValidator.validate(this, context);
     }
 
     /**
@@ -126,10 +118,7 @@ public final class KafkaSinkProperties implements Serializable {
      * @return an {@link Optional} containing the prefix string, or empty if not specified
      */
     public Optional<String> transactionalIdPrefix() {
-        if (transactionalIdPrefix == null || transactionalIdPrefix.isBlank()) {
-            return Optional.empty();
-        }
-        return Optional.of(transactionalIdPrefix);
+        return Optional.ofNullable(transactionalIdPrefix);
     }
 
     /**

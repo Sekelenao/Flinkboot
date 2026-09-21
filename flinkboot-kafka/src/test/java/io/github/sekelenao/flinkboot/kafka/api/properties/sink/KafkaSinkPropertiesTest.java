@@ -2,17 +2,20 @@ package io.github.sekelenao.flinkboot.kafka.api.properties.sink;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import io.github.sekelenao.flinkboot.kafka.api.exception.InvalidKafkaSinkPropertiesException;
+
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -181,32 +184,78 @@ class KafkaSinkPropertiesTest {
         @Test
         @DisplayName("Should fail validation when transactional-id-prefix is blank")
         void shouldFailWhenTransactionalIdPrefixIsBlank() {
-            assertThrows(
-                InvalidKafkaSinkPropertiesException.class,
-                () -> new KafkaSinkProperties(
-                    "my-sink",
-                    List.of("localhost:9092"),
-                    "my-topic",
-                    KafkaDeliveryGuarantee.EXACTLY_ONCE,
-                    "   ",
-                    null
-                )
+            var props = new KafkaSinkProperties(
+                "my-sink",
+                List.of("localhost:9092"),
+                "my-topic",
+                KafkaDeliveryGuarantee.EXACTLY_ONCE,
+                "   ",
+                null
+            );
+            var violations = validator.validate(props);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("transactionalIdPrefix")))
             );
         }
 
         @Test
         @DisplayName("Should fail validation when transactional-id-prefix is empty")
         void shouldFailWhenTransactionalIdPrefixIsEmpty() {
-            assertThrows(
-                InvalidKafkaSinkPropertiesException.class,
-                () -> new KafkaSinkProperties(
-                    "my-sink",
-                    List.of("localhost:9092"),
-                    "my-topic",
-                    KafkaDeliveryGuarantee.EXACTLY_ONCE,
-                    "",
-                    null
-                )
+            var props = new KafkaSinkProperties(
+                "my-sink",
+                List.of("localhost:9092"),
+                "my-topic",
+                KafkaDeliveryGuarantee.EXACTLY_ONCE,
+                "",
+                null
+            );
+            var violations = validator.validate(props);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("transactionalIdPrefix")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when delivery-guarantee is EXACTLY_ONCE and transactional-id-prefix is null")
+        void shouldFailWhenExactlyOnceAndTransactionalIdPrefixIsNull() {
+            var props = new KafkaSinkProperties(
+                "my-sink",
+                List.of("localhost:9092"),
+                "my-topic",
+                KafkaDeliveryGuarantee.EXACTLY_ONCE,
+                null,
+                null
+            );
+            var violations = validator.validate(props);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("transactionalIdPrefix")
+                        && v.getMessage().equals("transactional-id-prefix is required when delivery-guarantee is EXACTLY_ONCE")
+                ))
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when transactional-id-prefix is specified for non-EXACTLY_ONCE guarantee")
+        void shouldFailWhenTransactionalIdPrefixSpecifiedForNonExactlyOnce() {
+            var props = new KafkaSinkProperties(
+                "my-sink",
+                List.of("localhost:9092"),
+                "my-topic",
+                KafkaDeliveryGuarantee.AT_LEAST_ONCE,
+                "some-prefix",
+                null
+            );
+            var violations = validator.validate(props);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("transactionalIdPrefix")
+                        && v.getMessage().equals("transactional-id-prefix can only be specified when delivery-guarantee is EXACTLY_ONCE")
+                ))
             );
         }
 
@@ -304,6 +353,93 @@ class KafkaSinkPropertiesTest {
                 () -> assertEquals("prefix", config.transactionalIdPrefix().get()),
                 () -> assertEquals(Map.of("key", "val"), config.properties())
             );
+        }
+
+        @Test
+        @DisplayName("Should return unmodifiable properties map")
+        void shouldReturnUnmodifiableProperties() {
+            var props = new HashMap<String, String>();
+            props.put("k", "v");
+            var config = new KafkaSinkProperties(
+                "my-sink",
+                List.of("localhost:9092"),
+                "my-topic",
+                KafkaDeliveryGuarantee.AT_LEAST_ONCE,
+                null,
+                props
+            );
+
+            var map = config.properties();
+            assertThrows(UnsupportedOperationException.class, () -> map.put("new", "val"));
+        }
+
+        @Test
+        @DisplayName("Should return unmodifiable bootstrap-servers list")
+        void shouldReturnUnmodifiableBootstrapServers() {
+            var servers = new ArrayList<String>();
+            servers.add("localhost:9092");
+            var config = new KafkaSinkProperties(
+                "my-sink",
+                servers,
+                "my-topic",
+                KafkaDeliveryGuarantee.AT_LEAST_ONCE,
+                null,
+                Map.of()
+            );
+
+            var list = config.bootstrapServers();
+            assertThrows(UnsupportedOperationException.class, () -> list.add("other:9092"));
+        }
+
+        @Test
+        @DisplayName("Should return empty unmodifiable list when constructed with empty bootstrap-servers")
+        void shouldReturnEmptyUnmodifiableListForEmptyBootstrapServers() {
+            var config = new KafkaSinkProperties(
+                "my-sink",
+                Collections.emptyList(),
+                "my-topic",
+                KafkaDeliveryGuarantee.AT_LEAST_ONCE,
+                null,
+                Map.of()
+            );
+
+            var servers = config.bootstrapServers();
+            assertNotNull(servers, "bootstrapServers() should never return null");
+            assertTrue(servers.isEmpty(), "Expected empty list when constructed with empty list");
+            assertThrows(UnsupportedOperationException.class, () -> servers.add("x"), "Returned list must be unmodifiable");
+        }
+
+        @Test
+        @DisplayName("Should return empty unmodifiable list when bootstrapServers is null")
+        void shouldReturnEmptyListWhenBootstrapServersIsNull() {
+            var config = new KafkaSinkProperties(
+                "my-sink",
+                null,
+                "my-topic",
+                KafkaDeliveryGuarantee.AT_LEAST_ONCE,
+                null,
+                Map.of()
+            );
+
+            var servers = config.bootstrapServers();
+            assertNotNull(servers, "bootstrapServers() should never return null");
+            assertTrue(servers.isEmpty(), "Expected empty list when constructed with null list");
+            assertThrows(UnsupportedOperationException.class, () -> servers.add("x"), "Returned list must be unmodifiable");
+        }
+
+        @Test
+        @DisplayName("Should return blank transactional ID prefix when it is blank")
+        void shouldReturnBlankTransactionalIdPrefix() {
+            var config = new KafkaSinkProperties(
+                "my-sink",
+                List.of("localhost:9092"),
+                "my-topic",
+                KafkaDeliveryGuarantee.EXACTLY_ONCE,
+                "   ",
+                Map.of()
+            );
+
+            assertEquals(Optional.of("   "), config.transactionalIdPrefix());
         }
     }
 

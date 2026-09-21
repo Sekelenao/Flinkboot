@@ -2,7 +2,7 @@ package io.github.sekelenao.flinkboot.core.api;
 
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.ConfigurationValidationException;
-import io.github.sekelenao.flinkboot.core.api.exception.configuration.YamlParsingException;
+import io.github.sekelenao.flinkboot.core.api.exception.parsing.YamlParsingException;
 import io.github.sekelenao.flinkboot.core.api.properties.JobProperties;
 import io.github.sekelenao.flinkboot.core.api.resource.Resource;
 import io.github.sekelenao.flinkboot.core.internal.execution.ExecutionEnvironmentFactory;
@@ -58,11 +58,11 @@ public final class Flinkboot {
     /**
      * Initializes a new {@code Flinkboot} instance from command-line arguments.
      *
-     * @param args the command-line arguments passed to the main method (must not be {@code null})
+     * @param args the command-line arguments (must not be {@code null})
      * @return a configured {@code Flinkboot} instance
      * @throws NullPointerException if {@code args} is {@code null}
      */
-    public static Flinkboot initialize(String[] args){
+    public static Flinkboot initialize(String... args) {
         Objects.requireNonNull(args, "args must not be null");
         return new Flinkboot(args);
     }

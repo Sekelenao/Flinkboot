@@ -2,14 +2,15 @@ package io.github.sekelenao.flinkboot.fluss.api.properties.source;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import io.github.sekelenao.flinkboot.fluss.api.exception.InvalidFlussSourcePropertiesException;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -180,37 +181,49 @@ class FlussSourcePropertiesTest {
         }
 
         @Test
-        @DisplayName("Should throw InvalidFlussSourcePropertiesException when TIMESTAMP mode is used without timestamp")
-        void shouldThrowWhenTimestampModeWithoutTimestamp() {
-            var exception = assertThrows(InvalidFlussSourcePropertiesException.class, () ->
-                new FlussSourceProperties(
-                    "my-source",
-                    List.of("localhost:9123"),
-                    "my_db",
-                    "my_table",
-                    FlussStartupMode.TIMESTAMP,
-                    null,
-                    Map.of()
-                )
+        @DisplayName("Should fail validation when TIMESTAMP mode is used without timestamp")
+        void shouldFailValidationWhenTimestampModeWithoutTimestamp() {
+            var props = new FlussSourceProperties(
+                "my-source",
+                List.of("localhost:9123"),
+                "my_db",
+                "my_table",
+                FlussStartupMode.TIMESTAMP,
+                null,
+                Map.of()
             );
-            assertEquals("startup-timestamp is required when startup-mode is TIMESTAMP", exception.getMessage());
+
+            var violations = validator.validate(props);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("startupTimestamp")
+                        && v.getMessage().equals("startup-timestamp is required when startup-mode is TIMESTAMP")
+                ))
+            );
         }
 
         @Test
-        @DisplayName("Should throw InvalidFlussSourcePropertiesException when timestamp is specified with non-TIMESTAMP mode")
-        void shouldThrowWhenTimestampSpecifiedWithNonTimestampMode() {
-            var exception = assertThrows(InvalidFlussSourcePropertiesException.class, () ->
-                new FlussSourceProperties(
-                    "my-source",
-                    List.of("localhost:9123"),
-                    "my_db",
-                    "my_table",
-                    FlussStartupMode.EARLIEST,
-                    1700000000000L,
-                    Map.of()
-                )
+        @DisplayName("Should fail validation when timestamp is specified with non-TIMESTAMP mode")
+        void shouldFailValidationWhenTimestampSpecifiedWithNonTimestampMode() {
+            var props = new FlussSourceProperties(
+                "my-source",
+                List.of("localhost:9123"),
+                "my_db",
+                "my_table",
+                FlussStartupMode.EARLIEST,
+                1700000000000L,
+                Map.of()
             );
-            assertEquals("startup-timestamp must not be specified when startup-mode is EARLIEST", exception.getMessage());
+
+            var violations = validator.validate(props);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("startupTimestamp")
+                        && v.getMessage().equals("startup-timestamp must not be specified when startup-mode is EARLIEST")
+                ))
+            );
         }
 
         @Test
@@ -347,6 +360,64 @@ class FlussSourcePropertiesTest {
             var servers = props.bootstrapServers();
             assertNotNull(servers, "bootstrapServers() should never return null even if supplied null in ctor");
             assertTrue(servers.isEmpty(), "Expected empty list when bootstrapServers is null");
+        }
+
+        @Test
+        @DisplayName("Should return unmodifiable bootstrap-servers list")
+        void shouldReturnUnmodifiableBootstrapServers() {
+            var props = new FlussSourceProperties(
+                    "src",
+                    new ArrayList<>(List.of("localhost:9123")),
+                    "db",
+                    "tbl",
+                    FlussStartupMode.EARLIEST,
+                    null,
+                    Map.of()
+            );
+
+            var servers = props.bootstrapServers();
+            assertThrows(UnsupportedOperationException.class, () -> servers.add("other:9123"));
+        }
+    }
+
+    @Nested
+    @DisplayName("Properties")
+    class PropertiesTests {
+
+        @Test
+        @DisplayName("Should return unmodifiable properties map")
+        void shouldReturnUnmodifiableProperties() {
+            var props = new FlussSourceProperties(
+                    "src",
+                    List.of("localhost:9123"),
+                    "db",
+                    "tbl",
+                    FlussStartupMode.EARLIEST,
+                    null,
+                    new HashMap<>(Map.of("k", "v"))
+            );
+
+            var map = props.properties();
+            assertThrows(UnsupportedOperationException.class, () -> map.put("new", "val"));
+        }
+
+        @Test
+        @DisplayName("Should return empty unmodifiable map when properties is null")
+        void shouldReturnEmptyMapWhenPropertiesIsNull() {
+            var props = new FlussSourceProperties(
+                    "src",
+                    List.of("localhost:9123"),
+                    "db",
+                    "tbl",
+                    FlussStartupMode.EARLIEST,
+                    null,
+                    null
+            );
+
+            var map = props.properties();
+            assertNotNull(map, "properties() should never return null");
+            assertTrue(map.isEmpty(), "Expected empty map when constructed with null properties");
+            assertThrows(UnsupportedOperationException.class, () -> map.put("k", "v"), "Returned map must be unmodifiable");
         }
     }
 }

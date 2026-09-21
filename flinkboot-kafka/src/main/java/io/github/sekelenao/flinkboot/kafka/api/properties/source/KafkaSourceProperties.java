@@ -2,13 +2,15 @@ package io.github.sekelenao.flinkboot.kafka.api.properties.source;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.sekelenao.flinkboot.core.api.validation.ValidatableProperties;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
-import io.github.sekelenao.flinkboot.kafka.api.exception.InvalidKafkaSourcePropertiesException;
-import io.github.sekelenao.flinkboot.kafka.internal.OffsetInitializerProperties;
+import io.github.sekelenao.flinkboot.kafka.internal.validation.properties.KafkaSourcePropertiesValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
 
 import java.io.Serializable;
@@ -23,7 +25,7 @@ import java.util.OptionalLong;
  * Unified configuration properties for Apache Flink Kafka sources consuming from an explicit list of topics
  * or dynamic topics matching a regex pattern.
  */
-public final class KafkaSourceProperties implements OffsetInitializerProperties, Serializable {
+public final class KafkaSourceProperties implements Serializable, ValidatableProperties {
 
     private static final long serialVersionUID = 1L;
 
@@ -38,6 +40,7 @@ public final class KafkaSourceProperties implements OffsetInitializerProperties,
 
     private final List<@NotBlank String> topics;
 
+    @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
     private final String topicPattern;
 
     @NotNull
@@ -62,7 +65,6 @@ public final class KafkaSourceProperties implements OffsetInitializerProperties,
      * @param startingOffsetsTimestamp       timestamp in milliseconds (required if startingOffsets is TIMESTAMP)
      * @param startingOffsetsPartitionOffsets list of partition offsets (required if startingOffsets is OFFSETS)
      * @param properties                     additional Kafka consumer client properties
-     * @throws InvalidKafkaSourcePropertiesException if topic subscription or offset parameters conflict or are missing
      */
     @JsonCreator
     public KafkaSourceProperties(
@@ -85,52 +87,11 @@ public final class KafkaSourceProperties implements OffsetInitializerProperties,
         this.startingOffsetsTimestamp = startingOffsetsTimestamp;
         this.startingOffsetsPartitionOffsets = startingOffsetsPartitionOffsets;
         this.properties = properties;
-        validate();
     }
 
-    private void validate() {
-        var hasTopics = topics != null && !topics.isEmpty();
-        var hasPattern = topicPattern != null && !topicPattern.isBlank();
-        if (hasTopics && hasPattern) {
-            throw new InvalidKafkaSourcePropertiesException("Cannot configure both 'topics' and 'topic-pattern'");
-        }
-        if (!hasTopics && !hasPattern) {
-            throw new InvalidKafkaSourcePropertiesException("Either 'topics' or 'topic-pattern' must be specified");
-        }
-        if (startingOffsets == KafkaOffsetInitializer.TIMESTAMP) {
-            if (startingOffsetsTimestamp == null) {
-                throw new InvalidKafkaSourcePropertiesException(
-                    "starting-offsets-timestamp is required when starting-offsets is TIMESTAMP"
-                );
-            }
-            if (startingOffsetsPartitionOffsets != null && !startingOffsetsPartitionOffsets.isEmpty()) {
-                throw new InvalidKafkaSourcePropertiesException(
-                    "starting-offsets-partition-offsets must not be specified when starting-offsets is TIMESTAMP"
-                );
-            }
-        } else if (startingOffsets == KafkaOffsetInitializer.OFFSETS) {
-            if (startingOffsetsPartitionOffsets == null || startingOffsetsPartitionOffsets.isEmpty()) {
-                throw new InvalidKafkaSourcePropertiesException(
-                    "starting-offsets-partition-offsets is required and cannot be empty when starting-offsets is OFFSETS"
-                );
-            }
-            if (startingOffsetsTimestamp != null) {
-                throw new InvalidKafkaSourcePropertiesException(
-                    "starting-offsets-timestamp must not be specified when starting-offsets is OFFSETS"
-                );
-            }
-        } else if (startingOffsets != null) {
-            if (startingOffsetsTimestamp != null) {
-                throw new InvalidKafkaSourcePropertiesException(
-                    "starting-offsets-timestamp must not be specified when starting-offsets is " + startingOffsets
-                );
-            }
-            if (startingOffsetsPartitionOffsets != null && !startingOffsetsPartitionOffsets.isEmpty()) {
-                throw new InvalidKafkaSourcePropertiesException(
-                    "starting-offsets-partition-offsets must not be specified when starting-offsets is " + startingOffsets
-                );
-            }
-        }
+    @Override
+    public boolean validate(ConstraintValidatorContext context) {
+        return KafkaSourcePropertiesValidator.validate(this, context);
     }
 
     /**
@@ -181,10 +142,7 @@ public final class KafkaSourceProperties implements OffsetInitializerProperties,
      * @return an {@link Optional} containing the topic pattern regex string, or empty if not set
      */
     public Optional<String> topicPattern() {
-        if (topicPattern == null) {
-            return Optional.empty();
-        }
-        return Optional.of(topicPattern);
+        return Optional.ofNullable(topicPattern);
     }
 
     /**

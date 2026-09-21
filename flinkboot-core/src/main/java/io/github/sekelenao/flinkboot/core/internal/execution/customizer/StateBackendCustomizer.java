@@ -9,6 +9,7 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.StateBackendOptions;
 import org.apache.flink.configuration.StateLatencyTrackOptions;
 
+import java.util.Locale;
 import java.util.Objects;
 
 public final class StateBackendCustomizer implements EnvironmentCustomizer {
@@ -50,7 +51,7 @@ public final class StateBackendCustomizer implements EnvironmentCustomizer {
     }
 
     private void applyCheckpointStorage(CheckpointStorageType checkpointStorage) {
-        var storageName = checkpointStorage.toString().toLowerCase();
+        var storageName = checkpointStorage.toString().toLowerCase(Locale.ROOT);
         toConfigure.set(CheckpointingOptions.CHECKPOINT_STORAGE, storageName);
     }
 

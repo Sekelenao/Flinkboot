@@ -2,7 +2,7 @@ package io.github.sekelenao.flinkboot.core.internal.parser.yaml;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.github.sekelenao.flinkboot.core.api.exception.configuration.YamlParsingException;
+import io.github.sekelenao.flinkboot.core.api.exception.parsing.YamlParsingException;
 
 import java.util.ArrayDeque;
 import java.util.Objects;

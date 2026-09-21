@@ -7,6 +7,9 @@ import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Duration;
 
@@ -91,13 +94,38 @@ class CheckpointingPropertiesTest {
             assertTrue(violations.isEmpty());
         }
 
-        @Test
-        @DisplayName("Should pass validation when all duration fields are null")
-        void shouldPassValidationWhenDurationsAreNull() {
+        @ParameterizedTest
+        @NullSource
+        @ValueSource(booleans = {true})
+        @DisplayName("Should fail validation when checkpointing is enabled or default without an interval")
+        void shouldFailValidationWhenCheckpointingIsEnabledWithoutInterval(Boolean enabled) {
             var config = new CheckpointingProperties(
-                null, null, null, null, null, null, null, null, null, null
+                enabled, null, null, null, null, null, null, null, null, null
             );
+
             var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(
+                    violations.stream().anyMatch(v ->
+                        v.getPropertyPath().toString().equals("interval")
+                            && v.getMessage().equals("interval must be specified when checkpointing is enabled")
+                    ),
+                    "Expected violation on property 'interval'"
+                )
+            );
+        }
+
+        @Test
+        @DisplayName("Should pass validation when checkpointing is disabled without an interval")
+        void shouldPassValidationWhenCheckpointingIsDisabledWithoutInterval() {
+            var config = new CheckpointingProperties(
+                false, null, null, null, null, null, null, null, null, null
+            );
+
+            var violations = validator.validate(config);
+
             assertTrue(violations.isEmpty());
         }
 
@@ -158,6 +186,36 @@ class CheckpointingPropertiesTest {
 
             assertEquals(1, validator.validate(negativeTimeout).size());
         }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "   ", "\t\n"})
+        @DisplayName("Should fail validation when storageUri is empty or blank")
+        void shouldFailValidationWhenStorageUriBlank(String storageUri) {
+            var config = new CheckpointingProperties(
+                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, false, Duration.ZERO, storageUri
+            );
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("storageUri")
+                        && v.getMessage().equals("must not be blank")
+                ))
+            );
+        }
+
+        @Test
+        @DisplayName("Should pass validation when storageUri is null")
+        void shouldPassValidationWhenStorageUriNull() {
+            var config = new CheckpointingProperties(
+                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, false, Duration.ZERO, null
+            );
+            var violations = validator.validate(config);
+            assertTrue(violations.isEmpty());
+        }
     }
 
     @Nested
@@ -214,4 +272,3 @@ class CheckpointingPropertiesTest {
         }
     }
 }
-

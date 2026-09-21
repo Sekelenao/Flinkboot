@@ -12,12 +12,12 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public class FileSystemResource implements Resource {
+public final class FileSystemResource implements Resource {
 
     private final String location;
 
     public FileSystemResource(String location) {
-        this.location = Objects.requireNonNull(location);
+        this.location = Objects.requireNonNull(FileSystemSupports.normalize(location));
     }
 
     @Override

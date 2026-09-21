@@ -177,7 +177,8 @@ class StartupEnvironmentTest {
             var cmd = CommandLine.parse(new String[0]);
             var resolver = new EnvVarResolver(k -> null);
             var startupEnv = new StartupEnvironment(cmd, resolver);
-            assertThrows(NullPointerException.class, () -> startupEnv.get(null));
+            var exception = assertThrows(NullPointerException.class, () -> startupEnv.get(null));
+            assertEquals("key must not be null", exception.getMessage());
         }
     }
 

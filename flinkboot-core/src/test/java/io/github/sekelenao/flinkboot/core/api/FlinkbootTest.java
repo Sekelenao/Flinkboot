@@ -4,9 +4,14 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.ConfigurationValidationException;
-import io.github.sekelenao.flinkboot.core.api.exception.configuration.UnresolvedPropertyPlaceholderException;
+import io.github.sekelenao.flinkboot.core.api.exception.parsing.UnresolvedPropertyPlaceholderException;
 import io.github.sekelenao.flinkboot.core.api.properties.JobProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.execution.ExecutionProperties;
+import io.github.sekelenao.flinkboot.core.api.properties.state.StateBackendProperties;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.apache.flink.configuration.PipelineOptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,6 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -32,6 +38,15 @@ class FlinkbootTest {
     private static final String YAML = "name: \"Flinkboot\"";
 
     private static final String YAML_VALUE = "Flinkboot";
+
+    private static final String MULTI_INVALID_YAML = "app-name: \"\"\n"
+        + "retries: 0\n"
+        + "execution:\n"
+        + "  parallelism: 8\n"
+        + "  max-parallelism: 4\n"
+        + "state-backend:\n"
+        + "  type: \"hashmap\"\n"
+        + "  custom-class: \"org.example.CustomBackend\"\n";
 
     static final class TestConfig {
 
@@ -70,6 +85,51 @@ class FlinkbootTest {
         public Integer port() { return port; }
     }
 
+    static final class TestCompositeConfig {
+
+        @NotBlank
+        private final String appName;
+
+        @Min(1)
+        private final int retries;
+
+        @Valid
+        @NotNull
+        private final ExecutionProperties execution;
+
+        @Valid
+        private final StateBackendProperties stateBackend;
+
+        @JsonCreator
+        public TestCompositeConfig(
+            @JsonProperty("app-name") String appName,
+            @JsonProperty("retries") int retries,
+            @JsonProperty("execution") ExecutionProperties execution,
+            @JsonProperty("state-backend") StateBackendProperties stateBackend
+        ) {
+            this.appName = appName;
+            this.retries = retries;
+            this.execution = execution;
+            this.stateBackend = stateBackend;
+        }
+
+        public String appName() {
+            return appName;
+        }
+
+        public int retries() {
+            return retries;
+        }
+
+        public ExecutionProperties execution() {
+            return execution;
+        }
+
+        public StateBackendProperties stateBackend() {
+            return stateBackend;
+        }
+    }
+
     @Nested
     @DisplayName("Initialize")
     class Initialize {
@@ -77,7 +137,7 @@ class FlinkbootTest {
         @Test
         @DisplayName("Should throw NullPointerException when args is null")
         void shouldThrowExceptionWhenArgsIsNull() {
-            var exception = assertThrows(NullPointerException.class, () -> Flinkboot.initialize(null));
+            var exception = assertThrows(NullPointerException.class, () -> Flinkboot.initialize((String[]) null));
             assertEquals("args must not be null", exception.getMessage());
         }
 
@@ -86,6 +146,30 @@ class FlinkbootTest {
         void shouldInitializeSuccessfully() {
             var flinkboot = Flinkboot.initialize(new String[0]);
             assertNotNull(flinkboot);
+        }
+
+        @Test
+        @DisplayName("Should initialize cleanly without arguments using varargs")
+        void shouldInitializeSuccessfullyWithoutArguments() {
+            var flinkboot = Flinkboot.initialize();
+            assertAll(
+                () -> assertNotNull(flinkboot),
+                () -> assertFalse(flinkboot.flag("unspecified-flag")),
+                () -> assertTrue(flinkboot.parameter("unspecified-param").isEmpty())
+            );
+        }
+
+        @Test
+        @DisplayName("Should initialize successfully with multiple arguments using varargs")
+        void shouldInitializeSuccessfullyWithVarargs() {
+            var flinkboot = Flinkboot.initialize("-key", "value", "--flag");
+            assertAll(
+                () -> assertNotNull(flinkboot),
+                () -> assertEquals("value", flinkboot.parameter("key").orElseThrow()),
+                () -> assertTrue(flinkboot.flag("flag")),
+                () -> assertFalse(flinkboot.flag("absent-flag")),
+                () -> assertTrue(flinkboot.parameter("absent-key").isEmpty())
+            );
         }
 
         @Test
@@ -209,6 +293,50 @@ class FlinkbootTest {
             assertAll(
                 () -> assertNotNull(config),
                 () -> assertEquals("", config.name())
+            );
+        }
+
+        @Test
+        @DisplayName("Should report all field-level and cross-field constraint violations concurrently")
+        void shouldReportAllFieldAndCrossFieldViolationsConcurrently(@TempDir Path tempDir) throws IOException {
+            var file = tempDir.resolve("multi-invalid-config.yaml");
+            Files.writeString(file, MULTI_INVALID_YAML);
+            var args = new String[]{"-flinkboot-configurations", "file:" + file.toAbsolutePath()};
+            var flinkboot = Flinkboot.initialize(args);
+
+            var exception = assertThrows(ConfigurationValidationException.class, () -> flinkboot.configuration(TestCompositeConfig.class));
+            var message = exception.getMessage();
+
+            assertAll(
+                () -> assertTrue(message.startsWith("Configuration validation failed with 4 violation(s):")),
+                () -> assertTrue(message.contains("appName:")),
+                () -> assertTrue(message.contains("retries:")),
+                () -> assertTrue(message.contains("execution.parallelism: parallelism (8) cannot exceed max-parallelism (4)")),
+                () -> assertTrue(message.contains("stateBackend.customClass: custom-class can only be specified when state backend type is CUSTOM"))
+            );
+        }
+
+        @Test
+        @DisplayName("Should bypass all field-level and cross-field constraint violations when disable-validation flag is enabled")
+        void shouldBypassAllFieldAndCrossFieldViolationsWhenDisabled(@TempDir Path tempDir) throws IOException {
+            var file = tempDir.resolve("multi-invalid-config.yaml");
+            Files.writeString(file, MULTI_INVALID_YAML);
+            var args = new String[]{
+                "-flinkboot-configurations", "file:" + file.toAbsolutePath(),
+                "--flinkboot-configuration-disable-validation"
+            };
+            var flinkboot = Flinkboot.initialize(args);
+            var config = assertDoesNotThrow(() -> flinkboot.configuration(TestCompositeConfig.class));
+
+            assertAll(
+                () -> assertNotNull(config),
+                () -> assertEquals("", config.appName()),
+                () -> assertEquals(0, config.retries()),
+                () -> assertNotNull(config.execution()),
+                () -> assertEquals(8, config.execution().parallelism().orElseThrow()),
+                () -> assertEquals(4, config.execution().maxParallelism().orElseThrow()),
+                () -> assertNotNull(config.stateBackend()),
+                () -> assertEquals("org.example.CustomBackend", config.stateBackend().customClass().orElseThrow())
             );
         }
 

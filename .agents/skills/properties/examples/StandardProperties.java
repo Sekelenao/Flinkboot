@@ -2,7 +2,10 @@ package io.github.example;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.sekelenao.flinkboot.core.api.validation.ValidatableProperties;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
+import io.github.sekelenao.flinkboot.core.internal.validation.properties.PropertiesValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -19,7 +22,7 @@ import java.util.OptionalLong;
 /**
  * Standard reference implementation for Flinkboot Configuration Properties DTOs.
  */
-public class StandardProperties implements Serializable {
+public class StandardProperties implements Serializable, ValidatableProperties {
 
     private static final long serialVersionUID = 1L;
 
@@ -54,20 +57,11 @@ public class StandardProperties implements Serializable {
         this.timestamp = timestamp;
         this.description = description;
         this.properties = properties;
-        validate();
     }
 
-    private void validate() {
-        if (mode == null) {
-            return;
-        }
-        if (mode == SampleMode.CUSTOM) {
-            if (timestamp == null) {
-                throw new IllegalArgumentException("timestamp is required when mode is CUSTOM");
-            }
-        } else if (timestamp != null) {
-            throw new IllegalArgumentException("timestamp must not be specified when mode is " + mode);
-        }
+    @Override
+    public boolean validate(ConstraintValidatorContext context) {
+        return StandardPropertiesValidator.validate(this, context);
     }
 
     public String name() {
@@ -143,5 +137,37 @@ public class StandardProperties implements Serializable {
     public enum SampleMode {
         DEFAULT,
         CUSTOM
+    }
+
+    public static final class StandardPropertiesValidator {
+
+        private StandardPropertiesValidator() {
+            throw new AssertionError("You cannot instantiate this class");
+        }
+
+        public static boolean validate(StandardProperties properties, ConstraintValidatorContext context) {
+            var mode = properties.mode();
+            if (mode == null) {
+                return true;
+            }
+
+            var timestamp = properties.timestamp();
+            if (mode == SampleMode.CUSTOM && timestamp.isEmpty()) {
+                return PropertiesValidator.reject(
+                    context,
+                    "timestamp",
+                    "timestamp is required when mode is CUSTOM"
+                );
+            }
+            if (mode != SampleMode.CUSTOM && timestamp.isPresent()) {
+                return PropertiesValidator.reject(
+                    context,
+                    "timestamp",
+                    "timestamp must not be specified when mode is " + mode
+                );
+            }
+
+            return true;
+        }
     }
 }

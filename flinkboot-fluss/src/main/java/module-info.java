@@ -10,8 +10,8 @@ module io.github.sekelenao.flinkboot.fluss {
     exports io.github.sekelenao.flinkboot.fluss.api.properties.sink;
     exports io.github.sekelenao.flinkboot.fluss.api.source;
     exports io.github.sekelenao.flinkboot.fluss.api.sink;
-    exports io.github.sekelenao.flinkboot.fluss.api.exception;
 
     opens io.github.sekelenao.flinkboot.fluss.api.properties.source;
     opens io.github.sekelenao.flinkboot.fluss.api.properties.sink;
+    opens io.github.sekelenao.flinkboot.fluss.internal.validation.properties to org.junit.platform.commons;
 }

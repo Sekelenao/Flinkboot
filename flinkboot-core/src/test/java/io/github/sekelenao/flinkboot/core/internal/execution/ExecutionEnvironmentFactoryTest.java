@@ -1,6 +1,6 @@
 package io.github.sekelenao.flinkboot.core.internal.execution;
 
-import io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidLocalWebUiPropertiesException;
+import io.github.sekelenao.flinkboot.core.api.exception.execution.UnsupportedExecutionEnvironmentException;
 import io.github.sekelenao.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
 import io.github.sekelenao.flinkboot.core.api.properties.JobProperties;
 import io.github.sekelenao.flinkboot.core.api.properties.checkpointing.CheckpointingMode;
@@ -285,7 +285,7 @@ class ExecutionEnvironmentFactoryTest {
         }
 
         @Test
-        @DisplayName("Should throw InvalidLocalWebUiPropertiesException when localWebUi is enabled on a cluster environment")
+        @DisplayName("Should throw UnsupportedExecutionEnvironmentException when localWebUi is enabled on a cluster environment")
         void shouldThrowExceptionWhenLocalWebUiEnabledOnClusterEnvironment() {
             var localWebUiConfig = new LocalWebUiProperties(true, 8081, "127.0.0.1");
             var envProps = new ExecutionEnvironmentProperties(null, null, null, null, null, localWebUiConfig, null);
@@ -296,7 +296,7 @@ class ExecutionEnvironmentFactoryTest {
                 mockedStatic.when(StreamExecutionEnvironment::getExecutionEnvironment).thenReturn(mockClusterEnv);
 
                 var factory = new ExecutionEnvironmentFactory();
-                assertThrows(InvalidLocalWebUiPropertiesException.class, () -> factory.create(jobConfig));
+                assertThrows(UnsupportedExecutionEnvironmentException.class, () -> factory.create(jobConfig));
             }
         }
 

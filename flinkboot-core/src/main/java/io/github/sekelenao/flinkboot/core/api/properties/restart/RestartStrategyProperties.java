@@ -2,8 +2,10 @@ package io.github.sekelenao.flinkboot.core.api.properties.restart;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidRestartStrategyPropertiesException;
+import io.github.sekelenao.flinkboot.core.api.validation.ValidatableProperties;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
+import io.github.sekelenao.flinkboot.core.internal.validation.properties.RestartStrategyPropertiesValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Valid;
 
 import java.io.Serializable;
@@ -17,7 +19,7 @@ import java.util.Optional;
  * {@link RestartStrategyType#FAILURE_RATE}, {@link RestartStrategyType#EXPONENTIAL_DELAY},
  * or {@link RestartStrategyType#FALLBACK}.
  */
-public final class RestartStrategyProperties implements Serializable {
+public final class RestartStrategyProperties implements ValidatableProperties, Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -39,7 +41,6 @@ public final class RestartStrategyProperties implements Serializable {
      * @param fixedDelay       parameters for fixed delay restart strategy
      * @param failureRate      parameters for failure rate restart strategy
      * @param exponentialDelay parameters for exponential delay restart strategy
-     * @throws InvalidRestartStrategyPropertiesException if parameters conflict with the selected type
      */
     @JsonCreator
     public RestartStrategyProperties(
@@ -52,7 +53,11 @@ public final class RestartStrategyProperties implements Serializable {
         this.fixedDelay = fixedDelay;
         this.failureRate = failureRate;
         this.exponentialDelay = exponentialDelay;
-        validate();
+    }
+
+    @Override
+    public boolean validate(ConstraintValidatorContext context) {
+        return RestartStrategyPropertiesValidator.validate(this, context);
     }
 
     /**
@@ -89,43 +94,6 @@ public final class RestartStrategyProperties implements Serializable {
      */
     public Optional<ExponentialDelayRestartProperties> exponentialDelay() {
         return Optional.ofNullable(exponentialDelay);
-    }
-
-    private void validate() {
-        RestartStrategyType effectiveType = type().orElse(RestartStrategyType.FALLBACK);
-
-        if (effectiveType == RestartStrategyType.FALLBACK || effectiveType == RestartStrategyType.NO_RESTART) {
-            if (fixedDelay != null || failureRate != null || exponentialDelay != null) {
-                throw new InvalidRestartStrategyPropertiesException(
-                    "No sub-configuration (fixed-delay, failure-rate, exponential-delay) must be specified when restart strategy type is " + effectiveType
-                );
-            }
-        } else if (effectiveType == RestartStrategyType.FIXED_DELAY) {
-            if (failureRate != null || exponentialDelay != null) {
-                throw new InvalidRestartStrategyPropertiesException(
-                    "Cannot specify failure-rate or exponential-delay when restart strategy type is FIXED_DELAY"
-                );
-            }
-        } else if (effectiveType == RestartStrategyType.FAILURE_RATE) {
-            if (fixedDelay != null || exponentialDelay != null) {
-                throw new InvalidRestartStrategyPropertiesException(
-                    "Cannot specify fixed-delay or exponential-delay when restart strategy type is FAILURE_RATE"
-                );
-            }
-        } else if (effectiveType == RestartStrategyType.EXPONENTIAL_DELAY) {
-            if (fixedDelay != null || failureRate != null) {
-                throw new InvalidRestartStrategyPropertiesException(
-                    "Cannot specify fixed-delay or failure-rate when restart strategy type is EXPONENTIAL_DELAY"
-                );
-            }
-            if (exponentialDelay != null && exponentialDelay.initialBackoff().isPresent() && exponentialDelay.maxBackoff().isPresent()) {
-                if (exponentialDelay.maxBackoff().get().compareTo(exponentialDelay.initialBackoff().get()) < 0) {
-                    throw new InvalidRestartStrategyPropertiesException(
-                        "max-backoff cannot be smaller than initial-backoff in exponential-delay restart strategy"
-                    );
-                }
-            }
-        }
     }
 
 

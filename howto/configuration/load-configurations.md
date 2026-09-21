@@ -336,3 +336,19 @@ topics:
 - **Case-Insensitive Keys & Enums:** Property names and Enum values are matched case-insensitively.
 - **Native Java 8 Date/Time Support:** Java 8+ temporal types (`java.time.Duration`, `java.time.Instant`, `java.time.LocalDate`, etc.) are natively supported out-of-the-box in YAML models without extra configuration.
 - **Jackson Module Auto-Discovery:** Additional Jackson modules on the classpath are automatically discovered and registered via `findAndAddModules()`.
+
+### Disabling Validation
+
+By default, the deserialized configuration model is validated against Jakarta Bean Validation annotations, and any violation fails fast with a `ConfigurationValidationException`. For test environments or non-strict workloads, you can bypass this validation step using `--flinkboot-configuration-disable-validation` (or `FLINKBOOT_CONFIGURATION_DISABLE_VALIDATION=true`):
+
+```bash
+# Via CLI
+flink run MyJob.jar --flinkboot-configuration-disable-validation
+
+# Via Environment Variable
+export FLINKBOOT_CONFIGURATION_DISABLE_VALIDATION=true
+flink run MyJob.jar
+```
+
+> [!CAUTION]
+> Disabling validation only bypasses the Jakarta Bean Validation check. Malformed YAML, unknown properties, and type mismatches still fail fast with a `YamlParsingException`. Constraint violations are loaded as-is, so use this flag only in controlled environments.

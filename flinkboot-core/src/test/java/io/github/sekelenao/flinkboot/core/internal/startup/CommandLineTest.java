@@ -1,10 +1,11 @@
 package io.github.sekelenao.flinkboot.core.internal.startup;
 
+import io.github.sekelenao.flinkboot.core.api.exception.parsing.CommandLineParsingException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.util.NoSuchElementException;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,6 +24,21 @@ class CommandLineTest {
         @DisplayName("Should throw NullPointerException when args array is null")
         void shouldThrowExceptionWhenArgsIsNull() {
             assertThrows(NullPointerException.class, () -> CommandLine.parse(null));
+        }
+
+        @ParameterizedTest(name = "Argument at index {0} is null")
+        @ValueSource(ints = {0, 1, 2, 3, 4})
+        @DisplayName("Should throw CommandLineParsingException when argument at any index is null")
+        void shouldThrowExceptionWhenArgumentAtIndexIsNull(int nullIndex) {
+            String[] args = {"run", "-key", "value", "--verbose", "job"};
+            args[nullIndex] = null;
+
+            var exception = assertThrows(
+                    CommandLineParsingException.class,
+                    () -> CommandLine.parse(args)
+            );
+
+            assertEquals("Argument at index " + nullIndex + " must not be null.", exception.getMessage());
         }
 
         @Test
@@ -58,10 +74,11 @@ class CommandLineTest {
         }
 
         @Test
-        @DisplayName("Should throw NoSuchElementException when option is missing its value")
+        @DisplayName("Should throw CommandLineParsingException when option is missing its value")
         void shouldThrowExceptionWhenOptionMissingValue() {
             String[] args = {"-key"};
-            assertThrows(NoSuchElementException.class, () -> CommandLine.parse(args));
+            var exception = assertThrows(CommandLineParsingException.class, () -> CommandLine.parse(args));
+            assertEquals("Option '-key' requires a value.", exception.getMessage());
         }
 
         @Test
@@ -100,6 +117,36 @@ class CommandLineTest {
             assertAll(
                 () -> assertTrue(cmd.option("").isEmpty()),
                 () -> assertFalse(cmd.flag(""))
+            );
+        }
+
+        @Test
+        @DisplayName("Should ignore arguments without a leading hyphen")
+        void shouldIgnoreArgumentsWithoutLeadingHyphen() {
+            String[] args = {"run", "job"};
+            var cmd = CommandLine.parse(args);
+            assertAll(
+                () -> assertTrue(cmd.option("run").isEmpty()),
+                () -> assertFalse(cmd.flag("run")),
+                () -> assertTrue(cmd.option("job").isEmpty()),
+                () -> assertFalse(cmd.flag("job")),
+                () -> assertTrue(cmd.option("any").isEmpty()),
+                () -> assertFalse(cmd.flag("any"))
+            );
+        }
+
+        @Test
+        @DisplayName("Should parse options and flags while ignoring positional arguments")
+        void shouldParseOptionsAndFlagsWhileIgnoringPositionalArguments() {
+            String[] args = {"run", "-key", "value", "--verbose", "job"};
+            var cmd = CommandLine.parse(args);
+            assertAll(
+                () -> assertEquals("value", cmd.option("key").orElseThrow()),
+                () -> assertTrue(cmd.flag("verbose")),
+                () -> assertTrue(cmd.option("run").isEmpty()),
+                () -> assertFalse(cmd.flag("run")),
+                () -> assertTrue(cmd.option("job").isEmpty()),
+                () -> assertFalse(cmd.flag("job"))
             );
         }
     }

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import io.github.sekelenao.flinkboot.core.api.exception.configuration.YamlParsingException;
+import io.github.sekelenao.flinkboot.core.api.exception.parsing.YamlParsingException;
 import io.github.sekelenao.flinkboot.core.internal.annotation.VisibleForTesting;
 import io.github.sekelenao.flinkboot.core.internal.startup.EnvVarResolver;
 import io.github.sekelenao.flinkboot.core.internal.validation.ConfigurationValidator;

@@ -2,8 +2,10 @@ package io.github.sekelenao.flinkboot.fluss.api.properties.source;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.sekelenao.flinkboot.core.api.validation.ValidatableProperties;
 import io.github.sekelenao.flinkboot.core.internal.annotation.Generated;
-import io.github.sekelenao.flinkboot.fluss.api.exception.InvalidFlussSourcePropertiesException;
+import io.github.sekelenao.flinkboot.fluss.internal.validation.properties.FlussSourcePropertiesValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -19,7 +21,7 @@ import java.util.OptionalLong;
 /**
  * Configuration properties for Apache Fluss sources in Apache Flink.
  */
-public final class FlussSourceProperties implements Serializable {
+public final class FlussSourceProperties implements Serializable, ValidatableProperties {
 
     private static final long serialVersionUID = 1L;
 
@@ -53,7 +55,6 @@ public final class FlussSourceProperties implements Serializable {
      * @param startupMode      startup mode (EARLIEST, LATEST, TIMESTAMP)
      * @param startupTimestamp timestamp in milliseconds (required if startupMode is TIMESTAMP)
      * @param properties       additional Fluss client/scanner configuration properties
-     * @throws InvalidFlussSourcePropertiesException if startup mode is TIMESTAMP but startupTimestamp is missing
      */
     @JsonCreator
     public FlussSourceProperties(
@@ -72,20 +73,11 @@ public final class FlussSourceProperties implements Serializable {
         this.startupMode = startupMode;
         this.startupTimestamp = startupTimestamp;
         this.properties = properties;
-        validate();
     }
 
-    private void validate() {
-        if (startupMode == null) {
-            return;
-        }
-        if (startupMode == FlussStartupMode.TIMESTAMP) {
-            if (startupTimestamp == null) {
-                throw new InvalidFlussSourcePropertiesException("startup-timestamp is required when startup-mode is TIMESTAMP");
-            }
-        } else if (startupTimestamp != null) {
-            throw new InvalidFlussSourcePropertiesException("startup-timestamp must not be specified when startup-mode is " + startupMode);
-        }
+    @Override
+    public boolean validate(ConstraintValidatorContext context) {
+        return FlussSourcePropertiesValidator.validate(this, context);
     }
 
     /**

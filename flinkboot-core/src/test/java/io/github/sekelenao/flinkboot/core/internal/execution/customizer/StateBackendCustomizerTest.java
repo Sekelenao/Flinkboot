@@ -16,6 +16,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.Locale;
+
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -143,6 +145,24 @@ class StateBackendCustomizerTest {
             );
         }
 
+        @Test
+        @DisplayName("Should format checkpoint storage with Locale.ROOT under a Turkish default locale")
+        void shouldFormatCheckpointStorageWithRootLocale() {
+            var previousLocale = Locale.getDefault();
+            Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+            try {
+                var flinkConfig = new Configuration();
+                var stateBackendConfig = new StateBackendProperties(null, CheckpointStorageType.FILESYSTEM, null, null, null);
+                var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
+
+                new StateBackendCustomizer(flinkConfig).configure(envProps);
+
+                assertEquals("filesystem", flinkConfig.get(CheckpointingOptions.CHECKPOINT_STORAGE));
+            } finally {
+                Locale.setDefault(previousLocale);
+            }
+        }
+
         @ParameterizedTest(name = "Should configure incremental checkpoints to {0}")
         @ValueSource(booleans = {true, false})
         @DisplayName("Should configure incremental checkpoints")
@@ -243,8 +263,8 @@ class StateBackendCustomizerTest {
 
             assertAll(
                 () -> assertEquals("file:///preconfigured-checkpoints", flinkConfig.get(CheckpointingOptions.CHECKPOINTS_DIRECTORY)),
-                () -> assertEquals(storageType.toString().toLowerCase(), flinkConfig.get(CheckpointingOptions.CHECKPOINT_STORAGE)),
-                () -> assertEquals(type.name().toLowerCase(), flinkConfig.get(StateBackendOptions.STATE_BACKEND)),
+                () -> assertEquals(storageType.toString().toLowerCase(Locale.ROOT), flinkConfig.get(CheckpointingOptions.CHECKPOINT_STORAGE)),
+                () -> assertEquals(type.name().toLowerCase(Locale.ROOT), flinkConfig.get(StateBackendOptions.STATE_BACKEND)),
                 () -> assertTrue(flinkConfig.get(CheckpointingOptions.INCREMENTAL_CHECKPOINTS)),
                 () -> assertTrue(flinkConfig.get(StateLatencyTrackOptions.LATENCY_TRACK_ENABLED))
             );

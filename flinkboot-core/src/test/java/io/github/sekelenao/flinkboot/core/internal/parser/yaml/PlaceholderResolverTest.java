@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
-import io.github.sekelenao.flinkboot.core.api.exception.configuration.UnresolvedPropertyPlaceholderException;
+import io.github.sekelenao.flinkboot.core.api.exception.parsing.UnresolvedPropertyPlaceholderException;
 import io.github.sekelenao.flinkboot.core.internal.startup.EnvVarResolver;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

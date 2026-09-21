@@ -18,9 +18,9 @@ In Flinkboot, all configuration classes that bind to YAML/JSON configuration fil
 - **`@JsonCreator`**: Annotate the primary constructor with `@JsonCreator`.
 - **`@JsonProperty`**: Annotate **every** parameter with `@JsonProperty("kebab-case-name")`.
 - **NO Constructor Null Checks**: Do **NOT** use `Objects.requireNonNull(...)` on constructor parameters. Allow Jackson to construct the DTO with `null` fields so that Jakarta Bean Validation (`@NotNull`, `@NotBlank`, `@NotEmpty`) can inspect the full object graph and report all missing/invalid keys simultaneously.
-- **Cross-Field Validation**: Call a private `validate()` method in the constructor when fields have interdependent requirements (e.g. `mode == TIMESTAMP` requires `timestamp != null`). Ensure `validate()` handles or ignores `null` fields when interdependencies are not applicable.
+- **Cross-Field Validation**: When fields have interdependent requirements (e.g. `mode == TIMESTAMP` requires `timestamp != null`), the DTO implements `ValidatableProperties` (from `io.github.sekelenao.flinkboot.core.api.validation.ValidatableProperties`). The DTO's `validate(ConstraintValidatorContext context)` delegates in one line to a dedicated static validator in an internal package (e.g. `MyPropertiesValidator.validate(this, context)`).
 
-## 3. Validation Guidelines (Jakarta vs Constructor)
+## 3. Validation Guidelines (Jakarta & Self-Validating DTOs)
 
 - **Single-Field Constraints** $\rightarrow$ **Jakarta Bean Validation**:
   - Place constraints on fields: `@NotBlank`, `@NotEmpty`, `@NotNull`, `@PositiveOrZero`, `@Positive`, `@Pattern`, `@Valid`.
@@ -29,9 +29,26 @@ In Flinkboot, all configuration classes that bind to YAML/JSON configuration fil
     - **Maps** (e.g. `properties`): Must use `private final Map<@NotNull String, @NotNull String> properties;` to reject null keys and values.
     - **Nested DTO collections**: Must use `private final List<@NotNull @Valid MyNestedProperties> items;` to reject null elements and trigger recursive Bean Validation.
   - **NEVER** write duplicate manual checks in the constructor (e.g. do **NOT** write `if (batchSize < 0)` in constructor if `@PositiveOrZero` is present).
-- **Cross-Field Interdependencies** $\rightarrow$ **Constructor `validate()`**:
-  - Put cross-field validation in `private void validate()`.
-  - Throw a dedicated domain exception (e.g. `InvalidFlussSourcePropertiesException`).
+- **Cross-Field Interdependencies** $\rightarrow$ **`ValidatableProperties` & Dedicated Static Validator**:
+  - Implement `ValidatableProperties` on the DTO:
+    ```java
+    @Override
+    public boolean validate(ConstraintValidatorContext context) {
+        return MyPropertiesValidator.validate(this, context);
+    }
+    ```
+  - Create a dedicated validator class in `internal.validation.properties`:
+    - **Simple validators (single method)**:
+      - Private constructor throwing `new AssertionError("You cannot instantiate this class")`.
+      - Static method `public static boolean validate(MyProperties properties, ConstraintValidatorContext context)`.
+    - **Complex validators (> 1 method / sub-configurations)**:
+      - Store `properties` and `context` as `private final` fields.
+      - Private constructor validating non-null arguments via `Objects.requireNonNull(..., "... must not be null")`.
+      - Static facade `public static boolean validate(MyProperties properties, ConstraintValidatorContext context) { return new MyPropertiesValidator(properties, context).execute(); }`.
+      - Instance helper `reject(propertyName, message)` delegating to `PropertiesValidator.reject(context, propertyName, message)`.
+      - Format switch `case` branches on a single line (e.g. `case FIXED_DELAY: return validateFixedDelay();`).
+    - Bind violations to property nodes via `PropertiesValidator.reject(context, "propertyName", "message")`.
+    - Keep DTOs pure, clean data carriers without massive `if` blocks.
 
 ## 4. Getters & Accessors Rules
 

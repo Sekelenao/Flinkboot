@@ -54,6 +54,13 @@ class KafkaSourceFactoryTest {
         assertInstanceOf(AssertionError.class, exception.getCause());
     }
 
+    @Test
+    @DisplayName("OffsetInitializerMapper.map should throw NullPointerException when properties is null")
+    void shouldThrowWhenPropertiesIsNullInOffsetInitializerMapper() {
+        var ex = assertThrows(NullPointerException.class, () -> OffsetInitializerMapper.map(null));
+        assertEquals("properties must not be null", ex.getMessage());
+    }
+
     @Nested
     @DisplayName("supplyFor & supplyBuilderFor (Topic List)")
     class SupplyForTopicList {

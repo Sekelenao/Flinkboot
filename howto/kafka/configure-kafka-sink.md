@@ -82,7 +82,7 @@ Flinkboot supports Flink's delivery guarantee strategies via the `delivery-guara
 ### Fail-Fast Rules for Delivery Guarantees
 To prevent misconfigurations at startup:
 1. If `delivery-guarantee` is set to `EXACTLY_ONCE`, a non-blank `transactional-id-prefix` **must** be provided.
-2. If `delivery-guarantee` is set to `AT_LEAST_ONCE` or `NONE` (or omitted), specifying `transactional-id-prefix` will cause a **fail-fast startup crash** throwing `InvalidKafkaSinkPropertiesException`.
+2. If `delivery-guarantee` is set to `AT_LEAST_ONCE` or `NONE` (or omitted), specifying `transactional-id-prefix` will cause a **fail-fast startup validation failure** via Jakarta Bean Validation.
 
 ---
 
@@ -158,5 +158,5 @@ KafkaSink<String> customKafkaSink = KafkaSinkFactory.supplyBuilderFor(config.kaf
 
 ## 5. Fail-Fast Validation & Exceptions
 
-- **Bean Validation:** If any property violates constraints (e.g. blank topic, or null keys/values in `properties`), a `PropertiesValidationException` is thrown at startup.
-- **Invalid Delivery Guarantee:** If `transactional-id-prefix` is provided without `EXACTLY_ONCE`, or omitted when `EXACTLY_ONCE` is configured, Flinkboot fails fast with an `InvalidKafkaSinkPropertiesException`.
+- **Bean Validation:** If any property violates constraints (e.g. blank topic, or null keys/values in `properties`), validation fails fast at startup.
+- **Cross-Field Delivery Guarantee Validation:** If `transactional-id-prefix` is provided without `EXACTLY_ONCE`, or omitted when `EXACTLY_ONCE` is configured, Flinkboot fails fast during Jakarta Bean Validation (reported on `transactionalIdPrefix`).

@@ -189,6 +189,6 @@ KafkaSource<String> customKafkaSource = KafkaSourceFactory.supplyBuilderFor(conf
 
 ## 5. Fail-Fast Validation & Exceptions
 
-- **Mutual Exclusivity:** Configuring both `topics` and `topic-pattern` or configuring neither will immediately throw `InvalidKafkaSourcePropertiesException`.
-- **Nested Bean Validation:** If any property violates constraints (e.g. negative partition or blank topic), a `PropertiesValidationException` is thrown at startup.
-- **Invalid Offset Strategy:** If `starting-offsets` is set to `TIMESTAMP` or `OFFSETS` without providing the required timestamp or partition offset list, Flinkboot fails fast with an `InvalidKafkaSourcePropertiesException`.
+- **Mutual Exclusivity:** Configuring both `topics` and `topic-pattern` or configuring neither fails fast during Jakarta Bean Validation (reported on `topicPattern` or `topics`).
+- **Nested Bean Validation:** If any property violates constraints (e.g. negative partition or blank topic), validation fails fast at startup.
+- **Offset Strategy Validation:** If `starting-offsets` is set to `TIMESTAMP` or `OFFSETS` without providing the required timestamp or partition offset list (or providing unexpected parameters), Flinkboot fails fast during Jakarta Bean Validation.

@@ -1,7 +1,10 @@
 package io.github.sekelenao.flinkboot.core.api.properties.state;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.sekelenao.flinkboot.core.api.exception.configuration.InvalidStateBackendPropertiesException;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -16,13 +19,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("StateBackendProperties Tests")
 class StateBackendPropertiesTest {
 
+    private static Validator validator;
     private final ObjectMapper mapper = new ObjectMapper();
+
+    @BeforeAll
+    static void setUpValidator() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
+    }
 
     @Nested
     @DisplayName("Constructor")
@@ -118,8 +127,8 @@ class StateBackendPropertiesTest {
     }
 
     @Nested
-    @DisplayName("Validation")
-    class Validation {
+    @DisplayName("Validation Tests")
+    class ValidationTests {
 
         @Test
         @DisplayName("Should pass validation with valid HASHMAP configuration")
@@ -137,7 +146,8 @@ class StateBackendPropertiesTest {
                 () -> assertEquals(CheckpointStorageType.JOBMANAGER, config.checkpointStorage().orElseThrow()),
                 () -> assertFalse(config.incremental().orElseThrow()),
                 () -> assertTrue(config.latencyTracking().orElseThrow()),
-                () -> assertTrue(config.customClass().isEmpty())
+                () -> assertTrue(config.customClass().isEmpty()),
+                () -> assertTrue(validator.validate(config).isEmpty())
             );
         }
 
@@ -157,45 +167,82 @@ class StateBackendPropertiesTest {
                 () -> assertEquals(CheckpointStorageType.FILESYSTEM, config.checkpointStorage().orElseThrow()),
                 () -> assertTrue(config.incremental().orElseThrow()),
                 () -> assertFalse(config.latencyTracking().orElseThrow()),
-                () -> assertEquals("com.example.MyCustomStateBackend", config.customClass().orElseThrow())
+                () -> assertEquals("com.example.MyCustomStateBackend", config.customClass().orElseThrow()),
+                () -> assertTrue(validator.validate(config).isEmpty())
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when custom-class is null for CUSTOM state backend")
+        void shouldFailValidationWhenCustomClassNullForCustomType() {
+            var config = new StateBackendProperties(StateBackendType.CUSTOM, null, null, null, null);
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("customClass")
+                        && v.getMessage().equals("custom-class must be specified when state backend type is CUSTOM")
+                ))
             );
         }
 
         @ParameterizedTest
-        @NullAndEmptySource
-        @ValueSource(strings = {"   ", "\t\n"})
-        @DisplayName("Should throw exception when custom-class is null, empty, or blank for CUSTOM state backend")
-        void shouldThrowExceptionWhenCustomClassNullOrBlankForCustomType(String customClass) {
-            var exception = assertThrows(
-                InvalidStateBackendPropertiesException.class,
-                () -> new StateBackendProperties(StateBackendType.CUSTOM, null, null, null, customClass)
-            );
-            assertEquals(
-                "custom-class must be specified when state backend type is CUSTOM",
-                exception.getMessage()
+        @ValueSource(strings = {"", "   ", "\t\n"})
+        @DisplayName("Should fail validation when custom-class is empty or blank for CUSTOM state backend")
+        void shouldFailValidationWhenCustomClassBlankForCustomType(String customClass) {
+            var config = new StateBackendProperties(StateBackendType.CUSTOM, null, null, null, customClass);
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("customClass")
+                        && v.getMessage().equals("must not be blank")
+                ))
             );
         }
 
         @ParameterizedTest
         @NullSource
         @EnumSource(value = StateBackendType.class, names = "CUSTOM", mode = EnumSource.Mode.EXCLUDE)
-        @DisplayName("Should throw exception when custom-class is provided for non-CUSTOM state backend")
-        void shouldThrowExceptionWhenCustomClassProvidedForNonCustomType(StateBackendType type) {
-            var exception = assertThrows(
-                InvalidStateBackendPropertiesException.class,
-                () -> new StateBackendProperties(type, null, null, null, "com.example.MyCustomStateBackend")
+        @DisplayName("Should fail validation when custom-class is provided for non-CUSTOM state backend")
+        void shouldFailValidationWhenCustomClassProvidedForNonCustomType(StateBackendType type) {
+            var config = new StateBackendProperties(type, null, null, null, "com.example.MyCustomStateBackend");
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("customClass")
+                        && v.getMessage().equals("custom-class can only be specified when state backend type is CUSTOM")
+                ))
             );
-            assertEquals(
-                "custom-class can only be specified when state backend type is CUSTOM",
-                exception.getMessage()
+        }
+
+        @Test
+        @DisplayName("Should pass validation when custom-class is null for non-CUSTOM state backend")
+        void shouldPassValidationWhenNullCustomClassForNonCustomType() {
+            var config = new StateBackendProperties(
+                StateBackendType.HASHMAP,
+                CheckpointStorageType.JOBMANAGER,
+                false,
+                true,
+                null
+            );
+
+            assertAll(
+                () -> assertNotNull(config),
+                () -> assertEquals(StateBackendType.HASHMAP, config.type().orElseThrow()),
+                () -> assertEquals(CheckpointStorageType.JOBMANAGER, config.checkpointStorage().orElseThrow()),
+                () -> assertTrue(validator.validate(config).isEmpty())
             );
         }
 
         @ParameterizedTest
-        @NullAndEmptySource
-        @ValueSource(strings = {"   ", "\t\n"})
-        @DisplayName("Should permit null or blank custom-class for non-CUSTOM state backend")
-        void shouldPermitNullOrBlankCustomClassForNonCustomType(String customClass) {
+        @ValueSource(strings = {"", "   ", "\t\n"})
+        @DisplayName("Should fail validation when custom-class is empty or blank for non-CUSTOM state backend")
+        void shouldFailValidationWhenBlankCustomClassForNonCustomType(String customClass) {
             var config = new StateBackendProperties(
                 StateBackendType.HASHMAP,
                 CheckpointStorageType.JOBMANAGER,
@@ -204,11 +251,12 @@ class StateBackendPropertiesTest {
                 customClass
             );
 
-            assertAll(
-                () -> assertNotNull(config),
-                () -> assertEquals(StateBackendType.HASHMAP, config.type().orElseThrow()),
-                () -> assertEquals(CheckpointStorageType.JOBMANAGER, config.checkpointStorage().orElseThrow())
-            );
+            var violations = validator.validate(config);
+            assertFalse(violations.isEmpty());
+            assertTrue(violations.stream().anyMatch(v ->
+                v.getPropertyPath().toString().equals("customClass")
+                    && v.getMessage().equals("custom-class can only be specified when state backend type is CUSTOM")
+            ));
         }
     }
 

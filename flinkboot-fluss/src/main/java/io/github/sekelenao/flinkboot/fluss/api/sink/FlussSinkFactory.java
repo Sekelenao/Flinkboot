@@ -1,12 +1,10 @@
 package io.github.sekelenao.flinkboot.fluss.api.sink;
 
-import io.github.sekelenao.flinkboot.core.internal.time.DurationFormatter;
 import io.github.sekelenao.flinkboot.fluss.api.properties.sink.FlussSinkProperties;
 import org.apache.fluss.flink.sink.FlussSink;
 import org.apache.fluss.flink.sink.FlussSinkBuilder;
 import org.apache.fluss.flink.sink.serializer.FlussSerializationSchema;
 
-import java.util.HashMap;
 import java.util.Objects;
 
 /**
@@ -44,15 +42,11 @@ public final class FlussSinkFactory {
         Objects.requireNonNull(config, "config must not be null");
         Objects.requireNonNull(serializationSchema, "serializationSchema must not be null");
 
-        var options = new HashMap<>(config.properties());
-        config.batchSize().ifPresent(batchSize -> options.put("client.writer.bucket.batch.size", String.valueOf(batchSize)));
-        config.batchTimeout().ifPresent(timeout -> options.put("client.writer.bucket.batch.timeout", DurationFormatter.format(timeout)));
-
         return new FlussSinkBuilder<T>()
             .setBootstrapServers(String.join(",", config.bootstrapServers()))
             .setDatabase(config.database())
             .setTable(config.table())
-            .setOptions(options)
+            .setOptions(config.properties())
             .setSerializationSchema(serializationSchema);
     }
 
