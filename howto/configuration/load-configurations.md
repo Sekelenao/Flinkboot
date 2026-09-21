@@ -166,7 +166,7 @@ kafka-source:
 ```java
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.sekelenao.flinkboot.core.api.properties.JobProperties;
-import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceTopicListProperties;
+import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceProperties;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -176,7 +176,7 @@ import java.time.Duration;
 public record AppConfig(
     @Valid @NotNull @JsonProperty("app") BusinessProperties app,
     @Valid @NotNull @JsonProperty("job") JobProperties job,
-    @Valid @JsonProperty("kafka-source") KafkaSourceTopicListProperties kafkaSource
+    @Valid @JsonProperty("kafka-source") KafkaSourceProperties kafkaSource
 ) {
 
     public record BusinessProperties(
