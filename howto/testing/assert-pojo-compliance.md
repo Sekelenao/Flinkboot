@@ -158,3 +158,11 @@ class UserActivityTypeInfoTest {
 
 This is the most direct way to check that a custom factory really produces a native Flink serializer
 instead of a Kryo fallback.
+
+---
+
+## Related Guides
+
+* [How to Assert Java Serialization Compliance](assert-serialization-compliance.md)
+* [How to Collect Stream Elements in Tests](collect-stream-elements-in-tests.md)
+* [How to Load Configurations in Tests](load-configurations-in-tests.md)

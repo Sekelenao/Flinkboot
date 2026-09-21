@@ -158,3 +158,12 @@ Each path passed to `FlinkbootTest.configuration(...)` **must explicitly specify
 
 > [!IMPORTANT]
 > Omitting the scheme prefix (e.g., passing `"job-test.yaml"` without `classpath:`) will throw an `UnrecognizedResourceException`. Always include `classpath:` or `file:`. See the [How to Load Resources](../configuration/load-resources.md) guide for more information on the underlying `Resource` abstraction.
+
+
+---
+
+## Related Guides
+
+* [How to Assert Java Serialization Compliance](assert-serialization-compliance.md)
+* [How to Assert Flink POJO Compliance](assert-pojo-compliance.md)
+* [How to Collect Stream Elements in Tests](collect-stream-elements-in-tests.md)
