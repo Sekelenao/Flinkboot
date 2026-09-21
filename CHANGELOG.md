@@ -49,6 +49,7 @@ All notable user-facing changes to this project are documented in this file.
 - **[flinkboot-core] Configurable Violations Log Size**: Validates positive values for `--flinkboot-configuration-violations-log-size` while preserving the default limit of 10.
 - **[flinkboot-core] Uniform Parsing Exception Diagnostic**: Wraps all Jackson conversion errors in `YamlParsingException` and displays Fully Qualified Class Names (FQCN) in mapping error messages.
 - **[flinkboot-core] Supported URI Schemes in Error Message**: Clarified supported URI prefixes (`classpath:`, `file:`) in `UnrecognizedResourceException` detail messages.
+- **[flinkboot-kafka] Non-Short-Circuiting Source Validation**: Evaluates topic subscription and starting offsets constraints unconditionally in `KafkaSourcePropertiesValidator`, collecting and reporting all configuration violations simultaneously in a single diagnostic report.
 - **[configuration] Unified Cross-Field Error Reporting**: Cross-field configuration constraints are now collected and reported alongside field-level validation errors in a single diagnostic report instead of interrupting deserialization prematurely.
 
 ---

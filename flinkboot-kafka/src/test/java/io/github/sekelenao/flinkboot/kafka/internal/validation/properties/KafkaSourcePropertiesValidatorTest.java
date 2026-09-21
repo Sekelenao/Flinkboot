@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -449,6 +450,40 @@ class KafkaSourcePropertiesValidatorTest {
             verify(context).buildConstraintViolationWithTemplate("starting-offsets-partition-offsets must not be specified when starting-offsets is " + strategy);
             verify(builder).addPropertyNode("startingOffsetsPartitionOffsets");
             verify(nodeBuilder).addConstraintViolation();
+        }
+
+        @Test
+        @DisplayName("Should report both subscription and starting-offsets violations simultaneously without short-circuiting")
+        void shouldReportBothSubscriptionAndStartingOffsetsViolationsSimultaneously() {
+            var context = mock(ConstraintValidatorContext.class);
+            var topicBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
+            var topicNode = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
+            var offsetBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
+            var offsetNode = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
+
+            when(context.buildConstraintViolationWithTemplate("Either 'topics' or 'topic-pattern' must be specified")).thenReturn(topicBuilder);
+            when(topicBuilder.addPropertyNode("topics")).thenReturn(topicNode);
+
+            when(context.buildConstraintViolationWithTemplate("starting-offsets-timestamp is required when starting-offsets is TIMESTAMP")).thenReturn(offsetBuilder);
+            when(offsetBuilder.addPropertyNode("startingOffsetsTimestamp")).thenReturn(offsetNode);
+
+            var props = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                "group",
+                null,
+                null,
+                KafkaOffsetInitializer.TIMESTAMP,
+                null,
+                null,
+                Map.of()
+            );
+
+            assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
+
+            verify(context, times(2)).disableDefaultConstraintViolation();
+            verify(topicNode).addConstraintViolation();
+            verify(offsetNode).addConstraintViolation();
         }
     }
 }
