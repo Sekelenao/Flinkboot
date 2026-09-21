@@ -7,6 +7,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -81,7 +85,7 @@ class CollectingSinkTest {
         }
 
         @Test
-        @SuppressWarnings("deprecation")
+        @SuppressWarnings({"deprecation", "removal"})
         @DisplayName("Should create writer with legacy InitContext")
         void shouldCreateWriterWithLegacyContext() throws Exception {
             try (var sink = new CollectingSink<String>()) {
@@ -92,6 +96,35 @@ class CollectingSinkTest {
                 writer.write("legacy-event", null);
 
                 assertEquals(List.of("legacy-event"), sink.elements());
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("Serialization")
+    class Serialization {
+
+        @Test
+        @DisplayName("Should remain functional and share registry after Java serialization roundtrip")
+        void shouldRemainFunctionalAfterSerializationRoundtrip() throws Exception {
+            try (var originalSink = new CollectingSink<String>()) {
+                var byteOutput = new ByteArrayOutputStream();
+                try (var objectOutput = new ObjectOutputStream(byteOutput)) {
+                    objectOutput.writeObject(originalSink);
+                }
+
+                CollectingSink<String> deserializedSink;
+                try (var objectInput = new ObjectInputStream(new ByteArrayInputStream(byteOutput.toByteArray()))) {
+                    @SuppressWarnings("unchecked")
+                    var read = (CollectingSink<String>) objectInput.readObject();
+                    deserializedSink = read;
+                }
+
+                try (var writer = deserializedSink.createWriter((WriterInitContext) null)) {
+                    writer.write("distributed-event", null);
+                }
+
+                assertEquals(List.of("distributed-event"), originalSink.elements());
             }
         }
     }

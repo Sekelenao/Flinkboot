@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -86,13 +87,14 @@ class CollectingSinkRegistryTest {
     class StorageAndRetrieval {
 
         @Test
-        @DisplayName("Should return empty list when sink identifier has no registered elements")
+        @DisplayName("Should return an unmodifiable empty list when sink identifier has no registered elements")
         void shouldReturnEmptyListForUnknownSinkId() {
             var elements = CollectingSinkRegistry.elements(UUID.randomUUID());
 
             assertAll(
                 () -> assertNotNull(elements),
-                () -> assertTrue(elements.isEmpty())
+                () -> assertTrue(elements.isEmpty()),
+                () -> assertThrows(UnsupportedOperationException.class, () -> elements.add("item"))
             );
         }
 
@@ -116,6 +118,42 @@ class CollectingSinkRegistryTest {
             List<String> snapshot = CollectingSinkRegistry.elements(sinkId);
 
             assertThrows(UnsupportedOperationException.class, () -> snapshot.add("mutated"));
+        }
+
+        @Test
+        @DisplayName("Should isolate snapshot from subsequent appends to the same sink")
+        void shouldIsolateSnapshotFromSubsequentAppends() {
+            var sinkId = UUID.randomUUID();
+            try {
+                CollectingSinkRegistry.append(sinkId, "first");
+                List<String> snapshot = CollectingSinkRegistry.elements(sinkId);
+
+                CollectingSinkRegistry.append(sinkId, "second");
+
+                assertAll(
+                    () -> assertEquals(List.of("first"), snapshot),
+                    () -> assertEquals(List.of("first", "second"), CollectingSinkRegistry.elements(sinkId))
+                );
+            } finally {
+                CollectingSinkRegistry.clear(sinkId);
+            }
+        }
+
+        @Test
+        @DisplayName("Should safely collect elements under concurrent multi-threaded appends")
+        void shouldSafelyCollectElementsUnderConcurrentAppends() {
+            var sinkId = UUID.randomUUID();
+            var count = 1_000;
+            try {
+                IntStream.range(0, count).parallel().forEach(i ->
+                    CollectingSinkRegistry.append(sinkId, "element-" + i)
+                );
+
+                var elements = CollectingSinkRegistry.<String>elements(sinkId);
+                assertEquals(count, elements.size());
+            } finally {
+                CollectingSinkRegistry.clear(sinkId);
+            }
         }
 
         @Test

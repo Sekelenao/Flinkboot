@@ -56,6 +56,21 @@ class CollectingSinkWriterTest {
                 CollectingSinkRegistry.clear(sinkId);
             }
         }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when writing null element")
+        void shouldThrowExceptionWhenWritingNullElement() {
+            var sinkId = UUID.randomUUID();
+            try (var writer = new CollectingSinkWriter<String>(sinkId)) {
+                var exception = assertThrows(
+                    NullPointerException.class,
+                    () -> writer.write(null, null)
+                );
+                assertEquals("value must not be null", exception.getMessage());
+            } finally {
+                CollectingSinkRegistry.clear(sinkId);
+            }
+        }
     }
 
     @Nested
