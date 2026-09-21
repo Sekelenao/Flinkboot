@@ -158,7 +158,7 @@ kafka-source:
   group-id: "fraud-detector-group"
   topics:
     - "transactions"
-  startup-mode: "EARLIEST"
+  starting-offsets: "EARLIEST"
 ```
 
 ### Defining the Composed Java Model (Record)
