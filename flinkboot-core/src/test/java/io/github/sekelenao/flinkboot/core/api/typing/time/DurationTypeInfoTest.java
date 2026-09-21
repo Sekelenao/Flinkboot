@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("DurationTypeInfo")
@@ -36,12 +37,17 @@ class DurationTypeInfoTest {
                 () -> assertEquals("Duration", typeInfo.toString())
             );
         }
+    }
+
+    @Nested
+    @DisplayName("Serializer Creation")
+    class SerializerCreation {
 
         @Test
         @DisplayName("Should create DurationSerializer with modern SerializerConfig")
         void shouldCreateSerializerWithSerializerConfig() {
             var serializer = typeInfo.createSerializer(new SerializerConfigImpl());
-            assertEquals(DurationSerializer.INSTANCE, serializer);
+            assertSame(DurationSerializer.INSTANCE, serializer);
         }
 
         @Test
@@ -49,8 +55,13 @@ class DurationTypeInfoTest {
         @DisplayName("Should create DurationSerializer with legacy ExecutionConfig")
         void shouldCreateSerializerWithExecutionConfig() {
             var serializer = typeInfo.createSerializer(new ExecutionConfig());
-            assertEquals(DurationSerializer.INSTANCE, serializer);
+            assertSame(DurationSerializer.INSTANCE, serializer);
         }
+    }
+
+    @Nested
+    @DisplayName("Equals and HashCode")
+    class EqualsAndHashCode {
 
         @Test
         @DisplayName("Should implement equals, canEqual and hashCode correctly")
@@ -60,12 +71,12 @@ class DurationTypeInfoTest {
                 () -> assertTrue(typeInfo.canEqual(same)),
                 () -> assertFalse(typeInfo.canEqual(new Object())),
                 () -> assertEquals(typeInfo, same),
+                () -> assertEquals(DurationTypeInfo.class.hashCode(), typeInfo.hashCode()),
                 () -> assertEquals(typeInfo.hashCode(), same.hashCode()),
                 () -> assertNotEquals(typeInfo, new Object()),
                 () -> assertNotEquals(typeInfo, null)
             );
         }
-
     }
 
 }
