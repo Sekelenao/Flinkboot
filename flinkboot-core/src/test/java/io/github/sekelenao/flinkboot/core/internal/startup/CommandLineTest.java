@@ -4,6 +4,8 @@ import io.github.sekelenao.flinkboot.core.api.exception.parsing.CommandLineParsi
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,43 +26,19 @@ class CommandLineTest {
             assertThrows(NullPointerException.class, () -> CommandLine.parse(null));
         }
 
-        @Test
-        @DisplayName("Should throw CommandLineParsingException when argument is null")
-        void shouldThrowExceptionWhenArgumentIsNull() {
-            String[] args = {"--verbose", null};
+        @ParameterizedTest(name = "Argument at index {0} is null")
+        @ValueSource(ints = {0, 1, 2, 3, 4})
+        @DisplayName("Should throw CommandLineParsingException when argument at any index is null")
+        void shouldThrowExceptionWhenArgumentAtIndexIsNull(int nullIndex) {
+            String[] args = {"run", "-key", "value", "--verbose", "job"};
+            args[nullIndex] = null;
 
             var exception = assertThrows(
                     CommandLineParsingException.class,
                     () -> CommandLine.parse(args)
             );
 
-            assertEquals("Argument at index 1 must not be null.", exception.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should throw CommandLineParsingException when option key is null")
-        void shouldThrowExceptionWhenOptionKeyIsNull() {
-            String[] args = {null, "value"};
-
-            var exception = assertThrows(
-                    CommandLineParsingException.class,
-                    () -> CommandLine.parse(args)
-            );
-
-            assertEquals("Argument at index 0 must not be null.", exception.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should throw CommandLineParsingException when option value is null")
-        void shouldThrowExceptionWhenOptionValueIsNull() {
-            String[] args = {"-key", null};
-
-            var exception = assertThrows(
-                    CommandLineParsingException.class,
-                    () -> CommandLine.parse(args)
-            );
-
-            assertEquals("Argument at index 1 must not be null.", exception.getMessage());
+            assertEquals("Argument at index " + nullIndex + " must not be null.", exception.getMessage());
         }
 
         @Test
