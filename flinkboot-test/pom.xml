@@ -21,12 +21,6 @@
 
     <dependencies>
 
-        <!-- Flinkboot Core -->
-        <dependency>
-            <groupId>io.github.sekelenao</groupId>
-            <artifactId>flinkboot-core</artifactId>
-        </dependency>
-
         <!-- Flink dependencies -->
         <dependency>
             <groupId>org.apache.flink</groupId>
@@ -39,6 +33,12 @@
 
         <!--   Test   -->
         <dependency>
+            <groupId>io.github.sekelenao</groupId>
+            <artifactId>flinkboot-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-clients</artifactId>
             <scope>test</scope>
@@ -49,7 +49,6 @@
             <artifactId>junit-jupiter</artifactId>
             <scope>provided</scope>
         </dependency>
-
 
     </dependencies>
 
@@ -63,8 +62,6 @@
                         <arg>-Xlint:-module</arg>
                         <arg>--add-reads</arg>
                         <arg>io.github.sekelenao.flinkboot.test=ALL-UNNAMED</arg>
-                        <arg>--add-reads</arg>
-                        <arg>io.github.sekelenao.flinkboot.core=ALL-UNNAMED</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>

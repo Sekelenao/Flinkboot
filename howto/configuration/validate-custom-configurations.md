@@ -179,4 +179,4 @@ class WindowedPipelinePropertiesTest {
 This example drives validation through the standard `jakarta.validation.Validator`. The validator Flinkboot uses internally is not exported to application code, so always trigger validation through the standard API in your own tests.
 
 > [!NOTE]
-> For an end-to-end check that also exercises YAML binding and the surrounding configuration pipeline, use `FlinkbootTest.configuration(...)` from `flinkboot-test`, which throws `ConfigurationValidationException` when the loaded configuration is invalid. See the [How to Load Configurations in Tests](../testing/load-configurations-in-tests.md) guide for details.
+> For an end-to-end check that also exercises YAML binding and the surrounding configuration pipeline, use `Flinkboot.initialize(...)`, which throws `ConfigurationValidationException` when the loaded configuration is invalid. See the [How to Load Configurations in Tests](../testing/load-configurations-in-tests.md) guide for details.

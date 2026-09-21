@@ -76,7 +76,7 @@ If any element fails serialization, the assertion fails immediately with a descr
 Application configuration classes are often passed directly into operator constructors:
 
 ```java
-import io.github.sekelenao.flinkboot.test.api.FlinkbootTest;
+import io.github.sekelenao.flinkboot.core.api.Flinkboot;
 import io.github.sekelenao.flinkboot.test.api.assertion.FlinkbootAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -85,11 +85,10 @@ class JobConfigurationTest {
 
     @Test
     @DisplayName("Should verify that application configuration is serializable for Flink operators")
-    void shouldBeSerializable() {
-        MyApplicationConfig config = FlinkbootTest.configuration(
-            MyApplicationConfig.class,
-            "classpath:job-full-config.yaml"
-        );
+    void shouldBeSerializable() throws Exception {
+        MyApplicationConfig config = Flinkboot.initialize(
+            "-flinkboot-configurations", "classpath:job-full-config.yaml"
+        ).configuration(MyApplicationConfig.class);
 
         FlinkbootAssertions.assertThat(config)
             .isSerializable();
@@ -142,11 +141,11 @@ class ThresholdAlertFunctionTest {
 ## 5. Best Practices
 
 * **Use a Complete YAML Fixture (`job-full-config.yaml`)**:
-  When testing configuration classes loaded via `FlinkbootTest.configuration(...)`, ensure 100% of optional properties, nested DTOs, and collection elements are populated in the test YAML. Minimal fixtures that leave optional fields as `null` can mask non-serializable types until they are populated in production.
+  When testing configuration classes loaded via `Flinkboot.initialize(...)`, ensure 100% of optional properties, nested DTOs, and collection elements are populated in the test YAML. Minimal fixtures that leave optional fields as `null` can mask non-serializable types until they are populated in production.
 * **Mark Non-Serializable Resources as `transient`**:
   Fields holding network connections, thread pools, or client handles should be marked `transient` and initialized inside the operator's `open(OpenContext context)` or `open(Configuration parameters)` lifecycle method instead of being serialized.
 * **Validate the Entire Lifecycle**:
-  Combining `FlinkbootTest.configuration(...)` with `isSerializable()` validates the complete configuration lifecycle end-to-end: YAML parsing, environment placeholder substitution, Jakarta Bean Validation, and standard Java serialization round-trip.
+  Combining `Flinkboot.initialize(...)` with `isSerializable()` validates the complete configuration lifecycle end-to-end: YAML parsing, environment placeholder substitution, Jakarta Bean Validation, and standard Java serialization round-trip.
 * **Combine with POJO Assertions for Pipeline Elements**:
   Java serialization compliance (`isSerializable()`) is intended for **operators, functions, and configurations** shipped across the cluster. For **data records** traveling through Flink data streams, prefer [How to Assert Flink POJO Compliance](assert-pojo-compliance.md) to ensure high-performance native serialization without Kryo fallback.
 

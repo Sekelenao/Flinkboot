@@ -38,7 +38,7 @@ All audit subagents (including `module-scanner` and `pr-reviewer`) must consult 
 
 ## 7. Blank Path Checking in Test Helpers (`FlinkbootTest.configuration`)
 - **Pattern**: Rejecting blank paths (`""` or `"   "`) with defensive checks in `FlinkbootTest.configuration`.
-- **Status**: **REJECTED**
+- **Status**: **HISTORICAL / REJECTED** (Note: `FlinkbootTest` was removed in #200 in favor of direct `Flinkboot.initialize(String... args)`).
 - **Rationale**: Passing empty strings in unit test resource paths is non-sensical; letting it fail downstream in core is completely acceptable.
 
 ## 8. Java Records in Java 11
