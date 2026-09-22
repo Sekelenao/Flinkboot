@@ -1,6 +1,7 @@
 package io.github.sekelenao.flinkboot.core.internal.startup;
 
 import io.github.sekelenao.flinkboot.core.api.exception.parsing.BooleanParsingException;
+import io.github.sekelenao.flinkboot.core.api.exception.parsing.IntegerParsingException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -401,7 +402,7 @@ class StartupEnvironmentTest {
             var cmd = CommandLine.parse(new String[]{"-flinkboot-configuration-violations-log-size", size});
             var resolver = new EnvVarResolver(k -> null);
             var startupEnv = new StartupEnvironment(cmd, resolver);
-            var exception = assertThrows(IllegalArgumentException.class, startupEnv::parserFeatures);
+            var exception = assertThrows(IntegerParsingException.class, startupEnv::parserFeatures);
             assertEquals(
                 "Invalid value for 'flinkboot-configuration-violations-log-size': must be a strictly positive integer, but was '" + size + "'",
                 exception.getMessage()
@@ -415,7 +416,7 @@ class StartupEnvironmentTest {
             var cmd = CommandLine.parse(new String[0]);
             var resolver = new EnvVarResolver(k -> "FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE".equals(k) ? size : null);
             var startupEnv = new StartupEnvironment(cmd, resolver);
-            var exception = assertThrows(IllegalArgumentException.class, startupEnv::parserFeatures);
+            var exception = assertThrows(IntegerParsingException.class, startupEnv::parserFeatures);
             assertEquals(
                 "Invalid value for 'flinkboot-configuration-violations-log-size': must be a strictly positive integer, but was '" + size + "'",
                 exception.getMessage()
