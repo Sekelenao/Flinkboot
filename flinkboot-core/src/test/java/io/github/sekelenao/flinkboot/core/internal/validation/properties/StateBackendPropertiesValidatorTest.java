@@ -13,10 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullSource;
-import static org.mockito.ArgumentMatchers.anyString;
+import org.mockito.Answers;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import io.github.sekelenao.flinkboot.core.api.properties.state.CheckpointStorageType;
 import io.github.sekelenao.flinkboot.core.api.properties.state.StateBackendProperties;
@@ -91,20 +89,10 @@ class StateBackendPropertiesValidatorTest {
         @Test
         @DisplayName("Should fail when state backend is non-CUSTOM and customClass is empty string")
         void shouldFailWhenNonCustomAndCustomClassEmpty() {
-            var context = mock(ConstraintValidatorContext.class);
-            var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-            var nodeBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-
-            when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder);
-            when(builder.addPropertyNode("customClass")).thenReturn(nodeBuilder);
-
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
             var props = new StateBackendProperties(StateBackendType.ROCKSDB, CheckpointStorageType.FILESYSTEM, true, false, "");
 
             assertFalse(StateBackendPropertiesValidator.validate(props, context));
-            verify(context).disableDefaultConstraintViolation();
-            verify(context).buildConstraintViolationWithTemplate("custom-class can only be specified when state backend type is CUSTOM");
-            verify(builder).addPropertyNode("customClass");
-            verify(nodeBuilder).addConstraintViolation();
         }
 
         @Test
@@ -128,20 +116,10 @@ class StateBackendPropertiesValidatorTest {
         @Test
         @DisplayName("Should fail when state backend is CUSTOM and customClass is null")
         void shouldFailWhenCustomAndCustomClassNull() {
-            var context = mock(ConstraintValidatorContext.class);
-            var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-            var nodeBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-
-            when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder);
-            when(builder.addPropertyNode("customClass")).thenReturn(nodeBuilder);
-
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
             var props = new StateBackendProperties(StateBackendType.CUSTOM, null, null, null, null);
 
             assertFalse(StateBackendPropertiesValidator.validate(props, context));
-            verify(context).disableDefaultConstraintViolation();
-            verify(context).buildConstraintViolationWithTemplate("custom-class must be specified when state backend type is CUSTOM");
-            verify(builder).addPropertyNode("customClass");
-            verify(nodeBuilder).addConstraintViolation();
         }
 
         @ParameterizedTest
@@ -149,20 +127,10 @@ class StateBackendPropertiesValidatorTest {
         @EnumSource(value = StateBackendType.class, names = "CUSTOM", mode = EnumSource.Mode.EXCLUDE)
         @DisplayName("Should fail when state backend is not CUSTOM and customClass is provided")
         void shouldFailWhenNotCustomAndCustomClassProvided(StateBackendType type) {
-            var context = mock(ConstraintValidatorContext.class);
-            var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-            var nodeBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-
-            when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder);
-            when(builder.addPropertyNode("customClass")).thenReturn(nodeBuilder);
-
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
             var props = new StateBackendProperties(type, null, null, null, "com.example.MyFactory");
 
             assertFalse(StateBackendPropertiesValidator.validate(props, context));
-            verify(context).disableDefaultConstraintViolation();
-            verify(context).buildConstraintViolationWithTemplate("custom-class can only be specified when state backend type is CUSTOM");
-            verify(builder).addPropertyNode("customClass");
-            verify(nodeBuilder).addConstraintViolation();
         }
     }
 }

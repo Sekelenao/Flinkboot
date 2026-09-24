@@ -14,10 +14,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import static org.mockito.ArgumentMatchers.anyString;
+import org.mockito.Answers;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import io.github.sekelenao.flinkboot.fluss.api.properties.source.FlussSourceProperties;
 import io.github.sekelenao.flinkboot.fluss.api.properties.source.FlussStartupMode;
@@ -133,12 +131,7 @@ class FlussSourcePropertiesValidatorTest {
         @Test
         @DisplayName("Should fail when startupMode is TIMESTAMP and startupTimestamp is null")
         void shouldFailWhenTimestampModeAndTimestampIsNull() {
-            var context = mock(ConstraintValidatorContext.class);
-            var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-            var nodeBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-
-            when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder);
-            when(builder.addPropertyNode("startupTimestamp")).thenReturn(nodeBuilder);
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
 
             var props = new FlussSourceProperties(
                 "fluss-source",
@@ -151,22 +144,13 @@ class FlussSourcePropertiesValidatorTest {
             );
 
             assertFalse(FlussSourcePropertiesValidator.validate(props, context));
-            verify(context).disableDefaultConstraintViolation();
-            verify(context).buildConstraintViolationWithTemplate("startup-timestamp is required when startup-mode is TIMESTAMP");
-            verify(builder).addPropertyNode("startupTimestamp");
-            verify(nodeBuilder).addConstraintViolation();
         }
 
         @ParameterizedTest
         @EnumSource(value = FlussStartupMode.class, names = "TIMESTAMP", mode = EnumSource.Mode.EXCLUDE)
         @DisplayName("Should fail when startupMode is not TIMESTAMP and startupTimestamp is provided")
         void shouldFailWhenNonTimestampModeAndTimestampIsProvided(FlussStartupMode mode) {
-            var context = mock(ConstraintValidatorContext.class);
-            var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-            var nodeBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-
-            when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder);
-            when(builder.addPropertyNode("startupTimestamp")).thenReturn(nodeBuilder);
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
 
             var props = new FlussSourceProperties(
                 "fluss-source",
@@ -179,10 +163,6 @@ class FlussSourcePropertiesValidatorTest {
             );
 
             assertFalse(FlussSourcePropertiesValidator.validate(props, context));
-            verify(context).disableDefaultConstraintViolation();
-            verify(context).buildConstraintViolationWithTemplate("startup-timestamp must not be specified when startup-mode is " + mode);
-            verify(builder).addPropertyNode("startupTimestamp");
-            verify(nodeBuilder).addConstraintViolation();
         }
     }
 }

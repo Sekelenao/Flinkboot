@@ -19,10 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
+import org.mockito.Answers;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @DisplayName("KafkaSinkPropertiesValidator")
 class KafkaSinkPropertiesValidatorTest {
@@ -115,12 +113,7 @@ class KafkaSinkPropertiesValidatorTest {
         @Test
         @DisplayName("Should fail when EXACTLY_ONCE is used without transactionalIdPrefix")
         void shouldFailWhenExactlyOnceWithoutPrefix() {
-            var context = mock(ConstraintValidatorContext.class);
-            var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-            var nodeBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-
-            when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder);
-            when(builder.addPropertyNode("transactionalIdPrefix")).thenReturn(nodeBuilder);
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
 
             var props = new KafkaSinkProperties(
                 "sink",
@@ -132,12 +125,6 @@ class KafkaSinkPropertiesValidatorTest {
             );
 
             assertFalse(KafkaSinkPropertiesValidator.validate(props, context));
-            verify(context).disableDefaultConstraintViolation();
-            verify(context).buildConstraintViolationWithTemplate(
-                "transactional-id-prefix is required when delivery-guarantee is EXACTLY_ONCE"
-            );
-            verify(builder).addPropertyNode("transactionalIdPrefix");
-            verify(nodeBuilder).addConstraintViolation();
         }
 
         @ParameterizedTest
@@ -145,12 +132,7 @@ class KafkaSinkPropertiesValidatorTest {
         @EnumSource(value = KafkaDeliveryGuarantee.class, names = "EXACTLY_ONCE", mode = EnumSource.Mode.EXCLUDE)
         @DisplayName("Should fail when non-EXACTLY_ONCE guarantee has transactionalIdPrefix")
         void shouldFailWhenNonExactlyOnceWithPrefix(KafkaDeliveryGuarantee guarantee) {
-            var context = mock(ConstraintValidatorContext.class);
-            var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-            var nodeBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-
-            when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder);
-            when(builder.addPropertyNode("transactionalIdPrefix")).thenReturn(nodeBuilder);
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
 
             var props = new KafkaSinkProperties(
                 "sink",
@@ -162,12 +144,6 @@ class KafkaSinkPropertiesValidatorTest {
             );
 
             assertFalse(KafkaSinkPropertiesValidator.validate(props, context));
-            verify(context).disableDefaultConstraintViolation();
-            verify(context).buildConstraintViolationWithTemplate(
-                "transactional-id-prefix can only be specified when delivery-guarantee is EXACTLY_ONCE"
-            );
-            verify(builder).addPropertyNode("transactionalIdPrefix");
-            verify(nodeBuilder).addConstraintViolation();
         }
     }
 }

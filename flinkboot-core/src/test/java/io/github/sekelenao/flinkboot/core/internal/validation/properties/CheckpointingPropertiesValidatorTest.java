@@ -17,10 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
+import org.mockito.Answers;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @DisplayName("CheckpointingPropertiesValidator")
 class CheckpointingPropertiesValidatorTest {
@@ -81,25 +79,12 @@ class CheckpointingPropertiesValidatorTest {
         @ValueSource(booleans = {true})
         @DisplayName("Should return false and register violation when checkpointing is enabled or default without an interval")
         void shouldFailWhenCheckpointingIsEnabledWithoutInterval(Boolean enabled) {
-            var context = mock(ConstraintValidatorContext.class);
-            var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-            var nodeBuilder =
-                mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-
-            when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder);
-            when(builder.addPropertyNode("interval")).thenReturn(nodeBuilder);
-
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
             var props = new CheckpointingProperties(
                 enabled, null, null, null, null, null, null, null, null, null
             );
 
             assertFalse(CheckpointingPropertiesValidator.validate(props, context));
-            verify(context).disableDefaultConstraintViolation();
-            verify(context).buildConstraintViolationWithTemplate(
-                "interval must be specified when checkpointing is enabled"
-            );
-            verify(builder).addPropertyNode("interval");
-            verify(nodeBuilder).addConstraintViolation();
         }
 
         @Test

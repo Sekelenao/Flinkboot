@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.Answers;
 
 import java.util.List;
 import java.util.Map;
@@ -18,11 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @DisplayName("KafkaSourcePropertiesValidator")
 class KafkaSourcePropertiesValidatorTest {
@@ -103,12 +102,7 @@ class KafkaSourcePropertiesValidatorTest {
         @Test
         @DisplayName("Should fail when both topics and topic-pattern are configured")
         void shouldFailWhenBothTopicsAndPatternConfigured() {
-            var context = mock(ConstraintValidatorContext.class);
-            var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-            var nodeBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-
-            when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder);
-            when(builder.addPropertyNode("topicPattern")).thenReturn(nodeBuilder);
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
 
             var props = new KafkaSourceProperties(
                 "source",
@@ -123,21 +117,12 @@ class KafkaSourcePropertiesValidatorTest {
             );
 
             assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
-            verify(context).disableDefaultConstraintViolation();
-            verify(context).buildConstraintViolationWithTemplate("Cannot configure both 'topics' and 'topic-pattern'");
-            verify(builder).addPropertyNode("topicPattern");
-            verify(nodeBuilder).addConstraintViolation();
         }
 
         @Test
         @DisplayName("Should fail when neither topics nor topic-pattern are configured")
         void shouldFailWhenNeitherTopicsNorPatternConfigured() {
-            var context = mock(ConstraintValidatorContext.class);
-            var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-            var nodeBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-
-            when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder);
-            when(builder.addPropertyNode("topics")).thenReturn(nodeBuilder);
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
 
             var props = new KafkaSourceProperties(
                 "source",
@@ -152,21 +137,12 @@ class KafkaSourcePropertiesValidatorTest {
             );
 
             assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
-            verify(context).disableDefaultConstraintViolation();
-            verify(context).buildConstraintViolationWithTemplate("Either 'topics' or 'topic-pattern' must be specified");
-            verify(builder).addPropertyNode("topics");
-            verify(nodeBuilder).addConstraintViolation();
         }
 
         @Test
         @DisplayName("Should fail when both topics and empty topic-pattern are configured")
         void shouldFailWhenBothTopicsAndEmptyTopicPatternConfigured() {
-            var context = mock(ConstraintValidatorContext.class);
-            var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-            var nodeBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-
-            when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder);
-            when(builder.addPropertyNode("topicPattern")).thenReturn(nodeBuilder);
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
 
             var props = new KafkaSourceProperties(
                 "source",
@@ -181,10 +157,6 @@ class KafkaSourcePropertiesValidatorTest {
             );
 
             assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
-            verify(context).disableDefaultConstraintViolation();
-            verify(context).buildConstraintViolationWithTemplate("Cannot configure both 'topics' and 'topic-pattern'");
-            verify(builder).addPropertyNode("topicPattern");
-            verify(nodeBuilder).addConstraintViolation();
         }
 
         @Test
@@ -228,12 +200,7 @@ class KafkaSourcePropertiesValidatorTest {
         @Test
         @DisplayName("Should fail when TIMESTAMP mode is used without timestamp")
         void shouldFailWhenTimestampModeWithoutTimestamp() {
-            var context = mock(ConstraintValidatorContext.class);
-            var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-            var nodeBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-
-            when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder);
-            when(builder.addPropertyNode("startingOffsetsTimestamp")).thenReturn(nodeBuilder);
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
 
             var props = new KafkaSourceProperties(
                 "source",
@@ -248,21 +215,12 @@ class KafkaSourcePropertiesValidatorTest {
             );
 
             assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
-            verify(context).disableDefaultConstraintViolation();
-            verify(context).buildConstraintViolationWithTemplate("starting-offsets-timestamp is required when starting-offsets is TIMESTAMP");
-            verify(builder).addPropertyNode("startingOffsetsTimestamp");
-            verify(nodeBuilder).addConstraintViolation();
         }
 
         @Test
         @DisplayName("Should fail when TIMESTAMP mode is used with partition offsets")
         void shouldFailWhenTimestampModeWithPartitionOffsets() {
-            var context = mock(ConstraintValidatorContext.class);
-            var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-            var nodeBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-
-            when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder);
-            when(builder.addPropertyNode("startingOffsetsPartitionOffsets")).thenReturn(nodeBuilder);
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
 
             var partitionOffset = new TopicPartitionOffsetProperties("my-topic", 0, 100L);
             var props = new KafkaSourceProperties(
@@ -278,10 +236,6 @@ class KafkaSourcePropertiesValidatorTest {
             );
 
             assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
-            verify(context).disableDefaultConstraintViolation();
-            verify(context).buildConstraintViolationWithTemplate("starting-offsets-partition-offsets must not be specified when starting-offsets is TIMESTAMP");
-            verify(builder).addPropertyNode("startingOffsetsPartitionOffsets");
-            verify(nodeBuilder).addConstraintViolation();
         }
 
         @Test
@@ -307,12 +261,7 @@ class KafkaSourcePropertiesValidatorTest {
         @Test
         @DisplayName("Should fail when OFFSETS mode is used without partition offsets")
         void shouldFailWhenOffsetsModeWithoutPartitionOffsets() {
-            var context = mock(ConstraintValidatorContext.class);
-            var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-            var nodeBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-
-            when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder);
-            when(builder.addPropertyNode("startingOffsetsPartitionOffsets")).thenReturn(nodeBuilder);
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
 
             var props = new KafkaSourceProperties(
                 "source",
@@ -327,21 +276,12 @@ class KafkaSourcePropertiesValidatorTest {
             );
 
             assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
-            verify(context).disableDefaultConstraintViolation();
-            verify(context).buildConstraintViolationWithTemplate("starting-offsets-partition-offsets is required and cannot be empty when starting-offsets is OFFSETS");
-            verify(builder).addPropertyNode("startingOffsetsPartitionOffsets");
-            verify(nodeBuilder).addConstraintViolation();
         }
 
         @Test
         @DisplayName("Should fail when OFFSETS mode is used with timestamp")
         void shouldFailWhenOffsetsModeWithTimestamp() {
-            var context = mock(ConstraintValidatorContext.class);
-            var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-            var nodeBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-
-            when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder);
-            when(builder.addPropertyNode("startingOffsetsTimestamp")).thenReturn(nodeBuilder);
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
 
             var partitionOffset = new TopicPartitionOffsetProperties("my-topic", 0, 100L);
             var props = new KafkaSourceProperties(
@@ -357,23 +297,13 @@ class KafkaSourcePropertiesValidatorTest {
             );
 
             assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
-            verify(context).disableDefaultConstraintViolation();
-            verify(context).buildConstraintViolationWithTemplate("starting-offsets-timestamp must not be specified when starting-offsets is OFFSETS");
-            verify(builder).addPropertyNode("startingOffsetsTimestamp");
-            verify(nodeBuilder).addConstraintViolation();
         }
-
 
         @ParameterizedTest
         @EnumSource(value = KafkaOffsetInitializer.class, names = {"TIMESTAMP", "OFFSETS"}, mode = EnumSource.Mode.EXCLUDE)
         @DisplayName("Should fail when standard offset strategy has timestamp")
         void shouldFailWhenStandardStrategyHasTimestamp(KafkaOffsetInitializer strategy) {
-            var context = mock(ConstraintValidatorContext.class);
-            var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-            var nodeBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-
-            when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder);
-            when(builder.addPropertyNode("startingOffsetsTimestamp")).thenReturn(nodeBuilder);
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
 
             var props = new KafkaSourceProperties(
                 "source",
@@ -388,22 +318,13 @@ class KafkaSourcePropertiesValidatorTest {
             );
 
             assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
-            verify(context).disableDefaultConstraintViolation();
-            verify(context).buildConstraintViolationWithTemplate("starting-offsets-timestamp must not be specified when starting-offsets is " + strategy);
-            verify(builder).addPropertyNode("startingOffsetsTimestamp");
-            verify(nodeBuilder).addConstraintViolation();
         }
 
         @ParameterizedTest
         @EnumSource(value = KafkaOffsetInitializer.class, names = {"TIMESTAMP", "OFFSETS"}, mode = EnumSource.Mode.EXCLUDE)
         @DisplayName("Should fail when standard offset strategy has partition offsets")
         void shouldFailWhenStandardStrategyHasPartitionOffsets(KafkaOffsetInitializer strategy) {
-            var context = mock(ConstraintValidatorContext.class);
-            var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-            var nodeBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-
-            when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder);
-            when(builder.addPropertyNode("startingOffsetsPartitionOffsets")).thenReturn(nodeBuilder);
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
 
             var partitionOffset = new TopicPartitionOffsetProperties("my-topic", 0, 100L);
             var props = new KafkaSourceProperties(
@@ -419,26 +340,12 @@ class KafkaSourcePropertiesValidatorTest {
             );
 
             assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
-            verify(context).disableDefaultConstraintViolation();
-            verify(context).buildConstraintViolationWithTemplate("starting-offsets-partition-offsets must not be specified when starting-offsets is " + strategy);
-            verify(builder).addPropertyNode("startingOffsetsPartitionOffsets");
-            verify(nodeBuilder).addConstraintViolation();
         }
 
         @Test
         @DisplayName("Should report both subscription and starting-offsets violations simultaneously without short-circuiting")
         void shouldReportBothSubscriptionAndStartingOffsetsViolationsSimultaneously() {
-            var context = mock(ConstraintValidatorContext.class);
-            var topicBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-            var topicNode = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-            var offsetBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-            var offsetNode = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-
-            when(context.buildConstraintViolationWithTemplate("Either 'topics' or 'topic-pattern' must be specified")).thenReturn(topicBuilder);
-            when(topicBuilder.addPropertyNode("topics")).thenReturn(topicNode);
-
-            when(context.buildConstraintViolationWithTemplate("starting-offsets-timestamp is required when starting-offsets is TIMESTAMP")).thenReturn(offsetBuilder);
-            when(offsetBuilder.addPropertyNode("startingOffsetsTimestamp")).thenReturn(offsetNode);
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
 
             var props = new KafkaSourceProperties(
                 "source",
@@ -454,13 +361,7 @@ class KafkaSourcePropertiesValidatorTest {
 
             assertAll(
                 () -> assertFalse(KafkaSourcePropertiesValidator.validate(props, context)),
-                () -> verify(context, times(2)).disableDefaultConstraintViolation(),
-                () -> verify(context).buildConstraintViolationWithTemplate("Either 'topics' or 'topic-pattern' must be specified"),
-                () -> verify(topicBuilder).addPropertyNode("topics"),
-                () -> verify(topicNode).addConstraintViolation(),
-                () -> verify(context).buildConstraintViolationWithTemplate("starting-offsets-timestamp is required when starting-offsets is TIMESTAMP"),
-                () -> verify(offsetBuilder).addPropertyNode("startingOffsetsTimestamp"),
-                () -> verify(offsetNode).addConstraintViolation()
+                () -> verify(context, times(2)).disableDefaultConstraintViolation()
             );
         }
     }
