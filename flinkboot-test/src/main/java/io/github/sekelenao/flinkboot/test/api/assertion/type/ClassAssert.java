@@ -4,10 +4,9 @@ import io.github.sekelenao.flinkboot.test.internal.pojo.PojoValidator;
 
 import org.apache.flink.api.common.functions.InvalidTypesException;
 import org.apache.flink.api.java.typeutils.TypeExtractor;
+import org.opentest4j.AssertionFailedError;
 
 import java.util.Objects;
-
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Fluent assertion provider for verifying Apache Flink serialization rules and class structures.
@@ -51,8 +50,8 @@ public final class ClassAssert {
             new PojoValidator().validate(TypeExtractor.createTypeInfo(type));
             return this;
         } catch (InvalidTypesException exception) {
-            fail(String.format("Expected class <%s> to be a valid POJO, but type extraction failed", type.getName()), exception);
-            return this;
+            var message = "Expected class <" + type.getName() + "> to be a valid POJO, but type extraction failed";
+            throw new AssertionFailedError(message, exception);
         }
     }
 

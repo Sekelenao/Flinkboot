@@ -86,9 +86,11 @@ class ClassAssertTest {
         void shouldFailWhenTypeExtractionThrowsInvalidTypesException() {
             var classAssert = new ClassAssert(InvalidTypesExtractionPojo.class);
             var error = assertThrows(AssertionFailedError.class, classAssert::isPojo);
+            var expectedMessage = "Expected class <" + InvalidTypesExtractionPojo.class.getName() + "> to be a valid POJO, but type extraction failed";
             assertAll(
-                () -> assertTrue(error.getMessage().contains("Expected class <" + InvalidTypesExtractionPojo.class.getName() + "> to be a valid POJO, but type extraction failed")),
-                () -> assertInstanceOf(InvalidTypesException.class, error.getCause())
+                () -> assertEquals(expectedMessage, error.getMessage()),
+                () -> assertInstanceOf(InvalidTypesException.class, error.getCause()),
+                () -> assertEquals("Simulated type extraction failure", error.getCause().getMessage())
             );
         }
     }
