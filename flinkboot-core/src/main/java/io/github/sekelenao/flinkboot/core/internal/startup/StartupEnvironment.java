@@ -1,5 +1,6 @@
 package io.github.sekelenao.flinkboot.core.internal.startup;
 
+import io.github.sekelenao.flinkboot.core.api.exception.parsing.IntegerParsingException;
 import io.github.sekelenao.flinkboot.core.internal.annotation.VisibleForTesting;
 import io.github.sekelenao.flinkboot.core.internal.parser.bool.StrictBooleanParser;
 import io.github.sekelenao.flinkboot.core.internal.parser.integer.IntegerParser;
@@ -53,7 +54,7 @@ public final class StartupEnvironment {
 
     public ParserFeatures parserFeatures(){
         var validationCapacity = get(VIOLATIONS_LOG_SIZE)
-            .map(value -> IntegerParser.parseStrictlyPositive(value, () -> new IllegalArgumentException(
+            .map(value -> IntegerParser.parseStrictlyPositive(value, () -> new IntegerParsingException(
                 "Invalid value for '" + VIOLATIONS_LOG_SIZE
                     + "': must be a strictly positive integer, but was '" + value + "'"
             )))
