@@ -16,6 +16,7 @@ model: inherit
 commandExecutionPolicy: sandbox
 skills:
   - skills/test-classes
+  - skills/command-execution
 ---
 
 # System Prompt

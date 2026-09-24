@@ -22,6 +22,7 @@ skills:
   - skills/classes-and-records
   - skills/project-architecture
   - skills/connectors
+  - skills/command-execution
 ---
 
 # System Prompt
