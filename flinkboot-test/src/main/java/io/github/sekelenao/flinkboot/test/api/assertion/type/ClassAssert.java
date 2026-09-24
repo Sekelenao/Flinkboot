@@ -2,7 +2,9 @@ package io.github.sekelenao.flinkboot.test.api.assertion.type;
 
 import io.github.sekelenao.flinkboot.test.internal.pojo.PojoValidator;
 
+import org.apache.flink.api.common.functions.InvalidTypesException;
 import org.apache.flink.api.java.typeutils.TypeExtractor;
+import org.opentest4j.AssertionFailedError;
 
 import java.util.Objects;
 
@@ -44,8 +46,13 @@ public final class ClassAssert {
      * @throws AssertionError if the class or any nested field violates Flink POJO rules
      */
     public ClassAssert isPojo() {
-        new PojoValidator().validate(TypeExtractor.createTypeInfo(type));
-        return this;
+        try {
+            new PojoValidator().validate(TypeExtractor.createTypeInfo(type));
+            return this;
+        } catch (InvalidTypesException exception) {
+            var message = "Expected class <" + type.getName() + "> to be a valid POJO, but type extraction failed";
+            throw new AssertionFailedError(message, exception);
+        }
     }
 
 }

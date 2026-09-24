@@ -52,6 +52,7 @@ All notable user-facing changes to this project are documented in this file.
 - **[flinkboot-core] Supported URI Schemes in Error Message**: Clarified supported URI prefixes (`classpath:`, `file:`) in `UnrecognizedResourceException` detail messages.
 - **[flinkboot-kafka] Non-Short-Circuiting Source Validation**: Evaluates topic subscription and starting offsets constraints unconditionally in `KafkaSourcePropertiesValidator`, collecting and reporting all configuration violations simultaneously in a single diagnostic report.
 - **[flinkboot-core] Typed Integer Parsing Exception**: Throws dedicated `IntegerParsingException` (inheriting from `FlinkbootException`) instead of raw `IllegalArgumentException` when parsing invalid or non-strictly-positive startup integer parameters (such as `flinkboot-configuration-violations-log-size`).
+- **[flinkboot-test] POJO Assertion Failure on Type Extraction Error**: Catches Flink's raw `InvalidTypesException` during POJO type extraction in `ClassAssert.isPojo()` and rethrows it as an `AssertionFailedError` with the original exception attached as cause, ensuring consistent test failure behavior.
 - **[configuration] Unified Cross-Field Error Reporting**: Cross-field configuration constraints are now collected and reported alongside field-level validation errors in a single diagnostic report instead of interrupting deserialization prematurely.
 
 ---
