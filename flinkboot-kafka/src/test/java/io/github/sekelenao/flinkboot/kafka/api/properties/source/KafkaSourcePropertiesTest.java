@@ -472,6 +472,102 @@ class KafkaSourcePropertiesTest {
         }
 
         @Test
+        @DisplayName("Should report both missing timestamp and unexpected partition-offsets violations simultaneously for TIMESTAMP strategy")
+        void shouldReportBothMissingTimestampAndUnexpectedPartitionOffsetsViolationsForTimestampStrategySimultaneously() {
+            var props = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                List.of("topic-a"),
+                null,
+                KafkaOffsetInitializer.TIMESTAMP,
+                null,
+                List.of(new TopicPartitionOffsetProperties("topic-a", 0, 100L)),
+                null
+            );
+            var violations = validator.validate(props);
+            assertAll(
+                () -> assertEquals(2, violations.size(), "Expected exactly 2 violations for missing timestamp and unexpected partition offsets"),
+                () -> assertTrue(
+                    violations.stream().anyMatch(v ->
+                        v.getPropertyPath().toString().equals("startingOffsetsTimestamp")
+                            && v.getMessage().equals("starting-offsets-timestamp is required when starting-offsets is TIMESTAMP")),
+                    "Expected violation on property 'startingOffsetsTimestamp' stating timestamp is required for TIMESTAMP strategy"
+                ),
+                () -> assertTrue(
+                    violations.stream().anyMatch(v ->
+                        v.getPropertyPath().toString().equals("startingOffsetsPartitionOffsets")
+                            && v.getMessage().equals("starting-offsets-partition-offsets must not be specified when starting-offsets is TIMESTAMP")),
+                    "Expected violation on property 'startingOffsetsPartitionOffsets' stating partition offsets must not be specified for TIMESTAMP strategy"
+                )
+            );
+        }
+
+        @Test
+        @DisplayName("Should report both missing partition-offsets and unexpected timestamp violations simultaneously for OFFSETS strategy")
+        void shouldReportBothMissingPartitionOffsetsAndUnexpectedTimestampViolationsForOffsetsStrategySimultaneously() {
+            var props = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                List.of("topic-a"),
+                null,
+                KafkaOffsetInitializer.OFFSETS,
+                1000L,
+                null,
+                null
+            );
+            var violations = validator.validate(props);
+            assertAll(
+                () -> assertEquals(2, violations.size(), "Expected exactly 2 violations for missing partition offsets and unexpected timestamp"),
+                () -> assertTrue(
+                    violations.stream().anyMatch(v ->
+                        v.getPropertyPath().toString().equals("startingOffsetsPartitionOffsets")
+                            && v.getMessage().equals("starting-offsets-partition-offsets is required and cannot be empty when starting-offsets is OFFSETS")),
+                    "Expected violation on property 'startingOffsetsPartitionOffsets' stating partition offsets are required for OFFSETS strategy"
+                ),
+                () -> assertTrue(
+                    violations.stream().anyMatch(v ->
+                        v.getPropertyPath().toString().equals("startingOffsetsTimestamp")
+                            && v.getMessage().equals("starting-offsets-timestamp must not be specified when starting-offsets is OFFSETS")),
+                    "Expected violation on property 'startingOffsetsTimestamp' stating timestamp must not be specified for OFFSETS strategy"
+                )
+            );
+        }
+
+        @Test
+        @DisplayName("Should report both unexpected timestamp and unexpected partition-offsets violations simultaneously for standard strategy")
+        void shouldReportBothUnexpectedTimestampAndUnexpectedPartitionOffsetsViolationsForStandardStrategySimultaneously() {
+            var props = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                List.of("topic-a"),
+                null,
+                KafkaOffsetInitializer.EARLIEST,
+                1000L,
+                List.of(new TopicPartitionOffsetProperties("topic-a", 0, 100L)),
+                null
+            );
+            var violations = validator.validate(props);
+            assertAll(
+                () -> assertEquals(2, violations.size(), "Expected exactly 2 violations for unexpected timestamp and unexpected partition offsets"),
+                () -> assertTrue(
+                    violations.stream().anyMatch(v ->
+                        v.getPropertyPath().toString().equals("startingOffsetsTimestamp")
+                            && v.getMessage().equals("starting-offsets-timestamp must not be specified when starting-offsets is EARLIEST")),
+                    "Expected violation on property 'startingOffsetsTimestamp' stating timestamp must not be specified for EARLIEST strategy"
+                ),
+                () -> assertTrue(
+                    violations.stream().anyMatch(v ->
+                        v.getPropertyPath().toString().equals("startingOffsetsPartitionOffsets")
+                            && v.getMessage().equals("starting-offsets-partition-offsets must not be specified when starting-offsets is EARLIEST")),
+                    "Expected violation on property 'startingOffsetsPartitionOffsets' stating partition offsets must not be specified for EARLIEST strategy"
+                )
+            );
+        }
+
+        @Test
         @DisplayName("Should fail validation when name is blank or null")
         void shouldFailWhenNameIsBlankOrNull() {
             var blankConfig = new KafkaSourceProperties(

@@ -33,15 +33,12 @@ public final class KafkaSourcePropertiesValidator {
     private boolean validateTopicSubscription() {
         var hasTopics = !properties.topics().isEmpty();
         var hasPattern = properties.topicPattern().isPresent();
-
         if (hasTopics && hasPattern) {
             return PropertiesValidator.reject(context, "topicPattern", "Cannot configure both 'topics' and 'topic-pattern'");
         }
-
         if (!hasTopics && !hasPattern) {
             return PropertiesValidator.reject(context, "topics", "Either 'topics' or 'topic-pattern' must be specified");
         }
-
         return true;
     }
 
@@ -50,7 +47,6 @@ public final class KafkaSourcePropertiesValidator {
         if (strategy == null) {
             return true;
         }
-
         switch (strategy) {
             case TIMESTAMP: return validateTimestampOffsets();
             case OFFSETS: return validateSpecificOffsets();
@@ -59,33 +55,42 @@ public final class KafkaSourcePropertiesValidator {
     }
 
     private boolean validateTimestampOffsets() {
+        var isValid = true;
         if (properties.startingOffsetsTimestamp().isEmpty()) {
-            return rejectTimestamp("starting-offsets-timestamp is required when starting-offsets is TIMESTAMP");
+            rejectTimestamp("starting-offsets-timestamp is required when starting-offsets is TIMESTAMP");
+            isValid = false;
         }
         if (!properties.startingOffsetsPartitionOffsets().isEmpty()) {
-            return rejectPartitionOffsets("starting-offsets-partition-offsets must not be specified when starting-offsets is TIMESTAMP");
+            rejectPartitionOffsets("starting-offsets-partition-offsets must not be specified when starting-offsets is TIMESTAMP");
+            isValid = false;
         }
-        return true;
+        return isValid;
     }
 
     private boolean validateSpecificOffsets() {
+        var isValid = true;
         if (properties.startingOffsetsPartitionOffsets().isEmpty()) {
-            return rejectPartitionOffsets("starting-offsets-partition-offsets is required and cannot be empty when starting-offsets is OFFSETS");
+            rejectPartitionOffsets("starting-offsets-partition-offsets is required and cannot be empty when starting-offsets is OFFSETS");
+            isValid = false;
         }
         if (properties.startingOffsetsTimestamp().isPresent()) {
-            return rejectTimestamp("starting-offsets-timestamp must not be specified when starting-offsets is OFFSETS");
+            rejectTimestamp("starting-offsets-timestamp must not be specified when starting-offsets is OFFSETS");
+            isValid = false;
         }
-        return true;
+        return isValid;
     }
 
     private boolean validateStandardOffsets(KafkaOffsetInitializer strategy) {
+        var isValid = true;
         if (properties.startingOffsetsTimestamp().isPresent()) {
-            return rejectTimestamp("starting-offsets-timestamp must not be specified when starting-offsets is " + strategy);
+            rejectTimestamp("starting-offsets-timestamp must not be specified when starting-offsets is " + strategy);
+            isValid = false;
         }
         if (!properties.startingOffsetsPartitionOffsets().isEmpty()) {
-            return rejectPartitionOffsets("starting-offsets-partition-offsets must not be specified when starting-offsets is " + strategy);
+            rejectPartitionOffsets("starting-offsets-partition-offsets must not be specified when starting-offsets is " + strategy);
+            isValid = false;
         }
-        return true;
+        return isValid;
     }
 
     private boolean rejectTimestamp(String message) {
