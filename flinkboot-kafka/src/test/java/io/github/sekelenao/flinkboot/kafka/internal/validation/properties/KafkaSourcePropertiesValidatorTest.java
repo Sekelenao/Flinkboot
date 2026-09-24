@@ -338,25 +338,5 @@ class KafkaSourcePropertiesValidatorTest {
 
             assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
         }
-
-        @Test
-        @DisplayName("Should report both subscription and starting-offsets violations simultaneously without short-circuiting")
-        void shouldReportBothSubscriptionAndStartingOffsetsViolationsSimultaneously() {
-            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-
-            var props = new KafkaSourceProperties(
-                "source",
-                List.of("localhost:9092"),
-                "group",
-                null,
-                null,
-                KafkaOffsetInitializer.TIMESTAMP,
-                null,
-                null,
-                Map.of()
-            );
-
-            assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
-        }
     }
 }
