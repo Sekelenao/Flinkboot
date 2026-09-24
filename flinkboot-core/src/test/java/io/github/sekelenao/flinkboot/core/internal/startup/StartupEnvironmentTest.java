@@ -385,6 +385,16 @@ class StartupEnvironmentTest {
             assertEquals(capacity, startupEnv.parserFeatures().validationCapacity());
         }
 
+        @ParameterizedTest(name = "capacity = {0}")
+        @ValueSource(ints = {1, 10, 25, 100, Integer.MAX_VALUE})
+        @DisplayName("Should accept strictly positive validation capacity in env variables")
+        void shouldAcceptValidValidationCapacityInEnv(int capacity) {
+            var cmd = CommandLine.parse(new String[0]);
+            var resolver = new EnvVarResolver(k -> "FLINKBOOT_CONFIGURATION_VIOLATIONS_LOG_SIZE".equals(k) ? String.valueOf(capacity) : null);
+            var startupEnv = new StartupEnvironment(cmd, resolver);
+            assertEquals(capacity, startupEnv.parserFeatures().validationCapacity());
+        }
+
         @Test
         @DisplayName("Should prefer CommandLine option over EnvVarResolver for validation capacity")
         void shouldPreferCommandLineOverEnvForValidationCapacity() {
