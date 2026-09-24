@@ -3,8 +3,9 @@ package io.github.sekelenao.flinkboot.kafka.api.properties.sink;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
-import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+
+import static jakarta.validation.Validation.buildDefaultValidatorFactory;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -22,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -36,7 +38,7 @@ class KafkaSinkPropertiesTest {
 
     private static final Validator validator;
     static {
-        try (var factory = Validation.buildDefaultValidatorFactory()) {
+        try (var factory = buildDefaultValidatorFactory()) {
             validator = factory.getValidator();
         }
     }
@@ -64,8 +66,7 @@ class KafkaSinkPropertiesTest {
                 () -> assertEquals("my-sink", config.name()),
                 () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
                 () -> assertEquals("my-topic", config.topic()),
-                () -> assertTrue(config.deliveryGuarantee().isPresent()),
-                () -> assertEquals(KafkaDeliveryGuarantee.EXACTLY_ONCE, config.deliveryGuarantee().get()),
+                () -> assertEquals(KafkaDeliveryGuarantee.EXACTLY_ONCE, config.deliveryGuarantee()),
                 () -> assertTrue(config.transactionalIdPrefix().isPresent()),
                 () -> assertEquals("my-prefix", config.transactionalIdPrefix().get()),
                 () -> assertEquals(Map.of("acks", "all"), config.properties())
@@ -78,7 +79,8 @@ class KafkaSinkPropertiesTest {
             var yaml = "name: my-sink\n" +
                 "bootstrap-servers:\n" +
                 "  - localhost:9092\n" +
-                "topic: my-topic\n";
+                "topic: my-topic\n" +
+                "delivery-guarantee: AT_LEAST_ONCE\n";
 
             var config = mapper.readValue(yaml, KafkaSinkProperties.class);
 
@@ -87,7 +89,7 @@ class KafkaSinkPropertiesTest {
                 () -> assertEquals("my-sink", config.name()),
                 () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
                 () -> assertEquals("my-topic", config.topic()),
-                () -> assertTrue(config.deliveryGuarantee().isEmpty()),
+                () -> assertEquals(KafkaDeliveryGuarantee.AT_LEAST_ONCE, config.deliveryGuarantee()),
                 () -> assertTrue(config.transactionalIdPrefix().isEmpty()),
                 () -> assertTrue(config.properties().isEmpty())
             );
@@ -96,7 +98,7 @@ class KafkaSinkPropertiesTest {
 
     @Nested
     @DisplayName("Validation")
-    class ValidationTests {
+    class Validation {
 
         @Test
         @DisplayName("Should pass validation with valid properties")
@@ -115,12 +117,48 @@ class KafkaSinkPropertiesTest {
         }
 
         @Test
+        @DisplayName("Should pass validation when EXACTLY_ONCE is configured with valid transactional-id-prefix")
+        void shouldPassValidationWhenExactlyOnceWithValidPrefix() {
+            var config = new KafkaSinkProperties(
+                "my-sink",
+                List.of("localhost:9092"),
+                "my-topic",
+                KafkaDeliveryGuarantee.EXACTLY_ONCE,
+                "my-prefix",
+                null
+            );
+
+            var violations = validator.validate(config);
+            assertTrue(violations.isEmpty(), "Should have no validation violations");
+        }
+
+        @Test
         @DisplayName("Should fail validation when required fields are null")
         void shouldFailWhenRequiredFieldsAreNull() {
             assertAll(
-                () -> assertFalse(validator.validate(new KafkaSinkProperties(null, List.of("localhost:9092"), "t", null, null, null)).isEmpty()),
-                () -> assertFalse(validator.validate(new KafkaSinkProperties("s", null, "t", null, null, null)).isEmpty()),
-                () -> assertFalse(validator.validate(new KafkaSinkProperties("s", List.of("localhost:9092"), null, null, null, null)).isEmpty())
+                () -> assertFalse(validator.validate(new KafkaSinkProperties(null, List.of("localhost:9092"), "t", KafkaDeliveryGuarantee.AT_LEAST_ONCE, null, null)).isEmpty()),
+                () -> assertFalse(validator.validate(new KafkaSinkProperties("s", null, "t", KafkaDeliveryGuarantee.AT_LEAST_ONCE, null, null)).isEmpty()),
+                () -> assertFalse(validator.validate(new KafkaSinkProperties("s", List.of("localhost:9092"), null, KafkaDeliveryGuarantee.AT_LEAST_ONCE, null, null)).isEmpty()),
+                () -> assertFalse(validator.validate(new KafkaSinkProperties("s", List.of("localhost:9092"), "t", null, null, null)).isEmpty())
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when delivery-guarantee is null")
+        void shouldFailWhenDeliveryGuaranteeIsNull() {
+            var config = new KafkaSinkProperties(
+                "my-sink",
+                List.of("localhost:9092"),
+                "my-topic",
+                null,
+                null,
+                null
+            );
+
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("deliveryGuarantee")))
             );
         }
 
@@ -329,7 +367,7 @@ class KafkaSinkPropertiesTest {
 
     @Nested
     @DisplayName("Getters")
-    class GetterTests {
+    class Getters {
 
         @Test
         @DisplayName("Should return expected values from getters when all parameters are present")
@@ -347,12 +385,26 @@ class KafkaSinkPropertiesTest {
                 () -> assertEquals("my-sink", config.name()),
                 () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
                 () -> assertEquals("my-topic", config.topic()),
-                () -> assertTrue(config.deliveryGuarantee().isPresent()),
-                () -> assertEquals(KafkaDeliveryGuarantee.EXACTLY_ONCE, config.deliveryGuarantee().get()),
+                () -> assertEquals(KafkaDeliveryGuarantee.EXACTLY_ONCE, config.deliveryGuarantee()),
                 () -> assertTrue(config.transactionalIdPrefix().isPresent()),
                 () -> assertEquals("prefix", config.transactionalIdPrefix().get()),
                 () -> assertEquals(Map.of("key", "val"), config.properties())
             );
+        }
+
+        @Test
+        @DisplayName("Should return null delivery guarantee when constructed with null")
+        void shouldReturnNullWhenDeliveryGuaranteeIsNull() {
+            var config = new KafkaSinkProperties(
+                "my-sink",
+                List.of("localhost:9092"),
+                "my-topic",
+                null,
+                null,
+                Map.of()
+            );
+
+            assertNull(config.deliveryGuarantee());
         }
 
         @Test
@@ -445,7 +497,7 @@ class KafkaSinkPropertiesTest {
 
     @Nested
     @DisplayName("Equals and HashCode")
-    class EqualsHashCodeTests {
+    class EqualsAndHashCode {
 
         @Test
         @DisplayName("Equals and HashCode should work correctly")
@@ -483,6 +535,35 @@ class KafkaSinkPropertiesTest {
                 () -> assertNotEquals(config1, "string-object"),
                 () -> assertNotEquals(config1, configDiffTopic),
                 () -> assertNotNull(config1.toString())
+            );
+        }
+
+        @Test
+        @DisplayName("Should be unequal when properties differ")
+        void shouldBeUnequalWhenFieldsDiffer() {
+            var base = new KafkaSinkProperties(
+                "my-sink",
+                List.of("localhost:9092"),
+                "my-topic",
+                KafkaDeliveryGuarantee.AT_LEAST_ONCE,
+                null,
+                Map.of("key", "val")
+            );
+
+            var diffName = new KafkaSinkProperties("other-sink", List.of("localhost:9092"), "my-topic", KafkaDeliveryGuarantee.AT_LEAST_ONCE, null, Map.of("key", "val"));
+            var diffServers = new KafkaSinkProperties("my-sink", List.of("localhost:9093"), "my-topic", KafkaDeliveryGuarantee.AT_LEAST_ONCE, null, Map.of("key", "val"));
+            var diffTopic = new KafkaSinkProperties("my-sink", List.of("localhost:9092"), "other-topic", KafkaDeliveryGuarantee.AT_LEAST_ONCE, null, Map.of("key", "val"));
+            var diffGuarantee = new KafkaSinkProperties("my-sink", List.of("localhost:9092"), "my-topic", KafkaDeliveryGuarantee.NONE, null, Map.of("key", "val"));
+            var diffPrefix = new KafkaSinkProperties("my-sink", List.of("localhost:9092"), "my-topic", KafkaDeliveryGuarantee.AT_LEAST_ONCE, "prefix", Map.of("key", "val"));
+            var diffProps = new KafkaSinkProperties("my-sink", List.of("localhost:9092"), "my-topic", KafkaDeliveryGuarantee.AT_LEAST_ONCE, null, Map.of("key", "other"));
+
+            assertAll(
+                () -> assertNotEquals(base, diffName),
+                () -> assertNotEquals(base, diffServers),
+                () -> assertNotEquals(base, diffTopic),
+                () -> assertNotEquals(base, diffGuarantee),
+                () -> assertNotEquals(base, diffPrefix),
+                () -> assertNotEquals(base, diffProps)
             );
         }
     }

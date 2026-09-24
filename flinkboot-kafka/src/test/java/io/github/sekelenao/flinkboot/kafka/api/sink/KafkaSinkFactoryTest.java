@@ -35,7 +35,7 @@ class KafkaSinkFactoryTest {
                 "my-sink",
                 List.of("localhost:9092"),
                 "my-topic",
-                null,
+                KafkaDeliveryGuarantee.AT_LEAST_ONCE,
                 null,
                 Map.of("client.id", "test-client")
             );

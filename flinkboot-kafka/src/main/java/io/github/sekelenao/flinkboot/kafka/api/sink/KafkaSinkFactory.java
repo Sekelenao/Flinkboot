@@ -52,9 +52,9 @@ public final class KafkaSinkFactory {
         var builder = KafkaSink.<T>builder()
             .setBootstrapServers(String.join(",", config.bootstrapServers()))
             .setRecordSerializer(serializationSchema)
+            .setDeliveryGuarantee(config.deliveryGuarantee().deliveryGuarantee())
             .setKafkaProducerConfig(additionalProperties);
 
-        config.deliveryGuarantee().ifPresent(guarantee -> builder.setDeliveryGuarantee(guarantee.deliveryGuarantee()));
         config.transactionalIdPrefix().ifPresent(builder::setTransactionalIdPrefix);
 
         return builder;
