@@ -62,7 +62,7 @@ properties:
 | `name`                    | String          | **Yes**  | `@NotBlank`                    | Logical name of the Kafka sink configuration.                                                                                                                                         |
 | `bootstrap-servers`       | List of Strings | **Yes**  | `@NotEmpty`, items `@NotBlank` | Kafka bootstrap broker hosts/ports (e.g. `localhost:9092`).                                                                                                                           |
 | `topic`                   | String          | **Yes**  | `@NotBlank`                    | Target Kafka topic to write events to.                                                                                                                                                |
-| `delivery-guarantee`      | Enum            | No       | Enum                           | Delivery guarantee. Supported values: `NONE`, `AT_LEAST_ONCE`, `EXACTLY_ONCE`. Defaults to Flink default if omitted.                                                                  |
+| `delivery-guarantee`      | Enum            | **Yes**  | `@NotNull`                     | Delivery guarantee. Supported values: `NONE`, `AT_LEAST_ONCE`, `EXACTLY_ONCE`.                                                                                                        |
 | `transactional-id-prefix` | String          | No       | String                         | Transactional ID prefix. **Mandatory** only if `delivery-guarantee` is set to `EXACTLY_ONCE`. Must be blank/absent for other delivery guarantees (causes fail-fast crash if present). |
 | `properties`              | Map             | No       | Keys/values `@NotBlank`        | Custom Kafka client producer properties (e.g. `acks: all`). Keys and values must be non-null.                                                                                         |
 
@@ -77,12 +77,11 @@ Flinkboot supports Flink's delivery guarantee strategies via the `delivery-guara
 | `EXACTLY_ONCE`   | Exactly-once delivery semantics.                                           | `transactional-id-prefix`    |
 | `AT_LEAST_ONCE`  | At-least-once delivery semantics.                                          | None                         |
 | `NONE`           | Best-effort delivery semantics.                                            | None                         |
-| *Omitted (null)* | Let Flink apply its own defaults (leaves configuration builder untouched). | None                         |
 
 ### Fail-Fast Rules for Delivery Guarantees
 To prevent misconfigurations at startup:
 1. If `delivery-guarantee` is set to `EXACTLY_ONCE`, a non-blank `transactional-id-prefix` **must** be provided.
-2. If `delivery-guarantee` is set to `AT_LEAST_ONCE` or `NONE` (or omitted), specifying `transactional-id-prefix` will cause a **fail-fast startup validation failure** via Jakarta Bean Validation.
+2. If `delivery-guarantee` is set to `AT_LEAST_ONCE` or `NONE`, specifying `transactional-id-prefix` will cause a **fail-fast startup validation failure** via Jakarta Bean Validation.
 
 ---
 

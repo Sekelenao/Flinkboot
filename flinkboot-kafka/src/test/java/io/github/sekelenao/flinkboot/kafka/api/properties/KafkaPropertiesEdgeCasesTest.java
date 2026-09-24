@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -89,7 +90,7 @@ class KafkaPropertiesEdgeCasesTest {
 
         assertAll(
             () -> assertTrue(nullSinkConfig.properties().isEmpty()),
-            () -> assertTrue(nullSinkConfig.deliveryGuarantee().isEmpty()),
+            () -> assertNull(nullSinkConfig.deliveryGuarantee()),
             () -> assertTrue(nullSinkConfig.transactionalIdPrefix().isEmpty()),
             () -> assertTrue(nullListConfig.properties().isEmpty()),
             () -> assertEquals(KafkaOffsetInitializer.EARLIEST, nullListConfig.startingOffsets()),

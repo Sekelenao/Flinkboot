@@ -19,7 +19,7 @@ public final class KafkaSinkPropertiesValidator {
     public static boolean validate(KafkaSinkProperties properties, ConstraintValidatorContext context) {
         Objects.requireNonNull(properties, "properties must not be null");
         Objects.requireNonNull(context, "context must not be null");
-        var guarantee = properties.deliveryGuarantee().orElse(null);
+        var guarantee = properties.deliveryGuarantee();
         var isExactlyOnce = guarantee == KafkaDeliveryGuarantee.EXACTLY_ONCE;
         var hasPrefix = properties.transactionalIdPrefix().isPresent();
 

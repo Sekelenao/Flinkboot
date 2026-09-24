@@ -34,6 +34,7 @@ public final class KafkaSinkProperties implements Serializable, ValidatablePrope
     @NotBlank
     private final String topic;
 
+    @NotNull
     private final KafkaDeliveryGuarantee deliveryGuarantee;
 
     @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
@@ -104,12 +105,12 @@ public final class KafkaSinkProperties implements Serializable, ValidatablePrope
     }
 
     /**
-     * Returns the optional delivery guarantee semantic.
+     * Returns the delivery guarantee semantic.
      *
-     * @return an {@link Optional} containing {@link KafkaDeliveryGuarantee}, or empty if not specified
+     * @return the {@link KafkaDeliveryGuarantee}
      */
-    public Optional<KafkaDeliveryGuarantee> deliveryGuarantee() {
-        return Optional.ofNullable(deliveryGuarantee);
+    public KafkaDeliveryGuarantee deliveryGuarantee() {
+        return deliveryGuarantee;
     }
 
     /**
