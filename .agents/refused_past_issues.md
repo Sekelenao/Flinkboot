@@ -60,3 +60,9 @@ All audit subagents (including `module-scanner` and `pr-reviewer`) must consult 
 - **Pattern**: Demanding that getters return boxed wrapper types (`Integer`, `Long`, `Boolean`) instead of unboxed primitives or `OptionalInt` / `OptionalLong` to avoid auto-unboxing NPE risks.
 - **Status**: **BANNED**
 - **Rationale**: Flinkboot strictly forbids returning boxed object types (`Integer`, `Long`, `Boolean`) from public getters. Mandatory non-null properties must return primitive types (`int`, `long`, `boolean`). Optional properties must return `OptionalInt`, `OptionalLong`, or `Optional<T>`. Jakarta Bean Validation guarantees that mandatory properties are non-null before runtime consumers access the getters.
+
+## 12. Global Purge (`clearAll()`) in CollectingSink / CollectingSinkRegistry
+- **Pattern**: Introducing a global `clearAll()` or `reset()` method in `CollectingSink` or `CollectingSinkRegistry` to wipe all sinks from static memory.
+- **Status**: **REJECTED**
+- **Rationale**: `CollectingSink` implements `AutoCloseable`, guaranteeing scoped cleanup via `try-with-resources` or `@AfterEach`. Each sink uses a unique `UUID` specifically to ensure complete data isolation during concurrent/parallel test runs (`junit.jupiter.execution.parallel.enabled=true`). A global static `clearAll()` would introduce cross-test interference, destroy test isolation in parallel suites, expand public API surface unnecessarily, and encourage sloppy lifecycle management.
+
