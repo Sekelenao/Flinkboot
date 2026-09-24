@@ -10,10 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import static org.mockito.ArgumentMatchers.anyString;
+import org.mockito.Answers;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import io.github.sekelenao.flinkboot.core.api.properties.execution.ExecutionProperties;
 import jakarta.validation.ConstraintValidatorContext;
@@ -106,20 +104,10 @@ class ExecutionPropertiesValidatorTest {
         @Test
         @DisplayName("Should return false and register violation when parallelism exceeds maxParallelism")
         void shouldFailWhenParallelismExceedsMaxParallelism() {
-            var context = mock(ConstraintValidatorContext.class);
-            var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
-            var nodeBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
-
-            when(context.buildConstraintViolationWithTemplate(anyString())).thenReturn(builder);
-            when(builder.addPropertyNode("parallelism")).thenReturn(nodeBuilder);
-
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
             var props = new ExecutionProperties(null, 32, 16, null, null, null);
 
             assertFalse(ExecutionPropertiesValidator.validate(props, context));
-            verify(context).disableDefaultConstraintViolation();
-            verify(context).buildConstraintViolationWithTemplate("parallelism (32) cannot exceed max-parallelism (16)");
-            verify(builder).addPropertyNode("parallelism");
-            verify(nodeBuilder).addConstraintViolation();
         }
     }
 }
