@@ -197,7 +197,7 @@ class FlussSourcePropertiesTest {
             assertAll(
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v ->
-                    v.getPropertyPath().toString().equals("startupTimestamp")
+                    v.getPropertyPath().toString().equals("startup-timestamp")
                         && v.getMessage().equals("startup-timestamp is required when startup-mode is TIMESTAMP")
                 ))
             );
@@ -220,7 +220,7 @@ class FlussSourcePropertiesTest {
             assertAll(
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v ->
-                    v.getPropertyPath().toString().equals("startupTimestamp")
+                    v.getPropertyPath().toString().equals("startup-timestamp")
                         && v.getMessage().equals("startup-timestamp must not be specified when startup-mode is EARLIEST")
                 ))
             );
