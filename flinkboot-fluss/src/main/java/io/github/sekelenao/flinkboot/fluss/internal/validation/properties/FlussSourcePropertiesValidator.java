@@ -29,7 +29,7 @@ public final class FlussSourcePropertiesValidator {
             if (timestamp.isEmpty()) {
                 return PropertiesValidator.reject(
                     context,
-                    "startupTimestamp",
+                    "startup-timestamp",
                     "startup-timestamp is required when startup-mode is TIMESTAMP"
                 );
             }

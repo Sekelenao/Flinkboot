@@ -16,6 +16,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Answers;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import io.github.sekelenao.flinkboot.fluss.api.properties.source.FlussSourceProperties;
 import io.github.sekelenao.flinkboot.fluss.api.properties.source.FlussStartupMode;
@@ -144,6 +145,12 @@ class FlussSourcePropertiesValidatorTest {
             );
 
             assertFalse(FlussSourcePropertiesValidator.validate(props, context));
+            verify(
+                    context
+                            .buildConstraintViolationWithTemplate(
+                                    "startup-timestamp is required when startup-mode is TIMESTAMP"
+                            )
+            ).addPropertyNode("startup-timestamp");
         }
 
         @ParameterizedTest
