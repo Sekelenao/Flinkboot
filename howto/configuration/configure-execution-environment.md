@@ -163,7 +163,7 @@ The `restart-strategy` block accepts a `type` property (`NO_RESTART`, `FIXED_DEL
 |:--------------------------|:-----------|:---------|:-------------------------------------------|:------------------------------------------------------------------------------------------------------------------------|
 | `initial-backoff`         | `Duration` | No       | `@DurationMin(millis = 1)`                 | Initial backoff delay (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_INITIAL_BACKOFF`).                    |
 | `max-backoff`             | `Duration` | No       | $\ge$ `initial-backoff`                    | Maximum backoff delay cap (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_MAX_BACKOFF`).                    |
-| `backoff-multiplier`      | Double     | No       | `@DecimalMin("1.0")`                       | Exponential backoff multiplier (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_BACKOFF_MULTIPLIER`).        |
+| `backoff-multiplier`      | Double     | No       | `@DecimalMin(value = "1.0", inclusive = false)` | Exponential backoff multiplier (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_BACKOFF_MULTIPLIER`).        |
 | `reset-backoff-threshold` | `Duration` | No       | `@DurationMin(millis = 1)`                 | Reset backoff threshold duration (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_RESET_BACKOFF_THRESHOLD`). |
 | `jitter-factor`           | Double     | No       | `@DecimalMin("0.0")`, `@DecimalMax("1.0")` | Jitter factor for delay randomization (`RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_JITTER_FACTOR`).      |
 

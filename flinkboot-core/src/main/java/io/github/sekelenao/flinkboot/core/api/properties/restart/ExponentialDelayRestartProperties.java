@@ -26,7 +26,7 @@ public final class ExponentialDelayRestartProperties implements Serializable {
     @DurationMin(millis = 1)
     private final Duration maxBackoff;
 
-    @DecimalMin("1.0")
+    @DecimalMin(value = "1.0", inclusive = false)
     private final Double backoffMultiplier;
 
     @DurationMin(millis = 1)

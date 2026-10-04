@@ -360,6 +360,28 @@ class RestartStrategyPropertiesTest {
         }
 
         @Test
+        @DisplayName("Should reject an exponential backoff multiplier equal to one")
+        void shouldRejectExponentialBackoffMultiplierEqualToOne() {
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 1.0, Duration.ofHours(1), 0.1);
+            var config = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
+
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("exponentialDelay.backoffMultiplier")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should accept an exponential backoff multiplier greater than one")
+        void shouldAcceptExponentialBackoffMultiplierGreaterThanOne() {
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 1.1, Duration.ofHours(1), 0.1);
+            var config = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
+
+            assertTrue(validator.validate(config).isEmpty());
+        }
+
+        @Test
         @DisplayName("Should fail Bean Validation on invalid multiplier or jitter in ExponentialDelay")
         void shouldFailBeanValidationOnInvalidExponentialParams() {
             var expoInvalidMultiplier = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 0.5, Duration.ofHours(1), 0.1);

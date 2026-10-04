@@ -23,6 +23,9 @@ All notable user-facing changes to this project are documented in this file.
   - Added `boundedness: BOUNDED | UNBOUNDED` to switch Kafka ingestion between continuous streaming and Flink's native batch execution mode.
   - Added `stopping-offsets` configuration to automatically terminate ingestion upon reaching target offsets (specific timestamp, partition offsets, or current log end). Supports finite streaming when `boundedness: UNBOUNDED` and finite batch backfills when `boundedness: BOUNDED`.
 
+### 🔵 Fixes & Diagnostics
+- **[flinkboot-core] Exponential Backoff Multiplier Validation**: Rejects `backoff-multiplier: 1.0` during configuration validation, matching Flink's requirement that the multiplier be strictly greater than `1.0`.
+
 ---
 
 ## [0.5.0-1.20]
