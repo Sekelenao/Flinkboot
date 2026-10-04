@@ -270,7 +270,7 @@ class KafkaSinkPropertiesTest {
             assertAll(
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v ->
-                    v.getPropertyPath().toString().equals("transactionalIdPrefix")
+                    v.getPropertyPath().toString().equals("transactional-id-prefix")
                         && v.getMessage().equals("transactional-id-prefix is required when delivery-guarantee is EXACTLY_ONCE")
                 ))
             );
@@ -291,7 +291,7 @@ class KafkaSinkPropertiesTest {
             assertAll(
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v ->
-                    v.getPropertyPath().toString().equals("transactionalIdPrefix")
+                    v.getPropertyPath().toString().equals("transactional-id-prefix")
                         && v.getMessage().equals("transactional-id-prefix can only be specified when delivery-guarantee is EXACTLY_ONCE")
                 ))
             );
