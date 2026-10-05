@@ -3,9 +3,8 @@ package io.github.sekelenao.flinkboot.kafka.api.properties.sink;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
+import io.github.sekelenao.flinkboot.core.internal.validation.Validators;
 import jakarta.validation.Validator;
-
-import static jakarta.validation.Validation.buildDefaultValidatorFactory;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -38,7 +37,7 @@ class KafkaSinkPropertiesTest {
 
     private static final Validator validator;
     static {
-        try (var factory = buildDefaultValidatorFactory()) {
+        try (var factory = Validators.factory()) {
             validator = factory.getValidator();
         }
     }
@@ -158,7 +157,7 @@ class KafkaSinkPropertiesTest {
             var violations = validator.validate(config);
             assertAll(
                 () -> assertEquals(1, violations.size()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("deliveryGuarantee")))
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("delivery-guarantee")))
             );
         }
 
@@ -196,7 +195,7 @@ class KafkaSinkPropertiesTest {
             var violations = validator.validate(config);
             assertAll(
                 () -> assertFalse(violations.isEmpty()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("bootstrapServers")))
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("bootstrap-servers")))
             );
         }
 
@@ -233,7 +232,7 @@ class KafkaSinkPropertiesTest {
             var violations = validator.validate(props);
             assertAll(
                 () -> assertEquals(1, violations.size()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("transactionalIdPrefix")))
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("transactional-id-prefix")))
             );
         }
 
@@ -251,7 +250,7 @@ class KafkaSinkPropertiesTest {
             var violations = validator.validate(props);
             assertAll(
                 () -> assertEquals(1, violations.size()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("transactionalIdPrefix")))
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("transactional-id-prefix")))
             );
         }
 
@@ -336,7 +335,7 @@ class KafkaSinkPropertiesTest {
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(
                     violations.stream()
-                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrapServers"))
+                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrap-servers"))
                 )
             );
         }
@@ -359,7 +358,7 @@ class KafkaSinkPropertiesTest {
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(
                     violations.stream()
-                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrapServers"))
+                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrap-servers"))
                 )
             );
         }

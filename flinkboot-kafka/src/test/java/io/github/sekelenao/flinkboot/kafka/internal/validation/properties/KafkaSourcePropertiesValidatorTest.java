@@ -1,14 +1,13 @@
 package io.github.sekelenao.flinkboot.kafka.internal.validation.properties;
 
+import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaBoundedness;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaOffsetInitializer;
+import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaOffsetProperties;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceProperties;
-import io.github.sekelenao.flinkboot.kafka.api.properties.source.TopicPartitionOffsetProperties;
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Answers;
 
 import java.util.List;
@@ -22,6 +21,12 @@ import static org.mockito.Mockito.mock;
 
 @DisplayName("KafkaSourcePropertiesValidator")
 class KafkaSourcePropertiesValidatorTest {
+
+    private static final KafkaOffsetProperties DEFAULT_STARTING_OFFSETS =
+        new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null);
+
+    private static final KafkaOffsetProperties DEFAULT_STOPPING_OFFSETS =
+        new KafkaOffsetProperties(KafkaOffsetInitializer.LATEST, null, null);
 
     @Nested
     @DisplayName("Preconditions")
@@ -44,7 +49,7 @@ class KafkaSourcePropertiesValidatorTest {
                 "group",
                 List.of("topic"),
                 null,
-                null,
+                DEFAULT_STARTING_OFFSETS,
                 null,
                 null,
                 Map.of()
@@ -68,7 +73,7 @@ class KafkaSourcePropertiesValidatorTest {
                 "group",
                 List.of("my-topic"),
                 null,
-                KafkaOffsetInitializer.EARLIEST,
+                DEFAULT_STARTING_OFFSETS,
                 null,
                 null,
                 Map.of()
@@ -87,7 +92,7 @@ class KafkaSourcePropertiesValidatorTest {
                 "group",
                 null,
                 "my-topic-.*",
-                KafkaOffsetInitializer.LATEST,
+                DEFAULT_STARTING_OFFSETS,
                 null,
                 null,
                 Map.of()
@@ -100,14 +105,13 @@ class KafkaSourcePropertiesValidatorTest {
         @DisplayName("Should fail when both topics and topic-pattern are configured")
         void shouldFailWhenBothTopicsAndPatternConfigured() {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-
             var props = new KafkaSourceProperties(
                 "source",
                 List.of("localhost:9092"),
                 "group",
                 List.of("my-topic"),
                 "my-topic-.*",
-                KafkaOffsetInitializer.EARLIEST,
+                DEFAULT_STARTING_OFFSETS,
                 null,
                 null,
                 Map.of()
@@ -120,14 +124,13 @@ class KafkaSourcePropertiesValidatorTest {
         @DisplayName("Should fail when neither topics nor topic-pattern are configured")
         void shouldFailWhenNeitherTopicsNorPatternConfigured() {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-
             var props = new KafkaSourceProperties(
                 "source",
                 List.of("localhost:9092"),
                 "group",
                 null,
                 null,
-                KafkaOffsetInitializer.EARLIEST,
+                DEFAULT_STARTING_OFFSETS,
                 null,
                 null,
                 Map.of()
@@ -140,14 +143,13 @@ class KafkaSourcePropertiesValidatorTest {
         @DisplayName("Should fail when both topics and empty topic-pattern are configured")
         void shouldFailWhenBothTopicsAndEmptyTopicPatternConfigured() {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-
             var props = new KafkaSourceProperties(
                 "source",
                 List.of("localhost:9092"),
                 "group",
                 List.of("my-topic"),
                 "",
-                KafkaOffsetInitializer.EARLIEST,
+                DEFAULT_STARTING_OFFSETS,
                 null,
                 null,
                 Map.of()
@@ -157,8 +159,8 @@ class KafkaSourcePropertiesValidatorTest {
         }
 
         @Test
-        @DisplayName("Should pass when startingOffsets is null")
-        void shouldPassWhenStartingOffsetsIsNull() {
+        @DisplayName("Should pass when boundedness is BOUNDED and stopping-offsets is present")
+        void shouldPassWhenBoundedWithStoppingOffsets() {
             var context = mock(ConstraintValidatorContext.class);
             var props = new KafkaSourceProperties(
                 "source",
@@ -166,8 +168,46 @@ class KafkaSourcePropertiesValidatorTest {
                 "group",
                 List.of("my-topic"),
                 null,
+                DEFAULT_STARTING_OFFSETS,
+                KafkaBoundedness.BOUNDED,
+                DEFAULT_STOPPING_OFFSETS,
+                Map.of()
+            );
+
+            assertTrue(KafkaSourcePropertiesValidator.validate(props, context));
+        }
+
+        @Test
+        @DisplayName("Should fail when boundedness is BOUNDED and stopping-offsets is absent")
+        void shouldFailWhenBoundedWithoutStoppingOffsets() {
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
+            var props = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                "group",
+                List.of("my-topic"),
                 null,
+                DEFAULT_STARTING_OFFSETS,
+                KafkaBoundedness.BOUNDED,
                 null,
+                Map.of()
+            );
+
+            assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
+        }
+
+        @Test
+        @DisplayName("Should pass when boundedness is UNBOUNDED and stopping-offsets is absent")
+        void shouldPassWhenUnboundedWithoutStoppingOffsets() {
+            var context = mock(ConstraintValidatorContext.class);
+            var props = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                "group",
+                List.of("my-topic"),
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                KafkaBoundedness.UNBOUNDED,
                 null,
                 Map.of()
             );
@@ -176,8 +216,8 @@ class KafkaSourcePropertiesValidatorTest {
         }
 
         @Test
-        @DisplayName("Should pass when TIMESTAMP mode is used with timestamp")
-        void shouldPassWhenTimestampModeWithTimestamp() {
+        @DisplayName("Should pass when boundedness is UNBOUNDED and stopping-offsets is present (finite streaming)")
+        void shouldPassWhenUnboundedWithStoppingOffsets() {
             var context = mock(ConstraintValidatorContext.class);
             var props = new KafkaSourceProperties(
                 "source",
@@ -185,158 +225,13 @@ class KafkaSourcePropertiesValidatorTest {
                 "group",
                 List.of("my-topic"),
                 null,
-                KafkaOffsetInitializer.TIMESTAMP,
-                123456789L,
-                null,
+                DEFAULT_STARTING_OFFSETS,
+                KafkaBoundedness.UNBOUNDED,
+                DEFAULT_STOPPING_OFFSETS,
                 Map.of()
             );
 
             assertTrue(KafkaSourcePropertiesValidator.validate(props, context));
-        }
-
-        @Test
-        @DisplayName("Should fail when TIMESTAMP mode is used without timestamp")
-        void shouldFailWhenTimestampModeWithoutTimestamp() {
-            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-
-            var props = new KafkaSourceProperties(
-                "source",
-                List.of("localhost:9092"),
-                "group",
-                List.of("my-topic"),
-                null,
-                KafkaOffsetInitializer.TIMESTAMP,
-                null,
-                null,
-                Map.of()
-            );
-
-            assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
-        }
-
-        @Test
-        @DisplayName("Should fail when TIMESTAMP mode is used with partition offsets")
-        void shouldFailWhenTimestampModeWithPartitionOffsets() {
-            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-
-            var partitionOffset = new TopicPartitionOffsetProperties("my-topic", 0, 100L);
-            var props = new KafkaSourceProperties(
-                "source",
-                List.of("localhost:9092"),
-                "group",
-                List.of("my-topic"),
-                null,
-                KafkaOffsetInitializer.TIMESTAMP,
-                123456789L,
-                List.of(partitionOffset),
-                Map.of()
-            );
-
-            assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
-        }
-
-        @Test
-        @DisplayName("Should pass when OFFSETS mode is used with partition offsets")
-        void shouldPassWhenOffsetsModeWithPartitionOffsets() {
-            var context = mock(ConstraintValidatorContext.class);
-            var partitionOffset = new TopicPartitionOffsetProperties("my-topic", 0, 100L);
-            var props = new KafkaSourceProperties(
-                "source",
-                List.of("localhost:9092"),
-                "group",
-                List.of("my-topic"),
-                null,
-                KafkaOffsetInitializer.OFFSETS,
-                null,
-                List.of(partitionOffset),
-                Map.of()
-            );
-
-            assertTrue(KafkaSourcePropertiesValidator.validate(props, context));
-        }
-
-        @Test
-        @DisplayName("Should fail when OFFSETS mode is used without partition offsets")
-        void shouldFailWhenOffsetsModeWithoutPartitionOffsets() {
-            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-
-            var props = new KafkaSourceProperties(
-                "source",
-                List.of("localhost:9092"),
-                "group",
-                List.of("my-topic"),
-                null,
-                KafkaOffsetInitializer.OFFSETS,
-                null,
-                null,
-                Map.of()
-            );
-
-            assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
-        }
-
-        @Test
-        @DisplayName("Should fail when OFFSETS mode is used with timestamp")
-        void shouldFailWhenOffsetsModeWithTimestamp() {
-            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-
-            var partitionOffset = new TopicPartitionOffsetProperties("my-topic", 0, 100L);
-            var props = new KafkaSourceProperties(
-                "source",
-                List.of("localhost:9092"),
-                "group",
-                List.of("my-topic"),
-                null,
-                KafkaOffsetInitializer.OFFSETS,
-                123456789L,
-                List.of(partitionOffset),
-                Map.of()
-            );
-
-            assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
-        }
-
-        @ParameterizedTest
-        @EnumSource(value = KafkaOffsetInitializer.class, names = {"TIMESTAMP", "OFFSETS"}, mode = EnumSource.Mode.EXCLUDE)
-        @DisplayName("Should fail when standard offset strategy has timestamp")
-        void shouldFailWhenStandardStrategyHasTimestamp(KafkaOffsetInitializer strategy) {
-            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-
-            var props = new KafkaSourceProperties(
-                "source",
-                List.of("localhost:9092"),
-                "group",
-                List.of("my-topic"),
-                null,
-                strategy,
-                123456789L,
-                null,
-                Map.of()
-            );
-
-            assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
-        }
-
-        @ParameterizedTest
-        @EnumSource(value = KafkaOffsetInitializer.class, names = {"TIMESTAMP", "OFFSETS"}, mode = EnumSource.Mode.EXCLUDE)
-        @DisplayName("Should fail when standard offset strategy has partition offsets")
-        void shouldFailWhenStandardStrategyHasPartitionOffsets(KafkaOffsetInitializer strategy) {
-            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-
-            var partitionOffset = new TopicPartitionOffsetProperties("my-topic", 0, 100L);
-            var props = new KafkaSourceProperties(
-                "source",
-                List.of("localhost:9092"),
-                "group",
-                List.of("my-topic"),
-                null,
-                strategy,
-                null,
-                List.of(partitionOffset),
-                Map.of()
-            );
-
-            assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
         }
     }
 }

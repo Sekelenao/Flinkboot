@@ -2,6 +2,7 @@ package io.github.sekelenao.flinkboot.core.api.properties.local;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import io.github.sekelenao.flinkboot.core.internal.validation.Validators;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -9,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static jakarta.validation.Validation.buildDefaultValidatorFactory;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -28,7 +28,7 @@ class LocalWebUiPropertiesTest {
     private static final Validator validator;
 
     static {
-        try (var factory = buildDefaultValidatorFactory()) {
+        try (var factory = Validators.factory()) {
             validator = factory.getValidator();
         }
     }
@@ -120,9 +120,9 @@ class LocalWebUiPropertiesTest {
             assertAll(
                 () -> assertEquals(1, violations.size(), "Should have exactly 1 violation for blank bindAddress"),
                 () -> assertTrue(violations.stream().anyMatch(v ->
-                    v.getPropertyPath().toString().equals("bindAddress")
+                    v.getPropertyPath().toString().equals("bind-address")
                         && v.getMessage().equals("must not be blank")
-                ), "Violation should target 'bindAddress' with message 'must not be blank'")
+                ), "Violation should target 'bind-address' with message 'must not be blank'")
             );
         }
 

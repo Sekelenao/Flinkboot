@@ -309,10 +309,10 @@ class FlinkbootTest {
 
             assertAll(
                 () -> assertTrue(message.startsWith("Configuration validation failed with 4 violation(s):")),
-                () -> assertTrue(message.contains("appName:")),
+                () -> assertTrue(message.contains("app-name:")),
                 () -> assertTrue(message.contains("retries:")),
                 () -> assertTrue(message.contains("execution.parallelism: parallelism (8) cannot exceed max-parallelism (4)")),
-                () -> assertTrue(message.contains("stateBackend.customClass: custom-class can only be specified when state backend type is CUSTOM"))
+                () -> assertTrue(message.contains("state-backend.customClass: custom-class can only be specified when state backend type is CUSTOM"))
             );
         }
 

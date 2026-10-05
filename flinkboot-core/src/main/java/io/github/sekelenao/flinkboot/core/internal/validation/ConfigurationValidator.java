@@ -1,7 +1,6 @@
 package io.github.sekelenao.flinkboot.core.internal.validation;
 
 import io.github.sekelenao.flinkboot.core.api.exception.configuration.ConfigurationValidationException;
-import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
@@ -21,7 +20,7 @@ public final class ConfigurationValidator implements AutoCloseable {
         if (capacity <= 0) {
             throw new IllegalArgumentException("Capacity must be strictly positive");
         }
-        this.factory = Validation.buildDefaultValidatorFactory();
+        this.factory = Validators.factory();
         this.validator = factory.getValidator();
         this.capacity = capacity;
     }

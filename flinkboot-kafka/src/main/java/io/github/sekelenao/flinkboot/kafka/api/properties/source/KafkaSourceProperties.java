@@ -11,7 +11,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.PositiveOrZero;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -19,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.OptionalLong;
 
 /**
  * Unified configuration properties for Apache Flink Kafka sources consuming from an explicit list of topics
@@ -43,28 +41,29 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
     @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
     private final String topicPattern;
 
+    @Valid
     @NotNull
-    private final KafkaOffsetInitializer startingOffsets;
+    private final KafkaOffsetProperties startingOffsets;
 
-    @PositiveOrZero
-    private final Long startingOffsetsTimestamp;
+    private final KafkaBoundedness boundedness;
 
-    private final List<@NotNull @Valid TopicPartitionOffsetProperties> startingOffsetsPartitionOffsets;
+    @Valid
+    private final KafkaOffsetProperties stoppingOffsets;
 
     private final Map<@NotNull String, @NotNull String> properties;
 
     /**
      * Creates a new {@code KafkaSourceProperties} instance.
      *
-     * @param name                           source operator name in Flink DAG
-     * @param bootstrapServers               list of Kafka broker addresses
-     * @param groupId                        Kafka consumer group ID
-     * @param topics                         list of topics to consume from (mutually exclusive with {@code topicPattern})
-     * @param topicPattern                   regular expression pattern to match topics against (mutually exclusive with {@code topics})
-     * @param startingOffsets                starting offset strategy (EARLIEST, LATEST, COMMITTED, TIMESTAMP, OFFSETS)
-     * @param startingOffsetsTimestamp       timestamp in milliseconds (required if startingOffsets is TIMESTAMP)
-     * @param startingOffsetsPartitionOffsets list of partition offsets (required if startingOffsets is OFFSETS)
-     * @param properties                     additional Kafka consumer client properties
+     * @param name             source operator name in Flink DAG
+     * @param bootstrapServers list of Kafka broker addresses
+     * @param groupId          Kafka consumer group ID
+     * @param topics           list of topics to consume from (mutually exclusive with {@code topicPattern})
+     * @param topicPattern     regular expression pattern to match topics against (mutually exclusive with {@code topics})
+     * @param startingOffsets  starting offset configuration
+     * @param boundedness      execution boundedness mode (optional, defaults to UNBOUNDED if null)
+     * @param stoppingOffsets  stopping offset configuration (optional)
+     * @param properties       additional Kafka consumer client properties
      */
     @JsonCreator
     public KafkaSourceProperties(
@@ -73,9 +72,9 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
         @JsonProperty("group-id") String groupId,
         @JsonProperty("topics") List<String> topics,
         @JsonProperty("topic-pattern") String topicPattern,
-        @JsonProperty("starting-offsets") KafkaOffsetInitializer startingOffsets,
-        @JsonProperty("starting-offsets-timestamp") Long startingOffsetsTimestamp,
-        @JsonProperty("starting-offsets-partition-offsets") List<TopicPartitionOffsetProperties> startingOffsetsPartitionOffsets,
+        @JsonProperty("starting-offsets") KafkaOffsetProperties startingOffsets,
+        @JsonProperty("boundedness") KafkaBoundedness boundedness,
+        @JsonProperty("stopping-offsets") KafkaOffsetProperties stoppingOffsets,
         @JsonProperty("properties") Map<String, String> properties
     ) {
         this.name = name;
@@ -84,8 +83,8 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
         this.topics = topics;
         this.topicPattern = topicPattern;
         this.startingOffsets = startingOffsets;
-        this.startingOffsetsTimestamp = startingOffsetsTimestamp;
-        this.startingOffsetsPartitionOffsets = startingOffsetsPartitionOffsets;
+        this.boundedness = boundedness;
+        this.stoppingOffsets = stoppingOffsets;
         this.properties = properties;
     }
 
@@ -146,36 +145,30 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
     }
 
     /**
-     * Returns the starting offset strategy.
+     * Returns the starting offset configuration.
      *
-     * @return the {@link KafkaOffsetInitializer}
+     * @return the {@link KafkaOffsetProperties}
      */
-    public KafkaOffsetInitializer startingOffsets() {
+    public KafkaOffsetProperties startingOffsets() {
         return startingOffsets;
     }
 
     /**
-     * Returns the optional starting offset timestamp in milliseconds.
+     * Returns the optional execution boundedness mode.
      *
-     * @return an {@link OptionalLong} containing the timestamp, or empty if not specified
+     * @return an {@link Optional} containing the {@link KafkaBoundedness}, or empty if not configured
      */
-    public OptionalLong startingOffsetsTimestamp() {
-        if (startingOffsetsTimestamp == null) {
-            return OptionalLong.empty();
-        }
-        return OptionalLong.of(startingOffsetsTimestamp);
+    public Optional<KafkaBoundedness> boundedness() {
+        return Optional.ofNullable(boundedness);
     }
 
     /**
-     * Returns the list of specific partition starting offsets.
+     * Returns the optional stopping offset configuration.
      *
-     * @return an unmodifiable list of {@link TopicPartitionOffsetProperties}
+     * @return an {@link Optional} containing the stopping {@link KafkaOffsetProperties}, or empty if not configured
      */
-    public List<TopicPartitionOffsetProperties> startingOffsetsPartitionOffsets() {
-        if (startingOffsetsPartitionOffsets == null) {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(startingOffsetsPartitionOffsets);
+    public Optional<KafkaOffsetProperties> stoppingOffsets() {
+        return Optional.ofNullable(stoppingOffsets);
     }
 
     /**
@@ -202,16 +195,16 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
             && Objects.equals(groupId, o.groupId)
             && Objects.equals(topics, o.topics)
             && Objects.equals(topicPattern, o.topicPattern)
-            && startingOffsets == o.startingOffsets
-            && Objects.equals(startingOffsetsTimestamp, o.startingOffsetsTimestamp)
-            && Objects.equals(startingOffsetsPartitionOffsets, o.startingOffsetsPartitionOffsets)
+            && Objects.equals(startingOffsets, o.startingOffsets)
+            && boundedness == o.boundedness
+            && Objects.equals(stoppingOffsets, o.stoppingOffsets)
             && Objects.equals(properties, o.properties);
     }
 
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(name, bootstrapServers, groupId, topics, topicPattern, startingOffsets, startingOffsetsTimestamp, startingOffsetsPartitionOffsets, properties);
+        return Objects.hash(name, bootstrapServers, groupId, topics, topicPattern, startingOffsets, boundedness, stoppingOffsets, properties);
     }
 
     @Override
@@ -224,8 +217,8 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
             ", topics=" + topics +
             ", topicPattern='" + topicPattern + '\'' +
             ", startingOffsets=" + startingOffsets +
-            ", startingOffsetsTimestamp=" + startingOffsetsTimestamp +
-            ", startingOffsetsPartitionOffsets=" + startingOffsetsPartitionOffsets +
+            ", boundedness=" + boundedness +
+            ", stoppingOffsets=" + stoppingOffsets +
             ", properties=" + properties +
             '}';
     }

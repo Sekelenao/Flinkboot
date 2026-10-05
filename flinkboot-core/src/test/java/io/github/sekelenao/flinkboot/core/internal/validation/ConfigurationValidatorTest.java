@@ -33,6 +33,11 @@ class ConfigurationValidatorTest {
         public String name = "";
     }
 
+    public static class CamelCaseConfig {
+        @NotBlank
+        public String sampleField = "";
+    }
+
     public static class FourViolationsConfig {
         @NotBlank
         public String alpha = "";
@@ -122,6 +127,17 @@ class ConfigurationValidatorTest {
                     () -> assertTrue(message.startsWith("Configuration validation failed with 1 violation(s):\n - ")),
                     () -> assertTrue(message.contains("name:"))
                 );
+            }
+        }
+
+        @Test
+        @DisplayName("Should throw ConfigurationValidationException and format property path to kebab-case")
+        void shouldFormatPropertyPathToKebabCase() {
+            try (var validator = new ConfigurationValidator(10)) {
+                var exception = assertThrows(ConfigurationValidationException.class, () -> validator.validate(new CamelCaseConfig()));
+                var message = exception.getMessage();
+
+                assertTrue(message.contains("sample-field:"));
             }
         }
 

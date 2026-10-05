@@ -2,7 +2,7 @@ package io.github.sekelenao.flinkboot.core.api.properties.checkpointing;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import jakarta.validation.Validation;
+import io.github.sekelenao.flinkboot.core.internal.validation.Validators;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,7 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("CheckpointingProperties Tests")
 class CheckpointingPropertiesTest {
 
-    private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    private static final Validator validator;
+
+    static {
+        try (var factory = Validators.factory()) {
+            validator = factory.getValidator();
+        }
+    }
 
     @Nested
     @DisplayName("Getters Tests")
@@ -172,8 +178,14 @@ class CheckpointingPropertiesTest {
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ofSeconds(-1), 1,
                 null, false, Duration.ZERO, null
             );
+            var violations = validator.validate(negativeMinPause);
 
-            assertEquals(1, validator.validate(negativeMinPause).size());
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("min-pause-between-checkpoints")
+                ), "Violation must target 'min-pause-between-checkpoints'")
+            );
         }
 
         @Test
@@ -183,8 +195,14 @@ class CheckpointingPropertiesTest {
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
                 null, false, Duration.ofSeconds(-5), null
             );
+            var violations = validator.validate(negativeTimeout);
 
-            assertEquals(1, validator.validate(negativeTimeout).size());
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("aligned-checkpoint-timeout")
+                ), "Violation must target 'aligned-checkpoint-timeout'")
+            );
         }
 
         @ParameterizedTest
@@ -200,7 +218,7 @@ class CheckpointingPropertiesTest {
             assertAll(
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v ->
-                    v.getPropertyPath().toString().equals("storageUri")
+                    v.getPropertyPath().toString().equals("storage-uri")
                         && v.getMessage().equals("must not be blank")
                 ))
             );

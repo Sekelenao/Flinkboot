@@ -2,6 +2,7 @@ package io.github.sekelenao.flinkboot.fluss.api.properties.sink;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import io.github.sekelenao.flinkboot.core.internal.validation.Validators;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static jakarta.validation.Validation.buildDefaultValidatorFactory;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -34,7 +34,7 @@ class FlussSinkPropertiesTest {
 
     private static final Validator validator;
     static {
-        try (var factory = buildDefaultValidatorFactory()) {
+        try (var factory = Validators.factory()) {
             validator = factory.getValidator();
         }
     }
@@ -181,7 +181,7 @@ class FlussSinkPropertiesTest {
                 () -> {
                     var v = validator.validate(nullServers);
                     assertEquals(1, v.size());
-                    assertTrue(v.stream().anyMatch(vi -> vi.getPropertyPath().toString().equals("bootstrapServers")));
+                    assertTrue(v.stream().anyMatch(vi -> vi.getPropertyPath().toString().equals("bootstrap-servers")));
                 },
                 () -> {
                     var v = validator.validate(nullDb);
@@ -210,7 +210,7 @@ class FlussSinkPropertiesTest {
             var violations = validator.validate(props);
             assertAll(
                 () -> assertEquals(1, violations.size()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("bootstrapServers")))
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("bootstrap-servers")))
             );
         }
 
@@ -230,7 +230,7 @@ class FlussSinkPropertiesTest {
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(
                     violations.stream()
-                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrapServers"))
+                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrap-servers"))
                 )
             );
         }
@@ -251,7 +251,7 @@ class FlussSinkPropertiesTest {
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(
                     violations.stream()
-                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrapServers"))
+                        .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrap-servers"))
                 )
             );
         }

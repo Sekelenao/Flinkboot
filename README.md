@@ -152,7 +152,7 @@ Sincere appreciation to all contributors who have shaped and strengthened this c
 
 <!-- CONTRIBUTORS-START -->
 <p align="left">
-  <a href="https://github.com/Sekelenao"><img src="https://github.com/Sekelenao.png?size=64" width="64" height="64" alt="Sekelenao" title="Sekelenao (63 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
+  <a href="https://github.com/Sekelenao"><img src="https://github.com/Sekelenao.png?size=64" width="64" height="64" alt="Sekelenao" title="Sekelenao (65 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/LouisDeconinck"><img src="https://github.com/LouisDeconinck.png?size=64" width="64" height="64" alt="LouisDeconinck" title="LouisDeconinck (8 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/be-student"><img src="https://github.com/be-student.png?size=64" width="64" height="64" alt="be-student" title="be-student (4 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/bkalika"><img src="https://github.com/bkalika.png?size=64" width="64" height="64" alt="bkalika" title="bkalika (4 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
@@ -161,9 +161,9 @@ Sincere appreciation to all contributors who have shaped and strengthened this c
   <a href="https://github.com/Aaqibhafeezkhan"><img src="https://github.com/Aaqibhafeezkhan.png?size=64" width="64" height="64" alt="Aaqibhafeezkhan" title="Aaqibhafeezkhan (2 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/FrodyGr"><img src="https://github.com/FrodyGr.png?size=64" width="64" height="64" alt="FrodyGr" title="FrodyGr (2 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/Pallavi-p-h"><img src="https://github.com/Pallavi-p-h.png?size=64" width="64" height="64" alt="Pallavi-p-h" title="Pallavi-p-h (2 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
+  <a href="https://github.com/PHJ2000"><img src="https://github.com/PHJ2000.png?size=64" width="64" height="64" alt="PHJ2000" title="PHJ2000 (2 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/Renan-Bacheschi"><img src="https://github.com/Renan-Bacheschi.png?size=64" width="64" height="64" alt="Renan-Bacheschi" title="Renan-Bacheschi (2 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/yunaremaia"><img src="https://github.com/yunaremaia.png?size=64" width="64" height="64" alt="yunaremaia" title="yunaremaia (2 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
-  <a href="https://github.com/Aaditya0411"><img src="https://github.com/Aaditya0411.png?size=64" width="64" height="64" alt="Aaditya0411" title="Aaditya0411 (1 merged PR)" style="border-radius: 50%; margin: 2px;" /></a>
 </p>
 <!-- CONTRIBUTORS-END -->
 

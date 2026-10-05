@@ -1,11 +1,13 @@
 package io.github.sekelenao.flinkboot.kafka.api.source;
 
+import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaBoundedness;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaOffsetInitializer;
+import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaOffsetProperties;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.KafkaSourceProperties;
 import io.github.sekelenao.flinkboot.kafka.api.properties.source.TopicPartitionOffsetProperties;
-import io.github.sekelenao.flinkboot.kafka.internal.OffsetInitializerMapper;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.api.connector.source.Boundedness;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 import org.apache.flink.util.Collector;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -36,6 +38,12 @@ class KafkaSourceFactoryTest {
         }
     };
 
+    private static final KafkaOffsetProperties DEFAULT_STARTING_OFFSETS =
+        new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null);
+
+    private static final KafkaOffsetProperties DEFAULT_STOPPING_OFFSETS =
+        new KafkaOffsetProperties(KafkaOffsetInitializer.LATEST, null, null);
+
     @Test
     @DisplayName("Private constructor should throw AssertionError")
     void testConstructorIsPrivate() throws Exception {
@@ -43,22 +51,6 @@ class KafkaSourceFactoryTest {
         constructor.setAccessible(true);
         var exception = assertThrows(InvocationTargetException.class, constructor::newInstance);
         assertInstanceOf(AssertionError.class, exception.getCause());
-    }
-
-    @Test
-    @DisplayName("OffsetInitializerMapper private constructor should throw AssertionError")
-    void testOffsetInitializerMapperConstructorIsPrivate() throws Exception {
-        var constructor = OffsetInitializerMapper.class.getDeclaredConstructor();
-        constructor.setAccessible(true);
-        var exception = assertThrows(InvocationTargetException.class, constructor::newInstance);
-        assertInstanceOf(AssertionError.class, exception.getCause());
-    }
-
-    @Test
-    @DisplayName("OffsetInitializerMapper.map should throw NullPointerException when properties is null")
-    void shouldThrowWhenPropertiesIsNullInOffsetInitializerMapper() {
-        var ex = assertThrows(NullPointerException.class, () -> OffsetInitializerMapper.map(null));
-        assertEquals("properties must not be null", ex.getMessage());
     }
 
     @Nested
@@ -74,7 +66,7 @@ class KafkaSourceFactoryTest {
                 "test-group",
                 List.of("test-topic"),
                 null,
-                KafkaOffsetInitializer.EARLIEST,
+                DEFAULT_STARTING_OFFSETS,
                 null,
                 null,
                 Map.of("client.id", "test-client")
@@ -89,14 +81,15 @@ class KafkaSourceFactoryTest {
         @Test
         @DisplayName("Should successfully build with valid TIMESTAMP offset config")
         void shouldBuildWithTimestamp() {
+            var timestampOffsets = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 1689717600000L, null);
             var config = new KafkaSourceProperties(
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
                 List.of("test-topic"),
                 null,
-                KafkaOffsetInitializer.TIMESTAMP,
-                1689717600000L,
+                timestampOffsets,
+                null,
                 null,
                 null
             );
@@ -107,15 +100,20 @@ class KafkaSourceFactoryTest {
         @Test
         @DisplayName("Should successfully build with valid OFFSETS offset config")
         void shouldBuildWithPartitionOffsets() {
+            var partitionOffsets = new KafkaOffsetProperties(
+                KafkaOffsetInitializer.OFFSETS,
+                null,
+                List.of(new TopicPartitionOffsetProperties("test-topic", 0, 100L))
+            );
             var config = new KafkaSourceProperties(
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
                 List.of("test-topic"),
                 null,
-                KafkaOffsetInitializer.OFFSETS,
+                partitionOffsets,
                 null,
-                List.of(new TopicPartitionOffsetProperties("test-topic", 0, 100L)),
+                null,
                 null
             );
 
@@ -123,22 +121,51 @@ class KafkaSourceFactoryTest {
         }
 
         @Test
-        @DisplayName("Should successfully build with LATEST, COMMITTED, COMMITTED_EARLIEST, COMMITTED_LATEST offset configs")
-        void shouldBuildWithOtherOffsetInitializers() {
-            for (var initializer : List.of(KafkaOffsetInitializer.LATEST, KafkaOffsetInitializer.COMMITTED, KafkaOffsetInitializer.COMMITTED_EARLIEST, KafkaOffsetInitializer.COMMITTED_LATEST)) {
-                var config = new KafkaSourceProperties(
-                    "my-source",
-                    List.of("localhost:9092"),
-                    "test-group",
-                    List.of("test-topic"),
-                    null,
-                    initializer,
-                    null,
-                    null,
-                    null
-                );
-                assertNotNull(KafkaSourceFactory.supplyFor(config, TEST_SCHEMA));
-            }
+        @DisplayName("Should successfully build bounded source with stopping-offsets and verify BOUNDED boundedness")
+        void shouldBuildBoundedSourceWithStoppingOffsets() {
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "test-group",
+                List.of("test-topic"),
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                KafkaBoundedness.BOUNDED,
+                DEFAULT_STOPPING_OFFSETS,
+                null
+            );
+
+            var source = KafkaSourceFactory.supplyFor(config, TEST_SCHEMA);
+
+            assertAll(
+                () -> assertNotNull(source),
+                () -> assertEquals(Boundedness.BOUNDED, source.getBoundedness()),
+                () -> assertNotNull(KafkaSourceFactory.supplyBuilderFor(config, TEST_SCHEMA))
+            );
+        }
+
+        @Test
+        @DisplayName("Should successfully build unbounded source with stopping-offsets and verify CONTINUOUS_UNBOUNDED boundedness")
+        void shouldBuildUnboundedSourceWithStoppingOffsets() {
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "test-group",
+                List.of("test-topic"),
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                KafkaBoundedness.UNBOUNDED,
+                DEFAULT_STOPPING_OFFSETS,
+                null
+            );
+
+            var source = KafkaSourceFactory.supplyFor(config, TEST_SCHEMA);
+
+            assertAll(
+                () -> assertNotNull(source),
+                () -> assertEquals(Boundedness.CONTINUOUS_UNBOUNDED, source.getBoundedness()),
+                () -> assertNotNull(KafkaSourceFactory.supplyBuilderFor(config, TEST_SCHEMA))
+            );
         }
     }
 
@@ -155,7 +182,7 @@ class KafkaSourceFactoryTest {
                 "test-group",
                 null,
                 "test-.*",
-                KafkaOffsetInitializer.LATEST,
+                DEFAULT_STARTING_OFFSETS,
                 null,
                 null,
                 Map.of("client.id", "test-client")
@@ -170,14 +197,15 @@ class KafkaSourceFactoryTest {
         @Test
         @DisplayName("Should successfully build with valid TIMESTAMP offset config")
         void shouldBuildWithTimestamp() {
+            var timestampOffsets = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 1689717600000L, null);
             var config = new KafkaSourceProperties(
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
                 null,
                 "test-.*",
-                KafkaOffsetInitializer.TIMESTAMP,
-                1689717600000L,
+                timestampOffsets,
+                null,
                 null,
                 null
             );
@@ -188,15 +216,20 @@ class KafkaSourceFactoryTest {
         @Test
         @DisplayName("Should successfully build with valid OFFSETS offset config")
         void shouldBuildWithPartitionOffsets() {
+            var partitionOffsets = new KafkaOffsetProperties(
+                KafkaOffsetInitializer.OFFSETS,
+                null,
+                List.of(new TopicPartitionOffsetProperties("test-topic", 0, 100L))
+            );
             var config = new KafkaSourceProperties(
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
                 null,
                 "test-.*",
-                KafkaOffsetInitializer.OFFSETS,
+                partitionOffsets,
                 null,
-                List.of(new TopicPartitionOffsetProperties("test-topic", 0, 100L)),
+                null,
                 null
             );
 
@@ -217,7 +250,7 @@ class KafkaSourceFactoryTest {
                 "test-group",
                 List.of("test-topic"),
                 null,
-                KafkaOffsetInitializer.EARLIEST,
+                DEFAULT_STARTING_OFFSETS,
                 null,
                 null,
                 null

@@ -3,10 +3,9 @@ package io.github.sekelenao.flinkboot.core.api.properties.execution;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import io.github.sekelenao.flinkboot.core.internal.validation.Validators;
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
 import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -28,8 +27,9 @@ class ExecutionPropertiesTest {
 
     @BeforeAll
     static void setUp() {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
+        try (var factory = Validators.factory()) {
+            validator = factory.getValidator();
+        }
         mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
     }
@@ -138,7 +138,7 @@ class ExecutionPropertiesTest {
             var violations = validator.validate(config);
             assertAll(
                 () -> assertEquals(1, violations.size()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("maxParallelism")))
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("max-parallelism")))
             );
         }
 
@@ -155,7 +155,15 @@ class ExecutionPropertiesTest {
             );
 
             Set<ConstraintViolation<ExecutionProperties>> violations = validator.validate(config);
-            assertEquals(2, violations.size());
+            assertAll(
+                () -> assertEquals(2, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("buffer-timeout")
+                ), "Violation must target 'buffer-timeout'"),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("auto-watermark-interval")
+                ), "Violation must target 'auto-watermark-interval'")
+            );
         }
 
         @Test

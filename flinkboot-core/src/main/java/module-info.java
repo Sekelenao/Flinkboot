@@ -20,6 +20,7 @@ module io.github.sekelenao.flinkboot.core {
     // Internal utilities exported specifically to companion modules
     exports io.github.sekelenao.flinkboot.core.internal.annotation to io.github.sekelenao.flinkboot.kafka, io.github.sekelenao.flinkboot.fluss;
     exports io.github.sekelenao.flinkboot.core.internal.time to io.github.sekelenao.flinkboot.kafka, io.github.sekelenao.flinkboot.fluss;
+    exports io.github.sekelenao.flinkboot.core.internal.validation to io.github.sekelenao.flinkboot.kafka, io.github.sekelenao.flinkboot.fluss;
     exports io.github.sekelenao.flinkboot.core.internal.validation.properties to io.github.sekelenao.flinkboot.kafka, io.github.sekelenao.flinkboot.fluss;
 
 
