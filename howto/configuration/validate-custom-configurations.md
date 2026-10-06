@@ -84,7 +84,7 @@ public record WindowedPipelineProperties(
                 context.disableDefaultConstraintViolation();
                 context.buildConstraintViolationWithTemplate(
                            "slide-duration must be specified and strictly less than window-size for SLIDING windows")
-                       .addPropertyNode("slideDuration")
+                       .addPropertyNode("slide-duration")
                        .addConstraintViolation();
                 return false;
             }
@@ -119,7 +119,7 @@ Inside the `if` branch of `validate`, build a custom violation and bind it to th
 context.disableDefaultConstraintViolation();
 context.buildConstraintViolationWithTemplate(
            "slide-duration must be specified and strictly less than window-size for SLIDING windows")
-       .addPropertyNode("slideDuration")
+       .addPropertyNode("slide-duration")
        .addConstraintViolation();
 return false;
 ```
@@ -128,7 +128,7 @@ return false;
 
 There are two distinct outcomes when returning `false`:
 
-* Building a custom violation: users see `slideDuration: <your-custom-message>`.
+* Building a custom violation: users see `slide-duration: <your-custom-message>`.
 * Only returning `false` without building any violation: users see the generic text `Invalid configuration properties`.
 
 > [!NOTE]
@@ -168,7 +168,7 @@ class WindowedPipelinePropertiesTest {
 
         assertEquals(1, violations.size());
         var violation = violations.iterator().next();
-        assertEquals("slideDuration", violation.getPropertyPath().toString());
+        assertEquals("slide-duration", violation.getPropertyPath().toString());
         assertTrue(violation.getMessage().contains("strictly less than window-size"));
     }
 }
