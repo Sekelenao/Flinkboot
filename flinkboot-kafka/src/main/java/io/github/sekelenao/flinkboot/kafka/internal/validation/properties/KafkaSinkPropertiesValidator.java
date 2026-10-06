@@ -26,7 +26,7 @@ public final class KafkaSinkPropertiesValidator {
         if (isExactlyOnce && !hasPrefix) {
             return PropertiesValidator.reject(
                 context,
-                "transactionalIdPrefix",
+                "transactional-id-prefix",
                 "transactional-id-prefix is required when delivery-guarantee is EXACTLY_ONCE"
             );
         }
@@ -34,7 +34,7 @@ public final class KafkaSinkPropertiesValidator {
         if (!isExactlyOnce && hasPrefix) {
             return PropertiesValidator.reject(
                 context,
-                "transactionalIdPrefix",
+                "transactional-id-prefix",
                 "transactional-id-prefix can only be specified when delivery-guarantee is EXACTLY_ONCE"
             );
         }

@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.mockito.Answers;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @DisplayName("KafkaSinkPropertiesValidator")
 class KafkaSinkPropertiesValidatorTest {
@@ -125,6 +126,9 @@ class KafkaSinkPropertiesValidatorTest {
             );
 
             assertFalse(KafkaSinkPropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "transactional-id-prefix is required when delivery-guarantee is EXACTLY_ONCE"
+            )).addPropertyNode("transactional-id-prefix");
         }
 
         @ParameterizedTest
@@ -144,6 +148,9 @@ class KafkaSinkPropertiesValidatorTest {
             );
 
             assertFalse(KafkaSinkPropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "transactional-id-prefix can only be specified when delivery-guarantee is EXACTLY_ONCE"
+            )).addPropertyNode("transactional-id-prefix");
         }
     }
 }
