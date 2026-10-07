@@ -144,7 +144,7 @@ class ExecutionPropertiesTest {
 
         @Test
         @DisplayName("Should fail validation when durations are negative")
-        void shouldFailValidationWithNegativeDurations() {
+        void shouldFailValidationWithNegativeDurationsInSeconds() {
             var config = new ExecutionProperties(
                 ExecutionRuntimeMode.STREAMING,
                 1,
@@ -163,6 +163,76 @@ class ExecutionPropertiesTest {
                 () -> assertTrue(violations.stream().anyMatch(v ->
                     v.getPropertyPath().toString().equals("auto-watermark-interval")
                 ), "Violation must target 'auto-watermark-interval'")
+            );
+        }
+
+        @Test
+        @DisplayName("Should pass validation when buffer timeout is -1 millisecond")
+        void shouldPassValidationWhenBufferTimeoutIsNegativeOneMillisecond() {
+            var bufferTimeout = Duration.ofMillis(-1);
+            var config = new ExecutionProperties(
+                    ExecutionRuntimeMode.STREAMING,
+                    1,
+                    1,
+                    bufferTimeout,
+                    null,
+                    true
+            );
+
+            var violations = validator.validate(config);
+            assertAll(
+                    () -> assertTrue(violations.isEmpty()),
+                    () -> assertEquals(
+                            bufferTimeout,
+                            config.bufferTimeout().orElseThrow()
+                    )
+            );
+        }
+
+        @Test
+        @DisplayName("Should pass validation when buffer timeout is zero milliseconds")
+        void shouldPassValidationWhenBufferTimeoutIsZeroMilliseconds() {
+            var bufferTimeout = Duration.ZERO;
+            var config = new ExecutionProperties(
+                    ExecutionRuntimeMode.STREAMING,
+                    1,
+                    1,
+                    bufferTimeout,
+                    null,
+                    true
+            );
+
+            var violations = validator.validate(config);
+            assertAll(
+                    () -> assertTrue(violations.isEmpty()),
+                    () -> assertEquals(
+                            bufferTimeout,
+                            config.bufferTimeout().orElseThrow()
+                    )
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when buffer timeout is less than negative one millisecond")
+        void shouldFailValidationWhenBufferTimeoutIsLessThanNegativeOneMillisecond() {
+            var config = new ExecutionProperties(
+                    ExecutionRuntimeMode.STREAMING,
+                    1,
+                    1,
+                    Duration.ofMillis(-2),
+                    null,
+                    true
+            );
+
+            var violations = validator.validate(config);
+            assertAll(
+                    () -> assertEquals(1, violations.size()),
+                    () -> assertTrue(
+                            violations.stream().anyMatch(v ->
+                                    v.getPropertyPath().toString().equals("buffer-timeout")
+                            ),
+                            "Violation must target 'buffer-timeout'"
+                    )
             );
         }
 

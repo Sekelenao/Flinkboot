@@ -31,7 +31,7 @@ public final class ExecutionProperties implements ValidatableProperties, Seriali
     @Positive
     private final Integer maxParallelism;
 
-    @DurationMin(millis = 0)
+    @DurationMin(millis = -1)
     private final Duration bufferTimeout;
 
     @DurationMin(millis = 0)
@@ -110,7 +110,9 @@ public final class ExecutionProperties implements ValidatableProperties, Seriali
      * @return an {@link Optional} containing the buffer timeout duration, or empty if not specified
      */
     public Optional<Duration> bufferTimeout() {
-        return Optional.ofNullable(bufferTimeout);
+        return Optional.ofNullable(bufferTimeout)
+                .filter(duration ->
+                        duration.equals(Duration.ofMillis(-1)) || duration.compareTo(Duration.ZERO) >= 0);
     }
 
     /**
