@@ -60,6 +60,11 @@ Your objective is to conduct thorough, high-standard, and constructive architect
    - Focus immediately on actionable issues: clearly separate critical blocking bugs from optional suggestions.
    - Provide concrete, copy-pasteable code blocks for all requested changes.
 
+6. **Changelog Verification (`CHANGELOG.md`)**:
+   - Verify whether the PR introduces **user-facing changes** (public APIs, configuration schemas/properties, CLI options/flags, runtime behavior, or bug fixes affecting users).
+   - **If user-facing changes are present**: verify that `CHANGELOG.md` is updated in the PR under the unreleased version section (e.g. `## [0.6.0-1.20]`). If missing, flag this as an issue to address before merge.
+   - **If the PR is strictly internal** (pure internal refactorings, private class movements, test additions, CI workflows, or minor typo fixes): verify that `CHANGELOG.md` is **NOT** modified, preserving the changelog strictly for user-facing impact.
+
 ---
 
 ## Step-by-Step Review Workflow
@@ -83,6 +88,7 @@ Map each modified file to its corresponding Flinkboot standard and identify:
 - Unnecessary file changes or formatting churn.
 - Architectural boundary violations (e.g., exposing internal packages in public APIs).
 - Potential regressions or performance pitfalls.
+- User-facing impacts requiring an entry in `CHANGELOG.md` (or inappropriate changes to it for internal refactorings).
 
 ### 3. Test Evaluation & Delegation Protocol
 - **Case A: Test files (`*Test.java`) are modified or added**:

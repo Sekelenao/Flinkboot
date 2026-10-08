@@ -14,6 +14,7 @@ Flinkboot
 [![Java](https://img.shields.io/badge/Java_11%2B-%23ED8B00.svg?logo=openjdk&logoColor=white)](https://docs.oracle.com/en/java/javase/11/docs/api/index.html)
 [![Flink](https://img.shields.io/badge/Flink_1.20-%23E6526F.svg?logo=apacheflink&logoColor=white)](https://flink.apache.org/)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.sekelenao/flinkboot-core?label=Maven%20central&logo=apachemaven&logoColor=white&color=C71A36&labelColor=C71A36)](https://central.sonatype.com/artifact/io.github.sekelenao/flinkboot-core)
+[![Documentation](https://img.shields.io/badge/Documentation-flinkboot.com-%231e1f22.svg?logo=docusaurus&logoColor=white)](https://flinkboot.com)
 ![Tests](https://raw.githubusercontent.com/Sekelenao/Flinkboot/badges/Tests.svg)
 ![Coverage](https://raw.githubusercontent.com/Sekelenao/Flinkboot/badges/Coverage.svg)
 ![Branches](https://raw.githubusercontent.com/Sekelenao/Flinkboot/badges/Branches.svg)
@@ -104,41 +105,9 @@ public class MyFlinkJob {
 
 ---
 
-## Key Capabilities
-
-* **Unified Configuration Loading** — Parse and merge multiple YAML files, CLI arguments, and environment variables into immutable Java records.
-* **Fail-Fast Validation** — Catch missing parameters, invalid ranges, and syntax errors on the JobManager before resources are allocated.
-* **Declarative Execution Environment** — Configure and instantiate Flink's `StreamExecutionEnvironment` with zero boilerplate.
-* **Native JDK Type Serialization** — Built-in `@TypeInfo` factories for `Duration`, Java 8 time types, and generic collections without Kryo fallback.
-* **Deep POJO Compliance Verification** — Test utility (`FlinkbootAssertions.assertThat(...).isPojo()`) to recursively verify that data models serialize natively without Kryo.
-* **Testing Helpers** — Load and validate configurations directly in JUnit 5 tests.
-* **Unified Resource Loading** — Load files and assets seamlessly across classpath and file systems with a unified URI syntax (`Resource.of`).
-* **Auto-configured Connectors** — Production-ready sources and sinks (e.g. Apache Kafka, Apache Fluss) built directly from configuration.
-
----
-
-## Getting Started
-
-Follow these 3 essential steps to get started with Flinkboot:
-
-1. **[Setup POM & Avoid Conflicts](howto/setup/avoid-dependency-conflicts.md) (MUST READ)**  
-   *Configure your project's Maven POM, BOM dependencies, and shading relocations to prevent Jackson/Log4j runtime conflicts on your Flink cluster.*
-
-2. **[Configure Your Jobs (Load & Merge Configurations)](howto/configuration/load-configurations.md)**  
-   *Define your YAML configurations (defaults to `classpath:job-configuration.yaml`), load them into strongly-typed Java models, and apply CLI/environment overrides.*
-
-3. **[Create an Execution Environment](howto/configuration/configure-execution-environment.md)**  
-   *Configure execution modes, checkpointing, restart strategies, and RocksDB state backends to instantiate Flink's `StreamExecutionEnvironment` with zero boilerplate.*
-
----
-
 ## Documentation & References
 
-> [!NOTE]
-> **Version-Specific Documentation**: The documentation on the `main` branch tracks the latest development version. If you are using a specific release of Flinkboot, please **switch to the corresponding Git tag** (e.g. [`v0.5.0-1.20`](https://github.com/Sekelenao/Flinkboot/releases)) to ensure the guides and API references match your exact version.
-
-* **[How-To Guides Index](howto/README.md)** — Step-by-step guides for configurations, connectors, POJO compliance, and testing.
-* **[Compatibility Matrix](COMPATIBILITY.md)** — Supported Apache Flink versions and Java (JDK) runtimes.
+* **[Documentation](https://flinkboot.com)** — Official documentation.
 * **[Contributing Guide](CONTRIBUTING.md)** — Guidelines for reporting issues, submitting pull requests, and coding standards.
 * **[Changelog](CHANGELOG.md)** — Release notes and user-facing change history.
 

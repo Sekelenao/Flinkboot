@@ -67,7 +67,7 @@ mvn clean install -DskipTests
 
 1. Ensure you are the officially assigned contributor for the issue.
 2. Make sure `mvn clean test` passes locally (100% tests green).
-3. Update documentation in `howto/` and `CHANGELOG.md` if your change affects user-facing APIs.
+3. Update `CHANGELOG.md` if your change introduces user-facing changes (public APIs, configuration schemas, CLI options, runtime behavior, or bug fixes).
 4. Fill out the [Pull Request Template](.github/PULL_REQUEST_TEMPLATE.md), ensuring the PR title follows `#<issue_number>: <title>` and the body contains `Closes #<issue_number>`.
 
 Thank you for contributing to Flinkboot.

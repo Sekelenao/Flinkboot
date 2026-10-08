@@ -21,4 +21,4 @@ Closes #
 - [ ] My PR description includes `Closes #<issue_number>` to automatically link and close the issue upon merge.
 - [ ] `mvn clean test` passes locally with 0 errors and 0 failures.
 - [ ] My code adheres to the project standards in [CONTRIBUTING.md](CONTRIBUTING.md) and [.agents/skills/](.agents/skills/).
-- [ ] I have updated the documentation in `howto/` and `CHANGELOG.md` (if applicable).
+- [ ] I have updated `CHANGELOG.md` (if this PR introduces user-facing changes).
