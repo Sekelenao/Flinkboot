@@ -14,7 +14,7 @@ Flinkboot
 [![Java](https://img.shields.io/badge/Java_11%2B-%23ED8B00.svg?logo=openjdk&logoColor=white)](https://docs.oracle.com/en/java/javase/11/docs/api/index.html)
 [![Flink](https://img.shields.io/badge/Flink_1.20-%23E6526F.svg?logo=apacheflink&logoColor=white)](https://flink.apache.org/)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.sekelenao/flinkboot-core?label=Maven%20central&logo=apachemaven&logoColor=white&color=C71A36&labelColor=C71A36)](https://central.sonatype.com/artifact/io.github.sekelenao/flinkboot-core)
-[![Documentation](https://img.shields.io/badge/Documentation-flinkboot.com-%231e1f22.svg?logo=docusaurus&logoColor=white)](https://flinkboot.com)
+[![Documentation](https://img.shields.io/badge/Documentation-flinkboot.com-%230288D1.svg?logo=docusaurus&logoColor=white&color=0288D1&labelColor=0288D1)](https://flinkboot.com)
 ![Tests](https://raw.githubusercontent.com/Sekelenao/Flinkboot/badges/Tests.svg)
 ![Coverage](https://raw.githubusercontent.com/Sekelenao/Flinkboot/badges/Coverage.svg)
 ![Branches](https://raw.githubusercontent.com/Sekelenao/Flinkboot/badges/Branches.svg)
