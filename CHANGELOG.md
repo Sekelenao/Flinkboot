@@ -15,6 +15,7 @@ All notable user-facing changes to this project are documented in this file.
 ## [0.6.0-1.20]
 
 ### 🔴 Breaking Changes
+- **[flinkboot-core] Savepoint Restore Mode Compatibility**: Removed `RestoreMode.LEGACY`. Applications configuring `restore-mode: LEGACY` or referencing `RestoreMode.LEGACY` in Java must migrate to the supported `CLAIM` or `NO_CLAIM` mode according to the intended savepoint ownership behavior.
 - **[namespace] Canonical Namespace Migration to `com.flinkboot`**:
   - **Maven Coordinates**: Relocated root and all modules (`flinkboot-core`, `flinkboot-test`, `flinkboot-kafka`, `flinkboot-fluss`) from `io.github.sekelenao` to `com.flinkboot`.
   - **Java Package Hierarchy**: Migrated all classes, records, and interfaces from `io.github.sekelenao.flinkboot.*` to `com.flinkboot.*` across all modules.
