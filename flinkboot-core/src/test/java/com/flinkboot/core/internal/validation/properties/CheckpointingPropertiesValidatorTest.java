@@ -119,5 +119,31 @@ class CheckpointingPropertiesValidatorTest {
 
             assertTrue(CheckpointingPropertiesValidator.validate(props, context));
         }
+
+        @Test
+        @DisplayName("Should return false when min pause is positive and max concurrent checkpoints exceeds one")
+        void shouldFailWhenMinPauseIsPositiveAndMaxConcurrentExceedsOne() {
+            var context = mock(
+                ConstraintValidatorContext.class,
+                Answers.RETURNS_DEEP_STUBS
+            );
+
+            var props = new CheckpointingProperties(
+                true,
+                Duration.ofSeconds(10),
+                null,
+                null,
+                Duration.ofSeconds(5),
+                2,
+                null,
+                null,
+                null,
+                null
+            );
+
+            assertFalse(
+                CheckpointingPropertiesValidator.validate(props, context)
+            );
+        }
     }
 }

@@ -34,6 +34,7 @@ All notable user-facing changes to this project are documented in this file.
 - **[flinkboot-kafka] Configurable Reset Strategy for Explicit Partition Offsets (`reset-strategy`)**: Added `reset-strategy: EARLIEST | LATEST | NONE` (`KafkaOffsetResetStrategy`) to `KafkaOffsetProperties`, enforced when `strategy: OFFSETS`. Configures the underlying Flink `OffsetsInitializer.offsets(offsets, resetStrategy)` for unmapped partitions, preventing silent implicit fallback to `EARLIEST` and supporting strict failure with `NONE`.
 
 ### 🔵 Fixes & Diagnostics
+- **[flinkboot-core] Checkpoint Concurrency Validation**: Rejects configurations combining a positive `min-pause-between-checkpoints` with `max-concurrent-checkpoints` greater than `1`, preventing Flink startup failures.
 - **[flinkboot-core] Exponential Backoff Multiplier Validation**: Rejects `backoff-multiplier: 1.0` during configuration validation, matching Flink's requirement that the multiplier be strictly greater than `1.0`.
 - **[flinkboot-kafka] Null Delivery Guarantee Validation**: Prevents misleading cross-field validation errors when `delivery-guarantee` is missing, leaving the missing-value error to the field-level `@NotNull` constraint.
 - **[flinkboot-core] Buffer Timeout Maximum Throughput Support**: Allows `buffer-timeout: -1` (or `-1ms`) to disable periodic buffer flushing (`BUFFER_TIMEOUT_ENABLED = false`) for maximum throughput in streaming pipelines, resolving validation failures caused by `@DurationMin(millis = 0)`.
