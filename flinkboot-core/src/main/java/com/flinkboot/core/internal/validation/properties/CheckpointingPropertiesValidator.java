@@ -25,6 +25,18 @@ public final class CheckpointingPropertiesValidator {
                 "interval must be specified when checkpointing is enabled"
             );
         }
+
+        var minPause = properties.minPauseBetweenCheckpoints();
+        var maxConcurrent = properties.maxConcurrentCheckpoints();
+
+        if (minPause.isPresent() && !minPause.get().isZero() && maxConcurrent.isPresent() && maxConcurrent.getAsInt() > 1) {
+            return PropertiesValidator.reject(
+                context,
+                "max-concurrent-checkpoints",
+                "max-concurrent-checkpoints must be 1 when min-pause-between-checkpoints is greater than 0"
+            );
+        }
+
         return true;
     }
 
