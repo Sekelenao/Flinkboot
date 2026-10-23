@@ -15,11 +15,6 @@ public enum StateBackendType {
     ROCKSDB,
 
     /**
-     * Changelog state backend (durable short-interval checkpointing).
-     */
-    CHANGELOG,
-
-    /**
      * Custom state backend loaded via factory class name.
      */
     CUSTOM
