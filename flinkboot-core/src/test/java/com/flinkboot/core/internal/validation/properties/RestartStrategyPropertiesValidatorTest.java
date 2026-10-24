@@ -160,6 +160,36 @@ class RestartStrategyPropertiesValidatorTest {
         }
 
         @Test
+        @DisplayName("Should return false when only initial-backoff is specified in EXPONENTIAL_DELAY")
+        void shouldFailWhenOnlyInitialBackoffInExponentialDelay() {
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), null, 2.0, Duration.ofHours(1), 0.1);
+            var props = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
+
+            assertFalse(RestartStrategyPropertiesValidator.validate(props, context));
+        }
+
+        @Test
+        @DisplayName("Should return false when only max-backoff is specified in EXPONENTIAL_DELAY")
+        void shouldFailWhenOnlyMaxBackoffInExponentialDelay() {
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
+            var expo = new ExponentialDelayRestartProperties(null, Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
+            var props = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
+
+            assertFalse(RestartStrategyPropertiesValidator.validate(props, context));
+        }
+
+        @Test
+        @DisplayName("Should return true when neither initial-backoff nor max-backoff is specified in EXPONENTIAL_DELAY")
+        void shouldPassWhenNeitherBackoffInExponentialDelay() {
+            var context = mock(ConstraintValidatorContext.class);
+            var expo = new ExponentialDelayRestartProperties(null, null, 2.0, Duration.ofHours(1), 0.1);
+            var props = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
+
+            assertTrue(RestartStrategyPropertiesValidator.validate(props, context));
+        }
+
+        @Test
         @DisplayName("Should return false when exponential-delay is provided for FIXED_DELAY")
         void shouldFailWhenExponentialDelayProvidedForFixedDelay() {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
