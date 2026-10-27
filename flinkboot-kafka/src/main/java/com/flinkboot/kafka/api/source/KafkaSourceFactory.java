@@ -59,6 +59,8 @@ public final class KafkaSourceFactory {
             .setProperties(additionalProperties)
             .setDeserializer(schema);
 
+        config.clientIdPrefix().ifPresent(builder::setClientIdPrefix);
+
         config.stoppingOffsets().ifPresent(stopping -> {
             var stoppingOffsets = OffsetInitializerMapper.map(stopping);
             if (config.boundedness().orElse(KafkaBoundedness.UNBOUNDED) == KafkaBoundedness.BOUNDED) {

@@ -442,6 +442,7 @@ class KafkaSourcePropertiesTest {
                 + "  - \"localhost:9092\"\n"
                 + "  - \"localhost:9093\"\n"
                 + "group-id: \"analytics-group\"\n"
+                + "client-id-prefix: \"analytics-reader\"\n"
                 + "topics:\n"
                 + "  - \"orders\"\n"
                 + "  - \"payments\"\n"
@@ -461,6 +462,7 @@ class KafkaSourcePropertiesTest {
                 () -> assertEquals("full-kafka-source", config.name()),
                 () -> assertEquals(List.of("localhost:9092", "localhost:9093"), config.bootstrapServers()),
                 () -> assertEquals("analytics-group", config.groupId()),
+                () -> assertEquals(Optional.of("analytics-reader"), config.clientIdPrefix()),
                 () -> assertEquals(List.of("orders", "payments"), config.topics()),
                 () -> assertEquals(Optional.of(KafkaBoundedness.BOUNDED), config.boundedness()),
                 () -> assertEquals(KafkaOffsetInitializer.TIMESTAMP, config.startingOffsets().strategy()),
@@ -489,6 +491,7 @@ class KafkaSourcePropertiesTest {
                 () -> assertEquals("minimal-kafka-source", config.name()),
                 () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
                 () -> assertEquals("minimal-group", config.groupId()),
+                () -> assertTrue(config.clientIdPrefix().isEmpty()),
                 () -> assertEquals(List.of("orders"), config.topics()),
                 () -> assertEquals(KafkaOffsetInitializer.EARLIEST, config.startingOffsets().strategy()),
                 () -> assertEquals(Optional.empty(), config.boundedness()),
@@ -573,6 +576,41 @@ class KafkaSourcePropertiesTest {
                 () -> assertNotEquals(base, diffProps),
                 () -> assertNotEquals(base, null),
                 () -> assertNotEquals(base, "other type")
+            );
+        }
+
+        @Test
+        @DisplayName("Should distinguish configurations with different client ID prefixes")
+        void shouldDistinguishClientIdPrefixes() {
+            var base = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                "group",
+                "orders-reader",
+                List.of("topic"),
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                null
+            );
+            var differentPrefix = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                "group",
+                "payments-reader",
+                List.of("topic"),
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                null
+            );
+
+            assertAll(
+                () -> assertNotEquals(base, differentPrefix),
+                () -> assertNotEquals(base.hashCode(), differentPrefix.hashCode()),
+                () -> assertTrue(base.toString().contains("orders-reader"))
             );
         }
 

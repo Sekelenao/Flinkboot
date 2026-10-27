@@ -11,6 +11,7 @@ import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.connector.source.Boundedness;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.connector.kafka.source.KafkaSourceBuilder;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 import org.apache.flink.util.Collector;
@@ -215,6 +216,34 @@ class KafkaSourceFactoryTest {
                     assertEquals("schema must not be null", ex.getMessage());
                 }
             );
+        }
+    }
+
+    @Nested
+    @DisplayName("Client ID prefix")
+    class ClientIdPrefix {
+
+        @Test
+        @DisplayName("Should configure the Kafka source builder with the client ID prefix")
+        void shouldConfigureClientIdPrefix() throws Exception {
+            var config = new KafkaSourceProperties(
+                "orders-source",
+                List.of("localhost:9092"),
+                "orders-group",
+                "orders-reader",
+                List.of("orders"),
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                null
+            );
+
+            var builder = KafkaSourceFactory.supplyBuilderFor(config, TEST_SCHEMA);
+            var field = KafkaSourceBuilder.class.getDeclaredField("clientIdPrefix");
+            field.setAccessible(true);
+
+            assertEquals("orders-reader", field.get(builder));
         }
     }
 

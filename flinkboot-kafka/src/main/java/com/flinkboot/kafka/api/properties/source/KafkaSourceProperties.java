@@ -36,6 +36,9 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
     @NotBlank
     private final String groupId;
 
+    @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
+    private final String clientIdPrefix;
+
     private final List<@NotBlank String> topics;
 
     @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
@@ -58,6 +61,7 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
      * @param name             source operator name in Flink DAG
      * @param bootstrapServers list of Kafka broker addresses
      * @param groupId          Kafka consumer group ID
+     * @param clientIdPrefix   optional prefix for unique Kafka client IDs across source subtasks
      * @param topics           list of topics to consume from (mutually exclusive with {@code topicPattern})
      * @param topicPattern     regular expression pattern to match topics against (mutually exclusive with {@code topics})
      * @param startingOffsets  starting offset configuration
@@ -70,6 +74,7 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
         @JsonProperty("name") String name,
         @JsonProperty("bootstrap-servers") List<String> bootstrapServers,
         @JsonProperty("group-id") String groupId,
+        @JsonProperty("client-id-prefix") String clientIdPrefix,
         @JsonProperty("topics") List<String> topics,
         @JsonProperty("topic-pattern") String topicPattern,
         @JsonProperty("starting-offsets") KafkaOffsetProperties startingOffsets,
@@ -80,12 +85,32 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
         this.name = name;
         this.bootstrapServers = bootstrapServers;
         this.groupId = groupId;
+        this.clientIdPrefix = clientIdPrefix;
         this.topics = topics;
         this.topicPattern = topicPattern;
         this.startingOffsets = startingOffsets;
         this.boundedness = boundedness;
         this.stoppingOffsets = stoppingOffsets;
         this.properties = properties;
+    }
+
+    /**
+     * Backward-compatible constructor for configurations that do not specify a client ID prefix.
+     */
+    public KafkaSourceProperties(
+        String name,
+        List<String> bootstrapServers,
+        String groupId,
+        List<String> topics,
+        String topicPattern,
+        KafkaOffsetProperties startingOffsets,
+        KafkaBoundedness boundedness,
+        KafkaOffsetProperties stoppingOffsets,
+        Map<String, String> properties
+    ) {
+        this(
+            name, bootstrapServers, groupId, null, topics, topicPattern, startingOffsets, boundedness, stoppingOffsets, properties
+        );
     }
 
     @Override
@@ -121,6 +146,15 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
      */
     public String groupId() {
         return groupId;
+    }
+
+    /**
+     * Returns the optional prefix used to generate unique Kafka client IDs for source subtasks.
+     *
+     * @return an {@link Optional} containing the client ID prefix, or empty if not configured
+     */
+    public Optional<String> clientIdPrefix() {
+        return Optional.ofNullable(clientIdPrefix);
     }
 
     /**
@@ -193,6 +227,7 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
         return Objects.equals(name, o.name)
             && Objects.equals(bootstrapServers, o.bootstrapServers)
             && Objects.equals(groupId, o.groupId)
+            && Objects.equals(clientIdPrefix, o.clientIdPrefix)
             && Objects.equals(topics, o.topics)
             && Objects.equals(topicPattern, o.topicPattern)
             && Objects.equals(startingOffsets, o.startingOffsets)
@@ -204,7 +239,7 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(name, bootstrapServers, groupId, topics, topicPattern, startingOffsets, boundedness, stoppingOffsets, properties);
+        return Objects.hash(name, bootstrapServers, groupId, clientIdPrefix, topics, topicPattern, startingOffsets, boundedness, stoppingOffsets, properties);
     }
 
     @Override
@@ -214,6 +249,7 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
             "name='" + name + '\'' +
             ", bootstrapServers=" + bootstrapServers +
             ", groupId='" + groupId + '\'' +
+            ", clientIdPrefix='" + clientIdPrefix + '\'' +
             ", topics=" + topics +
             ", topicPattern='" + topicPattern + '\'' +
             ", startingOffsets=" + startingOffsets +
