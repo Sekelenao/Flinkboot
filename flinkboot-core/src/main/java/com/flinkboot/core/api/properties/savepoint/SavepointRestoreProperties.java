@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -18,6 +19,8 @@ public final class SavepointRestoreProperties implements Serializable {
 
     @NotBlank
     private final String savepointPath;
+    @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
+    private final String directory;
     private final Boolean allowNonRestoredState;
     private final RestoreMode restoreMode;
 
@@ -27,16 +30,23 @@ public final class SavepointRestoreProperties implements Serializable {
      * @param savepointPath          the path or URI to the savepoint directory
      * @param allowNonRestoredState  whether to allow state that cannot be mapped to the job graph
      * @param restoreMode            the restore ownership mode (CLAIM, NO_CLAIM, LEGACY)
+     * @param directory               the default directory for writing savepoints
      */
     @JsonCreator
     public SavepointRestoreProperties(
         @JsonProperty("savepoint-path") String savepointPath,
         @JsonProperty("allow-non-restored-state") Boolean allowNonRestoredState,
-        @JsonProperty("restore-mode") RestoreMode restoreMode
+        @JsonProperty("restore-mode") RestoreMode restoreMode,
+        @JsonProperty("directory") String directory
     ) {
         this.savepointPath = savepointPath;
+        this.directory = directory;
         this.allowNonRestoredState = allowNonRestoredState;
         this.restoreMode = restoreMode;
+    }
+
+    public SavepointRestoreProperties(String savepointPath, Boolean allowNonRestoredState, RestoreMode restoreMode) {
+        this(savepointPath, allowNonRestoredState, restoreMode, null);
     }
 
     /**
@@ -46,6 +56,15 @@ public final class SavepointRestoreProperties implements Serializable {
      */
     public String savepointPath() {
         return savepointPath;
+    }
+
+    /**
+     * Returns the default directory for writing savepoints.
+     *
+     * @return an {@link Optional} containing the savepoints directory, or empty if not specified
+     */
+    public Optional<String> directory() {
+        return Optional.ofNullable(directory);
     }
 
     /**
@@ -74,6 +93,7 @@ public final class SavepointRestoreProperties implements Serializable {
         }
         var o = (SavepointRestoreProperties) other;
         return Objects.equals(savepointPath, o.savepointPath)
+            && Objects.equals(directory, o.directory)
             && Objects.equals(allowNonRestoredState, o.allowNonRestoredState)
             && restoreMode == o.restoreMode;
     }
@@ -81,7 +101,7 @@ public final class SavepointRestoreProperties implements Serializable {
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(savepointPath, allowNonRestoredState, restoreMode);
+        return Objects.hash(savepointPath, directory, allowNonRestoredState, restoreMode);
     }
 
     @Override
@@ -89,6 +109,7 @@ public final class SavepointRestoreProperties implements Serializable {
     public String toString() {
         return "SavepointRestoreProperties{" +
             "savepointPath='" + savepointPath + '\'' +
+            ", directory='" + directory + '\'' +
             ", allowNonRestoredState=" + allowNonRestoredState +
             ", restoreMode=" + restoreMode +
             '}';

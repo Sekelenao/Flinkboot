@@ -40,7 +40,8 @@ class SavepointRestorePropertiesTest {
         void shouldDeserializeValidYamlWithAllFields() throws Exception {
             var yaml = "savepoint-path: /tmp/savepoint-1\n" +
                 "allow-non-restored-state: true\n" +
-                "restore-mode: CLAIM\n";
+                "restore-mode: CLAIM\n" +
+                "directory: /tmp/savepoints\n";
 
             var config = mapper.readValue(yaml, SavepointRestoreProperties.class);
 
@@ -50,7 +51,8 @@ class SavepointRestorePropertiesTest {
                 () -> assertTrue(config.allowNonRestoredState().isPresent()),
                 () -> assertTrue(config.allowNonRestoredState().get()),
                 () -> assertTrue(config.restoreMode().isPresent()),
-                () -> assertEquals(RestoreMode.CLAIM, config.restoreMode().get())
+                () -> assertEquals(RestoreMode.CLAIM, config.restoreMode().get()),
+                () -> assertEquals("/tmp/savepoints", config.directory().orElseThrow())
             );
         }
 
@@ -65,7 +67,8 @@ class SavepointRestorePropertiesTest {
                 () -> assertNotNull(config),
                 () -> assertEquals("/tmp/savepoint-1", config.savepointPath()),
                 () -> assertTrue(config.allowNonRestoredState().isEmpty()),
-                () -> assertTrue(config.restoreMode().isEmpty())
+                () -> assertTrue(config.restoreMode().isEmpty()),
+                () -> assertTrue(config.directory().isEmpty())
             );
         }
     }
@@ -77,7 +80,7 @@ class SavepointRestorePropertiesTest {
         @Test
         @DisplayName("Should pass validation with valid configuration")
         void shouldPassValidation() {
-            var config = new SavepointRestoreProperties("/tmp/savepoint-1", true, RestoreMode.NO_CLAIM);
+            var config = new SavepointRestoreProperties("/tmp/savepoint-1", true, RestoreMode.NO_CLAIM, "/tmp/savepoints");
 
             var violations = validator.validate(config);
 
@@ -92,6 +95,16 @@ class SavepointRestorePropertiesTest {
             var violations = validator.validate(config);
 
             assertFalse(violations.isEmpty(), "Should have validation violations");
+        }
+
+        @Test
+        @DisplayName("Should fail validation when directory is blank")
+        void shouldFailValidationWhenDirectoryIsBlank() {
+            var config = new SavepointRestoreProperties("/tmp/savepoint-1", true, RestoreMode.CLAIM, "   ");
+
+            var violations = validator.validate(config);
+
+            assertTrue(violations.stream().anyMatch(violation -> violation.getPropertyPath().toString().equals("directory")));
         }
 
         @Test
@@ -112,14 +125,15 @@ class SavepointRestorePropertiesTest {
         @Test
         @DisplayName("Should return expected values from getters")
         void testGetters() {
-            var config = new SavepointRestoreProperties("/path/to/savepoint", false, RestoreMode.LEGACY);
+            var config = new SavepointRestoreProperties("/path/to/savepoint", false, RestoreMode.LEGACY, "/tmp/savepoints");
 
             assertAll(
                 () -> assertEquals("/path/to/savepoint", config.savepointPath()),
                 () -> assertTrue(config.allowNonRestoredState().isPresent()),
                 () -> assertFalse(config.allowNonRestoredState().get()),
                 () -> assertTrue(config.restoreMode().isPresent()),
-                () -> assertEquals(RestoreMode.LEGACY, config.restoreMode().get())
+                () -> assertEquals(RestoreMode.LEGACY, config.restoreMode().get()),
+                () -> assertEquals("/tmp/savepoints", config.directory().orElseThrow())
             );
         }
     }
