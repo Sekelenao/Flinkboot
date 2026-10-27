@@ -6,6 +6,7 @@ import org.apache.fluss.flink.sink.FlussSinkBuilder;
 import org.apache.fluss.flink.sink.serializer.FlussSerializationSchema;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * Factory utility for constructing Apache Flink {@link FlussSink} instances from configuration properties.
@@ -64,5 +65,27 @@ public final class FlussSinkFactory {
         FlussSerializationSchema<T> serializationSchema
     ) {
         return supplyBuilderFor(config, serializationSchema).build();
+    }
+
+    /**
+     * Creates and builds a {@link FlussSink} after applying custom configuration to its builder.
+     *
+     * @param config              the Fluss sink configuration properties
+     * @param serializationSchema the serialization schema to encode records for Fluss
+     * @param builderCustomizer   the callback used to customize the configured builder
+     * @param <T>                 the input record type
+     * @return a built and immutable {@link FlussSink}
+     * @throws NullPointerException if any argument is {@code null}
+     */
+    public static <T> FlussSink<T> supplyFor(
+        FlussSinkProperties config,
+        FlussSerializationSchema<T> serializationSchema,
+        Consumer<FlussSinkBuilder<T>> builderCustomizer
+    ) {
+        Objects.requireNonNull(builderCustomizer, "builderCustomizer must not be null");
+
+        FlussSinkBuilder<T> builder = supplyBuilderFor(config, serializationSchema);
+        builderCustomizer.accept(builder);
+        return builder.build();
     }
 }

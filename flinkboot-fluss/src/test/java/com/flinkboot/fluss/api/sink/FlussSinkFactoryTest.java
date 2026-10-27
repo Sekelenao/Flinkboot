@@ -10,12 +10,14 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("FlussSinkFactory")
 class FlussSinkFactoryTest {
@@ -92,6 +94,48 @@ class FlussSinkFactoryTest {
             assertNotNull(builder);
 
             assertThrows(RuntimeException.class, () -> FlussSinkFactory.supplyFor(props, TEST_SCHEMA));
+        }
+
+        @Test
+        @DisplayName("Should apply the builder customizer before building the sink")
+        void shouldApplyBuilderCustomizerBeforeBuildingSink() {
+            var props = new FlussSinkProperties(
+                "my-sink",
+                List.of("localhost:9123"),
+                "my_db",
+                "my_table",
+                Map.of("custom.key", "custom.value")
+            );
+            var customized = new AtomicBoolean();
+
+            assertThrows(RuntimeException.class, () -> FlussSinkFactory.supplyFor(
+                props,
+                TEST_SCHEMA,
+                builder -> {
+                    assertNotNull(builder);
+                    customized.set(true);
+                }
+            ));
+
+            assertTrue(customized.get());
+        }
+
+        @Test
+        @DisplayName("Should reject a null builder customizer")
+        void shouldRejectNullBuilderCustomizer() {
+            var props = new FlussSinkProperties(
+                "my-sink",
+                List.of("localhost:9123"),
+                "my_db",
+                "my_table",
+                null
+            );
+
+            var exception = assertThrows(
+                NullPointerException.class,
+                () -> FlussSinkFactory.supplyFor(props, TEST_SCHEMA, null)
+            );
+            assertEquals("builderCustomizer must not be null", exception.getMessage());
         }
 
         @Test
