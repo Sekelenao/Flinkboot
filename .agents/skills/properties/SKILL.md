@@ -1,5 +1,5 @@
 ---
-name: configuration-properties
+name: properties
 description: Best practices and strict rules for creating Flinkboot configuration properties DTOs (Jackson, Jakarta, Immutability, Fail-fast).
 ---
 

@@ -268,39 +268,45 @@ class RestartStrategyPropertiesTest {
             var violations = validator.validate(config);
             assertAll(
                 () -> assertEquals(1, violations.size()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("exponentialDelay")))
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("exponential-delay")))
             );
         }
 
         @Test
-        @DisplayName("Should pass validation when only initial-backoff is present in exponential delay")
-        void shouldPassValidationWhenOnlyInitialBackoffPresent() {
+        @DisplayName("Should fail validation when only initial-backoff is present in exponential delay")
+        void shouldFailValidationWhenOnlyInitialBackoffPresent() {
             var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), null, 2.0, Duration.ofHours(1), 0.1);
 
             var config = assertDoesNotThrow(
                 () -> new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo)
             );
 
+            var violations = validator.validate(config);
             assertAll(
-                () -> assertTrue(validator.validate(config).isEmpty()),
-                () -> assertEquals(Duration.ofSeconds(1), config.exponentialDelay().orElseThrow().initialBackoff().orElseThrow()),
-                () -> assertTrue(config.exponentialDelay().orElseThrow().maxBackoff().isEmpty())
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("exponential-delay"))),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getMessage().equals(
+                    "both initial-backoff and max-backoff must be specified together in exponential-delay restart strategy"
+                )))
             );
         }
 
         @Test
-        @DisplayName("Should pass validation when only max-backoff is present in exponential delay")
-        void shouldPassValidationWhenOnlyMaxBackoffPresent() {
+        @DisplayName("Should fail validation when only max-backoff is present in exponential delay")
+        void shouldFailValidationWhenOnlyMaxBackoffPresent() {
             var expo = new ExponentialDelayRestartProperties(null, Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
 
             var config = assertDoesNotThrow(
                 () -> new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo)
             );
 
+            var violations = validator.validate(config);
             assertAll(
-                () -> assertTrue(validator.validate(config).isEmpty()),
-                () -> assertTrue(config.exponentialDelay().orElseThrow().initialBackoff().isEmpty()),
-                () -> assertEquals(Duration.ofMinutes(1), config.exponentialDelay().orElseThrow().maxBackoff().orElseThrow())
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("exponential-delay"))),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getMessage().equals(
+                    "both initial-backoff and max-backoff must be specified together in exponential-delay restart strategy"
+                )))
             );
         }
 

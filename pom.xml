@@ -59,8 +59,8 @@
         <!-- Dependency versions -->
         <dependency.junit.version>5.14.4</dependency.junit.version>
         <dependency.mockito.version>5.24.0</dependency.mockito.version>
-        <dependency.jackson.version>2.22.3</dependency.jackson.version>
-        <dependency.validation.version>8.0.5.Final</dependency.validation.version>
+        <dependency.jackson.version>2.22.4</dependency.jackson.version>
+        <dependency.validation.version>8.0.6.Final</dependency.validation.version>
         <dependency.expressly.version>5.0.0</dependency.expressly.version>
         <dependency.flink-connector-kafka.version>3.4.0-1.20</dependency.flink-connector-kafka.version>
         <dependency.kafka-clients.version>3.9.2</dependency.kafka-clients.version>
@@ -76,7 +76,7 @@
         <plugin.maven.javadoc.version>3.12.0</plugin.maven.javadoc.version>
         <plugin.maven.source.version>3.4.0</plugin.maven.source.version>
         <plugin.maven.gpg.version>3.2.8</plugin.maven.gpg.version>
-        <plugin.maven.central.publishing.version>0.11.0</plugin.maven.central.publishing.version>
+        <plugin.maven.central.publishing.version>0.12.0</plugin.maven.central.publishing.version>
         <plugin.spotless.version>2.46.1</plugin.spotless.version>
 
         <!-- Project configs -->
