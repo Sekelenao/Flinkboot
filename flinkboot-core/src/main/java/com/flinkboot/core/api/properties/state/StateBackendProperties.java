@@ -16,7 +16,7 @@ import java.util.Optional;
  * Configuration properties for Flink state backends and checkpoint storage.
  * <p>
  * Supports {@link StateBackendType#HASHMAP}, {@link StateBackendType#ROCKSDB},
- * {@link StateBackendType#CHANGELOG}, or {@link StateBackendType#CUSTOM}.
+ * {@link StateBackendType#CUSTOM}.
  */
 public final class StateBackendProperties implements Serializable, ValidatableProperties {
 
@@ -28,6 +28,7 @@ public final class StateBackendProperties implements Serializable, ValidatablePr
     private final Boolean latencyTracking;
     @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
     private final String customClass;
+    private final Boolean changelog;
 
     /**
      * Creates a new {@code StateBackendProperties} instance.
@@ -37,6 +38,7 @@ public final class StateBackendProperties implements Serializable, ValidatablePr
      * @param incremental       whether incremental checkpoints are enabled (RocksDB)
      * @param latencyTracking   whether state access latency tracking metrics are enabled (RocksDB)
      * @param customClass       fully qualified class name of custom state backend factory
+     * @param changelog        whether the changelog state backend feature is enabled
      */
     @JsonCreator
     public StateBackendProperties(
@@ -44,13 +46,15 @@ public final class StateBackendProperties implements Serializable, ValidatablePr
         @JsonProperty("checkpoint-storage") CheckpointStorageType checkpointStorage,
         @JsonProperty("incremental") Boolean incremental,
         @JsonProperty("latency-tracking") Boolean latencyTracking,
-        @JsonProperty("custom-class") String customClass
+        @JsonProperty("custom-class") String customClass,
+        @JsonProperty("changelog") Boolean changelog
     ) {
         this.type = type;
         this.checkpointStorage = checkpointStorage;
         this.incremental = incremental;
         this.latencyTracking = latencyTracking;
         this.customClass = customClass;
+        this.changelog = changelog;
     }
 
     @Override
@@ -103,6 +107,15 @@ public final class StateBackendProperties implements Serializable, ValidatablePr
         return Optional.ofNullable(customClass);
     }
 
+    /**
+     * Returns whether the changelog state backend feature is enabled.
+     *
+     * @return an Optional containing the changelog flag, or empty if not specified
+     */
+    public Optional<Boolean> changelog() {
+        return Optional.ofNullable(changelog);
+    }
+
     @Override
     @Generated
     public boolean equals(Object other) {
@@ -114,7 +127,8 @@ public final class StateBackendProperties implements Serializable, ValidatablePr
             && checkpointStorage == o.checkpointStorage
             && Objects.equals(incremental, o.incremental)
             && Objects.equals(latencyTracking, o.latencyTracking)
-            && Objects.equals(customClass, o.customClass);
+            && Objects.equals(customClass, o.customClass)
+            && Objects.equals(changelog, o.changelog);
     }
 
     @Override
@@ -125,7 +139,8 @@ public final class StateBackendProperties implements Serializable, ValidatablePr
             checkpointStorage,
             incremental,
             latencyTracking,
-            customClass
+            customClass,
+            changelog
         );
     }
 
@@ -138,6 +153,7 @@ public final class StateBackendProperties implements Serializable, ValidatablePr
             ", incremental=" + incremental +
             ", latencyTracking=" + latencyTracking +
             ", customClass='" + customClass + '\'' +
+            ", changelog=" + changelog +
             '}';
     }
 }
