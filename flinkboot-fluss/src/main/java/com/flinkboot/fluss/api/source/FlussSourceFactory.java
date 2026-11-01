@@ -95,9 +95,11 @@ public final class FlussSourceFactory {
         FlussDeserializationSchema<T> deserializationSchema,
         Consumer<FlussSourceBuilder<T>> builderCustomizer
     ) {
+        Objects.requireNonNull(config, "config must not be null");
+        Objects.requireNonNull(deserializationSchema, "deserializationSchema must not be null");
         Objects.requireNonNull(builderCustomizer, "builderCustomizer must not be null");
 
-        FlussSourceBuilder<T> builder = supplyBuilderFor(config, deserializationSchema);
+        var builder = supplyBuilderFor(config, deserializationSchema);
         builderCustomizer.accept(builder);
         return builder.build();
     }
