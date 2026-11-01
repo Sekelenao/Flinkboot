@@ -165,6 +165,14 @@ class FlussSinkFactoryTest {
                 () -> {
                     var ex = assertThrows(NullPointerException.class, () -> FlussSinkFactory.supplyFor(props, null));
                     assertEquals("serializationSchema must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> FlussSinkFactory.supplyFor(null, TEST_SCHEMA, builder -> {}));
+                    assertEquals("config must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> FlussSinkFactory.supplyFor(props, null, builder -> {}));
+                    assertEquals("serializationSchema must not be null", ex.getMessage());
                 }
             );
         }

@@ -12,6 +12,13 @@ All notable user-facing changes to this project are documented in this file.
 
 ---
 
+## [Unreleased]
+
+### 🟢 Features & Enhancements
+- **[flinkboot-fluss] Customizable Fluss Sink Builder**: Added a `FlussSinkFactory.supplyFor` overload accepting a builder customizer.
+
+---
+
 ## [0.6.0-1.20]
 
 ### 🔴 Breaking Changes

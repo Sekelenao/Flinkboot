@@ -82,9 +82,11 @@ public final class FlussSinkFactory {
         FlussSerializationSchema<T> serializationSchema,
         Consumer<FlussSinkBuilder<T>> builderCustomizer
     ) {
+        Objects.requireNonNull(config, "config must not be null");
+        Objects.requireNonNull(serializationSchema, "serializationSchema must not be null");
         Objects.requireNonNull(builderCustomizer, "builderCustomizer must not be null");
 
-        FlussSinkBuilder<T> builder = supplyBuilderFor(config, serializationSchema);
+        var builder = supplyBuilderFor(config, serializationSchema);
         builderCustomizer.accept(builder);
         return builder.build();
     }
