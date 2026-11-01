@@ -3,7 +3,6 @@ package com.flinkboot.core.api.properties.local;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.flinkboot.core.internal.annotation.Generated;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import org.hibernate.validator.constraints.Range;
 
@@ -19,7 +18,6 @@ public final class LocalWebUiProperties implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @NotNull
     private final Boolean enabled;
 
     @Range(min = 0, max = 65535)
@@ -30,7 +28,7 @@ public final class LocalWebUiProperties implements Serializable {
     /**
      * Creates a new {@code LocalWebUiProperties} instance.
      *
-     * @param enabled     whether the local Web UI dashboard is enabled
+     * @param enabled     whether the local Web UI dashboard is enabled (defaults to {@code true} when omitted)
      * @param port        the HTTP port to bind the Web UI to (e.g. 8081)
      * @param bindAddress the host interface to bind to (e.g. {@code "localhost"} or {@code "0.0.0.0"})
      */

@@ -26,6 +26,7 @@ All notable user-facing changes to this project are documented in this file.
 
 ### 🟢 Features & Enhancements
 - **[flinkboot-core] Configurable Savepoint Directory**: Added the optional `directory` property to `SavepointRestoreProperties`, mapped to Flink's `state.savepoints.dir` configuration key.
+- **[flinkboot-core] Optional Local Web UI Enablement**: Removed `@NotNull` constraint on `LocalWebUiProperties.enabled` and aligned default behavior with `CheckpointingProperties`, activating the local Web UI by default when `local-web-ui` is declared without requiring an explicit `enabled: true`.
 - **[flinkboot-fluss] Customizable Fluss Source Builder**: Added a `FlussSourceFactory.supplyFor` overload accepting a `Consumer<FlussSourceBuilder<T>>`, allowing source builder options to be customized before the source is built.
 - **[flinkboot-fluss] Customizable Fluss Sink Builder**: Added a `FlussSinkFactory.supplyFor` overload accepting a builder customizer.
 - **[flinkboot-kafka] Configurable Kafka Source Client ID Prefix**: Added optional `client-id-prefix` configuration and wired it to Flink's `KafkaSourceBuilder.setClientIdPrefix`, allowing parallel source subtasks to use distinct Kafka client IDs.
