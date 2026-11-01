@@ -290,7 +290,7 @@ class KafkaSourcePropertiesTest {
         }
 
         @ParameterizedTest
-        @ValueSource(strings = {"", "   ", "\\t\\n"})
+        @ValueSource(strings = {"", "   ", "\t\n"})
         @DisplayName("Should fail validation when clientIdPrefix is blank")
         void shouldFailWhenClientIdPrefixIsBlank(String clientIdPrefix) {
             var config = new KafkaSourceProperties("my-source", List.of("localhost:9092"), "my-group", clientIdPrefix,
