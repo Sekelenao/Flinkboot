@@ -3,6 +3,7 @@ package com.flinkboot.core.internal.execution.customizer;
 import com.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
 import com.flinkboot.core.api.properties.savepoint.RestoreMode;
 import com.flinkboot.core.api.properties.savepoint.SavepointRestoreProperties;
+import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.StateRecoveryOptions;
 
@@ -23,6 +24,7 @@ public final class SavepointRestoreCustomizer implements EnvironmentCustomizer {
     }
 
     private void apply(SavepointRestoreProperties savepointConfig) {
+        savepointConfig.directory().ifPresent(dir -> toConfigure.set(CheckpointingOptions.SAVEPOINT_DIRECTORY, dir));
         this.applySavepointPath(savepointConfig.savepointPath());
         savepointConfig.allowNonRestoredState().ifPresent(this::applyAllowNonRestoredState);
         savepointConfig.restoreMode().ifPresent(this::applyRestoreMode);
