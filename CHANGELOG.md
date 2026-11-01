@@ -12,11 +12,6 @@ All notable user-facing changes to this project are documented in this file.
 
 ---
 
-## [Unreleased]
-
-### 🟢 Features & Enhancements
-- **[flinkboot-core] Configurable Savepoint Directory**: Added the optional `directory` property to `SavepointRestoreProperties`, mapped to Flink's `state.savepoints.dir` configuration key.
-
 ## [0.6.0-1.20]
 
 ### 🔴 Breaking Changes
@@ -30,6 +25,8 @@ All notable user-facing changes to this project are documented in this file.
 - **[flinkboot-kafka] Migration of `starting-offsets` to Nested Object**: In both YAML configuration and the Java API, `starting-offsets` is no longer a scalar value but a structured nested object requiring a `strategy` key (e.g. `starting-offsets: { strategy: EARLIEST }`). Flat configuration keys `starting-offsets-timestamp` and `starting-offsets-partition-offsets` have been removed in favor of `timestamp` and `partitions` within this nested block. In Java, flattened accessors on `KafkaSourceProperties` are replaced by `config.startingOffsets().strategy()`, `.timestamp()`, and `.partitions()`.
 
 ### 🟢 Features & Enhancements
+- **[flinkboot-core] Configurable Savepoint Directory**: Added the optional `directory` property to `SavepointRestoreProperties`, mapped to Flink's `state.savepoints.dir` configuration key.
+- **[flinkboot-fluss] Customizable Fluss Sink Builder**: Added a `FlussSinkFactory.supplyFor` overload accepting a builder customizer.
 - **[flinkboot-core] Configurable State Changelog Flag (`state-backend.changelog`)**: Added optional `changelog` boolean property to `StateBackendProperties` (`state-backend.changelog: true | false`) and wired it to Flink's `state.backend.changelog.enabled` (`StateChangelogOptions.ENABLE_STATE_CHANGE_LOG`), allowing users to toggle durable short-interval changelog checkpointing over HashMap or RocksDB backends.
 - **[configuration] Automatic YAML Kebab-Case Mapping & Unified Validation Paths**:
   - **Zero-Boilerplate Kebab-Case Deserialization**: `YamlParser` now configures `PropertyNamingStrategies.KEBAB_CASE` by default, automatically binding camelCase Java fields to kebab-case YAML keys without requiring manual `@JsonProperty` annotations on every field of custom configuration classes and records.
