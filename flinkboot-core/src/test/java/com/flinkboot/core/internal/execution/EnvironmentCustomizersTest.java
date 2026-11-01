@@ -122,6 +122,7 @@ class EnvironmentCustomizersTest {
         var savepointConfig = new SavepointRestoreProperties(
             "/tmp/savepoint-2",
             null,
+            null,
             null
         );
         var envProps = new ExecutionEnvironmentProperties(null, null, null, null, savepointConfig, null, null);
