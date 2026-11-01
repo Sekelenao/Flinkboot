@@ -2,7 +2,6 @@ package com.flinkboot.core.internal.execution;
 
 import com.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
 import com.flinkboot.core.api.properties.JobProperties;
-import com.flinkboot.core.api.properties.local.LocalWebUiProperties;
 import com.flinkboot.core.internal.execution.customizer.CheckpointingCustomizer;
 import com.flinkboot.core.internal.execution.customizer.EnvironmentCustomizer;
 import com.flinkboot.core.internal.execution.customizer.ExecutionCustomizer;
