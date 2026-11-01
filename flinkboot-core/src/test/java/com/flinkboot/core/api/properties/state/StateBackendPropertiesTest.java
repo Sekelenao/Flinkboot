@@ -45,14 +45,14 @@ class StateBackendPropertiesTest {
                 false,
                 true,
                 null
-            );
+            , null);
             assertNotNull(config);
         }
 
         @Test
         @DisplayName("Should instantiate with null arguments")
         void shouldInstantiateWithNullArguments() {
-            var config = new StateBackendProperties(null, null, null, null, null);
+            var config = new StateBackendProperties(null, null, null, null, null, null);
             assertNotNull(config);
         }
     }
@@ -70,7 +70,7 @@ class StateBackendPropertiesTest {
                 true,
                 false,
                 null
-            );
+            , null);
 
             assertAll(
                 () -> assertTrue(config.type().isPresent()),
@@ -94,7 +94,7 @@ class StateBackendPropertiesTest {
                 false,
                 true,
                 "com.example.MyCustomStateBackend"
-            );
+            , null);
 
             assertAll(
                 () -> assertTrue(config.type().isPresent()),
@@ -113,7 +113,7 @@ class StateBackendPropertiesTest {
         @Test
         @DisplayName("Should return empty optionals when all properties are null")
         void shouldReturnEmptyOptionals() {
-            var config = new StateBackendProperties(null, null, null, null, null);
+            var config = new StateBackendProperties(null, null, null, null, null, null);
 
             assertAll(
                 () -> assertTrue(config.type().isEmpty()),
@@ -138,7 +138,7 @@ class StateBackendPropertiesTest {
                 false,
                 true,
                 null
-            );
+            , null);
 
             assertAll(
                 () -> assertEquals(StateBackendType.HASHMAP, config.type().orElseThrow()),
@@ -159,7 +159,7 @@ class StateBackendPropertiesTest {
                 true,
                 false,
                 "com.example.MyCustomStateBackend"
-            );
+            , null);
 
             assertAll(
                 () -> assertEquals(StateBackendType.CUSTOM, config.type().orElseThrow()),
@@ -174,7 +174,7 @@ class StateBackendPropertiesTest {
         @Test
         @DisplayName("Should fail validation when custom-class is null for CUSTOM state backend")
         void shouldFailValidationWhenCustomClassNullForCustomType() {
-            var config = new StateBackendProperties(StateBackendType.CUSTOM, null, null, null, null);
+            var config = new StateBackendProperties(StateBackendType.CUSTOM, null, null, null, null, null);
             var violations = validator.validate(config);
 
             assertAll(
@@ -190,7 +190,7 @@ class StateBackendPropertiesTest {
         @ValueSource(strings = {"", "   ", "\t\n"})
         @DisplayName("Should fail validation when custom-class is empty or blank for CUSTOM state backend")
         void shouldFailValidationWhenCustomClassBlankForCustomType(String customClass) {
-            var config = new StateBackendProperties(StateBackendType.CUSTOM, null, null, null, customClass);
+            var config = new StateBackendProperties(StateBackendType.CUSTOM, null, null, null, customClass, null);
             var violations = validator.validate(config);
 
             assertAll(
@@ -207,7 +207,7 @@ class StateBackendPropertiesTest {
         @EnumSource(value = StateBackendType.class, names = "CUSTOM", mode = EnumSource.Mode.EXCLUDE)
         @DisplayName("Should fail validation when custom-class is provided for non-CUSTOM state backend")
         void shouldFailValidationWhenCustomClassProvidedForNonCustomType(StateBackendType type) {
-            var config = new StateBackendProperties(type, null, null, null, "com.example.MyCustomStateBackend");
+            var config = new StateBackendProperties(type, null, null, null, "com.example.MyCustomStateBackend", null);
             var violations = validator.validate(config);
 
             assertAll(
@@ -228,7 +228,7 @@ class StateBackendPropertiesTest {
                 false,
                 true,
                 null
-            );
+            , null);
 
             assertAll(
                 () -> assertNotNull(config),
@@ -248,7 +248,7 @@ class StateBackendPropertiesTest {
                 false,
                 true,
                 customClass
-            );
+            , null);
 
             var violations = validator.validate(config);
             assertFalse(violations.isEmpty());
@@ -266,8 +266,8 @@ class StateBackendPropertiesTest {
         @Test
         @DisplayName("Should satisfy equals and hashCode contract")
         void shouldSatisfyEqualsAndHashCodeContract() {
-            var config1 = new StateBackendProperties(StateBackendType.ROCKSDB, CheckpointStorageType.FILESYSTEM, true, false, null);
-            var config2 = new StateBackendProperties(StateBackendType.ROCKSDB, CheckpointStorageType.FILESYSTEM, true, false, null);
+            var config1 = new StateBackendProperties(StateBackendType.ROCKSDB, CheckpointStorageType.FILESYSTEM, true, false, null, null);
+            var config2 = new StateBackendProperties(StateBackendType.ROCKSDB, CheckpointStorageType.FILESYSTEM, true, false, null, null);
 
             assertAll(
                 () -> assertEquals(config1, config1),
@@ -288,35 +288,35 @@ class StateBackendPropertiesTest {
                 true,
                 false,
                 null
-            );
+            , null);
             var diffType = new StateBackendProperties(
                 StateBackendType.HASHMAP,
                 CheckpointStorageType.FILESYSTEM,
                 true,
                 false,
                 null
-            );
+            , null);
             var diffStorage = new StateBackendProperties(
                 StateBackendType.ROCKSDB,
                 CheckpointStorageType.JOBMANAGER,
                 true,
                 false,
                 null
-            );
+            , null);
             var diffIncremental = new StateBackendProperties(
                 StateBackendType.ROCKSDB,
                 CheckpointStorageType.FILESYSTEM,
                 false,
                 false,
                 null
-            );
+            , null);
             var diffLatency = new StateBackendProperties(
                 StateBackendType.ROCKSDB,
                 CheckpointStorageType.FILESYSTEM,
                 true,
                 true,
                 null
-            );
+            , null);
 
             var custom1 = new StateBackendProperties(
                 StateBackendType.CUSTOM,
@@ -324,14 +324,14 @@ class StateBackendPropertiesTest {
                 true,
                 false,
                 "com.example.CustomBackend1"
-            );
+            , null);
             var custom2 = new StateBackendProperties(
                 StateBackendType.CUSTOM,
                 CheckpointStorageType.FILESYSTEM,
                 true,
                 false,
                 "com.example.CustomBackend2"
-            );
+            , null);
 
             assertAll(
                 () -> assertNotEquals(base, diffType),
@@ -352,7 +352,7 @@ class StateBackendPropertiesTest {
                 true,
                 false,
                 "com.example.CustomFactory"
-            );
+            , null);
             var str = config.toString();
             assertAll(
                 () -> assertTrue(str.contains("StateBackendProperties")),
@@ -415,19 +415,21 @@ class StateBackendPropertiesTest {
         }
 
         @Test
-        @DisplayName("Should deserialize CHANGELOG state backend with JOBMANAGER storage from JSON")
+        @DisplayName("Should deserialize HASHMAP backend with changelog enabled from JSON")
         void shouldDeserializeChangelogWithJobManagerStorageFromJson() throws Exception {
             var json = "{\n" +
-                "  \"type\": \"CHANGELOG\",\n" +
-                "  \"checkpoint-storage\": \"JOBMANAGER\"\n" +
-                "}";
+                    "  \"type\": \"HASHMAP\",\n" +
+                    "  \"checkpoint-storage\": \"JOBMANAGER\",\n" +
+                    "  \"changelog\": true\n" +
+                    "}";
 
             var config = mapper.readValue(json, StateBackendProperties.class);
 
             assertAll(
                 () -> assertNotNull(config),
-                () -> assertEquals(StateBackendType.CHANGELOG, config.type().orElseThrow()),
+                ()-> assertEquals(StateBackendType.HASHMAP, config.type().orElseThrow()),
                 () -> assertEquals(CheckpointStorageType.JOBMANAGER, config.checkpointStorage().orElseThrow()),
+                () -> assertTrue(config.changelog().orElseThrow()),
                 () -> assertTrue(config.incremental().isEmpty()),
                 () -> assertTrue(config.latencyTracking().isEmpty()),
                 () -> assertTrue(config.customClass().isEmpty())

@@ -12,10 +12,5 @@ public enum RestoreMode {
     /**
      * Flink does not take ownership of the savepoint; original files remain intact and untouched.
      */
-    NO_CLAIM,
-
-    /**
-     * Legacy restore mode behavior (Flink 1.14 and earlier).
-     */
-    LEGACY
+    NO_CLAIM
 }
