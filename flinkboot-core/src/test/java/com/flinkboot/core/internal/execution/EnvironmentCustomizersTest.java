@@ -101,7 +101,7 @@ class EnvironmentCustomizersTest {
             false,
             false,
             null
-        );
+        , null);
         var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
 
         new StateBackendCustomizer(config).configure(envProps);

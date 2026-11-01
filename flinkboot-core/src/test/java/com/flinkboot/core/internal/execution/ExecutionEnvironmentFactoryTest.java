@@ -211,7 +211,7 @@ class ExecutionEnvironmentFactoryTest {
                 true,
                 true,
                 null
-            );
+            , null);
             var envProps = new ExecutionEnvironmentProperties(null, null, null, stateConfig, null, null, null);
             var jobConfig = new JobProperties("state-backend-job", envProps);
 
