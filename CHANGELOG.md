@@ -26,6 +26,7 @@ All notable user-facing changes to this project are documented in this file.
 
 ### 🟢 Features & Enhancements
 - **[flinkboot-core] Configurable Savepoint Directory**: Added the optional `directory` property to `SavepointRestoreProperties`, mapped to Flink's `state.savepoints.dir` configuration key.
+- **[flinkboot-fluss] Customizable Fluss Source Builder**: Added a `FlussSourceFactory.supplyFor` overload accepting a `Consumer<FlussSourceBuilder<T>>`, allowing source builder options to be customized before the source is built.
 - **[flinkboot-fluss] Customizable Fluss Sink Builder**: Added a `FlussSinkFactory.supplyFor` overload accepting a builder customizer.
 - **[flinkboot-kafka] Configurable Kafka Source Client ID Prefix**: Added optional `client-id-prefix` configuration and wired it to Flink's `KafkaSourceBuilder.setClientIdPrefix`, allowing parallel source subtasks to use distinct Kafka client IDs.
 - **[flinkboot-core] Configurable State Changelog Flag (`state-backend.changelog`)**: Added optional `changelog` boolean property to `StateBackendProperties` (`state-backend.changelog: true | false`) and wired it to Flink's `state.backend.changelog.enabled` (`StateChangelogOptions.ENABLE_STATE_CHANGE_LOG`), allowing users to toggle durable short-interval changelog checkpointing over HashMap or RocksDB backends.

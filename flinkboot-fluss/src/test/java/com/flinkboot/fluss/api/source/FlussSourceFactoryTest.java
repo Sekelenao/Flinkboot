@@ -14,12 +14,14 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("FlussSourceFactory")
 class FlussSourceFactoryTest {
@@ -128,6 +130,53 @@ class FlussSourceFactoryTest {
             assertThrows(RuntimeException.class, () -> FlussSourceFactory.supplyFor(props, TEST_SCHEMA));
         }
 
+
+        @Test
+        @DisplayName("Should apply the builder customizer before building the source")
+        void shouldApplyBuilderCustomizerBeforeBuildingSource() {
+            var props = new FlussSourceProperties(
+                "my-source",
+                List.of("localhost:9123"),
+                "my_db",
+                "my_table",
+                FlussStartupMode.EARLIEST,
+                null,
+                Map.of()
+            );
+            var customized = new AtomicBoolean();
+
+            assertThrows(RuntimeException.class, () -> FlussSourceFactory.supplyFor(
+                props,
+                TEST_SCHEMA,
+                builder -> {
+                    assertNotNull(builder);
+                    customized.set(true);
+                }
+            ));
+
+            assertTrue(customized.get());
+        }
+
+        @Test
+        @DisplayName("Should reject a null builder customizer")
+        void shouldRejectNullBuilderCustomizer() {
+            var props = new FlussSourceProperties(
+                "my-source",
+                List.of("localhost:9123"),
+                "my_db",
+                "my_table",
+                FlussStartupMode.EARLIEST,
+                null,
+                Map.of()
+            );
+
+            var exception = assertThrows(
+                NullPointerException.class,
+                () -> FlussSourceFactory.supplyFor(props, TEST_SCHEMA, null)
+            );
+            assertEquals("builderCustomizer must not be null", exception.getMessage());
+        }
+
         @Test
         @DisplayName("Should throw NullPointerException when parameters are null")
         void shouldThrowNpeWhenParametersAreNull() {
@@ -156,6 +205,20 @@ class FlussSourceFactoryTest {
                 },
                 () -> {
                     var ex = assertThrows(NullPointerException.class, () -> FlussSourceFactory.supplyFor(props, null));
+                    assertEquals("deserializationSchema must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(
+                        NullPointerException.class,
+                        () -> FlussSourceFactory.supplyFor(null, TEST_SCHEMA, builder -> { })
+                    );
+                    assertEquals("config must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(
+                        NullPointerException.class,
+                        () -> FlussSourceFactory.supplyFor(props, null, builder -> { })
+                    );
                     assertEquals("deserializationSchema must not be null", ex.getMessage());
                 }
             );
