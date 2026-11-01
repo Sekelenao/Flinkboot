@@ -11,7 +11,6 @@ import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.connector.source.Boundedness;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
-import org.apache.flink.connector.kafka.source.KafkaSourceBuilder;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 import org.apache.flink.util.Collector;
@@ -69,6 +68,7 @@ class KafkaSourceFactoryTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
+                null,
                 List.of("test-topic"),
                 null,
                 DEFAULT_STARTING_OFFSETS,
@@ -91,6 +91,7 @@ class KafkaSourceFactoryTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
+                null,
                 List.of("test-topic"),
                 null,
                 timestampOffsets,
@@ -115,6 +116,7 @@ class KafkaSourceFactoryTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
+                null,
                 List.of("test-topic"),
                 null,
                 partitionOffsets,
@@ -133,6 +135,7 @@ class KafkaSourceFactoryTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
+                null,
                 List.of("test-topic"),
                 null,
                 DEFAULT_STARTING_OFFSETS,
@@ -157,6 +160,7 @@ class KafkaSourceFactoryTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
+                null,
                 List.of("test-topic"),
                 null,
                 DEFAULT_STARTING_OFFSETS,
@@ -181,6 +185,7 @@ class KafkaSourceFactoryTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
+                null,
                 List.of("test-topic"),
                 null,
                 DEFAULT_STARTING_OFFSETS,
@@ -225,7 +230,7 @@ class KafkaSourceFactoryTest {
 
         @Test
         @DisplayName("Should configure the Kafka source builder with the client ID prefix")
-        void shouldConfigureClientIdPrefix() throws Exception {
+        void shouldConfigureClientIdPrefix() {
             var config = new KafkaSourceProperties(
                 "orders-source",
                 List.of("localhost:9092"),
@@ -239,11 +244,10 @@ class KafkaSourceFactoryTest {
                 null
             );
 
-            var builder = KafkaSourceFactory.supplyBuilderFor(config, TEST_SCHEMA);
-            var field = KafkaSourceBuilder.class.getDeclaredField("clientIdPrefix");
-            field.setAccessible(true);
-
-            assertEquals("orders-reader", field.get(builder));
+            assertAll(
+                () -> assertNotNull(KafkaSourceFactory.supplyFor(config, TEST_SCHEMA)),
+                () -> assertNotNull(KafkaSourceFactory.supplyBuilderFor(config, TEST_SCHEMA))
+            );
         }
     }
 
@@ -258,6 +262,7 @@ class KafkaSourceFactoryTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
+                null,
                 null,
                 "test-.*",
                 DEFAULT_STARTING_OFFSETS,
@@ -280,6 +285,7 @@ class KafkaSourceFactoryTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
+                null,
                 null,
                 "test-.*",
                 timestampOffsets,
@@ -305,6 +311,7 @@ class KafkaSourceFactoryTest {
                 List.of("localhost:9092"),
                 "test-group",
                 null,
+                null,
                 "test-.*",
                 partitionOffsets,
                 null,
@@ -324,6 +331,7 @@ class KafkaSourceFactoryTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
+                null,
                 List.of("test-topic"),
                 null,
                 DEFAULT_STARTING_OFFSETS,

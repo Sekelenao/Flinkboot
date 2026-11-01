@@ -94,25 +94,6 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
         this.properties = properties;
     }
 
-    /**
-     * Backward-compatible constructor for configurations that do not specify a client ID prefix.
-     */
-    public KafkaSourceProperties(
-        String name,
-        List<String> bootstrapServers,
-        String groupId,
-        List<String> topics,
-        String topicPattern,
-        KafkaOffsetProperties startingOffsets,
-        KafkaBoundedness boundedness,
-        KafkaOffsetProperties stoppingOffsets,
-        Map<String, String> properties
-    ) {
-        this(
-            name, bootstrapServers, groupId, null, topics, topicPattern, startingOffsets, boundedness, stoppingOffsets, properties
-        );
-    }
-
     @Override
     public boolean validate(ConstraintValidatorContext context) {
         return KafkaSourcePropertiesValidator.validate(this, context);
