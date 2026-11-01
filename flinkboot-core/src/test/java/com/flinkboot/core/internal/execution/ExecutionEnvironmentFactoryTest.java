@@ -270,6 +270,24 @@ class ExecutionEnvironmentFactoryTest {
         }
 
         @Test
+        @DisplayName("Should configure local WebUI and create LocalStreamEnvironment when enabled is omitted")
+        void shouldConfigureLocalWebUiWhenEnabledIsOmitted() {
+            var localWebUiConfig = new LocalWebUiProperties(null, 8081, "127.0.0.1");
+            var envProps = new ExecutionEnvironmentProperties(null, null, null, null, null, localWebUiConfig, null);
+            var jobConfig = new JobProperties("default-webui-job", envProps);
+
+            var factory = new ExecutionEnvironmentFactory();
+            StreamExecutionEnvironment env = factory.create(jobConfig);
+
+            assertAll(
+                () -> assertNotNull(env),
+                () -> assertTrue(env instanceof LocalStreamEnvironment),
+                () -> assertEquals(8081, env.getConfiguration().get(RestOptions.PORT)),
+                () -> assertEquals("127.0.0.1", env.getConfiguration().get(RestOptions.BIND_ADDRESS))
+            );
+        }
+
+        @Test
         @DisplayName("Should not configure local WebUI options when enabled is false")
         void shouldNotConfigureLocalWebUiOptionsWhenDisabled() {
             var localWebUiConfig = new LocalWebUiProperties(false, 9090, "0.0.0.0");

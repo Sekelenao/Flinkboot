@@ -26,6 +26,7 @@ All notable user-facing changes to this project are documented in this file.
 
 ### 🟢 Features & Enhancements
 - **[flinkboot-core] Configurable Savepoint Directory**: Added the optional `directory` property to `SavepointRestoreProperties`, mapped to Flink's `state.savepoints.dir` configuration key.
+- **[flinkboot-core] Optional Local Web UI Enablement**: Removed `@NotNull` constraint on `LocalWebUiProperties.enabled` and aligned default behavior with `CheckpointingProperties`, activating the local Web UI by default when `local-web-ui` is declared without requiring an explicit `enabled: true`.
 - **[flinkboot-fluss] Customizable Fluss Sink Builder**: Added a `FlussSinkFactory.supplyFor` overload accepting a builder customizer.
 - **[flinkboot-core] Configurable State Changelog Flag (`state-backend.changelog`)**: Added optional `changelog` boolean property to `StateBackendProperties` (`state-backend.changelog: true | false`) and wired it to Flink's `state.backend.changelog.enabled` (`StateChangelogOptions.ENABLE_STATE_CHANGE_LOG`), allowing users to toggle durable short-interval changelog checkpointing over HashMap or RocksDB backends.
 - **[configuration] Automatic YAML Kebab-Case Mapping & Unified Validation Paths**:

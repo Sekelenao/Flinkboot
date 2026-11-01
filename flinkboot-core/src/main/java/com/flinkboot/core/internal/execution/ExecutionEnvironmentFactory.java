@@ -46,8 +46,8 @@ public final class ExecutionEnvironmentFactory {
 
         boolean useLocalWebUi = jobProperties.environment()
             .flatMap(ExecutionEnvironmentProperties::localWebUi)
-            .flatMap(LocalWebUiProperties::enabled)
-            .orElse(false);
+            .filter(ui -> ui.enabled().orElse(true))
+            .isPresent();
 
         return ExecutionEnvironmentProvider.get(useLocalWebUi).createEnvironment(configuration);
     }
