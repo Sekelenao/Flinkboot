@@ -73,6 +73,7 @@ class SavepointRestorePropertiesTest {
                 () -> assertTrue(config.directory().isEmpty())
             );
         }
+
     }
 
     @Nested
@@ -131,14 +132,14 @@ class SavepointRestorePropertiesTest {
         @Test
         @DisplayName("Should return expected values from getters")
         void testGetters() {
-            var config = new SavepointRestoreProperties("/path/to/savepoint", false, RestoreMode.LEGACY, "/tmp/savepoints");
+            var config = new SavepointRestoreProperties("/path/to/savepoint", false, RestoreMode.NO_CLAIM, "/tmp/savepoints");
 
             assertAll(
                 () -> assertEquals("/path/to/savepoint", config.savepointPath()),
                 () -> assertTrue(config.allowNonRestoredState().isPresent()),
                 () -> assertFalse(config.allowNonRestoredState().get()),
                 () -> assertTrue(config.restoreMode().isPresent()),
-                () -> assertEquals(RestoreMode.LEGACY, config.restoreMode().get()),
+                () -> assertEquals(RestoreMode.NO_CLAIM, config.restoreMode().get()),
                 () -> assertEquals("/tmp/savepoints", config.directory().orElseThrow())
             );
         }

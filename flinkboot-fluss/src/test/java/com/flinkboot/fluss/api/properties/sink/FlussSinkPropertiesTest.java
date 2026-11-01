@@ -18,6 +18,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -410,7 +411,7 @@ class FlussSinkPropertiesTest {
             var diffProps = new FlussSinkProperties("s", List.of("h:9123"), "d", "t", Map.of("k2", "v2"));
 
             assertAll(
-                () -> assertEquals(props1, props1),
+                () -> assertTrue(props1.equals(props1)),
                 () -> assertEquals(props1, props2),
                 () -> assertEquals(props2, props1),
                 () -> assertEquals(props1.hashCode(), props2.hashCode()),
@@ -420,7 +421,7 @@ class FlussSinkPropertiesTest {
                 () -> assertNotEquals(props1, diffTable),
                 () -> assertNotEquals(props1, diffProps),
                 () -> assertNotEquals(null, props1),
-                () -> assertNotEquals("string", props1),
+                () -> assertFalse(props1.equals("string")),
                 () -> assertTrue(props1.toString().contains("FlussSinkProperties"))
             );
         }

@@ -29,7 +29,7 @@ public final class SavepointRestoreProperties implements Serializable {
      *
      * @param savepointPath          the path or URI to the savepoint directory
      * @param allowNonRestoredState  whether to allow state that cannot be mapped to the job graph
-     * @param restoreMode            the restore ownership mode (CLAIM, NO_CLAIM, LEGACY)
+     * @param restoreMode            the restore ownership mode (CLAIM or NO_CLAIM)
      * @param directory              the default directory for writing savepoints
      */
     @JsonCreator

@@ -315,7 +315,7 @@ class FlussSourcePropertiesTest {
                 () -> assertEquals(props1.hashCode(), props2.hashCode()),
                 () -> assertNotEquals(props1, props3),
                 () -> assertNotEquals(null, props1),
-                () -> assertNotEquals("string", props1),
+                () -> assertFalse(props1.equals("string")),
                 () -> assertTrue(props1.toString().contains("FlussSourceProperties"))
             );
         }
