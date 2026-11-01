@@ -12,6 +12,11 @@ All notable user-facing changes to this project are documented in this file.
 
 ---
 
+## [Unreleased]
+
+### 🟢 Features & Enhancements
+- **[flinkboot-core] Configurable Savepoint Directory**: Added the optional `directory` property to `SavepointRestoreProperties`, mapped to Flink's `state.savepoints.dir` configuration key.
+
 ## [0.6.0-1.20]
 
 ### 🔴 Breaking Changes
