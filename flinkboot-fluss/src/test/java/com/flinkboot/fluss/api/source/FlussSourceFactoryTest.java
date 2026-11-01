@@ -206,6 +206,20 @@ class FlussSourceFactoryTest {
                 () -> {
                     var ex = assertThrows(NullPointerException.class, () -> FlussSourceFactory.supplyFor(props, null));
                     assertEquals("deserializationSchema must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(
+                        NullPointerException.class,
+                        () -> FlussSourceFactory.supplyFor(null, TEST_SCHEMA, builder -> { })
+                    );
+                    assertEquals("config must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(
+                        NullPointerException.class,
+                        () -> FlussSourceFactory.supplyFor(props, null, builder -> { })
+                    );
+                    assertEquals("deserializationSchema must not be null", ex.getMessage());
                 }
             );
         }
