@@ -1,25 +1,42 @@
 package io.github.example;
 
+import com.flinkboot.core.internal.annotation.Generated;
+
 import java.util.Objects;
-import java.util.Optional;
 
 public final class ClassDTO {
-    
-    private final String identifier; // Mandatory
 
-    private final String metadata;  // Optional
+    private final String identifier;
 
-    public ClassDTO(String identifier, String metadata) {
-       this.identifier = Objects.requireNonNull(identifier);
-       this.metadata = metadata;
+    public ClassDTO(String identifier) {
+        this.identifier = Objects.requireNonNull(identifier, "identifier must not be null");
     }
 
-    public String identifier(){
+    public String identifier() {
         return identifier;
     }
 
-    public Optional<String> metadata(){
-        return Optional.ofNullable(metadata);
+    @Override
+    @Generated
+    public boolean equals(Object other) {
+        if (!(other instanceof ClassDTO)) {
+            return false;
+        }
+        var o = (ClassDTO) other;
+        return Objects.equals(identifier, o.identifier);
     }
 
+    @Override
+    @Generated
+    public int hashCode() {
+        return Objects.hash(identifier);
+    }
+
+    @Override
+    @Generated
+    public String toString() {
+        return "ClassDTO{" +
+            "identifier='" + identifier + '\'' +
+            '}';
+    }
 }

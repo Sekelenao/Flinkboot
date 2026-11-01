@@ -86,9 +86,15 @@ public final class RestartStrategyPropertiesValidator {
             var expo = expoOpt.get();
             var initial = expo.initialBackoff();
             var max = expo.maxBackoff();
-            if (initial.isPresent() && max.isPresent() && max.get().compareTo(initial.get()) < 0) {
+            if (initial.isPresent() != max.isPresent()) {
                 return reject(
-                    "exponentialDelay",
+                    "exponential-delay",
+                    "both initial-backoff and max-backoff must be specified together in exponential-delay restart strategy"
+                );
+            }
+            if (initial.isPresent() && max.get().compareTo(initial.get()) < 0) {
+                return reject(
+                    "exponential-delay",
                     "max-backoff cannot be smaller than initial-backoff in exponential-delay restart strategy"
                 );
             }
