@@ -18,13 +18,12 @@ public final class LocalWebUiCustomizer implements EnvironmentCustomizer {
     @Override
     public void configure(ExecutionEnvironmentProperties configuration) {
         Objects.requireNonNull(configuration);
-        configuration.localWebUi().ifPresent(this::apply);
+        configuration.localWebUi()
+            .filter(localWebUi -> localWebUi.enabled().orElse(true))
+            .ifPresent(this::apply);
     }
 
     private void apply(LocalWebUiProperties localWebUiConfig) {
-        if (!localWebUiConfig.enabled().orElse(false)) {
-            return;
-        }
         localWebUiConfig.port().ifPresent(this::applyPort);
         localWebUiConfig.bindAddress().ifPresent(this::applyBindAddress);
     }
