@@ -15,6 +15,7 @@ All notable user-facing changes to this project are documented in this file.
 ## [0.6.0-1.20]
 
 ### 🔴 Breaking Changes
+- **[flinkboot-core] Removal of Invalid `CHANGELOG` State Backend Type**: Removed `StateBackendType.CHANGELOG` to prevent runtime crashes (`DynamicCodeLoadingException`) caused by Flink attempting to load class `'changelog'`. The changelog feature is now configured as a dedicated boolean flag via `state-backend.changelog: true | false` layered on top of a base state backend (`HASHMAP` or `ROCKSDB`).
 - **[flinkboot-core] Savepoint Restore Mode Compatibility**: Removed `RestoreMode.LEGACY`. Applications configuring `restore-mode: LEGACY` or referencing `RestoreMode.LEGACY` in Java must migrate to the supported `CLAIM` or `NO_CLAIM` mode according to the intended savepoint ownership behavior.
 - **[namespace] Canonical Namespace Migration to `com.flinkboot`**:
   - **Maven Coordinates**: Relocated root and all modules (`flinkboot-core`, `flinkboot-test`, `flinkboot-kafka`, `flinkboot-fluss`) from `io.github.sekelenao` to `com.flinkboot`.
@@ -24,6 +25,7 @@ All notable user-facing changes to this project are documented in this file.
 - **[flinkboot-kafka] Migration of `starting-offsets` to Nested Object**: In both YAML configuration and the Java API, `starting-offsets` is no longer a scalar value but a structured nested object requiring a `strategy` key (e.g. `starting-offsets: { strategy: EARLIEST }`). Flat configuration keys `starting-offsets-timestamp` and `starting-offsets-partition-offsets` have been removed in favor of `timestamp` and `partitions` within this nested block. In Java, flattened accessors on `KafkaSourceProperties` are replaced by `config.startingOffsets().strategy()`, `.timestamp()`, and `.partitions()`.
 
 ### 🟢 Features & Enhancements
+- **[flinkboot-core] Configurable State Changelog Flag (`state-backend.changelog`)**: Added optional `changelog` boolean property to `StateBackendProperties` (`state-backend.changelog: true | false`) and wired it to Flink's `state.backend.changelog.enabled` (`StateChangelogOptions.ENABLE_STATE_CHANGE_LOG`), allowing users to toggle durable short-interval changelog checkpointing over HashMap or RocksDB backends.
 - **[configuration] Automatic YAML Kebab-Case Mapping & Unified Validation Paths**:
   - **Zero-Boilerplate Kebab-Case Deserialization**: `YamlParser` now configures `PropertyNamingStrategies.KEBAB_CASE` by default, automatically binding camelCase Java fields to kebab-case YAML keys without requiring manual `@JsonProperty` annotations on every field of custom configuration classes and records.
   - **Unified Bean Validation Diagnostics**: Jakarta Bean Validation violation paths reported during configuration validation across all modules and connectors (core, Kafka, Fluss) are systematically unified to YAML/JSON kebab-case (e.g. `bootstrap-servers`, `group-id`, `min-pause-between-checkpoints`, `storage-uri`, `startup-timestamp`, `transactional-id-prefix`), matching configuration keys rather than Java internal camelCase field names.

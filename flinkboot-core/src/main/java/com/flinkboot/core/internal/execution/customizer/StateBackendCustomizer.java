@@ -8,6 +8,7 @@ import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.StateBackendOptions;
 import org.apache.flink.configuration.StateLatencyTrackOptions;
+import org.apache.flink.configuration.StateChangelogOptions;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -31,6 +32,9 @@ public final class StateBackendCustomizer implements EnvironmentCustomizer {
         stateConfig.checkpointStorage().ifPresent(this::applyCheckpointStorage);
         stateConfig.incremental().ifPresent(this::applyIncremental);
         stateConfig.latencyTracking().ifPresent(this::applyLatencyTracking);
+        stateConfig.changelog().ifPresent(enabled ->
+                toConfigure.set(StateChangelogOptions.ENABLE_STATE_CHANGE_LOG, enabled)
+        );
     }
 
     private void applyType(StateBackendType type, StateBackendProperties stateConfig) {
@@ -40,9 +44,6 @@ public final class StateBackendCustomizer implements EnvironmentCustomizer {
                 break;
             case ROCKSDB:
                 toConfigure.set(StateBackendOptions.STATE_BACKEND, "rocksdb");
-                break;
-            case CHANGELOG:
-                toConfigure.set(StateBackendOptions.STATE_BACKEND, "changelog");
                 break;
             case CUSTOM:
                 stateConfig.customClass().ifPresent(this::applyCustomClass);
