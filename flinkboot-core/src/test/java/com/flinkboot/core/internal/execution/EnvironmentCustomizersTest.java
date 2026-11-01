@@ -248,13 +248,13 @@ class EnvironmentCustomizersTest {
     @DisplayName("Should apply LocalWebUi options when enabled is omitted")
     void shouldApplyLocalWebUiOptionsWhenEnabledIsOmitted() {
         Configuration config = new Configuration();
-        var localWebUi = new LocalWebUiProperties(null, 8081, "127.0.0.1");
+        var localWebUi = new LocalWebUiProperties(null, 8082, "127.0.0.1");
         var envConfig = new ExecutionEnvironmentProperties(null, null, null, null, null, localWebUi, null);
 
         new LocalWebUiCustomizer(config).configure(envConfig);
 
         assertAll(
-                () -> assertEquals(8081, config.get(RestOptions.PORT)),
+                () -> assertEquals(8082, config.get(RestOptions.PORT)),
                 () -> assertEquals("127.0.0.1", config.get(RestOptions.BIND_ADDRESS))
         );
     }
