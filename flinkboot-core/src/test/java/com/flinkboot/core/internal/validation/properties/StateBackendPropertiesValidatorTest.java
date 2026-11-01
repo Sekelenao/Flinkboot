@@ -58,7 +58,7 @@ class StateBackendPropertiesValidatorTest {
         @Test
         @DisplayName("Should throw NullPointerException when context is null")
         void shouldThrowWhenContextIsNull() {
-            var props = new StateBackendProperties(StateBackendType.ROCKSDB, CheckpointStorageType.FILESYSTEM, true, false, null);
+            var props = new StateBackendProperties(StateBackendType.ROCKSDB, CheckpointStorageType.FILESYSTEM, true, false, null, null);
 
             var exception = assertThrows(
                 NullPointerException.class,
@@ -72,7 +72,7 @@ class StateBackendPropertiesValidatorTest {
         @DisplayName("Should pass when state backend is null and customClass is null")
         void shouldPassWhenStateBackendAndCustomClassNull() {
             var context = mock(ConstraintValidatorContext.class);
-            var props = new StateBackendProperties(null, null, null, null, null);
+            var props = new StateBackendProperties(null, null, null, null, null, null);
 
             assertTrue(StateBackendPropertiesValidator.validate(props, context));
         }
@@ -81,7 +81,7 @@ class StateBackendPropertiesValidatorTest {
         @DisplayName("Should pass when state backend is non-CUSTOM and customClass is null")
         void shouldPassWhenNonCustomAndCustomClassNull() {
             var context = mock(ConstraintValidatorContext.class);
-            var props = new StateBackendProperties(StateBackendType.HASHMAP, CheckpointStorageType.JOBMANAGER, false, true, null);
+            var props = new StateBackendProperties(StateBackendType.HASHMAP, CheckpointStorageType.JOBMANAGER, false, true, null, null);
 
             assertTrue(StateBackendPropertiesValidator.validate(props, context));
         }
@@ -90,7 +90,7 @@ class StateBackendPropertiesValidatorTest {
         @DisplayName("Should fail when state backend is non-CUSTOM and customClass is empty string")
         void shouldFailWhenNonCustomAndCustomClassEmpty() {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-            var props = new StateBackendProperties(StateBackendType.ROCKSDB, CheckpointStorageType.FILESYSTEM, true, false, "");
+            var props = new StateBackendProperties(StateBackendType.ROCKSDB, CheckpointStorageType.FILESYSTEM, true, false, "", null);
 
             assertFalse(StateBackendPropertiesValidator.validate(props, context));
         }
@@ -99,7 +99,7 @@ class StateBackendPropertiesValidatorTest {
         @DisplayName("Should pass when state backend is CUSTOM and customClass is non-blank")
         void shouldPassWhenCustomAndCustomClassProvided() {
             var context = mock(ConstraintValidatorContext.class);
-            var props = new StateBackendProperties(StateBackendType.CUSTOM, CheckpointStorageType.FILESYSTEM, false, false, "com.example.MyFactory");
+            var props = new StateBackendProperties(StateBackendType.CUSTOM, CheckpointStorageType.FILESYSTEM, false, false, "com.example.MyFactory", null);
 
             assertTrue(StateBackendPropertiesValidator.validate(props, context));
         }
@@ -108,7 +108,7 @@ class StateBackendPropertiesValidatorTest {
         @DisplayName("Should pass cross-field validation when state backend is CUSTOM and customClass is empty string")
         void shouldPassWhenCustomAndCustomClassIsEmptyString() {
             var context = mock(ConstraintValidatorContext.class);
-            var props = new StateBackendProperties(StateBackendType.CUSTOM, CheckpointStorageType.FILESYSTEM, false, false, "");
+            var props = new StateBackendProperties(StateBackendType.CUSTOM, CheckpointStorageType.FILESYSTEM, false, false, "", null);
 
             assertTrue(StateBackendPropertiesValidator.validate(props, context));
         }
@@ -117,7 +117,7 @@ class StateBackendPropertiesValidatorTest {
         @DisplayName("Should fail when state backend is CUSTOM and customClass is null")
         void shouldFailWhenCustomAndCustomClassNull() {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-            var props = new StateBackendProperties(StateBackendType.CUSTOM, null, null, null, null);
+            var props = new StateBackendProperties(StateBackendType.CUSTOM, null, null, null, null, null);
 
             assertFalse(StateBackendPropertiesValidator.validate(props, context));
         }
@@ -128,7 +128,7 @@ class StateBackendPropertiesValidatorTest {
         @DisplayName("Should fail when state backend is not CUSTOM and customClass is provided")
         void shouldFailWhenNotCustomAndCustomClassProvided(StateBackendType type) {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-            var props = new StateBackendProperties(type, null, null, null, "com.example.MyFactory");
+            var props = new StateBackendProperties(type, null, null, null, "com.example.MyFactory", null);
 
             assertFalse(StateBackendPropertiesValidator.validate(props, context));
         }

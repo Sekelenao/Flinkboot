@@ -15,7 +15,8 @@ In Flinkboot, all configuration classes that bind to YAML/JSON configuration fil
 
 ## 2. Jackson & Constructor Mapping
 
-- **`@JsonCreator`**: Annotate the primary constructor with `@JsonCreator`.
+- **Single Canonical Constructor (No Backward-Compatibility Overloads)**: Configuration properties DTOs must have **exactly one** canonical constructor. Do **NOT** create legacy constructor overloads or telescoping constructors chaining with `null` (`this(..., null)`). When a property is added or modified, update only the canonical constructor and update tests accordingly. Flinkboot favors clean, non-bloated APIs over constructor baggage.
+- **`@JsonCreator`**: Annotate the canonical constructor with `@JsonCreator`.
 - **`@JsonProperty`**: Annotate **every** parameter with `@JsonProperty("kebab-case-name")`.
 - **NO Constructor Null Checks**: Do **NOT** use `Objects.requireNonNull(...)` on constructor parameters. Allow Jackson to construct the DTO with `null` fields so that Jakarta Bean Validation (`@NotNull`, `@NotBlank`, `@NotEmpty`) can inspect the full object graph and report all missing/invalid keys simultaneously.
 - **Cross-Field Validation**: When fields have interdependent requirements (e.g. `mode == TIMESTAMP` requires `timestamp != null`), the DTO implements `ValidatableProperties` (from `com.flinkboot.core.api.validation.ValidatableProperties`). The DTO's `validate(ConstraintValidatorContext context)` delegates in one line to a dedicated static validator in an internal package (e.g. `MyPropertiesValidator.validate(this, context)`).
