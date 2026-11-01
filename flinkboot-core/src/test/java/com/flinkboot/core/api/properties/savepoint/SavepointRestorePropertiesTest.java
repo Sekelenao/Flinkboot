@@ -7,6 +7,8 @@ import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -90,27 +92,31 @@ class SavepointRestorePropertiesTest {
         @Test
         @DisplayName("Should fail validation when savepointPath is blank")
         void shouldFailValidationWhenSavepointPathIsBlank() {
-            var config = new SavepointRestoreProperties("   ", true, RestoreMode.CLAIM);
+            var config = new SavepointRestoreProperties("   ", true, RestoreMode.CLAIM, null);
 
             var violations = validator.validate(config);
 
             assertFalse(violations.isEmpty(), "Should have validation violations");
         }
 
-        @Test
-        @DisplayName("Should fail validation when directory is blank")
-        void shouldFailValidationWhenDirectoryIsBlank() {
-            var config = new SavepointRestoreProperties("/tmp/savepoint-1", true, RestoreMode.CLAIM, "   ");
+        @ParameterizedTest
+        @ValueSource(strings = {"", "\t", "\n", "   "})
+        @DisplayName("Should reject empty and whitespace-only directories")
+        void shouldFailValidationWhenDirectoryIsBlank(String directory) {
+            var config = new SavepointRestoreProperties("/tmp/savepoint-1", true, RestoreMode.CLAIM, directory);
 
             var violations = validator.validate(config);
 
-            assertTrue(violations.stream().anyMatch(violation -> violation.getPropertyPath().toString().equals("directory")));
+            assertEquals(1, violations.size());
+            assertTrue(violations.stream().anyMatch(violation ->
+                violation.getPropertyPath().toString().equals("directory")
+            ));
         }
 
         @Test
         @DisplayName("Should fail validation when savepointPath is null")
         void shouldFailValidationWhenSavepointPathIsNull() {
-            var config = new SavepointRestoreProperties(null, true, RestoreMode.CLAIM);
+            var config = new SavepointRestoreProperties(null, true, RestoreMode.CLAIM, null);
 
             var violations = validator.validate(config);
 
@@ -145,14 +151,17 @@ class SavepointRestorePropertiesTest {
         @Test
         @DisplayName("Should satisfy equals and hashCode contract")
         void testEqualsAndHashCode() {
-            var config1 = new SavepointRestoreProperties("/path", true, RestoreMode.CLAIM);
-            var config2 = new SavepointRestoreProperties("/path", true, RestoreMode.CLAIM);
-            var config3 = new SavepointRestoreProperties("/other", false, RestoreMode.NO_CLAIM);
+            var config1 = new SavepointRestoreProperties("/path", true, RestoreMode.CLAIM, null);
+            var config2 = new SavepointRestoreProperties("/path", true, RestoreMode.CLAIM, null);
+            var config3 = new SavepointRestoreProperties("/other", false, RestoreMode.NO_CLAIM, null);
+            var configWithDirectory = new SavepointRestoreProperties("/path", true, RestoreMode.CLAIM, "/tmp/savepoints");
 
             assertAll(
                 () -> assertEquals(config1, config2),
                 () -> assertEquals(config1.hashCode(), config2.hashCode()),
                 () -> assertNotEquals(config1, config3),
+                () -> assertNotEquals(config1, configWithDirectory),
+                () -> assertNotEquals(configWithDirectory, config1),
                 () -> assertNotEquals(null, config1),
                 () -> assertNotEquals("string", config1)
             );
