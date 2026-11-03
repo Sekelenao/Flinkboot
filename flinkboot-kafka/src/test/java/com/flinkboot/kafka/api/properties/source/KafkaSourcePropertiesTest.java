@@ -205,6 +205,25 @@ class KafkaSourcePropertiesTest {
             assertTrue(validator.validate(config).isEmpty());
         }
 
+        @Test
+        @DisplayName("Should pass validation with valid client ID prefix")
+        void shouldPassWithValidClientIdPrefix() {
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                "orders-reader",
+                List.of("topic-a"),
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                null
+            );
+
+            assertTrue(validator.validate(config).isEmpty());
+        }
+
         @ParameterizedTest
         @NullAndEmptySource
         @ValueSource(strings = {"   ", "\t\n"})
@@ -664,8 +683,8 @@ class KafkaSourcePropertiesTest {
 
             assertAll(
                 () -> assertNotEquals(base, differentPrefix),
-                () -> assertNotEquals(base.hashCode(), differentPrefix.hashCode()),
-                () -> assertTrue(base.toString().contains("orders-reader"))
+                () -> assertNotEquals(differentPrefix, base),
+                () -> assertNotEquals(base.hashCode(), differentPrefix.hashCode())
             );
         }
 
@@ -690,7 +709,7 @@ class KafkaSourcePropertiesTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "my-group",
-                null,
+                "orders-reader",
                 List.of("topic"),
                 null,
                 DEFAULT_STARTING_OFFSETS,
@@ -702,6 +721,7 @@ class KafkaSourcePropertiesTest {
             var str = config.toString();
             assertAll(
                 () -> assertTrue(str.contains("my-source")),
+                () -> assertTrue(str.contains("clientIdPrefix='orders-reader'")),
                 () -> assertTrue(str.contains("KafkaSourceProperties"))
             );
         }
