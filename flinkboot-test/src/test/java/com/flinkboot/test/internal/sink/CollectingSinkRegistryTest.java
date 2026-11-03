@@ -12,6 +12,7 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -72,6 +73,26 @@ class CollectingSinkRegistryTest {
         }
 
         @Test
+        @DisplayName("Should throw NullPointerException when checking size with null sinkId")
+        void shouldThrowExceptionWhenCheckingSizeWithNullSinkId() {
+            var exception = assertThrows(
+                NullPointerException.class,
+                () -> CollectingSinkRegistry.size(null)
+            );
+            assertEquals("sinkId must not be null", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when checking isEmpty with null sinkId")
+        void shouldThrowExceptionWhenCheckingIsEmptyWithNullSinkId() {
+            var exception = assertThrows(
+                NullPointerException.class,
+                () -> CollectingSinkRegistry.isEmpty(null)
+            );
+            assertEquals("sinkId must not be null", exception.getMessage());
+        }
+
+        @Test
         @DisplayName("Should throw NullPointerException when clearing with null sinkId")
         void shouldThrowExceptionWhenClearingWithNullSinkId() {
             var exception = assertThrows(
@@ -96,6 +117,43 @@ class CollectingSinkRegistryTest {
                 () -> assertTrue(elements.isEmpty()),
                 () -> assertThrows(UnsupportedOperationException.class, () -> elements.add("item"))
             );
+        }
+
+        @Test
+        @DisplayName("Should return zero size and true for isEmpty when sink identifier has no registered elements")
+        void shouldReturnZeroSizeAndTrueIsEmptyForUnknownSinkId() {
+            var sinkId = UUID.randomUUID();
+            assertAll(
+                () -> assertEquals(0, CollectingSinkRegistry.size(sinkId)),
+                () -> assertTrue(CollectingSinkRegistry.isEmpty(sinkId))
+            );
+        }
+
+        @Test
+        @DisplayName("Should accurately report size and isEmpty as elements are appended and cleared")
+        void shouldReportSizeAndIsEmptyCorrectly() {
+            var sinkId = UUID.randomUUID();
+            try {
+                CollectingSinkRegistry.append(sinkId, "first");
+                assertAll(
+                    () -> assertEquals(1, CollectingSinkRegistry.size(sinkId)),
+                    () -> assertFalse(CollectingSinkRegistry.isEmpty(sinkId))
+                );
+
+                CollectingSinkRegistry.append(sinkId, "second");
+                assertAll(
+                    () -> assertEquals(2, CollectingSinkRegistry.size(sinkId)),
+                    () -> assertFalse(CollectingSinkRegistry.isEmpty(sinkId))
+                );
+
+                CollectingSinkRegistry.clear(sinkId);
+                assertAll(
+                    () -> assertEquals(0, CollectingSinkRegistry.size(sinkId)),
+                    () -> assertTrue(CollectingSinkRegistry.isEmpty(sinkId))
+                );
+            } finally {
+                CollectingSinkRegistry.clear(sinkId);
+            }
         }
 
         @Test

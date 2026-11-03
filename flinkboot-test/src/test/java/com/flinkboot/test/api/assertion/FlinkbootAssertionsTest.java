@@ -1,11 +1,14 @@
 package com.flinkboot.test.api.assertion;
 
 import com.flinkboot.test.api.assertion.type.ClassAssert;
+import com.flinkboot.test.api.assertion.type.CollectingSinkAssert;
 import com.flinkboot.test.api.assertion.type.ObjectAssert;
 import com.flinkboot.test.api.assertion.type.TypeInformationAssert;
+import com.flinkboot.test.api.sink.CollectingSink;
 
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.connector.sink2.WriterInitContext;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -114,6 +117,45 @@ class FlinkbootAssertionsTest {
                 AssertionFailedError.class,
                 () -> assertThat(new NonSerializableSample()).isSerializable()
             );
+        }
+    }
+
+    @Nested
+    @DisplayName("assertThat(CollectingSink)")
+    class AssertThatCollectingSink {
+
+        @Test
+        @DisplayName("Should return CollectingSinkAssert instance when sink is valid")
+        void shouldReturnCollectingSinkAssert() {
+            try (var sink = new CollectingSink<String>()) {
+                assertInstanceOf(CollectingSinkAssert.class, assertThat(sink));
+            }
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when sink is null")
+        void shouldThrowExceptionWhenSinkIsNull() {
+            var exception = assertThrows(NullPointerException.class, () -> assertThat((CollectingSink<String>) null));
+            assertEquals("sink must not be null", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should successfully execute fluent assertion chain on CollectingSink")
+        void shouldChainFluentAssertionsOnCollectingSink() throws Exception {
+            try (var sink = new CollectingSink<String>()) {
+                var writer = sink.createWriter((WriterInitContext) null);
+                writer.write("msg-1", null);
+                writer.write("msg-2", null);
+
+                assertDoesNotThrow(() ->
+                    assertThat(sink)
+                        .hasSize(2)
+                        .contains("msg-1", "msg-2")
+                        .anyMatch(msg -> msg.equals("msg-1"))
+                        .allMatch(msg -> msg.startsWith("msg-"))
+                        .noneMatch(msg -> msg.startsWith("other-"))
+                );
+            }
         }
     }
 

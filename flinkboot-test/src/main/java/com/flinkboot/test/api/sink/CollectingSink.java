@@ -62,6 +62,24 @@ public final class CollectingSink<T> implements Sink<T>, AutoCloseable {
     }
 
     /**
+     * Returns the number of elements collected by this sink.
+     *
+     * @return the number of collected elements
+     */
+    public int size() {
+        return CollectingSinkRegistry.size(sinkId);
+    }
+
+    /**
+     * Returns {@code true} if this sink contains no elements.
+     *
+     * @return {@code true} if this sink contains no elements
+     */
+    public boolean isEmpty() {
+        return CollectingSinkRegistry.isEmpty(sinkId);
+    }
+
+    /**
      * Removes all collected elements for this sink.
      */
     public void clear() {
