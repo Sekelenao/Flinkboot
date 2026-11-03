@@ -62,6 +62,17 @@ class CollectingSinkAssertTest {
         }
 
         @Test
+        @DisplayName("Should pass when sink is empty and expected size is zero")
+        void shouldPassWhenSinkIsEmptyAndExpectedSizeIsZero() {
+            try (var sink = new CollectingSink<String>()) {
+                var sinkAssert = new CollectingSinkAssert<>(sink);
+                var result = sinkAssert.hasSize(0);
+
+                assertSame(sinkAssert, result);
+            }
+        }
+
+        @Test
         @DisplayName("Should fail with AssertionFailedError when size does not match")
         void shouldFailWhenSizeDoesNotMatch() throws Exception {
             try (var sink = new CollectingSink<String>()) {
@@ -197,6 +208,23 @@ class CollectingSinkAssertTest {
                 );
 
                 assertTrue(exception.getMessage().contains("missing: [null]"));
+            }
+        }
+
+        @Test
+        @DisplayName("Should fail with AssertionFailedError when sink is empty and expected elements are specified")
+        void shouldFailWhenSinkIsEmptyAndExpectedElementsAreSpecified() {
+            try (var sink = new CollectingSink<String>()) {
+                var sinkAssert = new CollectingSinkAssert<>(sink);
+                var exception = assertThrows(
+                    AssertionFailedError.class,
+                    () -> sinkAssert.contains("expected-record")
+                );
+
+                assertAll(
+                    () -> assertTrue(exception.getMessage().contains("Expected sink to contain [expected-record]")),
+                    () -> assertTrue(exception.getMessage().contains("missing: [expected-record]"))
+                );
             }
         }
     }
