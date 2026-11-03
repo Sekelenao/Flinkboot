@@ -18,6 +18,7 @@ import java.util.stream.IntStream;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -30,12 +31,14 @@ class CollectingSinkTest {
     class CreationAndCollection {
 
         @Test
-        @DisplayName("Should create sink and return empty elements initially")
+        @DisplayName("Should create sink and return empty elements, zero size, and true isEmpty initially")
         void shouldReturnEmptyElementsInitially() {
             try (var sink = new CollectingSink<String>()) {
                 assertAll(
                     () -> assertNotNull(sink),
-                    () -> assertTrue(sink.elements().isEmpty())
+                    () -> assertTrue(sink.elements().isEmpty()),
+                    () -> assertEquals(0, sink.size()),
+                    () -> assertTrue(sink.isEmpty())
                 );
             }
         }
@@ -60,6 +63,8 @@ class CollectingSinkTest {
 
                 assertAll(
                     () -> assertEquals(100, elements.size()),
+                    () -> assertEquals(100, sink.size()),
+                    () -> assertFalse(sink.isEmpty()),
                     () -> assertTrue(elements.containsAll(expected))
                 );
             }
@@ -189,7 +194,11 @@ class CollectingSinkTest {
 
                 sink.clear();
 
-                assertTrue(sink.elements().isEmpty());
+                assertAll(
+                    () -> assertTrue(sink.elements().isEmpty()),
+                    () -> assertEquals(0, sink.size()),
+                    () -> assertTrue(sink.isEmpty())
+                );
             }
         }
 
@@ -205,7 +214,11 @@ class CollectingSinkTest {
 
                 writer.write("event-after-clear", null);
 
-                assertEquals(List.of("event-after-clear"), sink.elements());
+                assertAll(
+                    () -> assertEquals(List.of("event-after-clear"), sink.elements()),
+                    () -> assertEquals(1, sink.size()),
+                    () -> assertFalse(sink.isEmpty())
+                );
             }
         }
 
@@ -218,7 +231,11 @@ class CollectingSinkTest {
 
             sink.close();
 
-            assertTrue(sink.elements().isEmpty());
+            assertAll(
+                () -> assertTrue(sink.elements().isEmpty()),
+                () -> assertEquals(0, sink.size()),
+                () -> assertTrue(sink.isEmpty())
+            );
         }
 
         @Test
@@ -232,7 +249,11 @@ class CollectingSinkTest {
                 assertEquals(List.of("event-in-try"), sink.elements());
             }
 
-            assertTrue(sinkReference.elements().isEmpty());
+            assertAll(
+                () -> assertTrue(sinkReference.elements().isEmpty()),
+                () -> assertEquals(0, sinkReference.size()),
+                () -> assertTrue(sinkReference.isEmpty())
+            );
         }
     }
 }
