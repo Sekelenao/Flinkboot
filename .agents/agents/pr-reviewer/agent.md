@@ -75,19 +75,33 @@ gh pr diff <PR_NUMBER>
 ```
 If an issue is linked (`Fixes #...`), inspect it via `gh issue view <ISSUE_NUMBER> --json title,body`.
 
-### 2. Inspect Files Safely
-Inspect files using read tools or `gh pr diff`. Do **NOT** run `git checkout` or switch branches in a shared local repository when uncommitted changes exist. If local execution is strictly required, ensure the working tree remains undisturbed.
+### 2. Isolated Worktree Inspection (Preserve Main Workspace)
+To inspect files, run `test-auditor`, or perform targeted local verification without disturbing the user's active workspace:
+1. Fetch the PR's latest head commit:
+```bash
+git fetch origin pull/<PR_NUMBER>/head:pr-<PR_NUMBER>
+```
+2. Create an isolated worktree under `.private/`:
+```bash
+git worktree add .private/worktree-pr-<PR_NUMBER> pr-<PR_NUMBER>
+```
+3. Perform file inspection and run targeted Maven verification inside the worktree directory:
+```bash
+mvn test -pl <TOUCHED_MODULE> -Dtest=<TestClass> -f .private/worktree-pr-<PR_NUMBER>/pom.xml
+```
+4. Once review is complete, cleanly remove the worktree and temporary branch:
+```bash
+git worktree remove --force .private/worktree-pr-<PR_NUMBER>
+git branch -D pr-<PR_NUMBER>
+```
 
 ### 3. Test Evaluation Protocol
-- **Test files touched**: Invoke `test-auditor` with the test class path and explicitly specify the diff or modified line ranges so it audits **only** the new/modified tests. Any substantive flaw reported by `test-auditor` on the diff must be included under `Required Changes`. Discard any findings on pre-existing untouched tests.
+- **Test files touched**: Invoke `test-auditor` with the test class path (targeting the worktree copy) and explicitly specify the diff or modified line ranges so it audits **only** the new/modified tests. Any substantive flaw reported by `test-auditor` on the diff must be included under `Required Changes`. Discard any findings on pre-existing untouched tests.
 - **Production code touched without tests**: Mark as `REQUEST CHANGES`.
 - **Documentation / CI only**: Skip test delegation.
 
 ### 4. Optional Targeted Verification
-If local regression verification is necessary:
-```bash
-mvn test -pl <TOUCHED_MODULE> -Dtest=<TestClass>
-```
+Targeted regression verification should be run against the isolated worktree using the `-f` flag as specified in step 2.
 
 ---
 
