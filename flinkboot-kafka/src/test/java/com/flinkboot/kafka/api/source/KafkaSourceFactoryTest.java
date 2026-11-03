@@ -68,6 +68,7 @@ class KafkaSourceFactoryTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
+                null,
                 List.of("test-topic"),
                 null,
                 DEFAULT_STARTING_OFFSETS,
@@ -90,6 +91,7 @@ class KafkaSourceFactoryTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
+                null,
                 List.of("test-topic"),
                 null,
                 timestampOffsets,
@@ -114,6 +116,7 @@ class KafkaSourceFactoryTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
+                null,
                 List.of("test-topic"),
                 null,
                 partitionOffsets,
@@ -132,6 +135,7 @@ class KafkaSourceFactoryTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
+                null,
                 List.of("test-topic"),
                 null,
                 DEFAULT_STARTING_OFFSETS,
@@ -156,6 +160,7 @@ class KafkaSourceFactoryTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
+                null,
                 List.of("test-topic"),
                 null,
                 DEFAULT_STARTING_OFFSETS,
@@ -180,6 +185,7 @@ class KafkaSourceFactoryTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
+                null,
                 List.of("test-topic"),
                 null,
                 DEFAULT_STARTING_OFFSETS,
@@ -219,6 +225,33 @@ class KafkaSourceFactoryTest {
     }
 
     @Nested
+    @DisplayName("Client ID prefix")
+    class ClientIdPrefix {
+
+        @Test
+        @DisplayName("Should configure the Kafka source builder with the client ID prefix")
+        void shouldConfigureClientIdPrefix() {
+            var config = new KafkaSourceProperties(
+                "orders-source",
+                List.of("localhost:9092"),
+                "orders-group",
+                "orders-reader",
+                List.of("orders"),
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                null
+            );
+
+            assertAll(
+                () -> assertNotNull(KafkaSourceFactory.supplyFor(config, TEST_SCHEMA)),
+                () -> assertNotNull(KafkaSourceFactory.supplyBuilderFor(config, TEST_SCHEMA))
+            );
+        }
+    }
+
+    @Nested
     @DisplayName("supplyFor & supplyBuilderFor (Topic Pattern)")
     class SupplyForTopicPattern {
 
@@ -229,6 +262,7 @@ class KafkaSourceFactoryTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
+                null,
                 null,
                 "test-.*",
                 DEFAULT_STARTING_OFFSETS,
@@ -251,6 +285,7 @@ class KafkaSourceFactoryTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
+                null,
                 null,
                 "test-.*",
                 timestampOffsets,
@@ -276,6 +311,7 @@ class KafkaSourceFactoryTest {
                 List.of("localhost:9092"),
                 "test-group",
                 null,
+                null,
                 "test-.*",
                 partitionOffsets,
                 null,
@@ -295,6 +331,7 @@ class KafkaSourceFactoryTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "test-group",
+                null,
                 List.of("test-topic"),
                 null,
                 DEFAULT_STARTING_OFFSETS,
