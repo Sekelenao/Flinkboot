@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("KafkaSinkFactory")
@@ -141,7 +142,7 @@ class KafkaSinkFactoryTest {
         void shouldBuildWithSchemaCustomizer() throws Exception {
             Consumer<KafkaRecordSerializationSchemaBuilder<String>> customizer = builder ->
                 builder.setValueSerializationSchema(new SimpleStringSchema())
-                    .setKeySerializationSchema(new SimpleStringSchema());
+                    .setKeySerializationSchema(element -> ("k-" + element).getBytes(StandardCharsets.UTF_8));
 
             var sink = KafkaSinkFactory.supplyFor(DEFAULT_CONFIG, customizer);
             var builderSink = KafkaSinkFactory.supplyBuilderFor(DEFAULT_CONFIG, customizer).build();
@@ -161,10 +162,10 @@ class KafkaSinkFactoryTest {
                 () -> assertNotNull(sink),
                 () -> assertNotNull(builderSink),
                 () -> assertEquals("my-topic", sinkRecord.topic()),
-                () -> assertEquals("payload", new String(sinkRecord.key(), StandardCharsets.UTF_8)),
+                () -> assertEquals("k-payload", new String(sinkRecord.key(), StandardCharsets.UTF_8)),
                 () -> assertEquals("payload", new String(sinkRecord.value(), StandardCharsets.UTF_8)),
                 () -> assertEquals("my-topic", builderRecord.topic()),
-                () -> assertEquals("payload", new String(builderRecord.key(), StandardCharsets.UTF_8)),
+                () -> assertEquals("k-payload", new String(builderRecord.key(), StandardCharsets.UTF_8)),
                 () -> assertEquals("payload", new String(builderRecord.value(), StandardCharsets.UTF_8))
             );
         }
@@ -247,11 +248,11 @@ class KafkaSinkFactoryTest {
             var builderRecord = builderSerializer.serialize("payload", null, null);
 
             assertAll(
-                () -> assertNotNull(sink),
-                () -> assertNotNull(builderSink),
                 () -> assertEquals("my-topic", sinkRecord.topic()),
+                () -> assertNull(sinkRecord.key()),
                 () -> assertEquals("payload", new String(sinkRecord.value(), StandardCharsets.UTF_8)),
                 () -> assertEquals("my-topic", builderRecord.topic()),
+                () -> assertNull(builderRecord.key()),
                 () -> assertEquals("payload", new String(builderRecord.value(), StandardCharsets.UTF_8))
             );
         }
