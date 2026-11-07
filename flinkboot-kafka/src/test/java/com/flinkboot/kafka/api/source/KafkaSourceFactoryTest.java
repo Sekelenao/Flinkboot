@@ -6,11 +6,12 @@ import com.flinkboot.kafka.api.properties.source.KafkaOffsetProperties;
 import com.flinkboot.kafka.api.properties.source.KafkaOffsetResetStrategy;
 import com.flinkboot.kafka.api.properties.source.KafkaSourceProperties;
 import com.flinkboot.kafka.api.properties.source.TopicPartitionOffsetProperties;
+import com.flinkboot.kafka.api.properties.source.TopicPartitionProperties;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.api.connector.source.Boundedness;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.api.connector.source.Boundedness;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 import org.apache.flink.util.Collector;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
@@ -32,21 +34,24 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DisplayName("KafkaSourceFactory")
 class KafkaSourceFactoryTest {
 
-    private static final KafkaRecordDeserializationSchema<String> TEST_SCHEMA = new KafkaRecordDeserializationSchema<>() {
-        @Override
-        public void deserialize(ConsumerRecord<byte[], byte[]> rcrd, Collector<String> out) { /* Do nothing */ }
-
-        @Override
-        public TypeInformation<String> getProducedType() {
-            return Types.STRING;
-        }
-    };
-
     private static final KafkaOffsetProperties DEFAULT_STARTING_OFFSETS =
         new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null, null);
 
     private static final KafkaOffsetProperties DEFAULT_STOPPING_OFFSETS =
         new KafkaOffsetProperties(KafkaOffsetInitializer.LATEST, null, null, null);
+
+    private static final KafkaRecordDeserializationSchema<String> TEST_SCHEMA =
+        new KafkaRecordDeserializationSchema<String>() {
+            @Override
+            public void deserialize(ConsumerRecord<byte[], byte[]> record, Collector<String> out) throws IOException {
+                out.collect(new String(record.value()));
+            }
+
+            @Override
+            public TypeInformation<String> getProducedType() {
+                return Types.STRING;
+            }
+        };
 
     @Test
     @DisplayName("Private constructor should throw AssertionError")
@@ -71,6 +76,7 @@ class KafkaSourceFactoryTest {
                 null,
                 List.of("test-topic"),
                 null,
+                null,
                 DEFAULT_STARTING_OFFSETS,
                 null,
                 null,
@@ -93,6 +99,7 @@ class KafkaSourceFactoryTest {
                 "test-group",
                 null,
                 List.of("test-topic"),
+                null,
                 null,
                 timestampOffsets,
                 null,
@@ -119,6 +126,7 @@ class KafkaSourceFactoryTest {
                 null,
                 List.of("test-topic"),
                 null,
+                null,
                 partitionOffsets,
                 null,
                 null,
@@ -137,6 +145,7 @@ class KafkaSourceFactoryTest {
                 "test-group",
                 null,
                 List.of("test-topic"),
+                null,
                 null,
                 DEFAULT_STARTING_OFFSETS,
                 KafkaBoundedness.BOUNDED,
@@ -163,6 +172,7 @@ class KafkaSourceFactoryTest {
                 null,
                 List.of("test-topic"),
                 null,
+                null,
                 DEFAULT_STARTING_OFFSETS,
                 KafkaBoundedness.UNBOUNDED,
                 DEFAULT_STOPPING_OFFSETS,
@@ -187,6 +197,7 @@ class KafkaSourceFactoryTest {
                 "test-group",
                 null,
                 List.of("test-topic"),
+                null,
                 null,
                 DEFAULT_STARTING_OFFSETS,
                 null,
@@ -238,6 +249,7 @@ class KafkaSourceFactoryTest {
                 "orders-reader",
                 List.of("orders"),
                 null,
+                null,
                 DEFAULT_STARTING_OFFSETS,
                 null,
                 null,
@@ -265,6 +277,7 @@ class KafkaSourceFactoryTest {
                 null,
                 null,
                 "test-.*",
+                null,
                 DEFAULT_STARTING_OFFSETS,
                 null,
                 null,
@@ -288,6 +301,7 @@ class KafkaSourceFactoryTest {
                 null,
                 null,
                 "test-.*",
+                null,
                 timestampOffsets,
                 null,
                 null,
@@ -313,6 +327,7 @@ class KafkaSourceFactoryTest {
                 null,
                 null,
                 "test-.*",
+                null,
                 partitionOffsets,
                 null,
                 null,
@@ -320,6 +335,34 @@ class KafkaSourceFactoryTest {
             );
 
             assertNotNull(KafkaSourceFactory.supplyFor(config, TEST_SCHEMA));
+        }
+    }
+
+    @Nested
+    @DisplayName("supplyFor & supplyBuilderFor (Partitions)")
+    class SupplyForPartitions {
+
+        @Test
+        @DisplayName("Should successfully build KafkaSource and KafkaSourceBuilder from partitions config")
+        void shouldBuildKafkaSource() {
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "test-group",
+                null,
+                null,
+                null,
+                List.of(new TopicPartitionProperties("test-topic", 0), new TopicPartitionProperties("test-topic", 1)),
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                Map.of("client.id", "test-client")
+            );
+
+            assertAll(
+                () -> assertNotNull(KafkaSourceFactory.supplyFor(config, TEST_SCHEMA)),
+                () -> assertNotNull(KafkaSourceFactory.supplyBuilderFor(config, TEST_SCHEMA))
+            );
         }
     }
 
@@ -333,6 +376,7 @@ class KafkaSourceFactoryTest {
                 "test-group",
                 null,
                 List.of("test-topic"),
+                null,
                 null,
                 DEFAULT_STARTING_OFFSETS,
                 null,
@@ -387,7 +431,7 @@ class KafkaSourceFactoryTest {
                                 () -> KafkaSourceFactory.supplyBuilderFor(
                                         config,
                                         (DeserializationSchema<String>) null
-                                )
+                                 )
                         );
                         assertEquals("schema must not be null", ex.getMessage());
                     }

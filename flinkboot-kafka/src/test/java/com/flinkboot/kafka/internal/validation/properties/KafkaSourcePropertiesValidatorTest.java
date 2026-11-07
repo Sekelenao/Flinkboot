@@ -4,6 +4,7 @@ import com.flinkboot.kafka.api.properties.source.KafkaBoundedness;
 import com.flinkboot.kafka.api.properties.source.KafkaOffsetInitializer;
 import com.flinkboot.kafka.api.properties.source.KafkaOffsetProperties;
 import com.flinkboot.kafka.api.properties.source.KafkaSourceProperties;
+import com.flinkboot.kafka.api.properties.source.TopicPartitionProperties;
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -50,6 +51,7 @@ class KafkaSourcePropertiesValidatorTest {
                 null,
                 List.of("topic"),
                 null,
+                null,
                 DEFAULT_STARTING_OFFSETS,
                 null,
                 null,
@@ -65,7 +67,7 @@ class KafkaSourcePropertiesValidatorTest {
     class Validation {
 
         @Test
-        @DisplayName("Should pass when valid topics are configured without pattern")
+        @DisplayName("Should pass when valid topics are configured without pattern or partitions")
         void shouldPassWhenTopicsConfiguredWithoutPattern() {
             var context = mock(ConstraintValidatorContext.class);
             var props = new KafkaSourceProperties(
@@ -74,6 +76,7 @@ class KafkaSourcePropertiesValidatorTest {
                 "group",
                 null,
                 List.of("my-topic"),
+                null,
                 null,
                 DEFAULT_STARTING_OFFSETS,
                 null,
@@ -85,7 +88,7 @@ class KafkaSourcePropertiesValidatorTest {
         }
 
         @Test
-        @DisplayName("Should pass when valid pattern is configured without topics")
+        @DisplayName("Should pass when valid pattern is configured without topics or partitions")
         void shouldPassWhenPatternConfiguredWithoutTopics() {
             var context = mock(ConstraintValidatorContext.class);
             var props = new KafkaSourceProperties(
@@ -95,6 +98,28 @@ class KafkaSourcePropertiesValidatorTest {
                 null,
                 null,
                 "my-topic-.*",
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                Map.of()
+            );
+
+            assertTrue(KafkaSourcePropertiesValidator.validate(props, context));
+        }
+
+        @Test
+        @DisplayName("Should pass when valid partitions are configured without topics or pattern")
+        void shouldPassWhenPartitionsConfiguredWithoutTopicsOrPattern() {
+            var context = mock(ConstraintValidatorContext.class);
+            var props = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                "group",
+                null,
+                null,
+                null,
+                List.of(new TopicPartitionProperties("my-topic", 0)),
                 DEFAULT_STARTING_OFFSETS,
                 null,
                 null,
@@ -115,6 +140,7 @@ class KafkaSourcePropertiesValidatorTest {
                 null,
                 List.of("my-topic"),
                 "my-topic-.*",
+                null,
                 DEFAULT_STARTING_OFFSETS,
                 null,
                 null,
@@ -125,13 +151,77 @@ class KafkaSourcePropertiesValidatorTest {
         }
 
         @Test
-        @DisplayName("Should fail when neither topics nor topic-pattern are configured")
+        @DisplayName("Should fail when both topics and partitions are configured")
+        void shouldFailWhenBothTopicsAndPartitionsConfigured() {
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
+            var props = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                "group",
+                null,
+                List.of("my-topic"),
+                null,
+                List.of(new TopicPartitionProperties("my-topic", 0)),
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                Map.of()
+            );
+
+            assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
+        }
+
+        @Test
+        @DisplayName("Should fail when both topic-pattern and partitions are configured")
+        void shouldFailWhenBothTopicPatternAndPartitionsConfigured() {
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
+            var props = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                "group",
+                null,
+                null,
+                "my-topic-.*",
+                List.of(new TopicPartitionProperties("my-topic", 0)),
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                Map.of()
+            );
+
+            assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
+        }
+
+        @Test
+        @DisplayName("Should fail when all three topics, topic-pattern, and partitions are configured")
+        void shouldFailWhenAllThreeConfigured() {
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
+            var props = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                "group",
+                null,
+                List.of("my-topic"),
+                "my-topic-.*",
+                List.of(new TopicPartitionProperties("my-topic", 0)),
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                Map.of()
+            );
+
+            assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
+        }
+
+        @Test
+        @DisplayName("Should fail when none of topics, topic-pattern, or partitions are configured")
         void shouldFailWhenNeitherTopicsNorPatternConfigured() {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
             var props = new KafkaSourceProperties(
                 "source",
                 List.of("localhost:9092"),
                 "group",
+                null,
                 null,
                 null,
                 null,
@@ -155,6 +245,7 @@ class KafkaSourcePropertiesValidatorTest {
                 null,
                 List.of("my-topic"),
                 "",
+                null,
                 DEFAULT_STARTING_OFFSETS,
                 null,
                 null,
@@ -174,6 +265,7 @@ class KafkaSourcePropertiesValidatorTest {
                 "group",
                 null,
                 List.of("my-topic"),
+                null,
                 null,
                 DEFAULT_STARTING_OFFSETS,
                 KafkaBoundedness.BOUNDED,
@@ -195,6 +287,7 @@ class KafkaSourcePropertiesValidatorTest {
                 null,
                 List.of("my-topic"),
                 null,
+                null,
                 DEFAULT_STARTING_OFFSETS,
                 KafkaBoundedness.BOUNDED,
                 null,
@@ -215,6 +308,7 @@ class KafkaSourcePropertiesValidatorTest {
                 null,
                 List.of("my-topic"),
                 null,
+                null,
                 DEFAULT_STARTING_OFFSETS,
                 KafkaBoundedness.UNBOUNDED,
                 null,
@@ -234,6 +328,7 @@ class KafkaSourcePropertiesValidatorTest {
                 "group",
                 null,
                 List.of("my-topic"),
+                null,
                 null,
                 DEFAULT_STARTING_OFFSETS,
                 KafkaBoundedness.UNBOUNDED,
