@@ -7,11 +7,13 @@ import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.KafkaSourceBuilder;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
+import org.apache.kafka.common.TopicPartition;
 
 import java.util.Objects;
 import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Factory utility for constructing Apache Flink {@link KafkaSource} instances from configuration properties.
@@ -72,9 +74,16 @@ public final class KafkaSourceFactory {
 
         if (!config.topics().isEmpty()) {
             builder.setTopics(config.topics());
-            return builder;
         }
-        builder.setTopicPattern(Pattern.compile(config.topicPattern().orElseThrow()));
+        if (config.topicPattern().isPresent()) {
+            builder.setTopicPattern(Pattern.compile(config.topicPattern().orElseThrow()));
+        }
+        if (!config.partitions().isEmpty()) {
+            var partitions = config.partitions().stream()
+                .map(p -> new TopicPartition(p.topic(), p.partition()))
+                .collect(Collectors.toSet());
+            builder.setPartitions(partitions);
+        }
         return builder;
     }
 
