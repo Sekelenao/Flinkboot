@@ -15,6 +15,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.Answers;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import com.flinkboot.core.api.properties.state.CheckpointStorageType;
 import com.flinkboot.core.api.properties.state.StateBackendProperties;
@@ -93,6 +94,9 @@ class StateBackendPropertiesValidatorTest {
             var props = new StateBackendProperties(StateBackendType.ROCKSDB, CheckpointStorageType.FILESYSTEM, true, false, "", null);
 
             assertFalse(StateBackendPropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "custom-class can only be specified when state backend type is CUSTOM"
+            )).addPropertyNode("custom-class");
         }
 
         @Test
@@ -120,6 +124,9 @@ class StateBackendPropertiesValidatorTest {
             var props = new StateBackendProperties(StateBackendType.CUSTOM, null, null, null, null, null);
 
             assertFalse(StateBackendPropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "custom-class must be specified when state backend type is CUSTOM"
+            )).addPropertyNode("custom-class");
         }
 
         @ParameterizedTest
@@ -131,6 +138,9 @@ class StateBackendPropertiesValidatorTest {
             var props = new StateBackendProperties(type, null, null, null, "com.example.MyFactory", null);
 
             assertFalse(StateBackendPropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "custom-class can only be specified when state backend type is CUSTOM"
+            )).addPropertyNode("custom-class");
         }
     }
 }
