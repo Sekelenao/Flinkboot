@@ -46,16 +46,16 @@ public final class KafkaSinkFactory {
         Objects.requireNonNull(config, "config must not be null");
         Objects.requireNonNull(serializationSchema, "serializationSchema must not be null");
 
-        var additionalProperties = new Properties();
-        additionalProperties.putAll(config.properties());
-
         var builder = KafkaSink.<T>builder()
             .setBootstrapServers(String.join(",", config.bootstrapServers()))
             .setRecordSerializer(serializationSchema)
-            .setDeliveryGuarantee(config.deliveryGuarantee().deliveryGuarantee())
-            .setKafkaProducerConfig(additionalProperties);
+            .setDeliveryGuarantee(config.deliveryGuarantee().deliveryGuarantee());
 
         config.transactionalIdPrefix().ifPresent(builder::setTransactionalIdPrefix);
+
+        var additionalProperties = new Properties();
+        additionalProperties.putAll(config.properties());
+        builder.setKafkaProducerConfig(additionalProperties);
 
         return builder;
     }

@@ -50,15 +50,12 @@ public final class KafkaSourceFactory {
         Objects.requireNonNull(config, "config must not be null");
         Objects.requireNonNull(schema, "schema must not be null");
 
-        var additionalProperties = new Properties();
-        additionalProperties.putAll(config.properties());
         var startingOffsets = OffsetInitializerMapper.map(config.startingOffsets());
 
         var builder = KafkaSource.<T>builder()
             .setBootstrapServers(String.join(",", config.bootstrapServers()))
             .setGroupId(config.groupId())
             .setStartingOffsets(startingOffsets)
-            .setProperties(additionalProperties)
             .setDeserializer(schema);
 
         config.clientIdPrefix().ifPresent(builder::setClientIdPrefix);
@@ -84,6 +81,11 @@ public final class KafkaSourceFactory {
                 .collect(Collectors.toSet());
             builder.setPartitions(partitions);
         }
+
+        var additionalProperties = new Properties();
+        additionalProperties.putAll(config.properties());
+        builder.setProperties(additionalProperties);
+
         return builder;
     }
 

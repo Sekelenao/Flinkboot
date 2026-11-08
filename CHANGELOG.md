@@ -73,6 +73,7 @@ All notable user-facing changes to this project are documented in this file.
 - **Buffer Timeout Maximum Throughput Support**: Allows `buffer-timeout: -1` (or `-1ms`) to disable periodic buffer flushing (`BUFFER_TIMEOUT_ENABLED = false`) for maximum throughput in streaming pipelines, resolving validation failures caused by `@DurationMin(millis = 0)`.
 
 #### flinkboot-kafka
+- **Properties Escape Hatch Application Order (#321)**: Applies client configuration from `properties` last in `KafkaSourceFactory` and `KafkaSinkFactory`, ensuring lower-level driver configurations provided via the universal properties escape hatch take precedence over typed defaults and options.
 - **Null Delivery Guarantee Validation**: Prevents misleading cross-field validation errors when `delivery-guarantee` is missing, leaving the missing-value error to the field-level `@NotNull` constraint.
 
 #### flinkboot-fluss
