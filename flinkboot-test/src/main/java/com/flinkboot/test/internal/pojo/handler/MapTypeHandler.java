@@ -21,9 +21,10 @@ public final class MapTypeHandler implements TypeInformationHandler {
     }
 
     @Override
-    public void handle(PojoValidationTask<?> task, Consumer<PojoValidationTask<?>> enqueuer) {
+    public void handle(PojoValidationTask<?> task, Consumer<PojoValidationTask<?>> enqueuer, Consumer<String> errors) {
         Objects.requireNonNull(task, "task must not be null");
         Objects.requireNonNull(enqueuer, "enqueuer must not be null");
+        Objects.requireNonNull(errors, "errors must not be null");
         var mapTypeInfo = (MapTypeInfo<?, ?>) task.typeInfo();
         enqueuer.accept(new PojoValidationTask<>(task.path() + "<key>", mapTypeInfo.getKeyTypeInfo()));
         enqueuer.accept(new PojoValidationTask<>(task.path() + "<value>", mapTypeInfo.getValueTypeInfo()));

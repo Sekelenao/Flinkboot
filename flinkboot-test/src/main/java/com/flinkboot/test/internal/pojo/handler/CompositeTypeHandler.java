@@ -21,9 +21,10 @@ public final class CompositeTypeHandler implements TypeInformationHandler {
     }
 
     @Override
-    public void handle(PojoValidationTask<?> task, Consumer<PojoValidationTask<?>> enqueuer) {
+    public void handle(PojoValidationTask<?> task, Consumer<PojoValidationTask<?>> enqueuer, Consumer<String> errors) {
         Objects.requireNonNull(task, "task must not be null");
         Objects.requireNonNull(enqueuer, "enqueuer must not be null");
+        Objects.requireNonNull(errors, "errors must not be null");
         var compositeType = (CompositeType<?>) task.typeInfo();
         for (int i = 0; i < compositeType.getArity(); i++) {
             enqueuer.accept(new PojoValidationTask<>(task.path() + "[" + i + "]", compositeType.getTypeAt(i)));

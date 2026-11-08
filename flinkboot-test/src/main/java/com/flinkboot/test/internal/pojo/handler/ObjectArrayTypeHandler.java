@@ -21,9 +21,10 @@ public final class ObjectArrayTypeHandler implements TypeInformationHandler {
     }
 
     @Override
-    public void handle(PojoValidationTask<?> task, Consumer<PojoValidationTask<?>> enqueuer) {
+    public void handle(PojoValidationTask<?> task, Consumer<PojoValidationTask<?>> enqueuer, Consumer<String> errors) {
         Objects.requireNonNull(task, "task must not be null");
         Objects.requireNonNull(enqueuer, "enqueuer must not be null");
+        Objects.requireNonNull(errors, "errors must not be null");
         var arrayTypeInfo = (ObjectArrayTypeInfo<?, ?>) task.typeInfo();
         enqueuer.accept(new PojoValidationTask<>(task.path() + "[]", arrayTypeInfo.getComponentInfo()));
     }

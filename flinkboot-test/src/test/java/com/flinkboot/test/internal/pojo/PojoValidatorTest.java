@@ -291,6 +291,17 @@ class PojoValidatorTest {
         public Map<String, Integer> map;
     }
 
+    public static class MultipleUnsupportedFieldsPojo {
+        public OffsetDateTime time;
+        public LocalDateTime localDateTime;
+    }
+
+    public static class NestedMultipleUnsupportedPojo {
+        public String validField;
+        public MultipleUnsupportedFieldsPojo nested;
+        public LocalDate unannotatedDate;
+    }
+
     // ==========================================
     // 4. Invalid POJO Variants (Nested & Parameterized Types Falling Back to Kryo)
     // ==========================================
@@ -477,6 +488,31 @@ class PojoValidatorTest {
         var typeInfo = TypeExtractor.createTypeInfo(UnsupportedTypePojo.class);
         var error = assertThrows(AssertionFailedError.class, () -> validator.validate(typeInfo));
         assertTrue(error.getMessage().contains("Field or type '$.time' is recognized as GenericTypeInfo"));
+    }
+
+    @Test
+    @DisplayName("Should aggregate multiple violations when POJO contains multiple unsupported fields")
+    void shouldAggregateMultipleViolationsWhenPojoHasMultipleUnsupportedFields() {
+        var typeInfo = TypeExtractor.createTypeInfo(MultipleUnsupportedFieldsPojo.class);
+        var error = assertThrows(AssertionFailedError.class, () -> validator.validate(typeInfo));
+        assertAll(
+            () -> assertTrue(error.getMessage().startsWith("Found 2 POJO validation violation(s):")),
+            () -> assertTrue(error.getMessage().contains("- Field or type '$.localDateTime' is recognized as GenericTypeInfo (java.time.LocalDateTime), which falls back to Kryo serialization.")),
+            () -> assertTrue(error.getMessage().contains("- Field or type '$.time' is recognized as GenericTypeInfo (java.time.OffsetDateTime), which falls back to Kryo serialization."))
+        );
+    }
+
+    @Test
+    @DisplayName("Should aggregate multiple violations across nested levels in BFS order")
+    void shouldAggregateMultipleViolationsAcrossNestedLevels() {
+        var typeInfo = TypeExtractor.createTypeInfo(NestedMultipleUnsupportedPojo.class);
+        var error = assertThrows(AssertionFailedError.class, () -> validator.validate(typeInfo));
+        assertAll(
+            () -> assertTrue(error.getMessage().startsWith("Found 3 POJO validation violation(s):")),
+            () -> assertTrue(error.getMessage().contains("- Field or type '$.unannotatedDate' is recognized as GenericTypeInfo (java.time.LocalDate), which falls back to Kryo serialization.")),
+            () -> assertTrue(error.getMessage().contains("- Field or type '$.nested.localDateTime' is recognized as GenericTypeInfo (java.time.LocalDateTime), which falls back to Kryo serialization.")),
+            () -> assertTrue(error.getMessage().contains("- Field or type '$.nested.time' is recognized as GenericTypeInfo (java.time.OffsetDateTime), which falls back to Kryo serialization."))
+        );
     }
 
     @Test

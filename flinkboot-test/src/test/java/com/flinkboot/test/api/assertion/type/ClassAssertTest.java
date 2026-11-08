@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("ClassAssert")
 class ClassAssertTest {
@@ -77,7 +78,12 @@ class ClassAssertTest {
         @DisplayName("Should fail with AssertionFailedError for invalid POJO")
         void shouldFailForInvalidPojo() {
             var classAssert = new ClassAssert(InvalidPojo.class);
-            assertThrows(AssertionFailedError.class, classAssert::isPojo);
+            var error = assertThrows(AssertionFailedError.class, classAssert::isPojo);
+            var expectedViolation = "Field or type '$' is recognized as GenericTypeInfo (" + InvalidPojo.class.getName() + "), which falls back to Kryo serialization.";
+            assertAll(
+                () -> assertTrue(error.getMessage().startsWith("Found 1 POJO validation violation(s):")),
+                () -> assertTrue(error.getMessage().contains(expectedViolation))
+            );
         }
 
         @Test

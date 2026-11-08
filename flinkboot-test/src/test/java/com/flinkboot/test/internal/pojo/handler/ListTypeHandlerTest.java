@@ -74,10 +74,12 @@ class ListTypeHandlerTest {
         void shouldEnqueueElementTypeTask() {
             var task = new PojoValidationTask<>("items", listTypeInfo);
             var enqueued = new ArrayList<PojoValidationTask<?>>();
+            var errors = new ArrayList<String>();
 
-            handler.handle(task, enqueued::add);
+            handler.handle(task, enqueued::add, errors::add);
 
             assertAll(
+                () -> assertTrue(errors.isEmpty()),
                 () -> assertEquals(1, enqueued.size()),
                 () -> assertEquals("items[]", enqueued.get(0).path()),
                 () -> assertEquals(BasicTypeInfo.STRING_TYPE_INFO, enqueued.get(0).typeInfo())
@@ -87,7 +89,7 @@ class ListTypeHandlerTest {
         @Test
         @DisplayName("Should throw NullPointerException when task is null")
         void shouldThrowWhenTaskIsNull() {
-            var ex = assertThrows(NullPointerException.class, () -> handler.handle(null, ignored -> {}));
+            var ex = assertThrows(NullPointerException.class, () -> handler.handle(null, ignored -> {}, ignored -> {}));
             assertEquals("task must not be null", ex.getMessage());
         }
 
@@ -95,8 +97,16 @@ class ListTypeHandlerTest {
         @DisplayName("Should throw NullPointerException when enqueuer is null")
         void shouldThrowWhenEnqueuerIsNull() {
             var task = new PojoValidationTask<>("items", listTypeInfo);
-            var ex = assertThrows(NullPointerException.class, () -> handler.handle(task, null));
+            var ex = assertThrows(NullPointerException.class, () -> handler.handle(task, null, ignored -> {}));
             assertEquals("enqueuer must not be null", ex.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when errors is null")
+        void shouldThrowWhenErrorsIsNull() {
+            var task = new PojoValidationTask<>("items", listTypeInfo);
+            var ex = assertThrows(NullPointerException.class, () -> handler.handle(task, ignored -> {}, null));
+            assertEquals("errors must not be null", ex.getMessage());
         }
 
     }

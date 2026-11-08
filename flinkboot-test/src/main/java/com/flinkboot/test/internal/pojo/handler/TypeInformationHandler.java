@@ -13,6 +13,6 @@ public interface TypeInformationHandler {
         return false;
     }
 
-    void handle(PojoValidationTask<?> task, Consumer<PojoValidationTask<?>> enqueuer);
+    void handle(PojoValidationTask<?> task, Consumer<PojoValidationTask<?>> enqueuer, Consumer<String> errors);
 
 }
