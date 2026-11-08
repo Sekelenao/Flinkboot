@@ -12,5 +12,4 @@ module com.flinkboot.fluss {
 
     opens com.flinkboot.fluss.api.properties.source;
     opens com.flinkboot.fluss.api.properties.sink;
-    opens com.flinkboot.fluss.internal.validation.properties to org.junit.platform.commons;
 }
