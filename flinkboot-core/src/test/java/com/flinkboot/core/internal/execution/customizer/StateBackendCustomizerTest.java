@@ -1,7 +1,6 @@
 package com.flinkboot.core.internal.execution.customizer;
 
 import com.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
-import com.flinkboot.core.api.properties.state.CheckpointStorageType;
 import com.flinkboot.core.api.properties.state.StateBackendProperties;
 import com.flinkboot.core.api.properties.state.StateBackendType;
 import org.apache.flink.configuration.CheckpointingOptions;
@@ -14,10 +13,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.apache.flink.configuration.StateChangelogOptions;
-
-import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -75,7 +73,7 @@ class StateBackendCustomizerTest {
         void shouldLeaveConfigurationUnmodifiedWhenStateBackendPropertiesAllNull() {
             var flinkConfig = new Configuration();
             var customizer = new StateBackendCustomizer(flinkConfig);
-            var stateBackendConfig = new StateBackendProperties(null, null, null, null, null, null);
+            var stateBackendConfig = new StateBackendProperties(null, null, null, null, null);
             var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
 
             customizer.configure(envProps);
@@ -92,7 +90,7 @@ class StateBackendCustomizerTest {
         void shouldConfigureStandardStateBackendTypes(StateBackendType type, String expectedBackend) {
             var flinkConfig = new Configuration();
             var customizer = new StateBackendCustomizer(flinkConfig);
-            var stateBackendConfig = new StateBackendProperties(type, null, null, null, null, null);
+            var stateBackendConfig = new StateBackendProperties(type, null, null, null, null);
             var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
 
             customizer.configure(envProps);
@@ -112,9 +110,9 @@ class StateBackendCustomizerTest {
                 StateBackendType.CUSTOM,
                 null,
                 null,
-                null,
-                "org.example.MyCustomStateBackendFactory"
-            , null);
+                "org.example.MyCustomStateBackendFactory",
+                null
+            );
             var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
 
             customizer.configure(envProps);
@@ -125,51 +123,13 @@ class StateBackendCustomizerTest {
             );
         }
 
-        @ParameterizedTest(name = "Should map checkpoint storage {0} to \"{1}\"")
-        @CsvSource({
-            "JOBMANAGER, jobmanager",
-            "FILESYSTEM, filesystem"
-        })
-        @DisplayName("Should configure checkpoint storage types")
-        void shouldConfigureCheckpointStorageTypes(CheckpointStorageType storageType, String expectedStorage) {
-            var flinkConfig = new Configuration();
-            var customizer = new StateBackendCustomizer(flinkConfig);
-            var stateBackendConfig = new StateBackendProperties(null, storageType, null, null, null, null);
-            var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
-
-            customizer.configure(envProps);
-
-            assertAll(
-                () -> assertEquals(expectedStorage, flinkConfig.get(CheckpointingOptions.CHECKPOINT_STORAGE)),
-                () -> assertEquals(1, flinkConfig.toMap().size())
-            );
-        }
-
-        @Test
-        @DisplayName("Should format checkpoint storage with Locale.ROOT under a Turkish default locale")
-        void shouldFormatCheckpointStorageWithRootLocale() {
-            var previousLocale = Locale.getDefault();
-            Locale.setDefault(Locale.forLanguageTag("tr-TR"));
-            try {
-                var flinkConfig = new Configuration();
-                var stateBackendConfig = new StateBackendProperties(null, CheckpointStorageType.FILESYSTEM, null, null, null, null);
-                var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
-
-                new StateBackendCustomizer(flinkConfig).configure(envProps);
-
-                assertEquals("filesystem", flinkConfig.get(CheckpointingOptions.CHECKPOINT_STORAGE));
-            } finally {
-                Locale.setDefault(previousLocale);
-            }
-        }
-
         @ParameterizedTest(name = "Should configure incremental checkpoints to {0}")
         @ValueSource(booleans = {true, false})
         @DisplayName("Should configure incremental checkpoints")
         void shouldConfigureIncrementalCheckpoints(boolean incremental) {
             var flinkConfig = new Configuration();
             var customizer = new StateBackendCustomizer(flinkConfig);
-            var stateBackendConfig = new StateBackendProperties(null, null, incremental, null, null, null);
+            var stateBackendConfig = new StateBackendProperties(null, incremental, null, null, null);
             var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
 
             customizer.configure(envProps);
@@ -186,7 +146,7 @@ class StateBackendCustomizerTest {
         void shouldConfigureLatencyTracking(boolean latencyTracking) {
             var flinkConfig = new Configuration();
             var customizer = new StateBackendCustomizer(flinkConfig);
-            var stateBackendConfig = new StateBackendProperties(null, null, null, latencyTracking, null, null);
+            var stateBackendConfig = new StateBackendProperties(null, null, latencyTracking, null, null);
             var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
 
             customizer.configure(envProps);
@@ -203,67 +163,61 @@ class StateBackendCustomizerTest {
             var flinkConfig = new Configuration();
             var stateBackendConfig = new StateBackendProperties(
                 StateBackendType.ROCKSDB,
-                CheckpointStorageType.FILESYSTEM,
                 false,
                 true,
+                null,
                 null
-            , null);
+            );
             var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
 
             new StateBackendCustomizer(flinkConfig).configure(envProps);
 
             assertAll(
                 () -> assertEquals("rocksdb", flinkConfig.get(StateBackendOptions.STATE_BACKEND)),
-                () -> assertEquals("filesystem", flinkConfig.get(CheckpointingOptions.CHECKPOINT_STORAGE)),
                 () -> assertFalse(flinkConfig.get(CheckpointingOptions.INCREMENTAL_CHECKPOINTS)),
                 () -> assertTrue(flinkConfig.get(StateLatencyTrackOptions.LATENCY_TRACK_ENABLED)),
-                () -> assertEquals(4, flinkConfig.toMap().size())
+                () -> assertEquals(3, flinkConfig.toMap().size())
             );
         }
 
         @Test
-        @DisplayName("Should configure custom state backend with storage and asymmetric feature flags")
-        void shouldConfigureCustomStateBackendWithStorageAndAsymmetricFlags() {
+        @DisplayName("Should configure custom state backend with asymmetric feature flags")
+        void shouldConfigureCustomStateBackendWithAsymmetricFlags() {
             var flinkConfig = new Configuration();
             var stateBackendConfig = new StateBackendProperties(
                 StateBackendType.CUSTOM,
-                CheckpointStorageType.FILESYSTEM,
                 true,
                 false,
-                "com.example.CustomBackendFactory"
-            , null);
+                "com.example.CustomBackendFactory",
+                null
+            );
             var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
 
             new StateBackendCustomizer(flinkConfig).configure(envProps);
 
             assertAll(
                 () -> assertEquals("com.example.CustomBackendFactory", flinkConfig.get(StateBackendOptions.STATE_BACKEND)),
-                () -> assertEquals("filesystem", flinkConfig.get(CheckpointingOptions.CHECKPOINT_STORAGE)),
                 () -> assertTrue(flinkConfig.get(CheckpointingOptions.INCREMENTAL_CHECKPOINTS)),
                 () -> assertFalse(flinkConfig.get(StateLatencyTrackOptions.LATENCY_TRACK_ENABLED)),
-                () -> assertEquals(4, flinkConfig.toMap().size())
+                () -> assertEquals(3, flinkConfig.toMap().size())
             );
         }
 
-        @ParameterizedTest(name = "Should preserve CHECKPOINTS_DIRECTORY when configuring backend {0} with storage {1}")
-        @CsvSource({
-            "HASHMAP, JOBMANAGER",
-            "ROCKSDB, FILESYSTEM"
-        })
+        @ParameterizedTest(name = "Should preserve CHECKPOINTS_DIRECTORY when configuring backend {0}")
+        @EnumSource(StateBackendType.class)
         @DisplayName("Should preserve existing CHECKPOINTS_DIRECTORY without interference")
-        void shouldPreserveExistingCheckpointsDirectory(StateBackendType type, CheckpointStorageType storageType) {
+        void shouldPreserveExistingCheckpointsDirectory(StateBackendType type) {
             var flinkConfig = new Configuration();
             flinkConfig.set(CheckpointingOptions.CHECKPOINTS_DIRECTORY, "file:///preconfigured-checkpoints");
 
-            var stateBackendConfig = new StateBackendProperties(type, storageType, true, true, null, null);
+            var customClass = type == StateBackendType.CUSTOM ? "com.example.CustomFactory" : null;
+            var stateBackendConfig = new StateBackendProperties(type, true, true, customClass, null);
             var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
 
             new StateBackendCustomizer(flinkConfig).configure(envProps);
 
             assertAll(
                 () -> assertEquals("file:///preconfigured-checkpoints", flinkConfig.get(CheckpointingOptions.CHECKPOINTS_DIRECTORY)),
-                () -> assertEquals(storageType.toString().toLowerCase(Locale.ROOT), flinkConfig.get(CheckpointingOptions.CHECKPOINT_STORAGE)),
-                () -> assertEquals(type.name().toLowerCase(Locale.ROOT), flinkConfig.get(StateBackendOptions.STATE_BACKEND)),
                 () -> assertTrue(flinkConfig.get(CheckpointingOptions.INCREMENTAL_CHECKPOINTS)),
                 () -> assertTrue(flinkConfig.get(StateLatencyTrackOptions.LATENCY_TRACK_ENABLED))
             );
@@ -275,22 +229,21 @@ class StateBackendCustomizerTest {
             var flinkConfig = new Configuration();
             var stateBackendConfig = new StateBackendProperties(
                 StateBackendType.ROCKSDB,
-                CheckpointStorageType.FILESYSTEM,
                 true,
                 true,
+                null,
                 null
-            , null);
+            );
             var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
 
             new StateBackendCustomizer(flinkConfig).configure(envProps);
 
             assertAll(
                 () -> assertEquals("rocksdb", flinkConfig.get(StateBackendOptions.STATE_BACKEND)),
-                () -> assertEquals("filesystem", flinkConfig.get(CheckpointingOptions.CHECKPOINT_STORAGE)),
                 () -> assertTrue(flinkConfig.get(CheckpointingOptions.INCREMENTAL_CHECKPOINTS)),
                 () -> assertTrue(flinkConfig.get(StateLatencyTrackOptions.LATENCY_TRACK_ENABLED)),
                 () -> assertNull(flinkConfig.get(CheckpointingOptions.CHECKPOINTS_DIRECTORY)),
-                () -> assertEquals(4, flinkConfig.toMap().size())
+                () -> assertEquals(3, flinkConfig.toMap().size())
             );
         }
 
@@ -300,7 +253,7 @@ class StateBackendCustomizerTest {
             var flinkConfig = new Configuration();
             flinkConfig.set(StateBackendOptions.STATE_BACKEND, "rocksdb");
 
-            var stateBackendConfig = new StateBackendProperties(StateBackendType.HASHMAP, null, null, null, null, null);
+            var stateBackendConfig = new StateBackendProperties(StateBackendType.HASHMAP, null, null, null, null);
             var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
 
             new StateBackendCustomizer(flinkConfig).configure(envProps);
@@ -317,7 +270,7 @@ class StateBackendCustomizerTest {
             var flinkConfig = new Configuration();
             flinkConfig.set(StateBackendOptions.STATE_BACKEND, "rocksdb");
 
-            var stateBackendConfig = new StateBackendProperties(null, null, true, null, null, null);
+            var stateBackendConfig = new StateBackendProperties(null, true, null, null, null);
             var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
 
             new StateBackendCustomizer(flinkConfig).configure(envProps);
@@ -335,7 +288,7 @@ class StateBackendCustomizerTest {
             var flinkConfig = new Configuration();
             flinkConfig.set(CoreOptions.DEFAULT_PARALLELISM, 4);
 
-            var stateBackendConfig = new StateBackendProperties(StateBackendType.HASHMAP, null, null, null, null, null);
+            var stateBackendConfig = new StateBackendProperties(StateBackendType.HASHMAP, null, null, null, null);
             var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
 
             new StateBackendCustomizer(flinkConfig).configure(envProps);
@@ -352,7 +305,7 @@ class StateBackendCustomizerTest {
         void shouldEnableStateChangelog() {
             var flinkConfig = new Configuration();
             var stateBackendConfig = new StateBackendProperties(
-                    StateBackendType.HASHMAP, null, null, null, null, true
+                    StateBackendType.HASHMAP, null, null, null, true
             );
             var envProps = new ExecutionEnvironmentProperties(
                     null, null, null, stateBackendConfig, null, null, null
@@ -368,7 +321,7 @@ class StateBackendCustomizerTest {
         void shouldDisableStateChangelog() {
             var flinkConfig = new Configuration();
             var stateBackendConfig = new StateBackendProperties(
-                    StateBackendType.HASHMAP, null, null, null, null, false
+                    StateBackendType.HASHMAP, null, null, null, false
             );
             var envProps = new ExecutionEnvironmentProperties(
                     null, null, null, stateBackendConfig, null, null, null
@@ -386,7 +339,7 @@ class StateBackendCustomizerTest {
             flinkConfig.set(StateChangelogOptions.ENABLE_STATE_CHANGE_LOG, true);
 
             var stateBackendConfig = new StateBackendProperties(
-                    StateBackendType.HASHMAP, null, null, null, null, null
+                    StateBackendType.HASHMAP, null, null, null, null
             );
             var envProps = new ExecutionEnvironmentProperties(
                     null, null, null, stateBackendConfig, null, null, null

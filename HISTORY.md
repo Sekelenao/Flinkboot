@@ -170,3 +170,7 @@ For AI agent orientation and skills index, see [AGENTS.md](AGENTS.md).
 
 ### #054 (13/10/26) — Namespace com.flinkboot, Dogfooding OpenRewrite & Rejection of Gadget Tooling (#275, PR #278) (v0.6.0)
 - **Decision**: Full migration to `com.flinkboot` (groupId, JPMS, packages) and POM alignment on `0.6.0-1.20`. Successful internal dogfooding of OpenRewrite to refactor the framework, but firm refusal to impose it on downstream users: a simple IDE rename (15s) surpasses the complexity of a third-party plugin or script.
+
+### #055 (08/11/26) — Decoupling Checkpoint Storage from State Backend (#246) (v0.6.0)
+- **Decision**: Relocation of `CheckpointStorageType` and `storage` configuration from `StateBackendProperties` to `CheckpointingProperties`, mirroring Flink's runtime model where checkpoint storage belongs to `CheckpointConfig`. Clean removal without legacy backwards-compatibility baggage and unified cross-field Bean Validation requiring `storage-uri` whenever storage is `FILESYSTEM`.
+

@@ -2,6 +2,7 @@ package com.flinkboot.core.internal.validation.properties;
 
 import java.util.Objects;
 
+import com.flinkboot.core.api.properties.checkpointing.CheckpointStorageType;
 import com.flinkboot.core.api.properties.checkpointing.CheckpointingProperties;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -24,6 +25,18 @@ public final class CheckpointingPropertiesValidator {
                 "interval",
                 "interval must be specified when checkpointing is enabled"
             );
+        }
+
+        var storage = properties.storage();
+        if (storage.isPresent() && storage.get() == CheckpointStorageType.FILESYSTEM) {
+            var storageUri = properties.storageUri();
+            if (storageUri.isEmpty() || storageUri.get().isBlank()) {
+                return PropertiesValidator.reject(
+                    context,
+                    "storage-uri",
+                    "storage-uri must be specified when checkpoint storage is FILESYSTEM"
+                );
+            }
         }
 
         var minPause = properties.minPauseBetweenCheckpoints();

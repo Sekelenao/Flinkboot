@@ -1,7 +1,6 @@
 package com.flinkboot.core.internal.execution.customizer;
 
 import com.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
-import com.flinkboot.core.api.properties.state.CheckpointStorageType;
 import com.flinkboot.core.api.properties.state.StateBackendProperties;
 import com.flinkboot.core.api.properties.state.StateBackendType;
 import org.apache.flink.configuration.CheckpointingOptions;
@@ -10,7 +9,6 @@ import org.apache.flink.configuration.StateBackendOptions;
 import org.apache.flink.configuration.StateLatencyTrackOptions;
 import org.apache.flink.configuration.StateChangelogOptions;
 
-import java.util.Locale;
 import java.util.Objects;
 
 public final class StateBackendCustomizer implements EnvironmentCustomizer {
@@ -29,7 +27,6 @@ public final class StateBackendCustomizer implements EnvironmentCustomizer {
 
     private void apply(StateBackendProperties stateConfig) {
         stateConfig.type().ifPresent(type -> this.applyType(type, stateConfig));
-        stateConfig.checkpointStorage().ifPresent(this::applyCheckpointStorage);
         stateConfig.incremental().ifPresent(this::applyIncremental);
         stateConfig.latencyTracking().ifPresent(this::applyLatencyTracking);
         stateConfig.changelog().ifPresent(enabled ->
@@ -49,11 +46,6 @@ public final class StateBackendCustomizer implements EnvironmentCustomizer {
                 stateConfig.customClass().ifPresent(this::applyCustomClass);
                 break;
         }
-    }
-
-    private void applyCheckpointStorage(CheckpointStorageType checkpointStorage) {
-        var storageName = checkpointStorage.toString().toLowerCase(Locale.ROOT);
-        toConfigure.set(CheckpointingOptions.CHECKPOINT_STORAGE, storageName);
     }
 
     private void applyIncremental(boolean incremental) {

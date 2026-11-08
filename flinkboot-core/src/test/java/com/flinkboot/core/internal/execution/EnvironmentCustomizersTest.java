@@ -7,7 +7,6 @@ import com.flinkboot.core.api.properties.checkpointing.CheckpointingProperties;
 import com.flinkboot.core.api.properties.restart.RestartStrategyProperties;
 import com.flinkboot.core.api.properties.restart.RestartStrategyType;
 import com.flinkboot.core.api.properties.savepoint.SavepointRestoreProperties;
-import com.flinkboot.core.api.properties.state.CheckpointStorageType;
 import com.flinkboot.core.api.properties.state.StateBackendProperties;
 import com.flinkboot.core.api.properties.state.StateBackendType;
 import com.flinkboot.core.internal.execution.customizer.CheckpointingCustomizer;
@@ -99,19 +98,17 @@ class EnvironmentCustomizersTest {
         Configuration config = new Configuration();
         var stateBackendConfig = new StateBackendProperties(
             StateBackendType.HASHMAP,
-            CheckpointStorageType.JOBMANAGER,
             false,
             false,
+            null,
             null
-        , null);
+        );
         var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
 
         new StateBackendCustomizer(config).configure(envProps);
 
         assertAll(
             () -> assertEquals("hashmap", config.get(StateBackendOptions.STATE_BACKEND)),
-            () -> assertEquals("jobmanager", config.get(CheckpointingOptions.CHECKPOINT_STORAGE)),
-            () -> assertNull(config.get(CheckpointingOptions.CHECKPOINTS_DIRECTORY)),
             () -> assertFalse(config.get(CheckpointingOptions.INCREMENTAL_CHECKPOINTS)),
             () -> assertFalse(config.get(StateLatencyTrackOptions.LATENCY_TRACK_ENABLED))
         );
@@ -151,6 +148,7 @@ class EnvironmentCustomizersTest {
             null,
             null,
             false,
+            null,
             null,
             null
         );

@@ -16,7 +16,7 @@ import com.flinkboot.core.api.properties.restart.RestartStrategyProperties;
 import com.flinkboot.core.api.properties.restart.RestartStrategyType;
 import com.flinkboot.core.api.properties.savepoint.RestoreMode;
 import com.flinkboot.core.api.properties.savepoint.SavepointRestoreProperties;
-import com.flinkboot.core.api.properties.state.CheckpointStorageType;
+import com.flinkboot.core.api.properties.checkpointing.CheckpointStorageType;
 import com.flinkboot.core.api.properties.state.StateBackendProperties;
 import com.flinkboot.core.api.properties.state.StateBackendType;
 import org.apache.flink.api.common.RuntimeExecutionMode;
@@ -104,6 +104,7 @@ class ExecutionEnvironmentFactoryTest {
                 ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION,
                 true,
                 Duration.ofMillis(1000),
+                CheckpointStorageType.FILESYSTEM,
                 "s3://my-bucket/checkpoints"
             );
             var envProps = new ExecutionEnvironmentProperties(null, chkConfig, null, null, null, null, null);
@@ -122,6 +123,7 @@ class ExecutionEnvironmentFactoryTest {
                 () -> assertEquals(ExternalizedCheckpointRetention.RETAIN_ON_CANCELLATION, flinkConfig.get(CheckpointingOptions.EXTERNALIZED_CHECKPOINT_RETENTION)),
                 () -> assertTrue(flinkConfig.get(CheckpointingOptions.ENABLE_UNALIGNED)),
                 () -> assertEquals(Duration.ofMillis(1000), flinkConfig.get(CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT)),
+                () -> assertEquals("filesystem", flinkConfig.get(CheckpointingOptions.CHECKPOINT_STORAGE)),
                 () -> assertEquals("s3://my-bucket/checkpoints", flinkConfig.get(CheckpointingOptions.CHECKPOINTS_DIRECTORY))
             );
         }
@@ -207,11 +209,11 @@ class ExecutionEnvironmentFactoryTest {
         void shouldMapStateBackendPropertiesToFlinkConfiguration() {
             var stateConfig = new StateBackendProperties(
                 StateBackendType.ROCKSDB,
-                CheckpointStorageType.FILESYSTEM,
                 true,
                 true,
+                null,
                 null
-            , null);
+            );
             var envProps = new ExecutionEnvironmentProperties(null, null, null, stateConfig, null, null, null);
             var jobConfig = new JobProperties("state-backend-job", envProps);
 
@@ -221,7 +223,6 @@ class ExecutionEnvironmentFactoryTest {
 
             assertAll(
                 () -> assertEquals("rocksdb", flinkConfig.get(StateBackendOptions.STATE_BACKEND)),
-                () -> assertEquals("filesystem", flinkConfig.get(CheckpointingOptions.CHECKPOINT_STORAGE)),
                 () -> assertTrue(flinkConfig.get(CheckpointingOptions.INCREMENTAL_CHECKPOINTS)),
                 () -> assertTrue(flinkConfig.get(StateLatencyTrackOptions.LATENCY_TRACK_ENABLED))
             );
