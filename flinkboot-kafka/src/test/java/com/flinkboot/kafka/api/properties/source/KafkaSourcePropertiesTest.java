@@ -683,6 +683,32 @@ class KafkaSourcePropertiesTest {
         }
 
         @Test
+        @DisplayName("Should fail validation when stoppingOffsets is configured but boundedness is missing")
+        void shouldFailWhenStoppingOffsetsConfiguredWithoutBoundedness() {
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                null,
+                List.of("topic-a"),
+                null,
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                DEFAULT_STOPPING_OFFSETS,
+                null
+            );
+
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("boundedness")
+                    && v.getMessage().contains("boundedness must be explicitly specified (BOUNDED or UNBOUNDED) when stopping-offsets is configured")))
+            );
+        }
+
+        @Test
         @DisplayName("Should cascade validation into stoppingOffsets when invalid")
         void shouldCascadeValidationIntoStoppingOffsets() {
             var invalidOffsets = new KafkaOffsetProperties(null, null, null, null);

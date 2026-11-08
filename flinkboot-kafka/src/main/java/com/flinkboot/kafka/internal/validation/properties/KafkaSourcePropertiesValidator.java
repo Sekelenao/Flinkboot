@@ -45,6 +45,9 @@ public final class KafkaSourcePropertiesValidator {
     }
 
     private boolean validateBoundedness() {
+        if (properties.stoppingOffsets().isPresent() && properties.boundedness().isEmpty()) {
+            return reject("boundedness", "boundedness must be explicitly specified (BOUNDED or UNBOUNDED) when stopping-offsets is configured");
+        }
         var isBounded = properties.boundedness().orElse(KafkaBoundedness.UNBOUNDED) == KafkaBoundedness.BOUNDED;
         if (isBounded && properties.stoppingOffsets().isEmpty()) {
             return reject("stopping-offsets", "stopping-offsets is required when boundedness is BOUNDED");

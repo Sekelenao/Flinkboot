@@ -360,5 +360,29 @@ class KafkaSourcePropertiesValidatorTest {
 
             assertTrue(KafkaSourcePropertiesValidator.validate(props, context));
         }
+
+        @Test
+        @DisplayName("Should fail when stopping-offsets is present and boundedness is absent")
+        void shouldFailWhenStoppingOffsetsPresentAndBoundednessAbsent() {
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
+            var props = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                "group",
+                null,
+                List.of("my-topic"),
+                null,
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                DEFAULT_STOPPING_OFFSETS,
+                Map.of()
+            );
+
+            assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
+            verify(context).buildConstraintViolationWithTemplate(
+                "boundedness must be explicitly specified (BOUNDED or UNBOUNDED) when stopping-offsets is configured"
+            );
+        }
     }
 }
