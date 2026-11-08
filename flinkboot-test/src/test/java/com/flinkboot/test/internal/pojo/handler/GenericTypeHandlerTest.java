@@ -7,10 +7,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.opentest4j.AssertionFailedError;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -68,23 +70,28 @@ class GenericTypeHandlerTest {
     class Handle {
 
         @Test
-        @DisplayName("Should fail assertion reporting GenericTypeInfo and Kryo fallback")
-        void shouldFailAssertionWhenGenericTypeInfo() {
+        @DisplayName("Should record error reporting GenericTypeInfo and Kryo fallback")
+        void shouldRecordErrorWhenGenericTypeInfo() {
             var task = new PojoValidationTask<>(
                 "root.unsupportedField",
                 new GenericTypeInfo<>(OffsetDateTime.class)
             );
-            var error = assertThrows(AssertionFailedError.class, () -> handler.handle(task, ignored -> {}));
-            assertEquals(
-                "Field or type 'root.unsupportedField' is recognized as GenericTypeInfo (java.time.OffsetDateTime), which falls back to Kryo serialization.",
-                error.getMessage()
+            var errors = new ArrayList<String>();
+            var enqueued = new ArrayList<PojoValidationTask<?>>();
+            handler.handle(task, enqueued::add, errors::add);
+            assertAll(
+                () -> assertTrue(enqueued.isEmpty()),
+                () -> assertEquals(
+                    List.of("Field or type 'root.unsupportedField' is recognized as GenericTypeInfo (java.time.OffsetDateTime), which falls back to Kryo serialization."),
+                    errors
+                )
             );
         }
 
         @Test
         @DisplayName("Should throw NullPointerException when task is null")
         void shouldThrowWhenTaskIsNull() {
-            var ex = assertThrows(NullPointerException.class, () -> handler.handle(null, ignored -> {}));
+            var ex = assertThrows(NullPointerException.class, () -> handler.handle(null, ignored -> {}, ignored -> {}));
             assertEquals("task must not be null", ex.getMessage());
         }
 
@@ -92,8 +99,16 @@ class GenericTypeHandlerTest {
         @DisplayName("Should throw NullPointerException when enqueuer is null")
         void shouldThrowWhenEnqueuerIsNull() {
             var task = new PojoValidationTask<>("root", new GenericTypeInfo<>(OffsetDateTime.class));
-            var ex = assertThrows(NullPointerException.class, () -> handler.handle(task, null));
+            var ex = assertThrows(NullPointerException.class, () -> handler.handle(task, null, ignored -> {}));
             assertEquals("enqueuer must not be null", ex.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when errors is null")
+        void shouldThrowWhenErrorsIsNull() {
+            var task = new PojoValidationTask<>("root", new GenericTypeInfo<>(OffsetDateTime.class));
+            var ex = assertThrows(NullPointerException.class, () -> handler.handle(task, ignored -> {}, null));
+            assertEquals("errors must not be null", ex.getMessage());
         }
 
     }

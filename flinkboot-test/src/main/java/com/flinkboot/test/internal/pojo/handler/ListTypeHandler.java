@@ -21,9 +21,10 @@ public final class ListTypeHandler implements TypeInformationHandler {
     }
 
     @Override
-    public void handle(PojoValidationTask<?> task, Consumer<PojoValidationTask<?>> enqueuer) {
+    public void handle(PojoValidationTask<?> task, Consumer<PojoValidationTask<?>> enqueuer, Consumer<String> errors) {
         Objects.requireNonNull(task, "task must not be null");
         Objects.requireNonNull(enqueuer, "enqueuer must not be null");
+        Objects.requireNonNull(errors, "errors must not be null");
         var listTypeInfo = (ListTypeInfo<?>) task.typeInfo();
         enqueuer.accept(new PojoValidationTask<>(task.path() + "[]", listTypeInfo.getElementTypeInfo()));
     }

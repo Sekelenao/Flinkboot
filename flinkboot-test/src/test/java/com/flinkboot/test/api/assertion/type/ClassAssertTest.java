@@ -77,7 +77,9 @@ class ClassAssertTest {
         @DisplayName("Should fail with AssertionFailedError for invalid POJO")
         void shouldFailForInvalidPojo() {
             var classAssert = new ClassAssert(InvalidPojo.class);
-            assertThrows(AssertionFailedError.class, classAssert::isPojo);
+            var error = assertThrows(AssertionFailedError.class, classAssert::isPojo);
+            var expectedViolation = "Field or type '$' is recognized as GenericTypeInfo (" + InvalidPojo.class.getName() + "), which falls back to Kryo serialization.";
+            assertEquals("Found 1 POJO validation violation(s):\n- " + expectedViolation, error.getMessage());
         }
 
         @Test

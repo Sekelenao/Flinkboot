@@ -21,9 +21,10 @@ public final class EitherTypeHandler implements TypeInformationHandler {
     }
 
     @Override
-    public void handle(PojoValidationTask<?> task, Consumer<PojoValidationTask<?>> enqueuer) {
+    public void handle(PojoValidationTask<?> task, Consumer<PojoValidationTask<?>> enqueuer, Consumer<String> errors) {
         Objects.requireNonNull(task, "task must not be null");
         Objects.requireNonNull(enqueuer, "enqueuer must not be null");
+        Objects.requireNonNull(errors, "errors must not be null");
         var eitherTypeInfo = (EitherTypeInfo<?, ?>) task.typeInfo();
         enqueuer.accept(new PojoValidationTask<>(task.path() + "<left>", eitherTypeInfo.getLeftType()));
         enqueuer.accept(new PojoValidationTask<>(task.path() + "<right>", eitherTypeInfo.getRightType()));

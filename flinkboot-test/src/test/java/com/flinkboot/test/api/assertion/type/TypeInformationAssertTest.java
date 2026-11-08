@@ -89,7 +89,9 @@ class TypeInformationAssertTest {
         @DisplayName("Should fail with AssertionFailedError for invalid POJO described by type information")
         void shouldFailForInvalidPojoTypeInformation() {
             var typeInfoAssert = new TypeInformationAssert<>(TypeInformation.of(InvalidPojo.class));
-            assertThrows(AssertionFailedError.class, typeInfoAssert::isPojo);
+            var error = assertThrows(AssertionFailedError.class, typeInfoAssert::isPojo);
+            var expectedViolation = "Field or type '$' is recognized as GenericTypeInfo (" + InvalidPojo.class.getName() + "), which falls back to Kryo serialization.";
+            assertEquals("Found 1 POJO validation violation(s):\n- " + expectedViolation, error.getMessage());
         }
 
         @Test
@@ -103,7 +105,9 @@ class TypeInformationAssertTest {
         @DisplayName("Should fail for invalid POJO described by a type hint")
         void shouldFailForInvalidPojoTypeHint() {
             var typeInfoAssert = new TypeInformationAssert<>(new TypeHint<InvalidPojo>() {});
-            assertThrows(AssertionFailedError.class, typeInfoAssert::isPojo);
+            var error = assertThrows(AssertionFailedError.class, typeInfoAssert::isPojo);
+            var expectedViolation = "Field or type '$' is recognized as GenericTypeInfo (" + InvalidPojo.class.getName() + "), which falls back to Kryo serialization.";
+            assertEquals("Found 1 POJO validation violation(s):\n- " + expectedViolation, error.getMessage());
         }
 
         @Test
@@ -112,10 +116,12 @@ class TypeInformationAssertTest {
             assertDoesNotThrow(
                 () -> new TypeInformationAssert<>(new TypeHint<Tuple2<String, ValidPojo>>() {}).isPojo()
             );
-            assertThrows(
+            var error = assertThrows(
                 AssertionFailedError.class,
                 () -> new TypeInformationAssert<>(new TypeHint<Tuple2<String, InvalidPojo>>() {}).isPojo()
             );
+            var expectedViolation = "Field or type '$[1]' is recognized as GenericTypeInfo (" + InvalidPojo.class.getName() + "), which falls back to Kryo serialization.";
+            assertEquals("Found 1 POJO validation violation(s):\n- " + expectedViolation, error.getMessage());
         }
     }
 }
