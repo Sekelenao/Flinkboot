@@ -77,6 +77,8 @@ public final class FlussSourceFactory {
         FlussSourceProperties config,
         FlussDeserializationSchema<T> deserializationSchema
     ) {
+        Objects.requireNonNull(config, "config must not be null");
+        Objects.requireNonNull(deserializationSchema, "deserializationSchema must not be null");
         return supplyBuilderFor(config, deserializationSchema).build();
     }
 

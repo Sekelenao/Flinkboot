@@ -178,6 +178,31 @@ class FlussSourceFactoryTest {
         }
 
         @Test
+        @DisplayName("Should throw NullPointerException when supplyFor parameters are null")
+        void shouldThrowNpeWhenSupplyForParametersAreNull() {
+            var props = new FlussSourceProperties(
+                "my-source",
+                List.of("localhost:9123"),
+                "my_db",
+                "my_table",
+                FlussStartupMode.EARLIEST,
+                null,
+                Map.of()
+            );
+
+            assertAll(
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> FlussSourceFactory.supplyFor(null, TEST_SCHEMA));
+                    assertEquals("config must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> FlussSourceFactory.supplyFor(props, null));
+                    assertEquals("deserializationSchema must not be null", ex.getMessage());
+                }
+            );
+        }
+
+        @Test
         @DisplayName("Should throw NullPointerException when parameters are null")
         void shouldThrowNpeWhenParametersAreNull() {
             var props = new FlussSourceProperties(
