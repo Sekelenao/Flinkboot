@@ -116,10 +116,31 @@ class CheckpointingPropertiesTest {
                 () -> assertTrue(
                     violations.stream().anyMatch(v ->
                         v.getPropertyPath().toString().equals("interval")
-                            && v.getMessage().equals("interval must be specified when checkpointing is enabled")
+                            && v.getMessageTemplate().equals("interval must be specified when checkpointing is enabled")
                     ),
                     "Expected violation on property 'interval'"
                 )
+            );
+        }
+
+        @Test
+        @DisplayName("Should reject concurrent checkpoints when min pause is positive")
+        void shouldFailWhenMinPauseIsPositiveAndMaxConcurrentExceedsOne() {
+            var config = new CheckpointingProperties(
+                true, Duration.ofSeconds(10), null, null, Duration.ofSeconds(5), 2,
+                null, null, null, null
+            );
+
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("max-concurrent-checkpoints")
+                        && v.getMessageTemplate().equals(
+                            "max-concurrent-checkpoints must be 1 when min-pause-between-checkpoints is greater than 0"
+                        )
+                ), "Expected violation on property 'max-concurrent-checkpoints'")
             );
         }
 

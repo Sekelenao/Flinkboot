@@ -45,6 +45,7 @@ All notable user-facing changes to this project are documented in this file.
 - **[flinkboot-kafka] Simplified Kafka Sink Serialization & Schema Customizers**: Added `KafkaSinkFactory.supplyFor` and `supplyBuilderFor` overloads accepting standard `SerializationSchema<T>` (automatically binding to `config.topic()`) and schema customizers `Consumer<KafkaRecordSerializationSchemaBuilder<T>>` for inline schema tuning (keys, partitioners, headers).
 
 ### 🔵 Fixes & Diagnostics
+- **[flinkboot-core] Checkpoint Concurrency Validation**: Rejects configurations combining a positive `min-pause-between-checkpoints` with `max-concurrent-checkpoints` greater than `1`, preventing Flink startup failures.
 - **[flinkboot-core] Interdependent Exponential Backoff Configuration**: Rejects an `exponential-delay` restart strategy that specifies only one of `initial-backoff` or `max-backoff`, preventing the Flink runtime failure (`initialBackoff cannot be greater than maxBackoff`) caused by upstream default fallbacks, and reports the violation against the canonical `exponential-delay` configuration key.
 - **[flinkboot-core] Exponential Backoff Multiplier Validation**: Rejects `backoff-multiplier: 1.0` during configuration validation, matching Flink's requirement that the multiplier be strictly greater than `1.0`.
 - **[flinkboot-kafka] Null Delivery Guarantee Validation**: Prevents misleading cross-field validation errors when `delivery-guarantee` is missing, leaving the missing-value error to the field-level `@NotNull` constraint.
