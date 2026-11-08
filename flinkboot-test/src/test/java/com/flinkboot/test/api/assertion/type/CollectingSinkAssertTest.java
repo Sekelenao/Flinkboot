@@ -132,6 +132,36 @@ class CollectingSinkAssertTest {
     }
 
     @Nested
+    @DisplayName("isNotEmpty")
+    class IsNotEmpty {
+
+        @Test
+        @DisplayName("Should pass when sink contains elements and return same assertion instance for chaining")
+        void shouldPassWhenSinkContainsElementsAndReturnThis() throws Exception {
+            try (var sink = new CollectingSink<String>()) {
+                var writer = sink.createWriter((WriterInitContext) null);
+                writer.write("event-1", null);
+
+                var sinkAssert = new CollectingSinkAssert<>(sink);
+                var result = sinkAssert.isNotEmpty();
+
+                assertSame(sinkAssert, result);
+            }
+        }
+
+        @Test
+        @DisplayName("Should fail with AssertionFailedError when sink is empty")
+        void shouldFailWhenSinkIsEmpty() {
+            try (var sink = new CollectingSink<String>()) {
+                var sinkAssert = new CollectingSinkAssert<>(sink);
+                var exception = assertThrows(AssertionFailedError.class, sinkAssert::isNotEmpty);
+
+                assertEquals("Expected sink not to be empty, but was empty", exception.getMessage());
+            }
+        }
+    }
+
+    @Nested
     @DisplayName("contains")
     class Contains {
 

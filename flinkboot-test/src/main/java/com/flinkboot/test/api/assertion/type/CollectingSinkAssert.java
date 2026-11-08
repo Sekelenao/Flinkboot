@@ -78,6 +78,19 @@ public final class CollectingSinkAssert<T> {
     }
 
     /**
+     * Asserts that at least one element has been collected by this sink.
+     *
+     * @return this assertion object for method chaining
+     * @throws AssertionError if the sink is empty
+     */
+    public CollectingSinkAssert<T> isNotEmpty() {
+        if (sink.isEmpty()) {
+            Assertions.fail("Expected sink not to be empty, but was empty");
+        }
+        return this;
+    }
+
+    /**
      * Asserts that all specified elements are present in the collected elements.
      *
      * @param expected the elements expected to be contained in the sink
