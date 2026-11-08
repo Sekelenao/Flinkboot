@@ -64,6 +64,8 @@ public final class FlussSinkFactory {
         FlussSinkProperties config,
         FlussSerializationSchema<T> serializationSchema
     ) {
+        Objects.requireNonNull(config, "config must not be null");
+        Objects.requireNonNull(serializationSchema, "serializationSchema must not be null");
         return supplyBuilderFor(config, serializationSchema).build();
     }
 

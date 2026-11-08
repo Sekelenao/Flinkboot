@@ -139,6 +139,29 @@ class FlussSinkFactoryTest {
         }
 
         @Test
+        @DisplayName("Should throw NullPointerException when supplyFor parameters are null")
+        void shouldThrowNpeWhenSupplyForParametersAreNull() {
+            var props = new FlussSinkProperties(
+                "my-sink",
+                List.of("localhost:9123"),
+                "my_db",
+                "my_table",
+                null
+            );
+
+            assertAll(
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> FlussSinkFactory.supplyFor(null, TEST_SCHEMA));
+                    assertEquals("config must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(NullPointerException.class, () -> FlussSinkFactory.supplyFor(props, null));
+                    assertEquals("serializationSchema must not be null", ex.getMessage());
+                }
+            );
+        }
+
+        @Test
         @DisplayName("Should throw NullPointerException when parameters are null")
         void shouldThrowNpeWhenParametersAreNull() {
             var props = new FlussSinkProperties(
