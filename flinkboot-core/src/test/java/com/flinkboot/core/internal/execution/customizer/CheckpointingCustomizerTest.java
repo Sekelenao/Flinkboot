@@ -1,6 +1,7 @@
 package com.flinkboot.core.internal.execution.customizer;
 
 import com.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
+import com.flinkboot.core.api.properties.checkpointing.CheckpointStorageType;
 import com.flinkboot.core.api.properties.checkpointing.CheckpointingMode;
 import com.flinkboot.core.api.properties.checkpointing.CheckpointingProperties;
 import com.flinkboot.core.api.properties.checkpointing.ExternalizedCheckpointCleanupMode;
@@ -16,6 +17,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import java.time.Duration;
+import java.util.Locale;
 
 import static org.apache.flink.core.execution.CheckpointingMode.AT_LEAST_ONCE;
 import static org.apache.flink.core.execution.CheckpointingMode.EXACTLY_ONCE;
@@ -70,7 +72,7 @@ class CheckpointingCustomizerTest {
             var flinkConfig = new Configuration();
             var customizer = new CheckpointingCustomizer(flinkConfig);
             var checkpointConfig = new CheckpointingProperties(
-                null, null, null, null, null, null, null, null, null, null
+                null, null, null, null, null, null, null, null, null, null, null
             );
             var envProps = new ExecutionEnvironmentProperties(null, checkpointConfig, null, null, null, null, null);
             customizer.configure(envProps);
@@ -92,12 +94,12 @@ class CheckpointingCustomizerTest {
                 ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION,
                 true,
                 Duration.ofMillis(1000L),
+                CheckpointStorageType.FILESYSTEM,
                 "s3://bucket/checkpoints"
             );
             var envProps = new ExecutionEnvironmentProperties(null, checkpointConfig, null, null, null, null, null);
 
             customizer.configure(envProps);
-
             assertTrue(flinkConfig.toMap().isEmpty());
         }
 
@@ -116,6 +118,7 @@ class CheckpointingCustomizerTest {
                 ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION,
                 true,
                 Duration.ofMillis(1000L),
+                CheckpointStorageType.FILESYSTEM,
                 "s3://bucket/checkpoints"
             );
             var envProps = new ExecutionEnvironmentProperties(null, checkpointConfig, null, null, null, null, null);
@@ -129,9 +132,52 @@ class CheckpointingCustomizerTest {
                 () -> assertEquals(ExternalizedCheckpointRetention.RETAIN_ON_CANCELLATION, flinkConfig.get(CheckpointingOptions.EXTERNALIZED_CHECKPOINT_RETENTION)),
                 () -> assertTrue(flinkConfig.get(CheckpointingOptions.ENABLE_UNALIGNED)),
                 () -> assertEquals(Duration.ofMillis(1000L), flinkConfig.get(CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT)),
+                () -> assertEquals("filesystem", flinkConfig.get(CheckpointingOptions.CHECKPOINT_STORAGE)),
                 () -> assertEquals("s3://bucket/checkpoints", flinkConfig.get(CheckpointingOptions.CHECKPOINTS_DIRECTORY)),
-                () -> assertEquals(9, flinkConfig.toMap().size())
+                () -> assertEquals(10, flinkConfig.toMap().size())
             );
+        }
+
+        @ParameterizedTest(name = "Should map checkpoint storage {0} to \"{1}\"")
+        @CsvSource({
+            "JOBMANAGER, jobmanager",
+            "FILESYSTEM, filesystem"
+        })
+        @DisplayName("Should configure checkpoint storage types")
+        void shouldConfigureCheckpointStorageTypes(CheckpointStorageType storageType, String expectedStorage) {
+            var flinkConfig = new Configuration();
+            var customizer = new CheckpointingCustomizer(flinkConfig);
+            var checkpointConfig = new CheckpointingProperties(
+                null, null, null, null, null, null, null, null, null, storageType, null
+            );
+            var envProps = new ExecutionEnvironmentProperties(null, checkpointConfig, null, null, null, null, null);
+
+            customizer.configure(envProps);
+
+            assertAll(
+                () -> assertEquals(expectedStorage, flinkConfig.get(CheckpointingOptions.CHECKPOINT_STORAGE)),
+                () -> assertEquals(1, flinkConfig.toMap().size())
+            );
+        }
+
+        @Test
+        @DisplayName("Should format checkpoint storage with Locale.ROOT under a Turkish default locale")
+        void shouldFormatCheckpointStorageWithRootLocale() {
+            var previousLocale = Locale.getDefault();
+            Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+            try {
+                var flinkConfig = new Configuration();
+                var checkpointConfig = new CheckpointingProperties(
+                    null, null, null, null, null, null, null, null, null, CheckpointStorageType.FILESYSTEM, null
+                );
+                var envProps = new ExecutionEnvironmentProperties(null, checkpointConfig, null, null, null, null, null);
+
+                new CheckpointingCustomizer(flinkConfig).configure(envProps);
+
+                assertEquals("filesystem", flinkConfig.get(CheckpointingOptions.CHECKPOINT_STORAGE));
+            } finally {
+                Locale.setDefault(previousLocale);
+            }
         }
 
         @Test
@@ -142,6 +188,7 @@ class CheckpointingCustomizerTest {
             var checkpointConfig = new CheckpointingProperties(
                 null,
                 Duration.ofMillis(10000L),
+                null,
                 null,
                 null,
                 null,
@@ -166,7 +213,7 @@ class CheckpointingCustomizerTest {
             var flinkConfig = new Configuration();
             var customizer = new CheckpointingCustomizer(flinkConfig);
             var checkpointConfig = new CheckpointingProperties(
-                null, null, mode, null, null, null, null, null, null, null
+                null, null, mode, null, null, null, null, null, null, null, null
             );
             var envProps = new ExecutionEnvironmentProperties(null, checkpointConfig, null, null, null, null, null);
             customizer.configure(envProps);
@@ -191,7 +238,7 @@ class CheckpointingCustomizerTest {
             var flinkConfig = new Configuration();
             var customizer = new CheckpointingCustomizer(flinkConfig);
             var checkpointConfig = new CheckpointingProperties(
-                null, null, null, null, null, null, cleanupMode, null, null, null
+                null, null, null, null, null, null, cleanupMode, null, null, null, null
             );
             var envProps = new ExecutionEnvironmentProperties(null, checkpointConfig, null, null, null, null, null);
             customizer.configure(envProps);
@@ -207,7 +254,7 @@ class CheckpointingCustomizerTest {
             var flinkConfig = new Configuration();
             var customizer = new CheckpointingCustomizer(flinkConfig);
             var checkpointConfig = new CheckpointingProperties(
-                null, null, null, null, null, null, null, true, null, null
+                null, null, null, null, null, null, null, true, null, null, null
             );
             var envProps = new ExecutionEnvironmentProperties(null, checkpointConfig, null, null, null, null, null);
             customizer.configure(envProps);
@@ -223,7 +270,7 @@ class CheckpointingCustomizerTest {
             var flinkConfig = new Configuration();
             var customizer = new CheckpointingCustomizer(flinkConfig);
             var checkpointConfig = new CheckpointingProperties(
-                null, null, null, null, null, null, null, false, null, null
+                null, null, null, null, null, null, null, false, null, null, null
             );
             var envProps = new ExecutionEnvironmentProperties(null, checkpointConfig, null, null, null, null, null);
             customizer.configure(envProps);
@@ -240,7 +287,7 @@ class CheckpointingCustomizerTest {
             flinkConfig.set(CoreOptions.DEFAULT_PARALLELISM, 8);
             var customizer = new CheckpointingCustomizer(flinkConfig);
             var checkpointConfig = new CheckpointingProperties(
-                true, Duration.ofSeconds(10), null, null, null, null, null, null, null, null
+                true, Duration.ofSeconds(10), null, null, null, null, null, null, null, null, null
             );
             var envProps = new ExecutionEnvironmentProperties(null, checkpointConfig, null, null, null, null, null);
             customizer.configure(envProps);

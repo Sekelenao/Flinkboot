@@ -15,6 +15,8 @@ import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -37,7 +39,7 @@ class CheckpointingPropertiesTest {
         @DisplayName("Should return empty optionals when all parameters are null")
         void shouldReturnEmptyOptionalsWhenNull() {
             var config = new CheckpointingProperties(
-                null, null, null, null, null, null, null, null, null, null
+                null, null, null, null, null, null, null, null, null, null, null
             );
 
             assertAll(
@@ -50,6 +52,7 @@ class CheckpointingPropertiesTest {
                 () -> assertTrue(config.externalizedCheckpointCleanup().isEmpty()),
                 () -> assertTrue(config.unalignedCheckpoints().isEmpty()),
                 () -> assertTrue(config.alignedCheckpointTimeout().isEmpty()),
+                () -> assertTrue(config.storage().isEmpty()),
                 () -> assertTrue(config.storageUri().isEmpty())
             );
         }
@@ -67,6 +70,7 @@ class CheckpointingPropertiesTest {
                 ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION,
                 true,
                 Duration.ofSeconds(1),
+                CheckpointStorageType.FILESYSTEM,
                 "file:///tmp/checkpoints"
             );
 
@@ -80,6 +84,7 @@ class CheckpointingPropertiesTest {
                 () -> assertEquals(ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, config.externalizedCheckpointCleanup().orElseThrow()),
                 () -> assertEquals(true, config.unalignedCheckpoints().orElseThrow()),
                 () -> assertEquals(Duration.ofSeconds(1), config.alignedCheckpointTimeout().orElseThrow()),
+                () -> assertEquals(CheckpointStorageType.FILESYSTEM, config.storage().orElseThrow()),
                 () -> assertEquals("file:///tmp/checkpoints", config.storageUri().orElseThrow())
             );
         }
@@ -94,7 +99,7 @@ class CheckpointingPropertiesTest {
         void shouldPassValidationWhenValid() {
             var config = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, false, Duration.ZERO, "s3://bucket"
+                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, false, Duration.ZERO, CheckpointStorageType.FILESYSTEM, "s3://bucket"
             );
             var violations = validator.validate(config);
             assertTrue(violations.isEmpty());
@@ -106,7 +111,7 @@ class CheckpointingPropertiesTest {
         @DisplayName("Should fail validation when checkpointing is enabled or default without an interval")
         void shouldFailValidationWhenCheckpointingIsEnabledWithoutInterval(Boolean enabled) {
             var config = new CheckpointingProperties(
-                enabled, null, null, null, null, null, null, null, null, null
+                enabled, null, null, null, null, null, null, null, null, null, null
             );
 
             var violations = validator.validate(config);
@@ -128,7 +133,7 @@ class CheckpointingPropertiesTest {
         void shouldFailWhenMinPauseIsPositiveAndMaxConcurrentExceedsOne() {
             var config = new CheckpointingProperties(
                 true, Duration.ofSeconds(10), null, null, Duration.ofSeconds(5), 2,
-                null, null, null, null
+                null, null, null, null, null
             );
 
             var violations = validator.validate(config);
@@ -148,7 +153,7 @@ class CheckpointingPropertiesTest {
         @DisplayName("Should pass validation when checkpointing is disabled without an interval")
         void shouldPassValidationWhenCheckpointingIsDisabledWithoutInterval() {
             var config = new CheckpointingProperties(
-                false, null, null, null, null, null, null, null, null, null
+                false, null, null, null, null, null, null, null, null, null, null
             );
 
             var violations = validator.validate(config);
@@ -161,11 +166,11 @@ class CheckpointingPropertiesTest {
         void shouldFailValidationWhenIntervalZeroOrNegative() {
             var zeroInterval = new CheckpointingProperties(
                 true, Duration.ZERO, CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                null, false, Duration.ZERO, null
+                null, false, Duration.ZERO, null, null
             );
             var negativeInterval = new CheckpointingProperties(
                 true, Duration.ofSeconds(-1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                null, false, Duration.ZERO, null
+                null, false, Duration.ZERO, null, null
             );
 
             assertAll(
@@ -179,11 +184,11 @@ class CheckpointingPropertiesTest {
         void shouldFailValidationWhenTimeoutZeroOrNegative() {
             var zeroTimeout = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ZERO, Duration.ZERO, 1,
-                null, false, Duration.ZERO, null
+                null, false, Duration.ZERO, null, null
             );
             var negativeTimeout = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(-10), Duration.ZERO, 1,
-                null, false, Duration.ZERO, null
+                null, false, Duration.ZERO, null, null
             );
 
             assertAll(
@@ -197,7 +202,7 @@ class CheckpointingPropertiesTest {
         void shouldFailValidationWhenMinPauseNegative() {
             var negativeMinPause = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ofSeconds(-1), 1,
-                null, false, Duration.ZERO, null
+                null, false, Duration.ZERO, null, null
             );
             var violations = validator.validate(negativeMinPause);
 
@@ -214,7 +219,7 @@ class CheckpointingPropertiesTest {
         void shouldFailValidationWhenAlignedCheckpointTimeoutNegative() {
             var negativeTimeout = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                null, false, Duration.ofSeconds(-5), null
+                null, false, Duration.ofSeconds(-5), null, null
             );
             var violations = validator.validate(negativeTimeout);
 
@@ -232,7 +237,7 @@ class CheckpointingPropertiesTest {
         void shouldFailValidationWhenStorageUriBlank(String storageUri) {
             var config = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                null, false, Duration.ZERO, storageUri
+                null, false, Duration.ZERO, null, storageUri
             );
             var violations = validator.validate(config);
 
@@ -250,7 +255,55 @@ class CheckpointingPropertiesTest {
         void shouldPassValidationWhenStorageUriNull() {
             var config = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                null, false, Duration.ZERO, null
+                null, false, Duration.ZERO, null, null
+            );
+            var violations = validator.validate(config);
+            assertTrue(violations.isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should fail validation when storage is FILESYSTEM and storageUri is null")
+        void shouldFailWhenStorageIsFileSystemAndStorageUriIsNull() {
+            var config = new CheckpointingProperties(
+                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, false, Duration.ZERO, CheckpointStorageType.FILESYSTEM, null
+            );
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("storage-uri")
+                        && v.getMessage().equals("storage-uri must be specified when checkpoint storage is FILESYSTEM")
+                ), "Violation must target 'storage-uri' with expected message")
+            );
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "   ", "\t\n"})
+        @DisplayName("Should fail validation when storage is FILESYSTEM and storageUri is blank")
+        void shouldFailWhenStorageIsFileSystemAndStorageUriIsBlank(String blankUri) {
+            var config = new CheckpointingProperties(
+                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, false, Duration.ZERO, CheckpointStorageType.FILESYSTEM, blankUri
+            );
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("storage-uri")
+                        && v.getMessage().equals("storage-uri must be specified when checkpoint storage is FILESYSTEM")
+                ))
+            );
+        }
+
+        @Test
+        @DisplayName("Should pass validation when storage is JOBMANAGER and storageUri is null")
+        void shouldPassWhenStorageIsJobManagerAndStorageUriIsNull() {
+            var config = new CheckpointingProperties(
+                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, false, Duration.ZERO, CheckpointStorageType.JOBMANAGER, null
             );
             var violations = validator.validate(config);
             assertTrue(violations.isEmpty());
@@ -266,17 +319,33 @@ class CheckpointingPropertiesTest {
         void shouldVerifyEqualsAndHashCode() {
             var config1 = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, false, Duration.ZERO, "s3://bucket"
+                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, false, Duration.ZERO, CheckpointStorageType.FILESYSTEM, "s3://bucket"
             );
             var config2 = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, false, Duration.ZERO, "s3://bucket"
+                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, false, Duration.ZERO, CheckpointStorageType.FILESYSTEM, "s3://bucket"
+            );
+            var diffStorage = new CheckpointingProperties(
+                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, false, Duration.ZERO, CheckpointStorageType.JOBMANAGER, "s3://bucket"
             );
 
             assertAll(
                 () -> assertEquals(config1, config2),
-                () -> assertEquals(config1.hashCode(), config2.hashCode())
+                () -> assertEquals(config1.hashCode(), config2.hashCode()),
+                () -> assertNotEquals(config1, diffStorage)
             );
+        }
+
+        @Test
+        @DisplayName("Should include storage in toString")
+        void shouldIncludeStorageInToString() {
+            var config = new CheckpointingProperties(
+                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, false, Duration.ZERO, CheckpointStorageType.FILESYSTEM, "s3://bucket"
+            );
+            var str = config.toString();
+            assertTrue(str.contains("storage=FILESYSTEM"));
         }
     }
 
@@ -297,6 +366,7 @@ class CheckpointingPropertiesTest {
                 "\"externalized-checkpoint-cleanup\": \"RETAIN_ON_CANCELLATION\"," +
                 "\"unaligned-checkpoints\": true," +
                 "\"aligned-checkpoint-timeout\": \"PT0.5S\"," +
+                "\"storage\": \"FILESYSTEM\"," +
                 "\"storage-uri\": \"s3://my-bucket/checkpoints\"" +
                 "}";
 
@@ -307,7 +377,22 @@ class CheckpointingPropertiesTest {
             assertNotNull(config);
             assertEquals(Duration.ofSeconds(5), config.interval().orElseThrow());
             assertEquals(CheckpointingMode.EXACTLY_ONCE, config.mode().orElseThrow());
+            assertEquals(CheckpointStorageType.FILESYSTEM, config.storage().orElseThrow());
             assertEquals("s3://my-bucket/checkpoints", config.storageUri().orElseThrow());
+        }
+
+        @Test
+        @DisplayName("Should deserialize JOBMANAGER storage from JSON")
+        void shouldDeserializeJobManagerStorage() throws Exception {
+            String json = "{" +
+                "\"storage\": \"JOBMANAGER\"" +
+                "}";
+
+            var mapper = new ObjectMapper();
+            var config = mapper.readValue(json, CheckpointingProperties.class);
+
+            assertNotNull(config);
+            assertEquals(CheckpointStorageType.JOBMANAGER, config.storage().orElseThrow());
         }
     }
 }

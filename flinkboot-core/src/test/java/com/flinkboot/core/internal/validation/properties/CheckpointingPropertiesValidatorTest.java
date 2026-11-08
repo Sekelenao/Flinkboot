@@ -1,5 +1,6 @@
 package com.flinkboot.core.internal.validation.properties;
 
+import com.flinkboot.core.api.properties.checkpointing.CheckpointStorageType;
 import com.flinkboot.core.api.properties.checkpointing.CheckpointingProperties;
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.mockito.Answers;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @DisplayName("CheckpointingPropertiesValidator")
 class CheckpointingPropertiesValidatorTest {
@@ -63,7 +65,7 @@ class CheckpointingPropertiesValidatorTest {
         @DisplayName("Should throw NullPointerException when context is null")
         void shouldThrowWhenContextIsNull() {
             var props = new CheckpointingProperties(
-                true, Duration.ofSeconds(10), null, null, null, null, null, null, null, null
+                true, Duration.ofSeconds(10), null, null, null, null, null, null, null, null, null
             );
 
             var exception = assertThrows(
@@ -81,7 +83,7 @@ class CheckpointingPropertiesValidatorTest {
         void shouldFailWhenCheckpointingIsEnabledWithoutInterval(Boolean enabled) {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
             var props = new CheckpointingProperties(
-                enabled, null, null, null, null, null, null, null, null, null
+                enabled, null, null, null, null, null, null, null, null, null, null
             );
 
             assertFalse(CheckpointingPropertiesValidator.validate(props, context));
@@ -93,7 +95,7 @@ class CheckpointingPropertiesValidatorTest {
             var context = mock(ConstraintValidatorContext.class);
 
             var props = new CheckpointingProperties(
-                false, null, null, null, null, null, null, null, null, null
+                false, null, null, null, null, null, null, null, null, null, null
             );
 
             assertTrue(CheckpointingPropertiesValidator.validate(props, context));
@@ -107,6 +109,7 @@ class CheckpointingPropertiesValidatorTest {
             var props = new CheckpointingProperties(
                 true,
                 Duration.ofSeconds(10),
+                null,
                 null,
                 null,
                 null,
@@ -138,6 +141,7 @@ class CheckpointingPropertiesValidatorTest {
                 null,
                 null,
                 null,
+                null,
                 null
             );
 
@@ -152,7 +156,7 @@ class CheckpointingPropertiesValidatorTest {
             var context = mock(ConstraintValidatorContext.class);
             var props = new CheckpointingProperties(
                 true, Duration.ofSeconds(10), null, null, Duration.ofSeconds(5), 1,
-                null, null, null, null
+                null, null, null, null, null
             );
 
             assertTrue(CheckpointingPropertiesValidator.validate(props, context));
@@ -164,7 +168,7 @@ class CheckpointingPropertiesValidatorTest {
             var context = mock(ConstraintValidatorContext.class);
             var props = new CheckpointingProperties(
                 true, Duration.ofSeconds(10), null, null, Duration.ZERO, 2,
-                null, null, null, null
+                null, null, null, null, null
             );
 
             assertTrue(CheckpointingPropertiesValidator.validate(props, context));
@@ -176,7 +180,7 @@ class CheckpointingPropertiesValidatorTest {
             var context = mock(ConstraintValidatorContext.class);
             var props = new CheckpointingProperties(
                 true, Duration.ofSeconds(10), null, null, Duration.ofSeconds(5), null,
-                null, null, null, null
+                null, null, null, null, null
             );
 
             assertTrue(CheckpointingPropertiesValidator.validate(props, context));
@@ -188,7 +192,62 @@ class CheckpointingPropertiesValidatorTest {
             var context = mock(ConstraintValidatorContext.class);
             var props = new CheckpointingProperties(
                 true, Duration.ofSeconds(10), null, null, null, 2,
-                null, null, null, null
+                null, null, null, null, null
+            );
+
+            assertTrue(CheckpointingPropertiesValidator.validate(props, context));
+        }
+
+        @Test
+        @DisplayName("Should fail when storage is FILESYSTEM and storage-uri is null")
+        void shouldFailWhenStorageIsFileSystemAndStorageUriIsNull() {
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
+            var props = new CheckpointingProperties(
+                true, Duration.ofSeconds(10), null, null, null, null,
+                null, null, null, CheckpointStorageType.FILESYSTEM, null
+            );
+
+            assertFalse(CheckpointingPropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "storage-uri must be specified when checkpoint storage is FILESYSTEM"
+            )).addPropertyNode("storage-uri");
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "   ", "\t\n"})
+        @DisplayName("Should fail when storage is FILESYSTEM and storage-uri is blank")
+        void shouldFailWhenStorageIsFileSystemAndStorageUriIsBlank(String blankUri) {
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
+            var props = new CheckpointingProperties(
+                true, Duration.ofSeconds(10), null, null, null, null,
+                null, null, null, CheckpointStorageType.FILESYSTEM, blankUri
+            );
+
+            assertFalse(CheckpointingPropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "storage-uri must be specified when checkpoint storage is FILESYSTEM"
+            )).addPropertyNode("storage-uri");
+        }
+
+        @Test
+        @DisplayName("Should pass when storage is FILESYSTEM and storage-uri is provided")
+        void shouldPassWhenStorageIsFileSystemAndStorageUriIsProvided() {
+            var context = mock(ConstraintValidatorContext.class);
+            var props = new CheckpointingProperties(
+                true, Duration.ofSeconds(10), null, null, null, null,
+                null, null, null, CheckpointStorageType.FILESYSTEM, "file:///tmp/checkpoints"
+            );
+
+            assertTrue(CheckpointingPropertiesValidator.validate(props, context));
+        }
+
+        @Test
+        @DisplayName("Should pass when storage is JOBMANAGER without storage-uri")
+        void shouldPassWhenStorageIsJobManagerWithoutStorageUri() {
+            var context = mock(ConstraintValidatorContext.class);
+            var props = new CheckpointingProperties(
+                true, Duration.ofSeconds(10), null, null, null, null,
+                null, null, null, CheckpointStorageType.JOBMANAGER, null
             );
 
             assertTrue(CheckpointingPropertiesValidator.validate(props, context));

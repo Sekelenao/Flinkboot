@@ -1,4 +1,4 @@
-package com.flinkboot.core.api.properties.state;
+package com.flinkboot.core.api.properties.checkpointing;
 
 /**
  * Storage location type for state checkpoints.

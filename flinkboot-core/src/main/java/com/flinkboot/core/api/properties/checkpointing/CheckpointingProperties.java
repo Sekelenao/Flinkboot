@@ -20,7 +20,7 @@ import java.util.OptionalInt;
  * Configuration properties for Flink stream checkpointing.
  * <p>
  * Configures interval, timeout, consistency mode, concurrency, unaligned checkpoints,
- * externalized checkpoint cleanup, and storage URI.
+ * externalized checkpoint cleanup, checkpoint storage, and storage URI.
  */
 public final class CheckpointingProperties implements ValidatableProperties, Serializable {
 
@@ -49,6 +49,8 @@ public final class CheckpointingProperties implements ValidatableProperties, Ser
     @DurationMin(millis = 0)
     private final Duration alignedCheckpointTimeout;
 
+    private final CheckpointStorageType storage;
+
     @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
     private final String storageUri;
 
@@ -64,6 +66,7 @@ public final class CheckpointingProperties implements ValidatableProperties, Ser
      * @param externalizedCheckpointCleanup cleanup behavior for externalized checkpoints on cancellation
      * @param unalignedCheckpoints          whether unaligned checkpoints are enabled
      * @param alignedCheckpointTimeout      timeout before switching from aligned to unaligned checkpoint
+     * @param storage                       checkpoint storage location type (JOBMANAGER or FILESYSTEM)
      * @param storageUri                    checkpoint storage directory URI (e.g. {@code "file:///checkpoints"} or {@code "s3://bucket/checkpoints"})
      */
     @JsonCreator
@@ -77,6 +80,7 @@ public final class CheckpointingProperties implements ValidatableProperties, Ser
         @JsonProperty("externalized-checkpoint-cleanup") ExternalizedCheckpointCleanupMode externalizedCheckpointCleanup,
         @JsonProperty("unaligned-checkpoints") Boolean unalignedCheckpoints,
         @JsonProperty("aligned-checkpoint-timeout") Duration alignedCheckpointTimeout,
+        @JsonProperty("storage") CheckpointStorageType storage,
         @JsonProperty("storage-uri") String storageUri
     ) {
         this.enabled = enabled;
@@ -88,6 +92,7 @@ public final class CheckpointingProperties implements ValidatableProperties, Ser
         this.externalizedCheckpointCleanup = externalizedCheckpointCleanup;
         this.unalignedCheckpoints = unalignedCheckpoints;
         this.alignedCheckpointTimeout = alignedCheckpointTimeout;
+        this.storage = storage;
         this.storageUri = storageUri;
     }
 
@@ -181,6 +186,15 @@ public final class CheckpointingProperties implements ValidatableProperties, Ser
     }
 
     /**
+     * Returns the optional checkpoint storage location type.
+     *
+     * @return an {@link Optional} containing the {@link CheckpointStorageType}, or empty if not specified
+     */
+    public Optional<CheckpointStorageType> storage() {
+        return Optional.ofNullable(storage);
+    }
+
+    /**
      * Returns the optional checkpoint storage directory URI.
      *
      * @return an {@link Optional} containing the storage URI string, or empty if not specified
@@ -205,6 +219,7 @@ public final class CheckpointingProperties implements ValidatableProperties, Ser
             && externalizedCheckpointCleanup == o.externalizedCheckpointCleanup
             && Objects.equals(unalignedCheckpoints, o.unalignedCheckpoints)
             && Objects.equals(alignedCheckpointTimeout, o.alignedCheckpointTimeout)
+            && storage == o.storage
             && Objects.equals(storageUri, o.storageUri);
     }
 
@@ -221,6 +236,7 @@ public final class CheckpointingProperties implements ValidatableProperties, Ser
             externalizedCheckpointCleanup,
             unalignedCheckpoints,
             alignedCheckpointTimeout,
+            storage,
             storageUri
         );
     }
@@ -238,6 +254,7 @@ public final class CheckpointingProperties implements ValidatableProperties, Ser
             ", externalizedCheckpointCleanup=" + externalizedCheckpointCleanup +
             ", unalignedCheckpoints=" + unalignedCheckpoints +
             ", alignedCheckpointTimeout=" + alignedCheckpointTimeout +
+            ", storage=" + storage +
             ", storageUri='" + storageUri + '\'' +
             '}';
     }

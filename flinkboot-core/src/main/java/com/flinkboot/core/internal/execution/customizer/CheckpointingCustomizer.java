@@ -1,6 +1,7 @@
 package com.flinkboot.core.internal.execution.customizer;
 
 import com.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
+import com.flinkboot.core.api.properties.checkpointing.CheckpointStorageType;
 import com.flinkboot.core.api.properties.checkpointing.CheckpointingMode;
 import com.flinkboot.core.api.properties.checkpointing.CheckpointingProperties;
 import com.flinkboot.core.api.properties.checkpointing.ExternalizedCheckpointCleanupMode;
@@ -9,6 +10,7 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.ExternalizedCheckpointRetention;
 
 import java.time.Duration;
+import java.util.Locale;
 import java.util.Objects;
 
 public final class CheckpointingCustomizer implements EnvironmentCustomizer {
@@ -36,6 +38,7 @@ public final class CheckpointingCustomizer implements EnvironmentCustomizer {
         checkpointingConfig.externalizedCheckpointCleanup().ifPresent(this::applyExternalizedCheckpointCleanup);
         checkpointingConfig.unalignedCheckpoints().ifPresent(this::applyUnalignedCheckpoints);
         checkpointingConfig.alignedCheckpointTimeout().ifPresent(this::applyAlignedCheckpointTimeout);
+        checkpointingConfig.storage().ifPresent(this::applyStorage);
         checkpointingConfig.storageUri().ifPresent(this::applyStorageUri);
     }
 
@@ -71,6 +74,11 @@ public final class CheckpointingCustomizer implements EnvironmentCustomizer {
 
     private void applyAlignedCheckpointTimeout(Duration alignedCheckpointTimeout) {
         toConfigure.set(CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT, alignedCheckpointTimeout);
+    }
+
+    private void applyStorage(CheckpointStorageType storage) {
+        var storageName = storage.toString().toLowerCase(Locale.ROOT);
+        toConfigure.set(CheckpointingOptions.CHECKPOINT_STORAGE, storageName);
     }
 
     private void applyStorageUri(String storageUri) {
