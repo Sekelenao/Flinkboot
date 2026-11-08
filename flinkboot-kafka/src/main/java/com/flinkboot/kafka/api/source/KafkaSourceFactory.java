@@ -108,6 +108,31 @@ public final class KafkaSourceFactory {
     }
 
     /**
+     * Creates and builds a {@link KafkaSource} from the provided configuration properties after applying a
+     * customizer to its builder.
+     *
+     * @param config the Kafka source configuration properties
+     * @param schema the deserialization schema to decode Kafka records
+     * @param builderCustomizer the customizer applied to the pre-configured source builder before construction
+     * @param <T>    the deserialized record type
+     * @return a built and immutable {@link KafkaSource}
+     * @throws NullPointerException if {@code config}, {@code schema}, or {@code builderCustomizer} is {@code null}
+     */
+    public static <T> KafkaSource<T> supplyFor(
+        KafkaSourceProperties config,
+        KafkaRecordDeserializationSchema<T> schema,
+        Consumer<KafkaSourceBuilder<T>> builderCustomizer
+    ) {
+        Objects.requireNonNull(config, "config must not be null");
+        Objects.requireNonNull(schema, "schema must not be null");
+        Objects.requireNonNull(builderCustomizer, "builderCustomizer must not be null");
+
+        var builder = supplyBuilderFor(config, schema);
+        builderCustomizer.accept(builder);
+        return builder.build();
+    }
+
+    /**
      * Creates and pre-configures a {@link KafkaSourceBuilder} from the provided configuration properties
      * using a value-only deserialization schema.
      *
