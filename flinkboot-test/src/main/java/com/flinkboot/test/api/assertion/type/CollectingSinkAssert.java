@@ -135,6 +135,11 @@ public final class CollectingSinkAssert<T> {
 
     /**
      * Asserts that all collected elements match the given predicate.
+     * <p>
+     * If the sink contains zero elements, this assertion is trivially satisfied (vacuous truth)
+     * because no elements violate the predicate. If non-emptiness is required, chain with
+     * {@link #isNotEmpty()} (e.g. {@code assertThat(sink).isNotEmpty().allMatch(predicate)}).
+     * </p>
      *
      * @param predicate condition to test against collected elements
      * @return this assertion object for method chaining
@@ -157,6 +162,11 @@ public final class CollectingSinkAssert<T> {
 
     /**
      * Asserts that no collected elements match the given predicate.
+     * <p>
+     * If the sink contains zero elements, this assertion is trivially satisfied (vacuous truth)
+     * because no elements satisfy the predicate. If non-emptiness is required, chain with
+     * {@link #isNotEmpty()} (e.g. {@code assertThat(sink).isNotEmpty().noneMatch(predicate)}).
+     * </p>
      *
      * @param predicate condition to test against collected elements
      * @return this assertion object for method chaining

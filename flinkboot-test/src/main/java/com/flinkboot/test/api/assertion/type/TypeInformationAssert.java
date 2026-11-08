@@ -57,13 +57,17 @@ public final class TypeInformationAssert<T> {
     }
 
     /**
-     * Recursively verifies that the described type strictly adheres to Apache Flink's POJO serialization rules.
+     * Recursively verifies that the described type strictly adheres to native Apache Flink serialization rules,
+     * guaranteeing zero Kryo fallback across the entire type hierarchy.
      * <p>
      * Validates public constructors, field visibility, getters/setters, nested types, generics,
-     * collections, arrays, and {@code @TypeInfo} annotations to guarantee zero Kryo fallback.
+     * collections, maps, Tuples, arrays, and {@code @TypeInfo} annotations across the type tree.
+     * Guarantees that neither {@link org.apache.flink.api.java.typeutils.GenericTypeInfo} nor
+     * {@link org.apache.flink.api.java.typeutils.MissingTypeInfo} is present in the type tree.
+     * </p>
      *
      * @return this assertion object for method chaining
-     * @throws AssertionError if the type or any nested field violates Flink POJO rules
+     * @throws AssertionError if the type or any nested field violates native Flink serialization rules
      */
     public TypeInformationAssert<T> isPojo() {
         new PojoValidator().validate(typeInfo);
