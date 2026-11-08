@@ -8,12 +8,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("TypeInformationAssert")
 class TypeInformationAssertTest {
@@ -93,10 +91,7 @@ class TypeInformationAssertTest {
             var typeInfoAssert = new TypeInformationAssert<>(TypeInformation.of(InvalidPojo.class));
             var error = assertThrows(AssertionFailedError.class, typeInfoAssert::isPojo);
             var expectedViolation = "Field or type '$' is recognized as GenericTypeInfo (" + InvalidPojo.class.getName() + "), which falls back to Kryo serialization.";
-            assertAll(
-                () -> assertTrue(error.getMessage().startsWith("Found 1 POJO validation violation(s):")),
-                () -> assertTrue(error.getMessage().contains(expectedViolation))
-            );
+            assertEquals("Found 1 POJO validation violation(s):\n- " + expectedViolation, error.getMessage());
         }
 
         @Test
@@ -112,10 +107,7 @@ class TypeInformationAssertTest {
             var typeInfoAssert = new TypeInformationAssert<>(new TypeHint<InvalidPojo>() {});
             var error = assertThrows(AssertionFailedError.class, typeInfoAssert::isPojo);
             var expectedViolation = "Field or type '$' is recognized as GenericTypeInfo (" + InvalidPojo.class.getName() + "), which falls back to Kryo serialization.";
-            assertAll(
-                () -> assertTrue(error.getMessage().startsWith("Found 1 POJO validation violation(s):")),
-                () -> assertTrue(error.getMessage().contains(expectedViolation))
-            );
+            assertEquals("Found 1 POJO validation violation(s):\n- " + expectedViolation, error.getMessage());
         }
 
         @Test
@@ -129,10 +121,7 @@ class TypeInformationAssertTest {
                 () -> new TypeInformationAssert<>(new TypeHint<Tuple2<String, InvalidPojo>>() {}).isPojo()
             );
             var expectedViolation = "Field or type '$[1]' is recognized as GenericTypeInfo (" + InvalidPojo.class.getName() + "), which falls back to Kryo serialization.";
-            assertAll(
-                () -> assertTrue(error.getMessage().startsWith("Found 1 POJO validation violation(s):")),
-                () -> assertTrue(error.getMessage().contains(expectedViolation))
-            );
+            assertEquals("Found 1 POJO validation violation(s):\n- " + expectedViolation, error.getMessage());
         }
     }
 }

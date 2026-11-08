@@ -15,6 +15,8 @@ import org.apache.flink.api.common.typeinfo.TypeInfoFactory;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.typeutils.EitherTypeInfo;
+import org.apache.flink.api.java.typeutils.GenericTypeInfo;
+import org.apache.flink.api.java.typeutils.MapTypeInfo;
 import org.apache.flink.api.java.typeutils.MissingTypeInfo;
 import org.apache.flink.api.java.typeutils.PojoTypeInfo;
 import org.apache.flink.api.java.typeutils.ListTypeInfo;
@@ -495,11 +497,10 @@ class PojoValidatorTest {
     void shouldAggregateMultipleViolationsWhenPojoHasMultipleUnsupportedFields() {
         var typeInfo = TypeExtractor.createTypeInfo(MultipleUnsupportedFieldsPojo.class);
         var error = assertThrows(AssertionFailedError.class, () -> validator.validate(typeInfo));
-        assertAll(
-            () -> assertTrue(error.getMessage().startsWith("Found 2 POJO validation violation(s):")),
-            () -> assertTrue(error.getMessage().contains("- Field or type '$.localDateTime' is recognized as GenericTypeInfo (java.time.LocalDateTime), which falls back to Kryo serialization.")),
-            () -> assertTrue(error.getMessage().contains("- Field or type '$.time' is recognized as GenericTypeInfo (java.time.OffsetDateTime), which falls back to Kryo serialization."))
-        );
+        var expectedMessage = "Found 2 POJO validation violation(s):\n"
+            + "- Field or type '$.localDateTime' is recognized as GenericTypeInfo (java.time.LocalDateTime), which falls back to Kryo serialization.\n"
+            + "- Field or type '$.time' is recognized as GenericTypeInfo (java.time.OffsetDateTime), which falls back to Kryo serialization.";
+        assertEquals(expectedMessage, error.getMessage());
     }
 
     @Test
@@ -507,12 +508,25 @@ class PojoValidatorTest {
     void shouldAggregateMultipleViolationsAcrossNestedLevels() {
         var typeInfo = TypeExtractor.createTypeInfo(NestedMultipleUnsupportedPojo.class);
         var error = assertThrows(AssertionFailedError.class, () -> validator.validate(typeInfo));
-        assertAll(
-            () -> assertTrue(error.getMessage().startsWith("Found 3 POJO validation violation(s):")),
-            () -> assertTrue(error.getMessage().contains("- Field or type '$.unannotatedDate' is recognized as GenericTypeInfo (java.time.LocalDate), which falls back to Kryo serialization.")),
-            () -> assertTrue(error.getMessage().contains("- Field or type '$.nested.localDateTime' is recognized as GenericTypeInfo (java.time.LocalDateTime), which falls back to Kryo serialization.")),
-            () -> assertTrue(error.getMessage().contains("- Field or type '$.nested.time' is recognized as GenericTypeInfo (java.time.OffsetDateTime), which falls back to Kryo serialization."))
+        var expectedMessage = "Found 3 POJO validation violation(s):\n"
+            + "- Field or type '$.unannotatedDate' is recognized as GenericTypeInfo (java.time.LocalDate), which falls back to Kryo serialization.\n"
+            + "- Field or type '$.nested.localDateTime' is recognized as GenericTypeInfo (java.time.LocalDateTime), which falls back to Kryo serialization.\n"
+            + "- Field or type '$.nested.time' is recognized as GenericTypeInfo (java.time.OffsetDateTime), which falls back to Kryo serialization.";
+        assertEquals(expectedMessage, error.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should aggregate heterogeneous violations combining MissingTypeInfo and GenericTypeInfo in map type")
+    void shouldAggregateHeterogeneousViolationsInMapType() {
+        var mapType = new MapTypeInfo<>(
+            new GenericTypeInfo<>(OffsetDateTime.class),
+            new MissingTypeInfo("erasedValue", new InvalidTypesException("Cannot determine field type."))
         );
+        var error = assertThrows(AssertionFailedError.class, () -> validator.validate(mapType));
+        var expectedMessage = "Found 2 POJO validation violation(s):\n"
+            + "- Field or type '$<key>' is recognized as GenericTypeInfo (java.time.OffsetDateTime), which falls back to Kryo serialization.\n"
+            + "- Field or type '$<value>' has missing type information (Cannot determine field type.) and cannot be serialized by Flink.";
+        assertEquals(expectedMessage, error.getMessage());
     }
 
     @Test
