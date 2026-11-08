@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Positive;
 import org.hibernate.validator.constraints.time.DurationMin;
 
 import java.io.Serializable;
@@ -12,6 +13,7 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
+import java.util.OptionalInt;
 
 /**
  * Configuration properties for exponential delay restart strategy.
@@ -36,6 +38,9 @@ public final class ExponentialDelayRestartProperties implements Serializable {
     @DecimalMax("1.0")
     private final Double jitterFactor;
 
+    @Positive
+    private final Integer attempts;
+
     /**
      * Creates a new {@code ExponentialDelayRestartProperties} instance.
      *
@@ -44,6 +49,7 @@ public final class ExponentialDelayRestartProperties implements Serializable {
      * @param backoffMultiplier     multiplier for increasing backoff delay after each failure
      * @param resetBackoffThreshold duration of stable execution before resetting backoff delay
      * @param jitterFactor          jitter randomization factor (0.0 to 1.0)
+     * @param attempts              maximum number of restart attempts
      */
     @JsonCreator
     public ExponentialDelayRestartProperties(
@@ -51,13 +57,15 @@ public final class ExponentialDelayRestartProperties implements Serializable {
         @JsonProperty("max-backoff") Duration maxBackoff,
         @JsonProperty("backoff-multiplier") Double backoffMultiplier,
         @JsonProperty("reset-backoff-threshold") Duration resetBackoffThreshold,
-        @JsonProperty("jitter-factor") Double jitterFactor
+        @JsonProperty("jitter-factor") Double jitterFactor,
+        @JsonProperty("attempts") Integer attempts
     ) {
         this.initialBackoff = initialBackoff;
         this.maxBackoff = maxBackoff;
         this.backoffMultiplier = backoffMultiplier;
         this.resetBackoffThreshold = resetBackoffThreshold;
         this.jitterFactor = jitterFactor;
+        this.attempts = attempts;
     }
 
     /**
@@ -111,6 +119,18 @@ public final class ExponentialDelayRestartProperties implements Serializable {
         return OptionalDouble.of(jitterFactor);
     }
 
+    /**
+     * Returns the maximum number of restart attempts.
+     *
+     * @return an {@link OptionalInt} containing the attempt count, or empty if not specified
+     */
+    public OptionalInt attempts() {
+        if (attempts == null) {
+            return OptionalInt.empty();
+        }
+        return OptionalInt.of(attempts);
+    }
+
     @Override
     @Generated
     public boolean equals(Object other) {
@@ -122,7 +142,8 @@ public final class ExponentialDelayRestartProperties implements Serializable {
             && Objects.equals(maxBackoff, o.maxBackoff)
             && Objects.equals(backoffMultiplier, o.backoffMultiplier)
             && Objects.equals(resetBackoffThreshold, o.resetBackoffThreshold)
-            && Objects.equals(jitterFactor, o.jitterFactor);
+            && Objects.equals(jitterFactor, o.jitterFactor)
+            && Objects.equals(attempts, o.attempts);
     }
 
     @Override
@@ -133,7 +154,8 @@ public final class ExponentialDelayRestartProperties implements Serializable {
             maxBackoff,
             backoffMultiplier,
             resetBackoffThreshold,
-            jitterFactor
+            jitterFactor,
+            attempts
         );
     }
 
@@ -146,6 +168,7 @@ public final class ExponentialDelayRestartProperties implements Serializable {
             ", backoffMultiplier=" + backoffMultiplier +
             ", resetBackoffThreshold=" + resetBackoffThreshold +
             ", jitterFactor=" + jitterFactor +
+            ", attempts=" + attempts +
             '}';
     }
 }

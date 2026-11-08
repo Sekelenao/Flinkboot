@@ -34,6 +34,7 @@ All notable user-facing changes to this project are documented in this file.
 ### 🟢 Features & Enhancements
 
 #### flinkboot-core
+- **Configurable Exponential Delay Restart Attempts (#328)**: Added optional `attempts` property to `ExponentialDelayRestartProperties` (`restart-strategy.exponential-delay.attempts`) and wired it to Flink's `RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_ATTEMPTS`, allowing operators to declaratively bound restart attempts instead of defaulting to infinite retries.
 - **Configurable Savepoint Directory**: Added the optional `directory` property to `SavepointRestoreProperties`, mapped to Flink's `state.savepoints.dir` configuration key.
 - **Optional Local Web UI Enablement**: Removed `@NotNull` constraint on `LocalWebUiProperties.enabled` and aligned default behavior with `CheckpointingProperties`, activating the local Web UI by default when `local-web-ui` is declared without requiring an explicit `enabled: true`.
 - **Configurable State Changelog Flag (`state-backend.changelog`)**: Added optional `changelog` boolean property to `StateBackendProperties` (`state-backend.changelog: true | false`) and wired it to Flink's `state.backend.changelog.enabled` (`StateChangelogOptions.ENABLE_STATE_CHANGE_LOG`), allowing users to toggle durable short-interval changelog checkpointing over HashMap or RocksDB backends.

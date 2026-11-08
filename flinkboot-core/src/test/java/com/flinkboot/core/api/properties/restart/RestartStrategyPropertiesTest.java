@@ -73,13 +73,14 @@ class RestartStrategyPropertiesTest {
         @Test
         @DisplayName("Should return empty optionals on ExponentialDelay sub-config getters when null")
         void shouldReturnEmptyOptionalsOnExponentialDelay() {
-            var expo = new ExponentialDelayRestartProperties(null, null, null, null, null);
+            var expo = new ExponentialDelayRestartProperties(null, null, null, null, null, null);
             assertAll(
                 () -> assertTrue(expo.initialBackoff().isEmpty()),
                 () -> assertTrue(expo.maxBackoff().isEmpty()),
                 () -> assertTrue(expo.backoffMultiplier().isEmpty()),
                 () -> assertTrue(expo.resetBackoffThreshold().isEmpty()),
-                () -> assertTrue(expo.jitterFactor().isEmpty())
+                () -> assertTrue(expo.jitterFactor().isEmpty()),
+                () -> assertTrue(expo.attempts().isEmpty())
             );
         }
     }
@@ -134,7 +135,7 @@ class RestartStrategyPropertiesTest {
         @Test
         @DisplayName("Should pass validation with valid exponential delay strategy")
         void shouldPassWithValidExponentialDelay() {
-            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, null);
             var config = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
 
             var violations = validator.validate(config);
@@ -150,7 +151,7 @@ class RestartStrategyPropertiesTest {
         void shouldPassValidationWhenDurationsAreNull() {
             var fixed = new FixedDelayRestartProperties(null, null);
             var failure = new FailureRateRestartProperties(null, null, null);
-            var expo = new ExponentialDelayRestartProperties(null, null, null, null, null);
+            var expo = new ExponentialDelayRestartProperties(null, null, null, null, null, null);
             assertAll(
                 () -> assertTrue(validator.validate(fixed).isEmpty()),
                 () -> assertTrue(validator.validate(failure).isEmpty()),
@@ -197,7 +198,7 @@ class RestartStrategyPropertiesTest {
         @Test
         @DisplayName("Should fail validation when exponential-delay provided for NO_RESTART or FALLBACK")
         void shouldFailValidationWhenExponentialDelayProvidedForNoRestartOrFallback() {
-            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, null);
             var config1 = new RestartStrategyProperties(RestartStrategyType.NO_RESTART, null, null, expo);
             var config2 = new RestartStrategyProperties(RestartStrategyType.FALLBACK, null, null, expo);
             assertAll(
@@ -219,7 +220,7 @@ class RestartStrategyPropertiesTest {
         @DisplayName("Should fail validation when incompatible exponential-delay provided for FIXED_DELAY")
         void shouldFailValidationWhenExponentialDelayProvidedForFixedDelay() {
             var fixed = new FixedDelayRestartProperties(3, Duration.ofSeconds(5));
-            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, null);
             var config = new RestartStrategyProperties(RestartStrategyType.FIXED_DELAY, fixed, null, expo);
             assertEquals(1, validator.validate(config).size());
         }
@@ -237,7 +238,7 @@ class RestartStrategyPropertiesTest {
         @DisplayName("Should fail validation when incompatible exponential-delay provided for FAILURE_RATE")
         void shouldFailValidationWhenExponentialDelayProvidedForFailureRate() {
             var failure = new FailureRateRestartProperties(3, Duration.ofMinutes(1), Duration.ofSeconds(1));
-            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, null);
             var config = new RestartStrategyProperties(RestartStrategyType.FAILURE_RATE, null, failure, expo);
             assertEquals(1, validator.validate(config).size());
         }
@@ -246,7 +247,7 @@ class RestartStrategyPropertiesTest {
         @DisplayName("Should fail validation when incompatible fixed-delay provided for EXPONENTIAL_DELAY")
         void shouldFailValidationWhenIncompatibleSubConfigForExponentialDelay() {
             var fixed = new FixedDelayRestartProperties(3, Duration.ofSeconds(5));
-            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, null);
             var config = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, fixed, null, expo);
             assertEquals(1, validator.validate(config).size());
         }
@@ -255,7 +256,7 @@ class RestartStrategyPropertiesTest {
         @DisplayName("Should fail validation when incompatible failure-rate provided for EXPONENTIAL_DELAY")
         void shouldFailValidationWhenFailureRateProvidedForExponentialDelay() {
             var failure = new FailureRateRestartProperties(3, Duration.ofMinutes(1), Duration.ofSeconds(1));
-            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, null);
             var config = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, failure, expo);
             assertEquals(1, validator.validate(config).size());
         }
@@ -263,7 +264,7 @@ class RestartStrategyPropertiesTest {
         @Test
         @DisplayName("Should fail validation when maxBackoff < initialBackoff in exponential delay")
         void shouldFailValidationWhenMaxBackoffIsSmallerThanInitial() {
-            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(10), Duration.ofSeconds(1), 2.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(10), Duration.ofSeconds(1), 2.0, Duration.ofHours(1), 0.1, null);
             var config = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
             var violations = validator.validate(config);
             assertAll(
@@ -275,7 +276,7 @@ class RestartStrategyPropertiesTest {
         @Test
         @DisplayName("Should fail validation when only initial-backoff is present in exponential delay")
         void shouldFailValidationWhenOnlyInitialBackoffPresent() {
-            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), null, 2.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), null, 2.0, Duration.ofHours(1), 0.1, null);
 
             var config = assertDoesNotThrow(
                 () -> new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo)
@@ -294,7 +295,7 @@ class RestartStrategyPropertiesTest {
         @Test
         @DisplayName("Should fail validation when only max-backoff is present in exponential delay")
         void shouldFailValidationWhenOnlyMaxBackoffPresent() {
-            var expo = new ExponentialDelayRestartProperties(null, Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(null, Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, null);
 
             var config = assertDoesNotThrow(
                 () -> new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo)
@@ -313,7 +314,7 @@ class RestartStrategyPropertiesTest {
         @Test
         @DisplayName("Should pass validation when both backoffs are absent in exponential delay")
         void shouldPassValidationWhenBothBackoffsAbsent() {
-            var expo = new ExponentialDelayRestartProperties(null, null, 2.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(null, null, 2.0, Duration.ofHours(1), 0.1, null);
 
             var config = assertDoesNotThrow(
                 () -> new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo)
@@ -353,10 +354,10 @@ class RestartStrategyPropertiesTest {
         @Test
         @DisplayName("Should fail Bean Validation on zero or negative durations in ExponentialDelay")
         void shouldFailBeanValidationOnInvalidExponentialDurations() {
-            var zeroInitial = new ExponentialDelayRestartProperties(Duration.ZERO, Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
-            var zeroMax = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ZERO, 2.0, Duration.ofHours(1), 0.1);
-            var zeroReset = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ZERO, 0.1);
-            var negativeInitial = new ExponentialDelayRestartProperties(Duration.ofSeconds(-1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
+            var zeroInitial = new ExponentialDelayRestartProperties(Duration.ZERO, Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, null);
+            var zeroMax = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ZERO, 2.0, Duration.ofHours(1), 0.1, null);
+            var zeroReset = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ZERO, 0.1, null);
+            var negativeInitial = new ExponentialDelayRestartProperties(Duration.ofSeconds(-1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, null);
             assertAll(
                 () -> assertEquals(1, validator.validate(zeroInitial).size()),
                 () -> assertEquals(1, validator.validate(zeroMax).size()),
@@ -368,7 +369,7 @@ class RestartStrategyPropertiesTest {
         @Test
         @DisplayName("Should reject an exponential backoff multiplier equal to one")
         void shouldRejectExponentialBackoffMultiplierEqualToOne() {
-            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 1.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 1.0, Duration.ofHours(1), 0.1, null);
             var config = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
 
             var violations = validator.validate(config);
@@ -381,7 +382,7 @@ class RestartStrategyPropertiesTest {
         @Test
         @DisplayName("Should accept an exponential backoff multiplier greater than one")
         void shouldAcceptExponentialBackoffMultiplierGreaterThanOne() {
-            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 1.1, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 1.1, Duration.ofHours(1), 0.1, null);
             var config = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
 
             assertTrue(validator.validate(config).isEmpty());
@@ -390,8 +391,8 @@ class RestartStrategyPropertiesTest {
         @Test
         @DisplayName("Should fail Bean Validation on invalid multiplier or jitter in ExponentialDelay")
         void shouldFailBeanValidationOnInvalidExponentialParams() {
-            var expoInvalidMultiplier = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 0.5, Duration.ofHours(1), 0.1);
-            var expoInvalidJitter = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 1.5);
+            var expoInvalidMultiplier = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 0.5, Duration.ofHours(1), 0.1, null);
+            var expoInvalidJitter = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 1.5, null);
             assertAll(
                 () -> assertEquals(1, validator.validate(expoInvalidMultiplier).size()),
                 () -> assertEquals(1, validator.validate(expoInvalidJitter).size())
@@ -413,8 +414,8 @@ class RestartStrategyPropertiesTest {
             var failure1 = new FailureRateRestartProperties(3, Duration.ofMinutes(1), Duration.ofSeconds(1));
             var failure2 = new FailureRateRestartProperties(3, Duration.ofMinutes(1), Duration.ofSeconds(1));
 
-            var expo1 = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
-            var expo2 = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
+            var expo1 = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, 5);
+            var expo2 = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, 5);
 
             var config1 = new RestartStrategyProperties(RestartStrategyType.FIXED_DELAY, fixed1, null, null);
             var config2 = new RestartStrategyProperties(RestartStrategyType.FIXED_DELAY, fixed2, null, null);
@@ -504,7 +505,8 @@ class RestartStrategyPropertiesTest {
                 () -> assertEquals(Duration.ofSeconds(30), config.exponentialDelay().orElseThrow().maxBackoff().orElseThrow()),
                 () -> assertEquals(1.5, config.exponentialDelay().orElseThrow().backoffMultiplier().orElseThrow()),
                 () -> assertEquals(Duration.ofMinutes(30), config.exponentialDelay().orElseThrow().resetBackoffThreshold().orElseThrow()),
-                () -> assertEquals(0.2, config.exponentialDelay().orElseThrow().jitterFactor().orElseThrow())
+                () -> assertEquals(0.2, config.exponentialDelay().orElseThrow().jitterFactor().orElseThrow()),
+                () -> assertTrue(config.exponentialDelay().orElseThrow().attempts().isEmpty())
             );
         }
     }
