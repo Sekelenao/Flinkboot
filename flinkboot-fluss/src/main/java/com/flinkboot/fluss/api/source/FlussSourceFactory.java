@@ -45,8 +45,7 @@ public final class FlussSourceFactory {
         Objects.requireNonNull(config, "config must not be null");
         Objects.requireNonNull(deserializationSchema, "deserializationSchema must not be null");
 
-        var flussConfig = new Configuration();
-        config.properties().forEach(flussConfig::setString);
+        var flussConfig = Configuration.fromMap(config.properties());
 
         var builder = new FlussSourceBuilder<T>()
             .setBootstrapServers(String.join(",", config.bootstrapServers()))
