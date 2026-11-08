@@ -52,10 +52,11 @@ public final class CollectingSinkAssert<T> {
         if (expectedSize < 0) {
             throw new IllegalArgumentException("expectedSize must not be negative");
         }
+        var actualSize = sink.size();
         Assertions.assertEquals(
             expectedSize,
-            sink.size(),
-            () -> "Expected sink to have size <" + expectedSize + ">, but was <" + sink.size() + ">"
+            actualSize,
+            () -> "Expected sink to have size <" + expectedSize + ">, but was <" + actualSize + ">"
         );
         return this;
     }
@@ -67,13 +68,12 @@ public final class CollectingSinkAssert<T> {
      * @throws AssertionError if the sink is not empty
      */
     public CollectingSinkAssert<T> isEmpty() {
-        if (!sink.isEmpty()) {
-            Assertions.assertEquals(
-                0,
-                sink.size(),
-                () -> "Expected sink to be empty, but had size <" + sink.size() + ">"
-            );
-        }
+        var actualSize = sink.size();
+        Assertions.assertEquals(
+            0,
+            actualSize,
+            () -> "Expected sink to be empty, but had size <" + actualSize + ">"
+        );
         return this;
     }
 
