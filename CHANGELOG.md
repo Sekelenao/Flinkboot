@@ -54,7 +54,7 @@ All notable user-facing changes to this project are documented in this file.
 
 #### flinkboot-test
 - **Aggregated Type Violations in POJO Assertions**: Consolidates all unsupported and missing type violations detected across complex domain models during BFS traversal into a single diagnostic `AssertionFailedError`, allowing developers to address all serialization violations in one pass rather than resolving them iteratively.
-- **Fluent CollectingSink Assertions & Zero-Copy Accessors**: Added dedicated `FlinkbootAssertions.assertThat(CollectingSink<T>)` returning `CollectingSinkAssert<T>` for concise fluent testing of emitted records (`.hasSize(...)`, `.isEmpty()`, `.contains(...)`, `.anyMatch(...)`, `.allMatch(...)`, `.noneMatch(...)`), alongside direct zero-copy `size()` and `isEmpty()` accessors on `CollectingSink` and `CollectingSinkRegistry`.
+- **Fluent CollectingSink Assertions & Zero-Copy Accessors**: Added dedicated `FlinkbootAssertions.assertThat(CollectingSink<T>)` returning `CollectingSinkAssert<T>` for concise fluent testing of emitted records (`.hasSize(...)`, `.isEmpty()`, `.isNotEmpty()`, `.contains(...)`, `.anyMatch(...)`, `.allMatch(...)`, `.noneMatch(...)`), alongside direct zero-copy `size()` and `isEmpty()` accessors on `CollectingSink` and `CollectingSinkRegistry`.
 
 #### Configuration & Cross-Cutting
 - **Automatic YAML Kebab-Case Mapping & Unified Validation Paths**:
