@@ -30,11 +30,11 @@ public enum KafkaOffsetInitializer {
      */
     COMMITTED_LATEST(OffsetsInitializer.committedOffsets(OffsetResetStrategy.LATEST)),
     /**
-     * Start consuming from a specific timestamp (requires {@code starting-offsets-timestamp}).
+     * Start consuming from a specific timestamp (requires {@code timestamp}).
      */
     TIMESTAMP(null),
     /**
-     * Start consuming from explicit partition offsets (requires {@code starting-offsets-partition-offsets}).
+     * Start consuming from explicit partition offsets (requires {@code partitions}).
      */
     OFFSETS(null);
 

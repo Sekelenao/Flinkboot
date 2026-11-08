@@ -32,7 +32,7 @@ public final class StateBackendProperties implements Serializable, ValidatablePr
     /**
      * Creates a new {@code StateBackendProperties} instance.
      *
-     * @param type            the state backend type (HASHMAP, ROCKSDB, CHANGELOG, CUSTOM)
+     * @param type            the state backend type (HASHMAP, ROCKSDB, CUSTOM)
      * @param incremental     whether incremental checkpoints are enabled (RocksDB)
      * @param latencyTracking whether state access latency tracking metrics are enabled (RocksDB)
      * @param customClass     fully qualified class name of custom state backend factory

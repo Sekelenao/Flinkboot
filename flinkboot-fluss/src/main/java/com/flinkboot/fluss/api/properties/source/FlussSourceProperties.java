@@ -52,7 +52,7 @@ public final class FlussSourceProperties implements Serializable, ValidatablePro
      * @param bootstrapServers list of Fluss coordinator/server addresses
      * @param database         target Fluss database name
      * @param table            target Fluss table name
-     * @param startupMode      startup mode (EARLIEST, LATEST, TIMESTAMP)
+     * @param startupMode      startup mode (EARLIEST, LATEST, FULL, TIMESTAMP)
      * @param startupTimestamp timestamp in milliseconds (required if startupMode is TIMESTAMP)
      * @param properties       additional Fluss client/scanner configuration properties
      */
