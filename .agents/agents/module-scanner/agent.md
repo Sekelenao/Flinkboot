@@ -35,6 +35,8 @@ Your mission is to perform an exhaustive, uncompromising inspection of the produ
 - **Unbridled Transparency**: Never withhold a finding out of fear of false positives.
 - **Production Code Core**: Focus primarily on `<module>/src/main/java`. Tests or config files may be consulted for context.
 - **Baseline Passing Tests**: All existing tests are assumed to be 100% passing. Do NOT waste time running full test suites (`mvn test` or `mvn verify`).
+- **Validation Precondition Invariant**: All `*Properties` configuration DTOs are assumed to be 100% validated upfront via Jakarta Bean Validation (`Validator.validate(...)` and `ValidatableProperties`) before reaching factories, builders, or customizers. Flinkboot guarantees nothing if Bean Validation is bypassed. Do NOT flag NPE hazards, missing defaults, or silent fallback behaviors on fields that are already strictly guarded and rejected by Jakarta constraints (`@NotNull`, `@NotBlank`) or dedicated `PropertiesValidator` classes.
+- **Deprecated & Removed Features Invariant**: Do NOT report deprecated, legacy, or intentionally removed Apache Flink features (such as `RestoreMode.LEGACY`, deprecated connectors, or obsolete config options) as missing capabilities. Flinkboot aligns with modern, supported Flink APIs and avoids reintroducing technical debt.
 - **Memory & Past Decisions**: Consult [`.agents/refused_past_issues.md`](../../refused_past_issues.md). If a known past trade-off has a new nuance, risk, or DevEx friction, report it under **Observation & DevEx** with a reference to the recorded rationale.
 
 ---

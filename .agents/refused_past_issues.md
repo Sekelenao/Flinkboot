@@ -71,3 +71,8 @@ All audit subagents (including `module-scanner` and `pr-reviewer`) must consult 
 - **Status**: **REJECTED**
 - **Rationale**: `ExecutionEnvironmentFactory` is an internal machinery class instantiated fresh on every invocation (`new ExecutionEnvironmentFactory().create(jobProperties)` in `Flinkboot.java`). It is never reused across multiple invocations, stored in static state, or shared across threads. Forcing it to be stateless by passing configuration across internal methods adds ceremony with zero practical reliability gain, directly adhering to Rule 1 (*Single-Use Internal Processor State*).
 
+## 14. Default Fallback Value Syntax in PlaceholderResolver (`${VAR:default}`)
+- **Pattern**: Supporting default fallback value syntax `${VAR:default}` or `${VAR:-default}` in `PlaceholderResolver`.
+- **Status**: **REJECTED**
+- **Rationale**: `PlaceholderResolver` intentionally restricts placeholders to strict `${VARIABLE_NAME}` lookups against environment variables or startup arguments. Introducing fallback syntax adds parsing complexity, ambiguity around colons in values (such as Kafka endpoints or URLs `host:9092`), and risks masking missing configuration in production. Missing placeholders must fail fast.
+
