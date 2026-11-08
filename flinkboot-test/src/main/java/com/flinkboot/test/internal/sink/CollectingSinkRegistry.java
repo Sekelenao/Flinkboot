@@ -51,6 +51,36 @@ public final class CollectingSinkRegistry {
     }
 
     /**
+     * Returns the number of elements collected by the specified sink.
+     *
+     * @param sinkId the identifier of the sink
+     * @return the number of collected elements
+     */
+    public static int size(UUID sinkId) {
+        Objects.requireNonNull(sinkId, "sinkId must not be null");
+        var queue = ELEMENTS_BY_SINK.get(sinkId);
+        if (queue == null) {
+            return 0;
+        }
+        return queue.size();
+    }
+
+    /**
+     * Returns {@code true} if the specified sink contains no elements.
+     *
+     * @param sinkId the identifier of the sink
+     * @return {@code true} if the specified sink contains no elements
+     */
+    public static boolean isEmpty(UUID sinkId) {
+        Objects.requireNonNull(sinkId, "sinkId must not be null");
+        var queue = ELEMENTS_BY_SINK.get(sinkId);
+        if (queue == null) {
+            return true;
+        }
+        return queue.isEmpty();
+    }
+
+    /**
      * Removes all elements associated with the specified sink.
      *
      * @param sinkId the identifier of the sink

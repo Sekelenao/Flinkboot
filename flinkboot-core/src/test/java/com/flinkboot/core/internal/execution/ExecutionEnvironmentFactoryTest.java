@@ -211,7 +211,7 @@ class ExecutionEnvironmentFactoryTest {
                 true,
                 true,
                 null
-            );
+            , null);
             var envProps = new ExecutionEnvironmentProperties(null, null, null, stateConfig, null, null, null);
             var jobConfig = new JobProperties("state-backend-job", envProps);
 
@@ -233,7 +233,8 @@ class ExecutionEnvironmentFactoryTest {
             var savepointConfig = new SavepointRestoreProperties(
                 "/tmp/savepoint-1",
                 true,
-                RestoreMode.CLAIM
+                RestoreMode.CLAIM,
+                "s3://my-bucket/savepoints"
             );
             var envProps = new ExecutionEnvironmentProperties(null, null, null, null, savepointConfig, null, null);
             var jobConfig = new JobProperties("savepoint-job", envProps);
@@ -245,7 +246,8 @@ class ExecutionEnvironmentFactoryTest {
             assertAll(
                 () -> assertEquals("/tmp/savepoint-1", flinkConfig.get(StateRecoveryOptions.SAVEPOINT_PATH)),
                 () -> assertTrue(flinkConfig.get(StateRecoveryOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE)),
-                () -> assertEquals("CLAIM", flinkConfig.get(StateRecoveryOptions.RESTORE_MODE).toString())
+                () -> assertEquals("CLAIM", flinkConfig.get(StateRecoveryOptions.RESTORE_MODE).toString()),
+                () -> assertEquals("s3://my-bucket/savepoints", flinkConfig.get(CheckpointingOptions.SAVEPOINT_DIRECTORY))
             );
         }
 
@@ -263,6 +265,24 @@ class ExecutionEnvironmentFactoryTest {
                 () -> assertNotNull(env),
                 () -> assertTrue(env instanceof LocalStreamEnvironment),
                 () -> assertEquals(8081, env.getConfiguration().get(RestOptions.PORT)),
+                () -> assertEquals("127.0.0.1", env.getConfiguration().get(RestOptions.BIND_ADDRESS))
+            );
+        }
+
+        @Test
+        @DisplayName("Should configure local WebUI and create LocalStreamEnvironment when enabled is omitted")
+        void shouldConfigureLocalWebUiWhenEnabledIsOmitted() {
+            var localWebUiConfig = new LocalWebUiProperties(null, 8082, "127.0.0.1");
+            var envProps = new ExecutionEnvironmentProperties(null, null, null, null, null, localWebUiConfig, null);
+            var jobConfig = new JobProperties("default-webui-job", envProps);
+
+            var factory = new ExecutionEnvironmentFactory();
+            StreamExecutionEnvironment env = factory.create(jobConfig);
+
+            assertAll(
+                () -> assertNotNull(env),
+                () -> assertTrue(env instanceof LocalStreamEnvironment),
+                () -> assertEquals(8082, env.getConfiguration().get(RestOptions.PORT)),
                 () -> assertEquals("127.0.0.1", env.getConfiguration().get(RestOptions.BIND_ADDRESS))
             );
         }

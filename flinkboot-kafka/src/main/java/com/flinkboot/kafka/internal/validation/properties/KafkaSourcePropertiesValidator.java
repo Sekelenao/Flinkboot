@@ -34,11 +34,11 @@ public final class KafkaSourcePropertiesValidator {
     private boolean validateTopicSubscription() {
         var hasTopics = !properties.topics().isEmpty();
         var hasPattern = properties.topicPattern().isPresent();
-        if (hasTopics && hasPattern) {
-            return reject("topic-pattern", "Cannot configure both 'topics' and 'topic-pattern'");
-        }
-        if (!hasTopics && !hasPattern) {
-            return reject("topics", "Either 'topics' or 'topic-pattern' must be specified");
+        var hasPartitions = !properties.partitions().isEmpty();
+
+        int count = (hasTopics ? 1 : 0) + (hasPattern ? 1 : 0) + (hasPartitions ? 1 : 0);
+        if (count != 1) {
+            return reject("topics", "Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified");
         }
         return true;
     }

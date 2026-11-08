@@ -2,6 +2,7 @@ package com.flinkboot.kafka.api.properties.source;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.flinkboot.core.internal.validation.Validators;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -11,12 +12,11 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import com.flinkboot.core.internal.validation.Validators;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -55,7 +55,9 @@ class KafkaSourcePropertiesTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "my-group",
+                null,
                 List.of("topic-a", "topic-b"),
+                null,
                 null,
                 DEFAULT_STARTING_OFFSETS,
                 KafkaBoundedness.BOUNDED,
@@ -69,6 +71,7 @@ class KafkaSourcePropertiesTest {
                 () -> assertEquals("my-group", config.groupId()),
                 () -> assertEquals(List.of("topic-a", "topic-b"), config.topics()),
                 () -> assertTrue(config.topicPattern().isEmpty()),
+                () -> assertTrue(config.partitions().isEmpty()),
                 () -> assertEquals(DEFAULT_STARTING_OFFSETS, config.startingOffsets()),
                 () -> assertEquals(Optional.of(KafkaBoundedness.BOUNDED), config.boundedness()),
                 () -> assertEquals(Optional.of(DEFAULT_STOPPING_OFFSETS), config.stoppingOffsets()),
@@ -84,7 +87,9 @@ class KafkaSourcePropertiesTest {
                 List.of("localhost:9092"),
                 "my-group",
                 null,
+                null,
                 "^my-topic-.*$",
+                null,
                 DEFAULT_STARTING_OFFSETS,
                 null,
                 null,
@@ -95,9 +100,49 @@ class KafkaSourcePropertiesTest {
                 () -> assertEquals("my-source", config.name()),
                 () -> assertTrue(config.topics().isEmpty()),
                 () -> assertEquals("^my-topic-.*$", config.topicPattern().orElseThrow()),
+                () -> assertTrue(config.partitions().isEmpty()),
                 () -> assertEquals(Optional.empty(), config.boundedness()),
                 () -> assertEquals(Optional.empty(), config.stoppingOffsets()),
                 () -> assertTrue(config.properties().isEmpty())
+            );
+        }
+
+        @Test
+        @DisplayName("Should successfully construct with partition list arguments")
+        void shouldConstructWithPartitionList() {
+            var partitions = List.of(new TopicPartitionProperties("topic-a", 0), new TopicPartitionProperties("topic-a", 1));
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                null,
+                null,
+                null,
+                partitions,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                null
+            );
+
+            assertAll(
+                () -> assertEquals("my-source", config.name()),
+                () -> assertTrue(config.topics().isEmpty()),
+                () -> assertTrue(config.topicPattern().isEmpty()),
+                () -> assertEquals(partitions, config.partitions())
+            );
+        }
+
+        @Test
+        @DisplayName("Should return an empty or configured client ID prefix from the canonical constructor")
+        void shouldConstructWithOptionalClientIdPrefix() {
+            var absent = new KafkaSourceProperties("my-source", List.of("localhost:9092"), "my-group", null,
+                List.of("topic-a"), null, null, DEFAULT_STARTING_OFFSETS, null, null, null);
+            var configured = new KafkaSourceProperties("my-source", List.of("localhost:9092"), "my-group", "orders-reader",
+                List.of("topic-a"), null, null, DEFAULT_STARTING_OFFSETS, null, null, null);
+            assertAll(
+                () -> assertEquals(Optional.empty(), absent.clientIdPrefix()),
+                () -> assertEquals(Optional.of("orders-reader"), configured.clientIdPrefix())
             );
         }
 
@@ -108,7 +153,9 @@ class KafkaSourcePropertiesTest {
                 "my-source",
                 null,
                 "my-group",
+                null,
                 List.of("topic-a"),
+                null,
                 null,
                 DEFAULT_STARTING_OFFSETS,
                 null,
@@ -120,18 +167,41 @@ class KafkaSourcePropertiesTest {
         }
 
         @Test
+        @DisplayName("Should return empty list when partitions is null")
+        void shouldReturnEmptyListWhenPartitionsIsNull() {
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                null,
+                List.of("topic-a"),
+                null,
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                null
+            );
+
+            assertTrue(config.partitions().isEmpty());
+        }
+
+        @Test
         @DisplayName("Should return unmodifiable defensive copies for collections")
         void shouldReturnUnmodifiableCollections() {
             var servers = new ArrayList<>(List.of("localhost:9092"));
             var topics = new ArrayList<>(List.of("topic-a"));
+            var partitions = new ArrayList<>(List.of(new TopicPartitionProperties("topic-a", 0)));
             var properties = new HashMap<>(Map.of("k", "v"));
 
             var config = new KafkaSourceProperties(
                 "my-source",
                 servers,
                 "my-group",
+                null,
                 topics,
                 null,
+                partitions,
                 DEFAULT_STARTING_OFFSETS,
                 null,
                 null,
@@ -141,6 +211,7 @@ class KafkaSourcePropertiesTest {
             assertAll(
                 () -> assertThrows(UnsupportedOperationException.class, () -> config.bootstrapServers().add("other:9092")),
                 () -> assertThrows(UnsupportedOperationException.class, () -> config.topics().add("topic-b")),
+                () -> assertThrows(UnsupportedOperationException.class, () -> config.partitions().add(new TopicPartitionProperties("topic-b", 1))),
                 () -> assertThrows(UnsupportedOperationException.class, () -> config.properties().put("k2", "v2"))
             );
         }
@@ -157,7 +228,9 @@ class KafkaSourcePropertiesTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "my-group",
+                null,
                 List.of("topic-a"),
+                null,
                 null,
                 DEFAULT_STARTING_OFFSETS,
                 null,
@@ -175,11 +248,53 @@ class KafkaSourcePropertiesTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "my-group",
+                null,
                 List.of("topic-a"),
+                null,
                 null,
                 DEFAULT_STARTING_OFFSETS,
                 KafkaBoundedness.BOUNDED,
                 DEFAULT_STOPPING_OFFSETS,
+                null
+            );
+
+            assertTrue(validator.validate(config).isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should pass validation with valid partitions subscription")
+        void shouldPassWithValidPartitions() {
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                null,
+                null,
+                null,
+                List.of(new TopicPartitionProperties("topic-a", 0)),
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                null
+            );
+
+            assertTrue(validator.validate(config).isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should pass validation with valid client ID prefix")
+        void shouldPassWithValidClientIdPrefix() {
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                "orders-reader",
+                List.of("topic-a"),
+                null,
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
                 null
             );
 
@@ -195,7 +310,9 @@ class KafkaSourcePropertiesTest {
                 name,
                 List.of("localhost:9092"),
                 "my-group",
+                null,
                 List.of("topic-a"),
+                null,
                 null,
                 DEFAULT_STARTING_OFFSETS,
                 null,
@@ -217,7 +334,9 @@ class KafkaSourcePropertiesTest {
                 "my-source",
                 null,
                 "my-group",
+                null,
                 List.of("topic-a"),
+                null,
                 null,
                 DEFAULT_STARTING_OFFSETS,
                 null,
@@ -228,7 +347,9 @@ class KafkaSourcePropertiesTest {
                 "my-source",
                 List.of(),
                 "my-group",
+                null,
                 List.of("topic-a"),
+                null,
                 null,
                 DEFAULT_STARTING_OFFSETS,
                 null,
@@ -251,7 +372,9 @@ class KafkaSourcePropertiesTest {
                 "my-source",
                 List.of("localhost:9092"),
                 groupId,
+                null,
                 List.of("topic-a"),
+                null,
                 null,
                 DEFAULT_STARTING_OFFSETS,
                 null,
@@ -268,6 +391,19 @@ class KafkaSourcePropertiesTest {
 
         @ParameterizedTest
         @ValueSource(strings = {"", "   ", "\t\n"})
+        @DisplayName("Should fail validation when clientIdPrefix is blank")
+        void shouldFailWhenClientIdPrefixIsBlank(String clientIdPrefix) {
+            var config = new KafkaSourceProperties("my-source", List.of("localhost:9092"), "my-group", clientIdPrefix,
+                List.of("topic-a"), null, null, DEFAULT_STARTING_OFFSETS, null, null, null);
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("client-id-prefix")))
+            );
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "   ", "\t\n"})
         @DisplayName("Should fail validation when topicPattern is blank")
         void shouldFailWhenTopicPatternIsBlank(String blankPattern) {
             var config = new KafkaSourceProperties(
@@ -275,7 +411,9 @@ class KafkaSourcePropertiesTest {
                 List.of("localhost:9092"),
                 "my-group",
                 null,
+                null,
                 blankPattern,
+                null,
                 DEFAULT_STARTING_OFFSETS,
                 null,
                 null,
@@ -296,8 +434,10 @@ class KafkaSourcePropertiesTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "my-group",
+                null,
                 List.of("topic-a"),
                 "^topic-.*$",
+                null,
                 DEFAULT_STARTING_OFFSETS,
                 null,
                 null,
@@ -308,18 +448,98 @@ class KafkaSourcePropertiesTest {
             assertAll(
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v ->
-                    v.getPropertyPath().toString().equals("topic-pattern")
-                    && v.getMessage().contains("Cannot configure both 'topics' and 'topic-pattern'")))
+                    v.getPropertyPath().toString().equals("topics")
+                    && v.getMessage().contains("Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified")))
             );
         }
 
         @Test
-        @DisplayName("Should fail validation when neither topics nor topic-pattern are configured")
+        @DisplayName("Should fail validation when both topics and partitions are configured")
+        void shouldFailWhenBothTopicsAndPartitionsSpecified() {
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                null,
+                List.of("topic-a"),
+                null,
+                List.of(new TopicPartitionProperties("topic-a", 0)),
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                null
+            );
+
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("topics")
+                    && v.getMessage().contains("Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when both topic-pattern and partitions are configured")
+        void shouldFailWhenBothTopicPatternAndPartitionsSpecified() {
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                null,
+                null,
+                "^topic-.*$",
+                List.of(new TopicPartitionProperties("topic-a", 0)),
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                null
+            );
+
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("topics")
+                    && v.getMessage().contains("Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when all three topics, topic-pattern, and partitions are configured")
+        void shouldFailWhenAllThreeSubscriptionModesSpecified() {
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                null,
+                List.of("topic-a"),
+                "^topic-.*$",
+                List.of(new TopicPartitionProperties("topic-a", 0)),
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                null
+            );
+
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("topics")
+                    && v.getMessage().contains("Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when neither topics, topic-pattern, nor partitions are configured")
         void shouldFailWhenNeitherTopicsNorTopicPatternSpecified() {
             var config = new KafkaSourceProperties(
                 "my-source",
                 List.of("localhost:9092"),
                 "my-group",
+                null,
+                null,
                 null,
                 null,
                 DEFAULT_STARTING_OFFSETS,
@@ -333,7 +553,57 @@ class KafkaSourcePropertiesTest {
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v ->
                     v.getPropertyPath().toString().equals("topics")
-                    && v.getMessage().contains("Either 'topics' or 'topic-pattern' must be specified")))
+                    && v.getMessage().contains("Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when partitions list contains null or invalid elements")
+        void shouldFailWhenPartitionsContainInvalidElement() {
+            var configWithNull = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                null,
+                null,
+                null,
+                Collections.singletonList(null),
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                null
+            );
+
+            var violations = validator.validate(configWithNull);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().startsWith("partitions")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should cascade validation into partitions when element is invalid")
+        void shouldCascadeValidationIntoPartitions() {
+            var invalidPartition = new TopicPartitionProperties(null, -1);
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                null,
+                null,
+                null,
+                List.of(invalidPartition),
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                null
+            );
+
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertEquals(2, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("partitions[0].topic"))),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("partitions[0].partition")))
             );
         }
 
@@ -344,7 +614,9 @@ class KafkaSourcePropertiesTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "my-group",
+                null,
                 List.of("topic-a"),
+                null,
                 null,
                 null,
                 null,
@@ -367,7 +639,9 @@ class KafkaSourcePropertiesTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "my-group",
+                null,
                 List.of("topic-a"),
+                null,
                 null,
                 invalidOffsets,
                 null,
@@ -389,7 +663,9 @@ class KafkaSourcePropertiesTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "my-group",
+                null,
                 List.of("topic-a"),
+                null,
                 null,
                 DEFAULT_STARTING_OFFSETS,
                 KafkaBoundedness.BOUNDED,
@@ -414,7 +690,9 @@ class KafkaSourcePropertiesTest {
                 "my-source",
                 List.of("localhost:9092"),
                 "my-group",
+                null,
                 List.of("topic-a"),
+                null,
                 null,
                 DEFAULT_STARTING_OFFSETS,
                 KafkaBoundedness.BOUNDED,
@@ -442,6 +720,7 @@ class KafkaSourcePropertiesTest {
                 + "  - \"localhost:9092\"\n"
                 + "  - \"localhost:9093\"\n"
                 + "group-id: \"analytics-group\"\n"
+                + "client-id-prefix: \"analytics-reader\"\n"
                 + "topics:\n"
                 + "  - \"orders\"\n"
                 + "  - \"payments\"\n"
@@ -461,7 +740,9 @@ class KafkaSourcePropertiesTest {
                 () -> assertEquals("full-kafka-source", config.name()),
                 () -> assertEquals(List.of("localhost:9092", "localhost:9093"), config.bootstrapServers()),
                 () -> assertEquals("analytics-group", config.groupId()),
+                () -> assertEquals(Optional.of("analytics-reader"), config.clientIdPrefix()),
                 () -> assertEquals(List.of("orders", "payments"), config.topics()),
+                () -> assertTrue(config.partitions().isEmpty()),
                 () -> assertEquals(Optional.of(KafkaBoundedness.BOUNDED), config.boundedness()),
                 () -> assertEquals(KafkaOffsetInitializer.TIMESTAMP, config.startingOffsets().strategy()),
                 () -> assertEquals(1689717600000L, config.startingOffsets().timestamp().orElseThrow()),
@@ -489,11 +770,43 @@ class KafkaSourcePropertiesTest {
                 () -> assertEquals("minimal-kafka-source", config.name()),
                 () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
                 () -> assertEquals("minimal-group", config.groupId()),
+                () -> assertTrue(config.clientIdPrefix().isEmpty()),
                 () -> assertEquals(List.of("orders"), config.topics()),
+                () -> assertTrue(config.partitions().isEmpty()),
                 () -> assertEquals(KafkaOffsetInitializer.EARLIEST, config.startingOffsets().strategy()),
                 () -> assertEquals(Optional.empty(), config.boundedness()),
                 () -> assertEquals(Optional.empty(), config.stoppingOffsets()),
                 () -> assertTrue(config.properties().isEmpty())
+            );
+        }
+
+        @Test
+        @DisplayName("Should deserialize YAML with partition subscriptions")
+        void shouldDeserializeYamlWithPartitions() throws Exception {
+            var yaml = "name: \"partition-kafka-source\"\n"
+                + "bootstrap-servers:\n"
+                + "  - \"localhost:9092\"\n"
+                + "group-id: \"partition-group\"\n"
+                + "partitions:\n"
+                + "  - topic: \"orders\"\n"
+                + "    partition: 0\n"
+                + "  - topic: \"orders\"\n"
+                + "    partition: 1\n"
+                + "starting-offsets:\n"
+                + "  strategy: EARLIEST\n";
+
+            var config = yamlMapper.readValue(yaml, KafkaSourceProperties.class);
+
+            assertAll(
+                () -> assertEquals("partition-kafka-source", config.name()),
+                () -> assertTrue(config.topics().isEmpty()),
+                () -> assertTrue(config.topicPattern().isEmpty()),
+                () -> assertEquals(2, config.partitions().size()),
+                () -> assertEquals("orders", config.partitions().get(0).topic()),
+                () -> assertEquals(0, config.partitions().get(0).partition()),
+                () -> assertEquals("orders", config.partitions().get(1).topic()),
+                () -> assertEquals(1, config.partitions().get(1).partition()),
+                () -> assertTrue(validator.validate(config).isEmpty())
             );
         }
     }
@@ -509,7 +822,9 @@ class KafkaSourcePropertiesTest {
                 "source",
                 List.of("localhost:9092"),
                 "group",
+                null,
                 List.of("topic"),
+                null,
                 null,
                 DEFAULT_STARTING_OFFSETS,
                 KafkaBoundedness.BOUNDED,
@@ -520,7 +835,9 @@ class KafkaSourcePropertiesTest {
                 "source",
                 List.of("localhost:9092"),
                 "group",
+                null,
                 List.of("topic"),
+                null,
                 null,
                 DEFAULT_STARTING_OFFSETS,
                 KafkaBoundedness.BOUNDED,
@@ -543,7 +860,9 @@ class KafkaSourcePropertiesTest {
                 "source",
                 List.of("localhost:9092"),
                 "group",
+                null,
                 List.of("topic"),
+                null,
                 null,
                 DEFAULT_STARTING_OFFSETS,
                 KafkaBoundedness.BOUNDED,
@@ -551,15 +870,26 @@ class KafkaSourcePropertiesTest {
                 Map.of("k", "v")
             );
 
-            var diffName = new KafkaSourceProperties("other", List.of("localhost:9092"), "group", List.of("topic"), null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
-            var diffServers = new KafkaSourceProperties("source", List.of("localhost:9093"), "group", List.of("topic"), null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
-            var diffGroup = new KafkaSourceProperties("source", List.of("localhost:9092"), "other-group", List.of("topic"), null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
-            var diffTopics = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", List.of("other-topic"), null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
-            var diffPattern = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", List.of("topic"), "^topic.*", DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
-            var diffStart = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", List.of("topic"), null, new KafkaOffsetProperties(KafkaOffsetInitializer.LATEST, null, null, null), KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
-            var diffBoundedness = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", List.of("topic"), null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.UNBOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
-            var diffStop = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", List.of("topic"), null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, new KafkaOffsetProperties(KafkaOffsetInitializer.COMMITTED, null, null, null), Map.of("k", "v"));
-            var diffProps = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", List.of("topic"), null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v2"));
+            var diffName = new KafkaSourceProperties("other", List.of("localhost:9092"), "group",
+                null, List.of("topic"), null, null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
+            var diffServers = new KafkaSourceProperties("source", List.of("localhost:9093"), "group",
+                null, List.of("topic"), null, null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
+            var diffGroup = new KafkaSourceProperties("source", List.of("localhost:9092"), "other-group",
+                null, List.of("topic"), null, null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
+            var diffTopics = new KafkaSourceProperties("source", List.of("localhost:9092"), "group",
+                null, List.of("other-topic"), null, null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
+            var diffPattern = new KafkaSourceProperties("source", List.of("localhost:9092"), "group",
+                null, null, "^topic.*", null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
+            var diffPartitions = new KafkaSourceProperties("source", List.of("localhost:9092"), "group",
+                null, null, null, List.of(new TopicPartitionProperties("topic", 0)), DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
+            var diffStart = new KafkaSourceProperties("source", List.of("localhost:9092"), "group",
+                null, List.of("topic"), null, null, new KafkaOffsetProperties(KafkaOffsetInitializer.LATEST, null, null, null), KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
+            var diffBoundedness = new KafkaSourceProperties("source", List.of("localhost:9092"), "group",
+                null, List.of("topic"), null, null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.UNBOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v"));
+            var diffStop = new KafkaSourceProperties("source", List.of("localhost:9092"), "group",
+                null, List.of("topic"), null, null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, new KafkaOffsetProperties(KafkaOffsetInitializer.COMMITTED, null, null, null), Map.of("k", "v"));
+            var diffProps = new KafkaSourceProperties("source", List.of("localhost:9092"), "group",
+                null, List.of("topic"), null, null, DEFAULT_STARTING_OFFSETS, KafkaBoundedness.BOUNDED, DEFAULT_STOPPING_OFFSETS, Map.of("k", "v2"));
 
             assertAll(
                 () -> assertNotEquals(base, diffName),
@@ -567,6 +897,7 @@ class KafkaSourcePropertiesTest {
                 () -> assertNotEquals(base, diffGroup),
                 () -> assertNotEquals(base, diffTopics),
                 () -> assertNotEquals(base, diffPattern),
+                () -> assertNotEquals(base, diffPartitions),
                 () -> assertNotEquals(base, diffStart),
                 () -> assertNotEquals(base, diffBoundedness),
                 () -> assertNotEquals(base, diffStop),
@@ -577,14 +908,67 @@ class KafkaSourcePropertiesTest {
         }
 
         @Test
+        @DisplayName("Should distinguish configurations with different client ID prefixes")
+        void shouldDistinguishClientIdPrefixes() {
+            var base = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                "group",
+                "orders-reader",
+                List.of("topic"),
+                null,
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                null
+            );
+            var differentPrefix = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                "group",
+                "payments-reader",
+                List.of("topic"),
+                null,
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                null
+            );
+
+            assertAll(
+                () -> assertNotEquals(base, differentPrefix),
+                () -> assertNotEquals(differentPrefix, base),
+                () -> assertNotEquals(base.hashCode(), differentPrefix.hashCode())
+            );
+        }
+
+        @Test
+        @DisplayName("Should distinguish configurations with and without a client ID prefix")
+        void shouldCompareNullAndNonNullClientIdPrefixes() {
+            var absent = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", null,
+                List.of("topic"), null, null, DEFAULT_STARTING_OFFSETS, null, null, null);
+            var configured = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", "orders-reader",
+                List.of("topic"), null, null, DEFAULT_STARTING_OFFSETS, null, null, null);
+            assertAll(
+                () -> assertNotEquals(absent, configured),
+                () -> assertNotEquals(configured, absent),
+                () -> assertNotEquals(absent.hashCode(), configured.hashCode())
+            );
+        }
+
+        @Test
         @DisplayName("Should produce meaningful toString output")
         void shouldProduceMeaningfulToString() {
             var config = new KafkaSourceProperties(
                 "my-source",
                 List.of("localhost:9092"),
                 "my-group",
+                "orders-reader",
                 List.of("topic"),
                 null,
+                List.of(new TopicPartitionProperties("topic", 0)),
                 DEFAULT_STARTING_OFFSETS,
                 KafkaBoundedness.BOUNDED,
                 DEFAULT_STOPPING_OFFSETS,
@@ -594,6 +978,8 @@ class KafkaSourcePropertiesTest {
             var str = config.toString();
             assertAll(
                 () -> assertTrue(str.contains("my-source")),
+                () -> assertTrue(str.contains("clientIdPrefix='orders-reader'")),
+                () -> assertTrue(str.contains("partitions=")),
                 () -> assertTrue(str.contains("KafkaSourceProperties"))
             );
         }

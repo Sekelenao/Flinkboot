@@ -1,8 +1,10 @@
 package com.flinkboot.test.api.assertion;
 
 import com.flinkboot.test.api.assertion.type.ClassAssert;
-import com.flinkboot.test.api.assertion.type.TypeInformationAssert;
+import com.flinkboot.test.api.assertion.type.CollectingSinkAssert;
 import com.flinkboot.test.api.assertion.type.ObjectAssert;
+import com.flinkboot.test.api.assertion.type.TypeInformationAssert;
+import com.flinkboot.test.api.sink.CollectingSink;
 
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -44,6 +46,20 @@ public final class FlinkbootAssertions {
     public static ClassAssert assertThat(Class<?> type) {
         Objects.requireNonNull(type, "Class to assert must not be null");
         return new ClassAssert(type);
+    }
+
+    /**
+     * Creates a new instance of {@link CollectingSinkAssert} to assert on the specified
+     * {@link CollectingSink}.
+     *
+     * @param sink the collecting sink to assert
+     * @param <T> the type of elements collected by the sink
+     * @return the created {@link CollectingSinkAssert} assertion object
+     * @throws NullPointerException if {@code sink} is {@code null}
+     */
+    public static <T> CollectingSinkAssert<T> assertThat(CollectingSink<T> sink) {
+        Objects.requireNonNull(sink, "sink must not be null");
+        return new CollectingSinkAssert<>(sink);
     }
 
     /**

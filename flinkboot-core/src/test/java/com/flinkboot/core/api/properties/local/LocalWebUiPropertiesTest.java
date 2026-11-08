@@ -127,15 +127,11 @@ class LocalWebUiPropertiesTest {
         }
 
         @Test
-        @DisplayName("Should fail validation when enabled is null")
-        void shouldFailValidationWhenEnabledIsNull() {
+        @DisplayName("Should pass validation when enabled is null")
+        void shouldPassValidationWhenEnabledIsNull() {
             var config = new LocalWebUiProperties(null, 8081, "localhost");
             var violations = validator.validate(config);
-            assertAll(
-                () -> assertEquals(1, violations.size(), "Should have exactly 1 violation for null enabled"),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("enabled")),
-                    "Violation should be on the enabled field")
-            );
+            assertTrue(violations.isEmpty(), "Should have no violations when enabled is null");
         }
 
         @ParameterizedTest
@@ -185,6 +181,22 @@ class LocalWebUiPropertiesTest {
                 () -> assertFalse(config.enabled().get()),
                 () -> assertTrue(config.port().isEmpty()),
                 () -> assertTrue(config.bindAddress().isEmpty())
+            );
+        }
+
+        @Test
+        @DisplayName("Should deserialize valid YAML without enabled field")
+        void shouldDeserializeValidYamlWithoutEnabledField() throws Exception {
+            var yaml = "port: 8081\n" +
+                "bind-address: localhost\n";
+            var config = mapper.readValue(yaml, LocalWebUiProperties.class);
+            assertAll(
+                () -> assertNotNull(config),
+                () -> assertTrue(config.enabled().isEmpty()),
+                () -> assertTrue(config.port().isPresent()),
+                () -> assertEquals(8081, config.port().getAsInt()),
+                () -> assertTrue(config.bindAddress().isPresent()),
+                () -> assertEquals("localhost", config.bindAddress().get())
             );
         }
 

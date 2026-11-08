@@ -20,8 +20,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Unified configuration properties for Apache Flink Kafka sources consuming from an explicit list of topics
- * or dynamic topics matching a regex pattern.
+ * Unified configuration properties for Apache Flink Kafka sources consuming from an explicit list of topics,
+ * dynamic topics matching a regex pattern, or explicit topic partitions.
  */
 public final class KafkaSourceProperties implements Serializable, ValidatableProperties {
 
@@ -36,10 +36,15 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
     @NotBlank
     private final String groupId;
 
+    @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
+    private final String clientIdPrefix;
+
     private final List<@NotBlank String> topics;
 
     @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
     private final String topicPattern;
+
+    private final List<@NotNull @Valid TopicPartitionProperties> partitions;
 
     @Valid
     @NotNull
@@ -58,8 +63,10 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
      * @param name             source operator name in Flink DAG
      * @param bootstrapServers list of Kafka broker addresses
      * @param groupId          Kafka consumer group ID
-     * @param topics           list of topics to consume from (mutually exclusive with {@code topicPattern})
-     * @param topicPattern     regular expression pattern to match topics against (mutually exclusive with {@code topics})
+     * @param clientIdPrefix   optional prefix for unique Kafka client IDs across source subtasks
+     * @param topics           list of topics to consume from (mutually exclusive with {@code topicPattern} and {@code partitions})
+     * @param topicPattern     regular expression pattern to match topics against (mutually exclusive with {@code topics} and {@code partitions})
+     * @param partitions       list of specific topic partitions to consume from (mutually exclusive with {@code topics} and {@code topicPattern})
      * @param startingOffsets  starting offset configuration
      * @param boundedness      execution boundedness mode (optional, defaults to UNBOUNDED if null)
      * @param stoppingOffsets  stopping offset configuration (optional)
@@ -70,8 +77,10 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
         @JsonProperty("name") String name,
         @JsonProperty("bootstrap-servers") List<String> bootstrapServers,
         @JsonProperty("group-id") String groupId,
+        @JsonProperty("client-id-prefix") String clientIdPrefix,
         @JsonProperty("topics") List<String> topics,
         @JsonProperty("topic-pattern") String topicPattern,
+        @JsonProperty("partitions") List<TopicPartitionProperties> partitions,
         @JsonProperty("starting-offsets") KafkaOffsetProperties startingOffsets,
         @JsonProperty("boundedness") KafkaBoundedness boundedness,
         @JsonProperty("stopping-offsets") KafkaOffsetProperties stoppingOffsets,
@@ -80,8 +89,10 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
         this.name = name;
         this.bootstrapServers = bootstrapServers;
         this.groupId = groupId;
+        this.clientIdPrefix = clientIdPrefix;
         this.topics = topics;
         this.topicPattern = topicPattern;
+        this.partitions = partitions;
         this.startingOffsets = startingOffsets;
         this.boundedness = boundedness;
         this.stoppingOffsets = stoppingOffsets;
@@ -124,6 +135,15 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
     }
 
     /**
+     * Returns the optional prefix used to generate unique Kafka client IDs for source subtasks.
+     *
+     * @return an {@link Optional} containing the client ID prefix, or empty if not configured
+     */
+    public Optional<String> clientIdPrefix() {
+        return Optional.ofNullable(clientIdPrefix);
+    }
+
+    /**
      * Returns the list of topics to subscribe to.
      *
      * @return an unmodifiable list of topic names
@@ -142,6 +162,18 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
      */
     public Optional<String> topicPattern() {
         return Optional.ofNullable(topicPattern);
+    }
+
+    /**
+     * Returns the list of specific topic partitions to subscribe to.
+     *
+     * @return an unmodifiable list of topic partition configurations
+     */
+    public List<TopicPartitionProperties> partitions() {
+        if (partitions == null) {
+            return Collections.emptyList();
+        }
+        return Collections.unmodifiableList(partitions);
     }
 
     /**
@@ -193,8 +225,10 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
         return Objects.equals(name, o.name)
             && Objects.equals(bootstrapServers, o.bootstrapServers)
             && Objects.equals(groupId, o.groupId)
+            && Objects.equals(clientIdPrefix, o.clientIdPrefix)
             && Objects.equals(topics, o.topics)
             && Objects.equals(topicPattern, o.topicPattern)
+            && Objects.equals(partitions, o.partitions)
             && Objects.equals(startingOffsets, o.startingOffsets)
             && boundedness == o.boundedness
             && Objects.equals(stoppingOffsets, o.stoppingOffsets)
@@ -204,7 +238,7 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
     @Override
     @Generated
     public int hashCode() {
-        return Objects.hash(name, bootstrapServers, groupId, topics, topicPattern, startingOffsets, boundedness, stoppingOffsets, properties);
+        return Objects.hash(name, bootstrapServers, groupId, clientIdPrefix, topics, topicPattern, partitions, startingOffsets, boundedness, stoppingOffsets, properties);
     }
 
     @Override
@@ -214,8 +248,10 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
             "name='" + name + '\'' +
             ", bootstrapServers=" + bootstrapServers +
             ", groupId='" + groupId + '\'' +
+            ", clientIdPrefix='" + clientIdPrefix + '\'' +
             ", topics=" + topics +
             ", topicPattern='" + topicPattern + '\'' +
+            ", partitions=" + partitions +
             ", startingOffsets=" + startingOffsets +
             ", boundedness=" + boundedness +
             ", stoppingOffsets=" + stoppingOffsets +

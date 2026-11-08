@@ -19,9 +19,11 @@ import com.flinkboot.core.internal.execution.customizer.SavepointRestoreCustomiz
 import com.flinkboot.core.internal.execution.customizer.StateBackendCustomizer;
 import com.flinkboot.core.api.properties.execution.ExecutionProperties;
 import com.flinkboot.core.api.properties.execution.ExecutionRuntimeMode;
+import com.flinkboot.core.api.properties.local.LocalWebUiProperties;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.RestartStrategyOptions;
+import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.configuration.StateBackendOptions;
 import org.apache.flink.configuration.StateLatencyTrackOptions;
 import org.apache.flink.configuration.StateRecoveryOptions;
@@ -101,7 +103,7 @@ class EnvironmentCustomizersTest {
             false,
             false,
             null
-        );
+        , null);
         var envProps = new ExecutionEnvironmentProperties(null, null, null, stateBackendConfig, null, null, null);
 
         new StateBackendCustomizer(config).configure(envProps);
@@ -121,6 +123,7 @@ class EnvironmentCustomizersTest {
         Configuration config = new Configuration();
         var savepointConfig = new SavepointRestoreProperties(
             "/tmp/savepoint-2",
+            null,
             null,
             null
         );
@@ -238,6 +241,36 @@ class EnvironmentCustomizersTest {
         assertAll(
                 () -> assertEquals(bufferTimeout, config.get(ExecutionOptions.BUFFER_TIMEOUT)),
                 () -> assertTrue(config.contains(ExecutionOptions.BUFFER_TIMEOUT))
+        );
+    }
+
+    @Test
+    @DisplayName("Should apply LocalWebUi options when enabled is omitted")
+    void shouldApplyLocalWebUiOptionsWhenEnabledIsOmitted() {
+        Configuration config = new Configuration();
+        var localWebUi = new LocalWebUiProperties(null, 8082, "127.0.0.1");
+        var envConfig = new ExecutionEnvironmentProperties(null, null, null, null, null, localWebUi, null);
+
+        new LocalWebUiCustomizer(config).configure(envConfig);
+
+        assertAll(
+                () -> assertEquals(8082, config.get(RestOptions.PORT)),
+                () -> assertEquals("127.0.0.1", config.get(RestOptions.BIND_ADDRESS))
+        );
+    }
+
+    @Test
+    @DisplayName("Should not apply LocalWebUi options when enabled is false")
+    void shouldNotApplyLocalWebUiOptionsWhenEnabledIsFalse() {
+        Configuration config = new Configuration();
+        var localWebUi = new LocalWebUiProperties(false, 8081, "127.0.0.1");
+        var envConfig = new ExecutionEnvironmentProperties(null, null, null, null, null, localWebUi, null);
+
+        new LocalWebUiCustomizer(config).configure(envConfig);
+
+        assertAll(
+                () -> assertFalse(config.contains(RestOptions.PORT)),
+                () -> assertFalse(config.contains(RestOptions.BIND_ADDRESS))
         );
     }
 }

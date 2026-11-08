@@ -13,13 +13,12 @@
 </p>
 
 [![Java](https://img.shields.io/badge/Java_11%2B-%23ED8B00.svg?logo=openjdk&logoColor=white)](https://docs.oracle.com/en/java/javase/11/docs/api/index.html)
-[![Flink](https://img.shields.io/badge/Flink_1.20-%23E6526F.svg?logo=apacheflink&logoColor=white)](https://flink.apache.org/)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.sekelenao/flinkboot-core?label=Maven%20central&logo=apachemaven&logoColor=white&color=C71A36&labelColor=C71A36)](https://central.sonatype.com/artifact/io.github.sekelenao/flinkboot-core)
+[![Flink](https://img.shields.io/badge/Flink_1.20-%236f42c1.svg?logo=apacheflink&logoColor=white)](https://flink.apache.org/)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.sekelenao/flinkboot-core?label=Maven%20central&logo=apachemaven&logoColor=white&color=007ec6&labelColor=007ec6)](https://central.sonatype.com/artifact/io.github.sekelenao/flinkboot-core)
 ![Tests](https://raw.githubusercontent.com/Sekelenao/Flinkboot/badges/Tests.svg)
 ![Coverage](https://raw.githubusercontent.com/Sekelenao/Flinkboot/badges/Coverage.svg)
 ![Branches](https://raw.githubusercontent.com/Sekelenao/Flinkboot/badges/Branches.svg)
-
----
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=Sekelenao_Flinkboot&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Sekelenao_Flinkboot)
 
 Flinkboot eliminates operational boilerplate and prevents runtime failures before stream pipelines reach TaskManagers:
 
@@ -84,9 +83,9 @@ Sincere appreciation to all contributors who have shaped and strengthened this c
 
 <!-- CONTRIBUTORS-START -->
 <p align="left">
-  <a href="https://github.com/Sekelenao"><img src="https://github.com/Sekelenao.png?size=64" width="64" height="64" alt="Sekelenao" title="Sekelenao (71 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
+  <a href="https://github.com/Sekelenao"><img src="https://github.com/Sekelenao.png?size=64" width="64" height="64" alt="Sekelenao" title="Sekelenao (76 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
+  <a href="https://github.com/Aaqibhafeezkhan"><img src="https://github.com/Aaqibhafeezkhan.png?size=64" width="64" height="64" alt="Aaqibhafeezkhan" title="Aaqibhafeezkhan (9 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/LouisDeconinck"><img src="https://github.com/LouisDeconinck.png?size=64" width="64" height="64" alt="LouisDeconinck" title="LouisDeconinck (8 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
-  <a href="https://github.com/Aaqibhafeezkhan"><img src="https://github.com/Aaqibhafeezkhan.png?size=64" width="64" height="64" alt="Aaqibhafeezkhan" title="Aaqibhafeezkhan (4 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/be-student"><img src="https://github.com/be-student.png?size=64" width="64" height="64" alt="be-student" title="be-student (4 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/bkalika"><img src="https://github.com/bkalika.png?size=64" width="64" height="64" alt="bkalika" title="bkalika (4 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
   <a href="https://github.com/kasapdev"><img src="https://github.com/kasapdev.png?size=64" width="64" height="64" alt="kasapdev" title="kasapdev (3 merged PRs)" style="border-radius: 50%; margin: 2px;" /></a>
