@@ -38,7 +38,8 @@ public final class KafkaSourcePropertiesValidator {
 
         int count = (hasTopics ? 1 : 0) + (hasPattern ? 1 : 0) + (hasPartitions ? 1 : 0);
         if (count != 1) {
-            return reject("topics", "Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified");
+            var property = count == 0 ? "topics" : (hasPartitions ? "partitions" : "topic-pattern");
+            return reject(property, "Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified");
         }
         return true;
     }

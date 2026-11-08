@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @DisplayName("KafkaSourcePropertiesValidator")
 class KafkaSourcePropertiesValidatorTest {
@@ -148,6 +149,9 @@ class KafkaSourcePropertiesValidatorTest {
             );
 
             assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified"
+            )).addPropertyNode("topic-pattern");
         }
 
         @Test
@@ -169,6 +173,9 @@ class KafkaSourcePropertiesValidatorTest {
             );
 
             assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified"
+            )).addPropertyNode("partitions");
         }
 
         @Test
@@ -190,6 +197,9 @@ class KafkaSourcePropertiesValidatorTest {
             );
 
             assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified"
+            )).addPropertyNode("partitions");
         }
 
         @Test
@@ -211,6 +221,9 @@ class KafkaSourcePropertiesValidatorTest {
             );
 
             assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified"
+            )).addPropertyNode("partitions");
         }
 
         @Test
@@ -232,6 +245,9 @@ class KafkaSourcePropertiesValidatorTest {
             );
 
             assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified"
+            )).addPropertyNode("topics");
         }
 
         @Test
@@ -253,6 +269,9 @@ class KafkaSourcePropertiesValidatorTest {
             );
 
             assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified"
+            )).addPropertyNode("topic-pattern");
         }
 
         @Test
@@ -295,6 +314,9 @@ class KafkaSourcePropertiesValidatorTest {
             );
 
             assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "stopping-offsets is required when boundedness is BOUNDED"
+            )).addPropertyNode("stopping-offsets");
         }
 
         @Test
