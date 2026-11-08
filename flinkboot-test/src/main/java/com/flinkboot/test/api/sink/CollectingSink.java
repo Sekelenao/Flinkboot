@@ -93,4 +93,14 @@ public final class CollectingSink<T> implements Sink<T>, AutoCloseable {
     public void close() {
         clear();
     }
+
+    /**
+     * Returns a string representation of this collecting sink displaying its collected elements.
+     *
+     * @return a string representation of this sink
+     */
+    @Override
+    public String toString() {
+        return "CollectingSink[elements=" + elements() + "]";
+    }
 }

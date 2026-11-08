@@ -256,4 +256,30 @@ class CollectingSinkTest {
             );
         }
     }
+
+    @Nested
+    @DisplayName("String representation")
+    class StringRepresentation {
+
+        @Test
+        @DisplayName("Should return string representation with empty elements when sink has no elements")
+        void shouldReturnStringRepresentationWhenEmpty() {
+            try (var sink = new CollectingSink<String>()) {
+                assertEquals("CollectingSink[elements=[]]", sink.toString());
+            }
+        }
+
+        @Test
+        @DisplayName("Should return string representation displaying collected elements when sink is populated")
+        void shouldReturnStringRepresentationWhenPopulated() throws Exception {
+            try (var sink = new CollectingSink<Integer>()) {
+                var writer = sink.createWriter((WriterInitContext) null);
+                writer.write(1, null);
+                writer.write(2, null);
+                writer.write(3, null);
+
+                assertEquals("CollectingSink[elements=[1, 2, 3]]", sink.toString());
+            }
+        }
+    }
 }
