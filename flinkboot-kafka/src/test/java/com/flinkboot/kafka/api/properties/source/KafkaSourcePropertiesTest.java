@@ -448,7 +448,7 @@ class KafkaSourcePropertiesTest {
             assertAll(
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v ->
-                    v.getPropertyPath().toString().equals("topics")
+                    v.getPropertyPath().toString().equals("topic-pattern")
                     && v.getMessage().contains("Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified")))
             );
         }
@@ -474,7 +474,7 @@ class KafkaSourcePropertiesTest {
             assertAll(
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v ->
-                    v.getPropertyPath().toString().equals("topics")
+                    v.getPropertyPath().toString().equals("partitions")
                     && v.getMessage().contains("Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified")))
             );
         }
@@ -500,7 +500,7 @@ class KafkaSourcePropertiesTest {
             assertAll(
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v ->
-                    v.getPropertyPath().toString().equals("topics")
+                    v.getPropertyPath().toString().equals("partitions")
                     && v.getMessage().contains("Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified")))
             );
         }
@@ -526,7 +526,7 @@ class KafkaSourcePropertiesTest {
             assertAll(
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v ->
-                    v.getPropertyPath().toString().equals("topics")
+                    v.getPropertyPath().toString().equals("partitions")
                     && v.getMessage().contains("Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified")))
             );
         }
