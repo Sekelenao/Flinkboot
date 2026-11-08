@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @DisplayName("RestartStrategyPropertiesValidator")
 class RestartStrategyPropertiesValidatorTest {
@@ -118,6 +119,9 @@ class RestartStrategyPropertiesValidatorTest {
             var props = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
 
             assertFalse(RestartStrategyPropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "max-backoff cannot be smaller than initial-backoff in exponential-delay restart strategy"
+            )).addPropertyNode("exponential-delay");
         }
 
         @Test
@@ -167,6 +171,9 @@ class RestartStrategyPropertiesValidatorTest {
             var props = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
 
             assertFalse(RestartStrategyPropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "both initial-backoff and max-backoff must be specified together in exponential-delay restart strategy"
+            )).addPropertyNode("exponential-delay");
         }
 
         @Test
@@ -177,6 +184,9 @@ class RestartStrategyPropertiesValidatorTest {
             var props = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
 
             assertFalse(RestartStrategyPropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "both initial-backoff and max-backoff must be specified together in exponential-delay restart strategy"
+            )).addPropertyNode("exponential-delay");
         }
 
         @Test

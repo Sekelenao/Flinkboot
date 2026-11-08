@@ -26,7 +26,7 @@ public final class StateBackendPropertiesValidator {
         if (isCustom && !hasCustomClass) {
             return PropertiesValidator.reject(
                 context,
-                "customClass",
+                "custom-class",
                 "custom-class must be specified when state backend type is CUSTOM"
             );
         }
@@ -34,7 +34,7 @@ public final class StateBackendPropertiesValidator {
         if (!isCustom && hasCustomClass) {
             return PropertiesValidator.reject(
                 context,
-                "customClass",
+                "custom-class",
                 "custom-class can only be specified when state backend type is CUSTOM"
             );
         }

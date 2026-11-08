@@ -312,7 +312,7 @@ class FlinkbootTest {
                 () -> assertTrue(message.contains("app-name:")),
                 () -> assertTrue(message.contains("retries:")),
                 () -> assertTrue(message.contains("execution.parallelism: parallelism (8) cannot exceed max-parallelism (4)")),
-                () -> assertTrue(message.contains("state-backend.customClass: custom-class can only be specified when state backend type is CUSTOM"))
+                () -> assertTrue(message.contains("state-backend.custom-class: custom-class can only be specified when state backend type is CUSTOM"))
             );
         }
 

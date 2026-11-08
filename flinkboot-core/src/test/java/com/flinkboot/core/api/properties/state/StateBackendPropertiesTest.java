@@ -180,7 +180,7 @@ class StateBackendPropertiesTest {
             assertAll(
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v ->
-                    v.getPropertyPath().toString().equals("customClass")
+                    v.getPropertyPath().toString().equals("custom-class")
                         && v.getMessage().equals("custom-class must be specified when state backend type is CUSTOM")
                 ))
             );
@@ -213,7 +213,7 @@ class StateBackendPropertiesTest {
             assertAll(
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v ->
-                    v.getPropertyPath().toString().equals("customClass")
+                    v.getPropertyPath().toString().equals("custom-class")
                         && v.getMessage().equals("custom-class can only be specified when state backend type is CUSTOM")
                 ))
             );
@@ -253,7 +253,7 @@ class StateBackendPropertiesTest {
             var violations = validator.validate(config);
             assertFalse(violations.isEmpty());
             assertTrue(violations.stream().anyMatch(v ->
-                v.getPropertyPath().toString().equals("customClass")
+                v.getPropertyPath().toString().equals("custom-class")
                     && v.getMessage().equals("custom-class can only be specified when state backend type is CUSTOM")
             ));
         }
