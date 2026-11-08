@@ -2,6 +2,8 @@ package com.flinkboot.kafka.api.properties.sink;
 
 import org.apache.flink.connector.base.DeliveryGuarantee;
 
+import java.util.Objects;
+
 /**
  * Delivery consistency guarantee semantics for Kafka sink producers.
  */
@@ -22,7 +24,7 @@ public enum KafkaDeliveryGuarantee {
     private final DeliveryGuarantee deliveryGuarantee;
 
     KafkaDeliveryGuarantee(DeliveryGuarantee deliveryGuarantee) {
-        this.deliveryGuarantee = deliveryGuarantee;
+        this.deliveryGuarantee = Objects.requireNonNull(deliveryGuarantee, "deliveryGuarantee must not be null");
     }
 
     /**
