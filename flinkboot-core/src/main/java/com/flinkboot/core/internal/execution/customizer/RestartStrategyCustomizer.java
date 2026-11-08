@@ -89,6 +89,7 @@ public final class RestartStrategyCustomizer implements EnvironmentCustomizer {
         config.backoffMultiplier().ifPresent(this::applyExponentialDelayBackoffMultiplier);
         config.resetBackoffThreshold().ifPresent(this::applyExponentialDelayResetBackoffThreshold);
         config.jitterFactor().ifPresent(this::applyExponentialDelayJitterFactor);
+        config.attempts().ifPresent(this::applyExponentialDelayAttempts);
     }
 
     private void applyExponentialDelayInitialBackoff(Duration initialBackoff) {
@@ -109,5 +110,9 @@ public final class RestartStrategyCustomizer implements EnvironmentCustomizer {
 
     private void applyExponentialDelayJitterFactor(double jitterFactor) {
         toConfigure.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_JITTER_FACTOR, jitterFactor);
+    }
+
+    private void applyExponentialDelayAttempts(int attempts) {
+        toConfigure.set(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_ATTEMPTS, attempts);
     }
 }

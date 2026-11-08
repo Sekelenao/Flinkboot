@@ -170,7 +170,7 @@ class ExecutionEnvironmentFactoryTest {
         @Test
         @DisplayName("Should correctly map ExponentialDelay RestartStrategyProperties into Flink Configuration")
         void shouldMapExponentialDelayRestartStrategyToFlinkConfiguration() {
-            var expo = new ExponentialDelayRestartProperties(Duration.ofMillis(1000), Duration.ofMillis(60000), 2.0, Duration.ofMillis(3600000), 0.1);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofMillis(1000), Duration.ofMillis(60000), 2.0, Duration.ofMillis(3600000), 0.1, 5);
             var restartConfig = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
             var envProps = new ExecutionEnvironmentProperties(null, null, restartConfig, null, null, null, null);
             var jobConfig = new JobProperties("restart-expo-job", envProps);
@@ -185,7 +185,8 @@ class ExecutionEnvironmentFactoryTest {
                 () -> assertEquals(Duration.ofMillis(60000), flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_MAX_BACKOFF)),
                 () -> assertEquals(2.0, flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_BACKOFF_MULTIPLIER)),
                 () -> assertEquals(Duration.ofMillis(3600000), flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_RESET_BACKOFF_THRESHOLD)),
-                () -> assertEquals(0.1, flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_JITTER_FACTOR))
+                () -> assertEquals(0.1, flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_JITTER_FACTOR)),
+                () -> assertEquals(5, flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_ATTEMPTS))
             );
         }
 

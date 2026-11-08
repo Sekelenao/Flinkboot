@@ -104,7 +104,7 @@ class RestartStrategyPropertiesValidatorTest {
         @DisplayName("Should return false when failure-rate is provided for EXPONENTIAL_DELAY")
         void shouldFailWhenFailureRateProvidedForExponentialDelay() {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, null);
             var failure = new FailureRateRestartProperties(3, Duration.ofMinutes(1), Duration.ofSeconds(1));
             var props = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, failure, expo);
 
@@ -115,7 +115,7 @@ class RestartStrategyPropertiesValidatorTest {
         @DisplayName("Should return false when maxBackoff < initialBackoff in EXPONENTIAL_DELAY")
         void shouldFailWhenMaxBackoffSmallerThanInitialInExponentialDelay() {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(10), Duration.ofSeconds(1), 2.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(10), Duration.ofSeconds(1), 2.0, Duration.ofHours(1), 0.1, null);
             var props = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
 
             assertFalse(RestartStrategyPropertiesValidator.validate(props, context));
@@ -147,7 +147,7 @@ class RestartStrategyPropertiesValidatorTest {
         @DisplayName("Should return true for valid EXPONENTIAL_DELAY strategy")
         void shouldPassWithValidExponentialDelay() {
             var context = mock(ConstraintValidatorContext.class);
-            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, null);
             var props = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
 
             assertTrue(RestartStrategyPropertiesValidator.validate(props, context));
@@ -157,7 +157,7 @@ class RestartStrategyPropertiesValidatorTest {
         @DisplayName("Should return true when initial-backoff equals max-backoff in EXPONENTIAL_DELAY")
         void shouldPassWhenInitialBackoffEqualsMaxBackoffInExponentialDelay() {
             var context = mock(ConstraintValidatorContext.class);
-            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(5), Duration.ofSeconds(5), 2.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(5), Duration.ofSeconds(5), 2.0, Duration.ofHours(1), 0.1, null);
             var props = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
 
             assertTrue(RestartStrategyPropertiesValidator.validate(props, context));
@@ -167,7 +167,7 @@ class RestartStrategyPropertiesValidatorTest {
         @DisplayName("Should return false when only initial-backoff is specified in EXPONENTIAL_DELAY")
         void shouldFailWhenOnlyInitialBackoffInExponentialDelay() {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), null, 2.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), null, 2.0, Duration.ofHours(1), 0.1, null);
             var props = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
 
             assertFalse(RestartStrategyPropertiesValidator.validate(props, context));
@@ -180,7 +180,7 @@ class RestartStrategyPropertiesValidatorTest {
         @DisplayName("Should return false when only max-backoff is specified in EXPONENTIAL_DELAY")
         void shouldFailWhenOnlyMaxBackoffInExponentialDelay() {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-            var expo = new ExponentialDelayRestartProperties(null, Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(null, Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, null);
             var props = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
 
             assertFalse(RestartStrategyPropertiesValidator.validate(props, context));
@@ -193,7 +193,7 @@ class RestartStrategyPropertiesValidatorTest {
         @DisplayName("Should return true when neither initial-backoff nor max-backoff is specified in EXPONENTIAL_DELAY")
         void shouldPassWhenNeitherBackoffInExponentialDelay() {
             var context = mock(ConstraintValidatorContext.class);
-            var expo = new ExponentialDelayRestartProperties(null, null, 2.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(null, null, 2.0, Duration.ofHours(1), 0.1, null);
             var props = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
 
             assertTrue(RestartStrategyPropertiesValidator.validate(props, context));
@@ -204,7 +204,7 @@ class RestartStrategyPropertiesValidatorTest {
         void shouldFailWhenExponentialDelayProvidedForFixedDelay() {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
             var fixed = new FixedDelayRestartProperties(3, Duration.ofSeconds(5));
-            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, null);
             var props = new RestartStrategyProperties(RestartStrategyType.FIXED_DELAY, fixed, null, expo);
 
             assertFalse(RestartStrategyPropertiesValidator.validate(props, context));
@@ -215,7 +215,7 @@ class RestartStrategyPropertiesValidatorTest {
         void shouldFailWhenExponentialDelayProvidedForFailureRate() {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
             var failure = new FailureRateRestartProperties(3, Duration.ofMinutes(1), Duration.ofSeconds(1));
-            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, null);
             var props = new RestartStrategyProperties(RestartStrategyType.FAILURE_RATE, null, failure, expo);
 
             assertFalse(RestartStrategyPropertiesValidator.validate(props, context));
@@ -226,7 +226,7 @@ class RestartStrategyPropertiesValidatorTest {
         void shouldFailWhenFixedDelayProvidedForExponentialDelay() {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
             var fixed = new FixedDelayRestartProperties(3, Duration.ofSeconds(5));
-            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1);
+            var expo = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, null);
             var props = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, fixed, null, expo);
 
             assertFalse(RestartStrategyPropertiesValidator.validate(props, context));
