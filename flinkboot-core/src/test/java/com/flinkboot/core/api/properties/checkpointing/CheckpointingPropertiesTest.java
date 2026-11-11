@@ -388,10 +388,18 @@ class CheckpointingPropertiesTest {
                 null, false, Duration.ZERO, CheckpointStorageType.FILESYSTEM, "s3://bucket", 3
             );
             var str = config.toString();
-            assertAll(
-                () -> assertTrue(str.contains("storage=FILESYSTEM")),
-                () -> assertTrue(str.contains("tolerableCheckpointFailures=3"))
+            assertTrue(str.contains("storage=FILESYSTEM"));
+        }
+
+        @Test
+        @DisplayName("Should include tolerableCheckpointFailures in toString")
+        void shouldIncludeTolerableCheckpointFailuresInToString() {
+            var config = new CheckpointingProperties(
+                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, false, Duration.ZERO, null, null, 3
             );
+            var str = config.toString();
+            assertTrue(str.contains("tolerableCheckpointFailures=3"));
         }
     }
 
@@ -440,7 +448,10 @@ class CheckpointingPropertiesTest {
             var config = mapper.readValue(json, CheckpointingProperties.class);
 
             assertNotNull(config);
-            assertEquals(CheckpointStorageType.JOBMANAGER, config.storage().orElseThrow());
+            assertAll(
+                () -> assertEquals(CheckpointStorageType.JOBMANAGER, config.storage().orElseThrow()),
+                () -> assertTrue(config.tolerableCheckpointFailures().isEmpty())
+            );
         }
     }
 }

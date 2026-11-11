@@ -96,7 +96,7 @@ class CheckpointingCustomizerTest {
                 Duration.ofMillis(1000L),
                 CheckpointStorageType.FILESYSTEM,
                 "s3://bucket/checkpoints",
-                null
+                5
             );
             var envProps = new ExecutionEnvironmentProperties(null, checkpointConfig, null, null, null, null, null);
 
