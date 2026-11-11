@@ -8,6 +8,7 @@ import com.flinkboot.core.internal.validation.properties.CheckpointingProperties
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import org.hibernate.validator.constraints.time.DurationMin;
 
 import java.io.Serializable;
@@ -54,6 +55,9 @@ public final class CheckpointingProperties implements ValidatableProperties, Ser
     @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
     private final String storageUri;
 
+    @PositiveOrZero
+    private final Integer tolerableCheckpointFailures;
+
     /**
      * Creates a new {@code CheckpointingProperties} instance.
      *
@@ -68,6 +72,7 @@ public final class CheckpointingProperties implements ValidatableProperties, Ser
      * @param alignedCheckpointTimeout      timeout before switching from aligned to unaligned checkpoint
      * @param storage                       checkpoint storage location type (JOBMANAGER or FILESYSTEM)
      * @param storageUri                    checkpoint storage directory URI (e.g. {@code "file:///checkpoints"} or {@code "s3://bucket/checkpoints"})
+     * @param tolerableCheckpointFailures   maximum number of tolerable consecutive checkpoint failures
      */
     @JsonCreator
     public CheckpointingProperties(
@@ -81,7 +86,8 @@ public final class CheckpointingProperties implements ValidatableProperties, Ser
         @JsonProperty("unaligned-checkpoints") Boolean unalignedCheckpoints,
         @JsonProperty("aligned-checkpoint-timeout") Duration alignedCheckpointTimeout,
         @JsonProperty("storage") CheckpointStorageType storage,
-        @JsonProperty("storage-uri") String storageUri
+        @JsonProperty("storage-uri") String storageUri,
+        @JsonProperty("tolerable-checkpoint-failures") Integer tolerableCheckpointFailures
     ) {
         this.enabled = enabled;
         this.interval = interval;
@@ -94,6 +100,7 @@ public final class CheckpointingProperties implements ValidatableProperties, Ser
         this.alignedCheckpointTimeout = alignedCheckpointTimeout;
         this.storage = storage;
         this.storageUri = storageUri;
+        this.tolerableCheckpointFailures = tolerableCheckpointFailures;
     }
 
     @Override
@@ -203,6 +210,18 @@ public final class CheckpointingProperties implements ValidatableProperties, Ser
         return Optional.ofNullable(storageUri);
     }
 
+    /**
+     * Returns the optional maximum number of tolerable consecutive checkpoint failures.
+     *
+     * @return an {@link OptionalInt} containing the tolerable checkpoint failures, or empty if not specified
+     */
+    public OptionalInt tolerableCheckpointFailures() {
+        if (tolerableCheckpointFailures == null) {
+            return OptionalInt.empty();
+        }
+        return OptionalInt.of(tolerableCheckpointFailures);
+    }
+
     @Override
     @Generated
     public boolean equals(Object other) {
@@ -220,7 +239,8 @@ public final class CheckpointingProperties implements ValidatableProperties, Ser
             && Objects.equals(unalignedCheckpoints, o.unalignedCheckpoints)
             && Objects.equals(alignedCheckpointTimeout, o.alignedCheckpointTimeout)
             && storage == o.storage
-            && Objects.equals(storageUri, o.storageUri);
+            && Objects.equals(storageUri, o.storageUri)
+            && Objects.equals(tolerableCheckpointFailures, o.tolerableCheckpointFailures);
     }
 
     @Override
@@ -237,7 +257,8 @@ public final class CheckpointingProperties implements ValidatableProperties, Ser
             unalignedCheckpoints,
             alignedCheckpointTimeout,
             storage,
-            storageUri
+            storageUri,
+            tolerableCheckpointFailures
         );
     }
 
@@ -256,6 +277,7 @@ public final class CheckpointingProperties implements ValidatableProperties, Ser
             ", alignedCheckpointTimeout=" + alignedCheckpointTimeout +
             ", storage=" + storage +
             ", storageUri='" + storageUri + '\'' +
+            ", tolerableCheckpointFailures=" + tolerableCheckpointFailures +
             '}';
     }
 }

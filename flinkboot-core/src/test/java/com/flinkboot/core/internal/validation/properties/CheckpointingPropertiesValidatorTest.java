@@ -65,7 +65,7 @@ class CheckpointingPropertiesValidatorTest {
         @DisplayName("Should throw NullPointerException when context is null")
         void shouldThrowWhenContextIsNull() {
             var props = new CheckpointingProperties(
-                true, Duration.ofSeconds(10), null, null, null, null, null, null, null, null, null
+                true, Duration.ofSeconds(10), null, null, null, null, null, null, null, null, null, null
             );
 
             var exception = assertThrows(
@@ -83,7 +83,7 @@ class CheckpointingPropertiesValidatorTest {
         void shouldFailWhenCheckpointingIsEnabledWithoutInterval(Boolean enabled) {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
             var props = new CheckpointingProperties(
-                enabled, null, null, null, null, null, null, null, null, null, null
+                enabled, null, null, null, null, null, null, null, null, null, null, null
             );
 
             assertFalse(CheckpointingPropertiesValidator.validate(props, context));
@@ -95,7 +95,7 @@ class CheckpointingPropertiesValidatorTest {
             var context = mock(ConstraintValidatorContext.class);
 
             var props = new CheckpointingProperties(
-                false, null, null, null, null, null, null, null, null, null, null
+                false, null, null, null, null, null, null, null, null, null, null, null
             );
 
             assertTrue(CheckpointingPropertiesValidator.validate(props, context));
@@ -109,6 +109,7 @@ class CheckpointingPropertiesValidatorTest {
             var props = new CheckpointingProperties(
                 true,
                 Duration.ofSeconds(10),
+                null,
                 null,
                 null,
                 null,
@@ -142,6 +143,7 @@ class CheckpointingPropertiesValidatorTest {
                 null,
                 null,
                 null,
+                null,
                 null
             );
 
@@ -156,7 +158,7 @@ class CheckpointingPropertiesValidatorTest {
             var context = mock(ConstraintValidatorContext.class);
             var props = new CheckpointingProperties(
                 true, Duration.ofSeconds(10), null, null, Duration.ofSeconds(5), 1,
-                null, null, null, null, null
+                null, null, null, null, null, null
             );
 
             assertTrue(CheckpointingPropertiesValidator.validate(props, context));
@@ -168,7 +170,7 @@ class CheckpointingPropertiesValidatorTest {
             var context = mock(ConstraintValidatorContext.class);
             var props = new CheckpointingProperties(
                 true, Duration.ofSeconds(10), null, null, Duration.ZERO, 2,
-                null, null, null, null, null
+                null, null, null, null, null, null
             );
 
             assertTrue(CheckpointingPropertiesValidator.validate(props, context));
@@ -180,7 +182,7 @@ class CheckpointingPropertiesValidatorTest {
             var context = mock(ConstraintValidatorContext.class);
             var props = new CheckpointingProperties(
                 true, Duration.ofSeconds(10), null, null, Duration.ofSeconds(5), null,
-                null, null, null, null, null
+                null, null, null, null, null, null
             );
 
             assertTrue(CheckpointingPropertiesValidator.validate(props, context));
@@ -192,7 +194,7 @@ class CheckpointingPropertiesValidatorTest {
             var context = mock(ConstraintValidatorContext.class);
             var props = new CheckpointingProperties(
                 true, Duration.ofSeconds(10), null, null, null, 2,
-                null, null, null, null, null
+                null, null, null, null, null, null
             );
 
             assertTrue(CheckpointingPropertiesValidator.validate(props, context));
@@ -204,7 +206,7 @@ class CheckpointingPropertiesValidatorTest {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
             var props = new CheckpointingProperties(
                 true, Duration.ofSeconds(10), null, null, null, null,
-                null, null, null, CheckpointStorageType.FILESYSTEM, null
+                null, null, null, CheckpointStorageType.FILESYSTEM, null, null
             );
 
             assertFalse(CheckpointingPropertiesValidator.validate(props, context));
@@ -220,7 +222,7 @@ class CheckpointingPropertiesValidatorTest {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
             var props = new CheckpointingProperties(
                 true, Duration.ofSeconds(10), null, null, null, null,
-                null, null, null, CheckpointStorageType.FILESYSTEM, blankUri
+                null, null, null, CheckpointStorageType.FILESYSTEM, blankUri, null
             );
 
             assertFalse(CheckpointingPropertiesValidator.validate(props, context));
@@ -235,7 +237,7 @@ class CheckpointingPropertiesValidatorTest {
             var context = mock(ConstraintValidatorContext.class);
             var props = new CheckpointingProperties(
                 true, Duration.ofSeconds(10), null, null, null, null,
-                null, null, null, CheckpointStorageType.FILESYSTEM, "file:///tmp/checkpoints"
+                null, null, null, CheckpointStorageType.FILESYSTEM, "file:///tmp/checkpoints", null
             );
 
             assertTrue(CheckpointingPropertiesValidator.validate(props, context));
@@ -247,7 +249,7 @@ class CheckpointingPropertiesValidatorTest {
             var context = mock(ConstraintValidatorContext.class);
             var props = new CheckpointingProperties(
                 true, Duration.ofSeconds(10), null, null, null, null,
-                null, null, null, CheckpointStorageType.JOBMANAGER, null
+                null, null, null, CheckpointStorageType.JOBMANAGER, null, null
             );
 
             assertTrue(CheckpointingPropertiesValidator.validate(props, context));

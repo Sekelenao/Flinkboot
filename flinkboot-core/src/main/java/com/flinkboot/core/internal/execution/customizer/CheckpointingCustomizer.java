@@ -35,6 +35,7 @@ public final class CheckpointingCustomizer implements EnvironmentCustomizer {
         checkpointingConfig.timeout().ifPresent(this::applyTimeout);
         checkpointingConfig.minPauseBetweenCheckpoints().ifPresent(this::applyMinPauseBetweenCheckpoints);
         checkpointingConfig.maxConcurrentCheckpoints().ifPresent(this::applyMaxConcurrentCheckpoints);
+        checkpointingConfig.tolerableCheckpointFailures().ifPresent(this::applyTolerableCheckpointFailures);
         checkpointingConfig.externalizedCheckpointCleanup().ifPresent(this::applyExternalizedCheckpointCleanup);
         checkpointingConfig.unalignedCheckpoints().ifPresent(this::applyUnalignedCheckpoints);
         checkpointingConfig.alignedCheckpointTimeout().ifPresent(this::applyAlignedCheckpointTimeout);
@@ -61,6 +62,10 @@ public final class CheckpointingCustomizer implements EnvironmentCustomizer {
 
     private void applyMaxConcurrentCheckpoints(int maxConcurrentCheckpoints) {
         toConfigure.set(CheckpointingOptions.MAX_CONCURRENT_CHECKPOINTS, maxConcurrentCheckpoints);
+    }
+
+    private void applyTolerableCheckpointFailures(int tolerableCheckpointFailures) {
+        toConfigure.set(CheckpointingOptions.TOLERABLE_FAILURE_NUMBER, tolerableCheckpointFailures);
     }
 
     private void applyExternalizedCheckpointCleanup(ExternalizedCheckpointCleanupMode externalizedCheckpointCleanup) {

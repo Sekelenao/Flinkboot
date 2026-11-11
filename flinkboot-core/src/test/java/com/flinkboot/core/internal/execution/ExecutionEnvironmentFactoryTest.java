@@ -105,7 +105,8 @@ class ExecutionEnvironmentFactoryTest {
                 true,
                 Duration.ofMillis(1000),
                 CheckpointStorageType.FILESYSTEM,
-                "s3://my-bucket/checkpoints"
+                "s3://my-bucket/checkpoints",
+                5
             );
             var envProps = new ExecutionEnvironmentProperties(null, chkConfig, null, null, null, null, null);
             var jobConfig = new JobProperties("checkpoint-job", envProps);
@@ -124,7 +125,8 @@ class ExecutionEnvironmentFactoryTest {
                 () -> assertTrue(flinkConfig.get(CheckpointingOptions.ENABLE_UNALIGNED)),
                 () -> assertEquals(Duration.ofMillis(1000), flinkConfig.get(CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT)),
                 () -> assertEquals("filesystem", flinkConfig.get(CheckpointingOptions.CHECKPOINT_STORAGE)),
-                () -> assertEquals("s3://my-bucket/checkpoints", flinkConfig.get(CheckpointingOptions.CHECKPOINTS_DIRECTORY))
+                () -> assertEquals("s3://my-bucket/checkpoints", flinkConfig.get(CheckpointingOptions.CHECKPOINTS_DIRECTORY)),
+                () -> assertEquals(5, flinkConfig.get(CheckpointingOptions.TOLERABLE_FAILURE_NUMBER))
             );
         }
 
