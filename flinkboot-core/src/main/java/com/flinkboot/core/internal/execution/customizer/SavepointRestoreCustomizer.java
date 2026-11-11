@@ -24,8 +24,16 @@ public final class SavepointRestoreCustomizer implements EnvironmentCustomizer {
     }
 
     private void apply(SavepointRestoreProperties savepointConfig) {
-        savepointConfig.directory().ifPresent(dir -> toConfigure.set(CheckpointingOptions.SAVEPOINT_DIRECTORY, dir));
-        this.applySavepointPath(savepointConfig.savepointPath());
+        savepointConfig.directory().ifPresent(this::applyDirectory);
+        savepointConfig.savepointPath().ifPresent(path -> applyRestore(path, savepointConfig));
+    }
+
+    private void applyDirectory(String directory) {
+        toConfigure.set(CheckpointingOptions.SAVEPOINT_DIRECTORY, directory);
+    }
+
+    private void applyRestore(String savepointPath, SavepointRestoreProperties savepointConfig) {
+        applySavepointPath(savepointPath);
         savepointConfig.allowNonRestoredState().ifPresent(this::applyAllowNonRestoredState);
         savepointConfig.restoreMode().ifPresent(this::applyRestoreMode);
     }
