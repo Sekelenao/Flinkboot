@@ -150,6 +150,7 @@ class EnvironmentCustomizersTest {
             false,
             null,
             null,
+            null,
             null
         );
         var envProps = new ExecutionEnvironmentProperties(null, chkConfig, null, null, null, null, null);
