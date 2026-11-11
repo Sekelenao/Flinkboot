@@ -2,8 +2,10 @@ package com.flinkboot.core.api.properties.savepoint;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.flinkboot.core.api.validation.ValidatableProperties;
 import com.flinkboot.core.internal.annotation.Generated;
-import jakarta.validation.constraints.NotBlank;
+import com.flinkboot.core.internal.validation.properties.SavepointRestorePropertiesValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.constraints.Pattern;
 
 import java.io.Serializable;
@@ -13,11 +15,11 @@ import java.util.Optional;
 /**
  * Configuration properties for restoring a Flink job from a savepoint.
  */
-public final class SavepointRestoreProperties implements Serializable {
+public final class SavepointRestoreProperties implements Serializable, ValidatableProperties {
 
     private static final long serialVersionUID = 1L;
 
-    @NotBlank
+    @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
     private final String savepointPath;
     @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
     private final String directory;
@@ -45,13 +47,18 @@ public final class SavepointRestoreProperties implements Serializable {
         this.restoreMode = restoreMode;
     }
 
+    @Override
+    public boolean validate(ConstraintValidatorContext context) {
+        return SavepointRestorePropertiesValidator.validate(this, context);
+    }
+
     /**
      * Returns the target savepoint path or URI.
      *
-     * @return the savepoint path
+     * @return an {@link Optional} containing the savepoint path, or empty if not specified
      */
-    public String savepointPath() {
-        return savepointPath;
+    public Optional<String> savepointPath() {
+        return Optional.ofNullable(savepointPath);
     }
 
     /**
