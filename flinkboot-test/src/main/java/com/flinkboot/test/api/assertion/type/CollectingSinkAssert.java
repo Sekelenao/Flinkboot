@@ -14,13 +14,14 @@ import java.util.stream.Collectors;
  *
  * <h3>Example:</h3>
  * <pre>{@code
- * CollectingSink<OrderEvent> sink = new CollectingSink<>();
- * // ... run Flink pipeline ...
+ * try (var sink = new CollectingSink<OrderEvent>()) {
+ *     // ... run Flink pipeline ...
  *
- * FlinkbootAssertions.assertThat(sink)
- *     .hasSize(2)
- *     .anyMatch(order -> order.status().equals("COMPLETED"))
- *     .allMatch(order -> order.amount() > 0);
+ *     FlinkbootAssertions.assertThat(sink)
+ *         .hasSize(2)
+ *         .anyMatch(order -> order.status().equals("COMPLETED"))
+ *         .allMatch(order -> order.amount() > 0);
+ * }
  * }</pre>
  *
  * @param <T> the type of elements collected by the sink

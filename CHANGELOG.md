@@ -46,18 +46,10 @@ All notable user-facing changes to this project are documented in this file.
 - **Dual-Mode Boundedness & Stopping Offsets Support (`boundedness` & `stopping-offsets`)**:
   - Added `boundedness: BOUNDED | UNBOUNDED` to switch Kafka ingestion between continuous streaming and Flink's native batch execution mode.
   - Added `stopping-offsets` configuration to automatically terminate ingestion upon reaching target offsets (specific timestamp, partition offsets, or current log end). Supports finite streaming when `boundedness: UNBOUNDED` and finite batch backfills when `boundedness: BOUNDED`.
-- **Simplified Kafka Source Deserialization**: Added `KafkaSourceFactory` overloads accepting Flink's `DeserializationSchema<T>`, automatically adapting value-only consumers through `KafkaRecordDeserializationSchema.valueOnly(...)`. Added an optional `KafkaSourceBuilder<T>` customizer overload for inline source tuning before construction.
+- **Simplified Kafka Source Deserialization**: Added `KafkaSourceFactory` overloads accepting Flink's `DeserializationSchema<T>`, automatically adapting value-only consumers through `KafkaRecordDeserializationSchema.valueOnly(...)`.
 - **Configurable Reset Strategy for Explicit Partition Offsets (`reset-strategy`)**: Added `reset-strategy: EARLIEST | LATEST | NONE` (`KafkaOffsetResetStrategy`) to `KafkaOffsetProperties`, enforced when `strategy: OFFSETS`. Configures the underlying Flink `OffsetsInitializer.offsets(offsets, resetStrategy)` for unmapped partitions, preventing silent implicit fallback to `EARLIEST` and supporting strict failure with `NONE`.
 - **Partition Subscription Mode (`partitions`)**: Added native partition-pinned consumption via `partitions` (`TopicPartitionProperties`), allowing Kafka sources to consume from explicit topic partitions in YAML (mutually exclusive with `topics` and `topic-pattern`) and wired directly to Flink's `KafkaSourceBuilder.setPartitions`.
 - **Simplified Kafka Sink Serialization & Schema Customizers**: Added `KafkaSinkFactory.supplyFor` and `supplyBuilderFor` overloads accepting standard `SerializationSchema<T>` (automatically binding to `config.topic()`) and schema customizers `Consumer<KafkaRecordSerializationSchemaBuilder<T>>` for inline schema tuning (keys, partitioners, headers).
-- **Customizable Kafka Sink Builder**: Added a `KafkaSinkFactory.supplyFor` overload accepting a `Consumer<KafkaSinkBuilder<T>>`, allowing sink builder options to be customized before the sink is built.
-- **Schema & Sink Builder Customizers Combined**: Added a `KafkaSinkFactory.supplyFor` overload accepting both a `Consumer<KafkaRecordSerializationSchemaBuilder<T>>` schema customizer and a `Consumer<KafkaSinkBuilder<T>>` builder customizer, mirroring `KafkaSourceFactory`.
-- **Value Serialization Schema & Sink Builder Customizer**: Added a `KafkaSinkFactory.supplyFor` overload accepting `SerializationSchema<T>` alongside a `Consumer<KafkaSinkBuilder<T>>` builder customizer, mirroring `KafkaSourceFactory`.
-- **Customizable Kafka Source Builder with Full Record Deserializer**: Added a `KafkaSourceFactory.supplyFor` overload accepting `KafkaRecordDeserializationSchema<T>` alongside a `Consumer<KafkaSourceBuilder<T>>`, allowing full record deserialization sources to be customized before construction.
-
-#### flinkboot-fluss
-- **Customizable Fluss Source Builder**: Added a `FlussSourceFactory.supplyFor` overload accepting a `Consumer<FlussSourceBuilder<T>>`, allowing source builder options to be customized before the source is built.
-- **Customizable Fluss Sink Builder**: Added a `FlussSinkFactory.supplyFor` overload accepting a builder customizer.
 
 #### flinkboot-test
 - **Aggregated Type Violations in POJO Assertions**: Consolidates all unsupported and missing type violations detected across complex domain models during BFS traversal into a single diagnostic `AssertionFailedError`, allowing developers to address all serialization violations in one pass rather than resolving them iteratively.
@@ -72,6 +64,7 @@ All notable user-facing changes to this project are documented in this file.
 ### 🔵 Fixes & Diagnostics
 
 #### flinkboot-core
+- **Support `Duration` Keys in `.keyBy(...)` (#365)**: `DurationTypeInfo` now implements `AtomicType<Duration>` and provides an internal `DurationComparator` (`TypeComparator<Duration>`), resolving runtime failures when using `Duration` fields or streams as keys in Flink `.keyBy(...)` operations.
 - **Checkpoint Storage Filesystem URI Validation (#246)**: Enforces that `storage-uri` is provided (not null and not blank) whenever `storage` is configured as `FILESYSTEM`, failing fast during Bean Validation with diagnostic message `"storage-uri must be specified when checkpoint storage is FILESYSTEM"` on property path `"storage-uri"`.
 - **Reject `storage-uri` for JobManager Checkpoint Storage (#369)**: Rejects configurations that set `storage-uri` while `storage` is `JOBMANAGER`, where the URI is never used, failing fast during Bean Validation with diagnostic message `"storage-uri can only be specified when checkpoint storage is FILESYSTEM"` on property path `"storage-uri"`.
 - **Canonical State Backend Custom Class Diagnostic Path**: Binds cross-field validation violations in `StateBackendProperties` (`custom-class must be specified...` and `custom-class can only be specified...`) to the canonical kebab-case configuration key `custom-class` instead of the internal Java field name `customClass`.
