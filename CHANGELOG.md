@@ -52,6 +52,7 @@ All notable user-facing changes to this project are documented in this file.
 - **Simplified Kafka Sink Serialization & Schema Customizers**: Added `KafkaSinkFactory.supplyFor` and `supplyBuilderFor` overloads accepting standard `SerializationSchema<T>` (automatically binding to `config.topic()`) and schema customizers `Consumer<KafkaRecordSerializationSchemaBuilder<T>>` for inline schema tuning (keys, partitioners, headers).
 - **Customizable Kafka Sink Builder**: Added a `KafkaSinkFactory.supplyFor` overload accepting a `Consumer<KafkaSinkBuilder<T>>`, allowing sink builder options to be customized before the sink is built.
 - **Schema & Sink Builder Customizers Combined**: Added a `KafkaSinkFactory.supplyFor` overload accepting both a `Consumer<KafkaRecordSerializationSchemaBuilder<T>>` schema customizer and a `Consumer<KafkaSinkBuilder<T>>` builder customizer, mirroring `KafkaSourceFactory`.
+- **Value Serialization Schema & Sink Builder Customizer**: Added a `KafkaSinkFactory.supplyFor` overload accepting `SerializationSchema<T>` alongside a `Consumer<KafkaSinkBuilder<T>>` builder customizer, mirroring `KafkaSourceFactory`.
 - **Customizable Kafka Source Builder with Full Record Deserializer**: Added a `KafkaSourceFactory.supplyFor` overload accepting `KafkaRecordDeserializationSchema<T>` alongside a `Consumer<KafkaSourceBuilder<T>>`, allowing full record deserialization sources to be customized before construction.
 
 #### flinkboot-fluss
