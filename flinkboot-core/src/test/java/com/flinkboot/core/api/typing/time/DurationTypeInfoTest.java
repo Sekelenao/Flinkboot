@@ -1,6 +1,6 @@
 package com.flinkboot.core.api.typing.time;
 
-import com.flinkboot.core.internal.time.DurationComparator;
+import com.flinkboot.core.internal.typing.time.DurationComparator;
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.serialization.SerializerConfigImpl;
 import org.apache.flink.api.common.typeinfo.AtomicType;

@@ -1,4 +1,4 @@
-package com.flinkboot.core.internal.time;
+package com.flinkboot.core.internal.typing.time;
 
 import com.flinkboot.core.api.typing.time.DurationSerializer;
 import org.apache.flink.core.memory.DataInputDeserializer;
