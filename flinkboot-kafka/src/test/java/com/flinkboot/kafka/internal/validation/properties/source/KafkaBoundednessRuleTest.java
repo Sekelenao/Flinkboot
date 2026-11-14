@@ -72,4 +72,38 @@ class KafkaBoundednessRuleTest {
 
         assertTrue(rule.check(props).isEmpty());
     }
+
+    @Test
+    @DisplayName("Should pass when boundedness and stopping-offsets are both absent")
+    void shouldPassWhenBothAbsent() {
+        var props = new KafkaSourceProperties(
+            null, List.of("localhost:9092"), null, null, List.of("t1"), null, null, null,
+            null, null, null
+        );
+
+        assertTrue(rule.check(props).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should pass when boundedness is UNBOUNDED without stopping-offsets")
+    void shouldPassWhenUnboundedWithoutStoppingOffsets() {
+        var props = new KafkaSourceProperties(
+            null, List.of("localhost:9092"), null, null, List.of("t1"), null, null, null,
+            KafkaBoundedness.UNBOUNDED, null, null
+        );
+
+        assertTrue(rule.check(props).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should pass when boundedness is UNBOUNDED with stopping-offsets")
+    void shouldPassWhenUnboundedWithStoppingOffsets() {
+        var stopping = new KafkaOffsetProperties(KafkaOffsetInitializer.LATEST, null, null, null);
+        var props = new KafkaSourceProperties(
+            null, List.of("localhost:9092"), null, null, List.of("t1"), null, null, null,
+            KafkaBoundedness.UNBOUNDED, stopping, null
+        );
+
+        assertTrue(rule.check(props).isEmpty());
+    }
 }

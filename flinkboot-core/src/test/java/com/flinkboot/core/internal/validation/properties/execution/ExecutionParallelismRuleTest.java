@@ -46,8 +46,24 @@ class ExecutionParallelismRuleTest {
     }
 
     @Test
-    @DisplayName("Should pass when parallelism or max-parallelism is absent")
-    void shouldPassWhenEitherIsAbsent() {
+    @DisplayName("Should pass when parallelism is strictly less than max-parallelism")
+    void shouldPassWhenParallelismLessThanMaxParallelism() {
+        var props = new ExecutionProperties(null, 2, 4, null, null, null);
+
+        assertTrue(rule.check(props).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should pass when parallelism is absent")
+    void shouldPassWhenParallelismIsAbsent() {
+        var props = new ExecutionProperties(null, null, 4, null, null, null);
+
+        assertTrue(rule.check(props).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should pass when max-parallelism is absent")
+    void shouldPassWhenMaxParallelismIsAbsent() {
         var props = new ExecutionProperties(null, 4, null, null, null, null);
 
         assertTrue(rule.check(props).isEmpty());

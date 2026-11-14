@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -103,10 +104,12 @@ class PropertiesValidatorTest {
             var valid = PropertiesValidator.compute("props", context, rules);
 
             assertFalse(valid);
+            verify(context, times(2)).disableDefaultConstraintViolation();
             verify(context).buildConstraintViolationWithTemplate("first error");
             verify(builder).addPropertyNode("first");
             verify(context).buildConstraintViolationWithTemplate("second error");
             verify(builder).addPropertyNode("second");
+            verify(nodeBuilder, times(2)).addConstraintViolation();
         }
     }
 }

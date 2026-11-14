@@ -24,6 +24,23 @@ class RestartStrategySubBlockRuleTest {
     );
 
     @Test
+    @DisplayName("Should throw NullPointerException when constructor arguments are null")
+    void shouldThrowWhenConstructorArgsAreNull() {
+        assertThrows(
+            NullPointerException.class,
+            () -> new RestartStrategySubBlockRule(null, "fixed-delay", properties -> false)
+        );
+        assertThrows(
+            NullPointerException.class,
+            () -> new RestartStrategySubBlockRule(RestartStrategyType.FIXED_DELAY, null, properties -> false)
+        );
+        assertThrows(
+            NullPointerException.class,
+            () -> new RestartStrategySubBlockRule(RestartStrategyType.FIXED_DELAY, "fixed-delay", null)
+        );
+    }
+
+    @Test
     @DisplayName("Should throw NullPointerException when properties is null")
     void shouldThrowWhenPropertiesIsNull() {
         var exception = assertThrows(NullPointerException.class, () -> rule.check(null));

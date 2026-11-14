@@ -22,6 +22,23 @@ class KafkaOffsetStrategyFieldRuleTest {
     );
 
     @Test
+    @DisplayName("Should throw NullPointerException when constructor arguments are null")
+    void shouldThrowWhenConstructorArgsAreNull() {
+        assertThrows(
+            NullPointerException.class,
+            () -> new KafkaOffsetStrategyFieldRule(null, "timestamp", properties -> false)
+        );
+        assertThrows(
+            NullPointerException.class,
+            () -> new KafkaOffsetStrategyFieldRule(KafkaOffsetInitializer.TIMESTAMP, null, properties -> false)
+        );
+        assertThrows(
+            NullPointerException.class,
+            () -> new KafkaOffsetStrategyFieldRule(KafkaOffsetInitializer.TIMESTAMP, "timestamp", null)
+        );
+    }
+
+    @Test
     @DisplayName("Should throw NullPointerException when properties is null")
     void shouldThrowWhenPropertiesIsNull() {
         var exception = assertThrows(NullPointerException.class, () -> rule.check(null));
@@ -54,6 +71,22 @@ class KafkaOffsetStrategyFieldRuleTest {
     @DisplayName("Should pass when strategy matches expectedStrategy and field is present")
     void shouldPassWhenExpectedStrategyAndFieldPresent() {
         var props = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 12345L, null, null);
+
+        assertTrue(rule.check(props).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should pass when strategy is null")
+    void shouldPassWhenStrategyIsNull() {
+        var props = new KafkaOffsetProperties(null, 12345L, null, null);
+
+        assertTrue(rule.check(props).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should pass when strategy differs from expectedStrategy and field is absent")
+    void shouldPassWhenOtherStrategyAndFieldAbsent() {
+        var props = new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null, null);
 
         assertTrue(rule.check(props).isEmpty());
     }

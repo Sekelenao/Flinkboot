@@ -77,4 +77,45 @@ class RestartStrategyExponentialBackoffPresenceRuleTest {
 
         assertTrue(rule.check(props).isEmpty());
     }
+
+    @Test
+    @DisplayName("Should pass when both initial-backoff and max-backoff are absent")
+    void shouldPassWhenBothAreAbsent() {
+        var props = new RestartStrategyProperties(
+            RestartStrategyType.EXPONENTIAL_DELAY,
+            null,
+            null,
+            new ExponentialDelayRestartProperties(null, null, 2.0, null, null, null)
+        );
+
+        assertTrue(rule.check(props).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should pass when type is null or not EXPONENTIAL_DELAY")
+    void shouldPassWhenNotExponentialDelay() {
+        var withNullType = new RestartStrategyProperties(
+            null,
+            null,
+            null,
+            new ExponentialDelayRestartProperties(Duration.ofSeconds(1), null, null, null, null, null)
+        );
+        var withFixedDelay = new RestartStrategyProperties(
+            RestartStrategyType.FIXED_DELAY,
+            null,
+            null,
+            new ExponentialDelayRestartProperties(Duration.ofSeconds(1), null, null, null, null, null)
+        );
+
+        assertTrue(rule.check(withNullType).isEmpty());
+        assertTrue(rule.check(withFixedDelay).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should pass when exponential-delay block is absent")
+    void shouldPassWhenExponentialDelayIsAbsent() {
+        var props = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, null);
+
+        assertTrue(rule.check(props).isEmpty());
+    }
 }

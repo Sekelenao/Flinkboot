@@ -66,4 +66,24 @@ class FlussStartupTimestampRuleTest {
 
         assertTrue(rule.check(props).isEmpty());
     }
+
+    @Test
+    @DisplayName("Should pass when startup-mode is null even if startup-timestamp is present")
+    void shouldPassWhenStartupModeIsNull() {
+        var props = new FlussSourceProperties(
+            null, List.of("localhost:9123"), "db", "tbl", null, 123456L, null
+        );
+
+        assertTrue(rule.check(props).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should pass when startup-mode is not TIMESTAMP and startup-timestamp is absent")
+    void shouldPassWhenNonTimestampModeWithoutTimestamp() {
+        var props = new FlussSourceProperties(
+            null, List.of("localhost:9123"), "db", "tbl", FlussStartupMode.LATEST, null, null
+        );
+
+        assertTrue(rule.check(props).isEmpty());
+    }
 }

@@ -62,4 +62,26 @@ class CheckpointingConcurrencyRuleTest {
 
         assertTrue(rule.check(props).isEmpty());
     }
+
+    @Test
+    @DisplayName("Should pass when min-pause-between-checkpoints is null even if max-concurrent-checkpoints > 1")
+    void shouldPassWhenMinPauseIsNull() {
+        var props = new CheckpointingProperties(
+            true, Duration.ofSeconds(10), null, null, null, 2,
+            null, null, null, null, null, null
+        );
+
+        assertTrue(rule.check(props).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should pass when max-concurrent-checkpoints is null even if min-pause-between-checkpoints is positive")
+    void shouldPassWhenMaxConcurrentIsNull() {
+        var props = new CheckpointingProperties(
+            true, Duration.ofSeconds(10), null, null, Duration.ofSeconds(5), null,
+            null, null, null, null, null, null
+        );
+
+        assertTrue(rule.check(props).isEmpty());
+    }
 }

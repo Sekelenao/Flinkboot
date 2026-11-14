@@ -66,4 +66,24 @@ class KafkaTransactionalIdPrefixRuleTest {
 
         assertTrue(rule.check(props).isEmpty());
     }
+
+    @Test
+    @DisplayName("Should pass when delivery-guarantee is null even if transactional-id-prefix is present")
+    void shouldPassWhenDeliveryGuaranteeIsNull() {
+        var props = new KafkaSinkProperties(
+            null, List.of("localhost:9092"), "topic", null, "tx-prefix", null
+        );
+
+        assertTrue(rule.check(props).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should pass when delivery-guarantee is not EXACTLY_ONCE without transactional-id-prefix")
+    void shouldPassWhenAtLeastOnceWithoutPrefix() {
+        var props = new KafkaSinkProperties(
+            null, List.of("localhost:9092"), "topic", KafkaDeliveryGuarantee.AT_LEAST_ONCE, null, null
+        );
+
+        assertTrue(rule.check(props).isEmpty());
+    }
 }

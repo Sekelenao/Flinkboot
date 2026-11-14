@@ -59,4 +59,34 @@ class StateBackendCustomClassRuleTest {
 
         assertTrue(rule.check(props).isEmpty());
     }
+
+    @Test
+    @DisplayName("Should pass when type is not CUSTOM and custom-class is absent")
+    void shouldPassWhenNonCustomWithoutClass() {
+        var props = new StateBackendProperties(StateBackendType.ROCKSDB, null, null, null, null);
+
+        assertTrue(rule.check(props).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should pass when type is null and custom-class is absent")
+    void shouldPassWhenTypeIsNullAndClassIsAbsent() {
+        var props = new StateBackendProperties(null, null, null, null, null);
+
+        assertTrue(rule.check(props).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should fail when type is null and custom-class is specified")
+    void shouldFailWhenTypeIsNullAndClassIsPresent() {
+        var props = new StateBackendProperties(null, null, null, "com.example.MyBackend", null);
+
+        assertEquals(
+            Optional.of(new PropertyViolation(
+                "custom-class",
+                "custom-class can only be specified when state backend type is CUSTOM"
+            )),
+            rule.check(props)
+        );
+    }
 }

@@ -75,10 +75,65 @@ class KafkaTopicSubscriptionRuleTest {
     }
 
     @Test
-    @DisplayName("Should pass when exactly one subscription mode is specified")
-    void shouldPassWhenExactlyOneSpecified() {
+    @DisplayName("Should fail on partitions when topic-pattern and partitions are specified")
+    void shouldFailWhenPatternAndPartitionsSpecified() {
+        var props = new KafkaSourceProperties(
+            null, List.of("localhost:9092"), null, null, null, "t.*",
+            List.of(new TopicPartitionProperties("t1", 0)), null, null, null, null
+        );
+
+        assertEquals(
+            Optional.of(new PropertyViolation(
+                "partitions",
+                "Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified"
+            )),
+            rule.check(props)
+        );
+    }
+
+    @Test
+    @DisplayName("Should fail on partitions when all three subscription modes are specified")
+    void shouldFailWhenAllThreeSpecified() {
+        var props = new KafkaSourceProperties(
+            null, List.of("localhost:9092"), null, null, List.of("t1"), "t.*",
+            List.of(new TopicPartitionProperties("t1", 0)), null, null, null, null
+        );
+
+        assertEquals(
+            Optional.of(new PropertyViolation(
+                "partitions",
+                "Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified"
+            )),
+            rule.check(props)
+        );
+    }
+
+    @Test
+    @DisplayName("Should pass when only topics is specified")
+    void shouldPassWhenOnlyTopicsSpecified() {
         var props = new KafkaSourceProperties(
             null, List.of("localhost:9092"), null, null, List.of("t1"), null, null, null, null, null, null
+        );
+
+        assertTrue(rule.check(props).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should pass when only topic-pattern is specified")
+    void shouldPassWhenOnlyPatternSpecified() {
+        var props = new KafkaSourceProperties(
+            null, List.of("localhost:9092"), null, null, null, "t.*", null, null, null, null, null
+        );
+
+        assertTrue(rule.check(props).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should pass when only partitions is specified")
+    void shouldPassWhenOnlyPartitionsSpecified() {
+        var props = new KafkaSourceProperties(
+            null, List.of("localhost:9092"), null, null, null, null,
+            List.of(new TopicPartitionProperties("t1", 0)), null, null, null, null
         );
 
         assertTrue(rule.check(props).isEmpty());

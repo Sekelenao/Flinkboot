@@ -1,6 +1,7 @@
 package com.flinkboot.core.internal.validation.properties.restart;
 
 import com.flinkboot.core.api.properties.restart.ExponentialDelayRestartProperties;
+import com.flinkboot.core.api.properties.restart.FailureRateRestartProperties;
 import com.flinkboot.core.api.properties.restart.FixedDelayRestartProperties;
 import com.flinkboot.core.api.properties.restart.RestartStrategyProperties;
 import com.flinkboot.core.api.properties.restart.RestartStrategyType;
@@ -94,13 +95,38 @@ class RestartStrategyPropertiesValidatorTest {
             var props = new RestartStrategyProperties(
                 RestartStrategyType.EXPONENTIAL_DELAY,
                 new FixedDelayRestartProperties(3, Duration.ofSeconds(10)),
-                null,
+                new FailureRateRestartProperties(3, Duration.ofMinutes(5), Duration.ofSeconds(10)),
                 new ExponentialDelayRestartProperties(Duration.ofSeconds(10), Duration.ofSeconds(5), null, null, null, null)
             );
 
             assertFalse(RestartStrategyPropertiesValidator.validate(props, context));
             verify(context).buildConstraintViolationWithTemplate("fixed-delay cannot be specified when restart strategy type is EXPONENTIAL_DELAY");
+            verify(context).buildConstraintViolationWithTemplate("failure-rate cannot be specified when restart strategy type is EXPONENTIAL_DELAY");
             verify(context).buildConstraintViolationWithTemplate("max-backoff cannot be smaller than initial-backoff in exponential-delay restart strategy");
+        }
+
+        @Test
+        @DisplayName("Should reject incompatible exponential-delay sub-block and missing backoff pair")
+        void shouldWireExponentialDelaySubBlockAndPresenceRules() {
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
+            var props = new RestartStrategyProperties(
+                RestartStrategyType.FIXED_DELAY,
+                null,
+                null,
+                new ExponentialDelayRestartProperties(Duration.ofSeconds(1), null, null, null, null, null)
+            );
+            var missingPairProps = new RestartStrategyProperties(
+                RestartStrategyType.EXPONENTIAL_DELAY,
+                null,
+                null,
+                new ExponentialDelayRestartProperties(Duration.ofSeconds(1), null, null, null, null, null)
+            );
+
+            assertFalse(RestartStrategyPropertiesValidator.validate(props, context));
+            verify(context).buildConstraintViolationWithTemplate("exponential-delay cannot be specified when restart strategy type is FIXED_DELAY");
+
+            assertFalse(RestartStrategyPropertiesValidator.validate(missingPairProps, context));
+            verify(context).buildConstraintViolationWithTemplate("both initial-backoff and max-backoff must be specified together in exponential-delay restart strategy");
         }
     }
 }

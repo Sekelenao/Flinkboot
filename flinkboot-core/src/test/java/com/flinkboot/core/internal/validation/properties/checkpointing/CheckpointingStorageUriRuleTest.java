@@ -85,4 +85,15 @@ class CheckpointingStorageUriRuleTest {
 
         assertTrue(rule.check(props).isEmpty());
     }
+
+    @Test
+    @DisplayName("Should pass when storage is null even if storage-uri is present")
+    void shouldPassWhenStorageIsNull() {
+        var props = new CheckpointingProperties(
+            true, Duration.ofSeconds(10), null, null, null, null, null, null, null,
+            null, "s3://bucket/checkpoints", null
+        );
+
+        assertTrue(rule.check(props).isEmpty());
+    }
 }

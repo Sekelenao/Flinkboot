@@ -28,7 +28,7 @@ class KafkaGroupIdRuleTest {
     }
 
     @Test
-    @DisplayName("Should fail when starting-offsets uses COMMITTED_OFFSETS without group-id")
+    @DisplayName("Should fail when starting-offsets uses COMMITTED without group-id")
     void shouldFailWhenCommittedOffsetsWithoutGroupId() {
         var starting = new KafkaOffsetProperties(KafkaOffsetInitializer.COMMITTED, null, null, null);
         var props = new KafkaSourceProperties(
@@ -45,7 +45,25 @@ class KafkaGroupIdRuleTest {
     }
 
     @Test
-    @DisplayName("Should pass when group-id is specified with COMMITTED_OFFSETS")
+    @DisplayName("Should fail when stopping-offsets uses COMMITTED without group-id")
+    void shouldFailWhenStoppingCommittedWithoutGroupId() {
+        var stopping = new KafkaOffsetProperties(KafkaOffsetInitializer.COMMITTED, null, null, null);
+        var props = new KafkaSourceProperties(
+            null, List.of("localhost:9092"), null, null, List.of("t1"), null, null, null,
+            KafkaBoundedness.BOUNDED, stopping, null
+        );
+
+        assertEquals(
+            Optional.of(new PropertyViolation(
+                "group-id",
+                "group-id is required when starting-offsets or stopping-offsets uses a COMMITTED strategy"
+            )),
+            rule.check(props)
+        );
+    }
+
+    @Test
+    @DisplayName("Should pass when group-id is specified with COMMITTED")
     void shouldPassWhenGroupIdIsSpecified() {
         var starting = new KafkaOffsetProperties(KafkaOffsetInitializer.COMMITTED, null, null, null);
         var props = new KafkaSourceProperties(
@@ -54,5 +72,25 @@ class KafkaGroupIdRuleTest {
         );
 
         assertTrue(rule.check(props).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should pass when group-id is absent and offset strategies do not require a group-id")
+    void shouldPassWhenGroupIdAbsentAndNotRequired() {
+        var withNullOffsets = new KafkaSourceProperties(
+            null, List.of("localhost:9092"), null, null, List.of("t1"), null, null, null, null, null, null
+        );
+        var withNullStrategy = new KafkaSourceProperties(
+            null, List.of("localhost:9092"), null, null, List.of("t1"), null, null,
+            new KafkaOffsetProperties(null, null, null, null), null, null, null
+        );
+        var withEarliest = new KafkaSourceProperties(
+            null, List.of("localhost:9092"), null, null, List.of("t1"), null, null,
+            new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null, null), null, null, null
+        );
+
+        assertTrue(rule.check(withNullOffsets).isEmpty());
+        assertTrue(rule.check(withNullStrategy).isEmpty());
+        assertTrue(rule.check(withEarliest).isEmpty());
     }
 }
