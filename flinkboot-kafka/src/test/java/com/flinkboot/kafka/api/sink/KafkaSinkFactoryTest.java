@@ -430,5 +430,67 @@ class KafkaSinkFactoryTest {
                 }
             );
         }
+
+        @Test
+        @DisplayName("Should apply builder customizer before building KafkaSink")
+        void shouldApplyBuilderCustomizer() {
+            var customized = new AtomicBoolean();
+            var schema = new SimpleStringSchema();
+            var sink = KafkaSinkFactory.supplyFor(
+                DEFAULT_CONFIG,
+                schema,
+                builder -> {
+                    assertNotNull(builder);
+                    customized.set(true);
+                }
+            );
+
+            assertAll(
+                () -> assertNotNull(sink),
+                () -> assertTrue(customized.get())
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when customized supplyFor parameters are null")
+        void shouldThrowExceptionWhenCustomizedSupplyForParamsAreNull() {
+            var schema = new SimpleStringSchema();
+
+            assertAll(
+                () -> {
+                    var ex = assertThrows(
+                        NullPointerException.class,
+                        () -> KafkaSinkFactory.supplyFor(
+                            (KafkaSinkProperties) null,
+                            schema,
+                            builder -> {}
+                        )
+                    );
+                    assertEquals("config must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(
+                        NullPointerException.class,
+                        () -> KafkaSinkFactory.supplyFor(
+                            DEFAULT_CONFIG,
+                            (SerializationSchema<String>) null,
+                            builder -> {}
+                        )
+                    );
+                    assertEquals("valueSerializationSchema must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(
+                        NullPointerException.class,
+                        () -> KafkaSinkFactory.supplyFor(
+                            DEFAULT_CONFIG,
+                            schema,
+                            null
+                        )
+                    );
+                    assertEquals("builderCustomizer must not be null", ex.getMessage());
+                }
+            );
+        }
     }
 }
