@@ -51,6 +51,7 @@ All notable user-facing changes to this project are documented in this file.
 - **Partition Subscription Mode (`partitions`)**: Added native partition-pinned consumption via `partitions` (`TopicPartitionProperties`), allowing Kafka sources to consume from explicit topic partitions in YAML (mutually exclusive with `topics` and `topic-pattern`) and wired directly to Flink's `KafkaSourceBuilder.setPartitions`.
 - **Simplified Kafka Sink Serialization & Schema Customizers**: Added `KafkaSinkFactory.supplyFor` and `supplyBuilderFor` overloads accepting standard `SerializationSchema<T>` (automatically binding to `config.topic()`) and schema customizers `Consumer<KafkaRecordSerializationSchemaBuilder<T>>` for inline schema tuning (keys, partitioners, headers).
 - **Customizable Kafka Sink Builder**: Added a `KafkaSinkFactory.supplyFor` overload accepting a `Consumer<KafkaSinkBuilder<T>>`, allowing sink builder options to be customized before the sink is built.
+- **Schema & Sink Builder Customizers Combined**: Added a `KafkaSinkFactory.supplyFor` overload accepting both a `Consumer<KafkaRecordSerializationSchemaBuilder<T>>` schema customizer and a `Consumer<KafkaSinkBuilder<T>>` builder customizer, mirroring `KafkaSourceFactory`.
 - **Customizable Kafka Source Builder with Full Record Deserializer**: Added a `KafkaSourceFactory.supplyFor` overload accepting `KafkaRecordDeserializationSchema<T>` alongside a `Consumer<KafkaSourceBuilder<T>>`, allowing full record deserialization sources to be customized before construction.
 
 #### flinkboot-fluss
@@ -78,6 +79,7 @@ All notable user-facing changes to this project are documented in this file.
 - **Buffer Timeout Maximum Throughput Support**: Allows `buffer-timeout: -1` (or `-1ms`) to disable periodic buffer flushing (`BUFFER_TIMEOUT_ENABLED = false`) for maximum throughput in streaming pipelines, resolving validation failures caused by `@DurationMin(millis = 0)`.
 
 #### flinkboot-kafka
+- **Fail Fast on Duplicate Topic-Partition Offsets (#361)**: Detects duplicate `(topic, partition)` entries in `OffsetInitializerMapper` when configuring per-partition offsets and throws `ConfigurationValidationException` identifying the duplicate `TopicPartition` instead of silently overwriting earlier values.
 - **Require Explicit Boundedness with Stopping Offsets (#327)**: Enforces that `boundedness` is explicitly specified (`BOUNDED` or `UNBOUNDED`) when `stopping-offsets` is configured in `KafkaSourceProperties`, preventing implicit fallback to `UNBOUNDED` from failing Flink batch job submissions with `IllegalArgumentException`.
 - **Properties Escape Hatch Application Order (#321)**: Applies client configuration from `properties` last in `KafkaSourceFactory` and `KafkaSinkFactory`, ensuring lower-level driver configurations provided via the universal properties escape hatch take precedence over typed defaults and options.
 - **Null Delivery Guarantee Validation**: Prevents misleading cross-field validation errors when `delivery-guarantee` is missing, leaving the missing-value error to the field-level `@NotNull` constraint.
