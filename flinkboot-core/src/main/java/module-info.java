@@ -19,7 +19,6 @@ module com.flinkboot.core {
     exports com.flinkboot.core.api.validation;
     // Internal utilities exported specifically to companion modules
     exports com.flinkboot.core.internal.annotation to com.flinkboot.kafka, com.flinkboot.fluss;
-    exports com.flinkboot.core.internal.time to com.flinkboot.kafka, com.flinkboot.fluss;
     exports com.flinkboot.core.internal.validation to com.flinkboot.kafka, com.flinkboot.fluss;
     exports com.flinkboot.core.internal.validation.properties to com.flinkboot.kafka, com.flinkboot.fluss;
 
