@@ -5,7 +5,6 @@ import com.flinkboot.test.api.assertion.type.CollectingSinkAssert;
 import com.flinkboot.test.api.assertion.type.ObjectAssert;
 import com.flinkboot.test.api.assertion.type.TypeInformationAssert;
 import com.flinkboot.test.api.sink.CollectingSink;
-
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.connector.sink2.WriterInitContext;

@@ -2,10 +2,8 @@ package com.flinkboot.kafka.api.properties.sink;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-
 import com.flinkboot.core.internal.validation.Validators;
 import jakarta.validation.Validator;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

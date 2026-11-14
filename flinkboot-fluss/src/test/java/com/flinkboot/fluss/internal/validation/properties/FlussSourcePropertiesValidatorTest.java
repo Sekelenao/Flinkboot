@@ -1,5 +1,15 @@
 package com.flinkboot.fluss.internal.validation.properties;
 
+import com.flinkboot.fluss.api.properties.source.FlussSourceProperties;
+import com.flinkboot.fluss.api.properties.source.FlussStartupMode;
+import jakarta.validation.ConstraintValidatorContext;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.Answers;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
@@ -9,17 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.Answers;
 import static org.mockito.Mockito.mock;
-
-import com.flinkboot.fluss.api.properties.source.FlussSourceProperties;
-import com.flinkboot.fluss.api.properties.source.FlussStartupMode;
-import jakarta.validation.ConstraintValidatorContext;
 
 @DisplayName("FlussSourcePropertiesValidator")
 class FlussSourcePropertiesValidatorTest {
