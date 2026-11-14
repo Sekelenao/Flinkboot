@@ -48,6 +48,7 @@ In Flinkboot, all configuration classes that bind to YAML/JSON configuration fil
       - Static facade `public static boolean validate(MyProperties properties, ConstraintValidatorContext context) { return new MyPropertiesValidator(properties, context).execute(); }`.
       - Instance helper `reject(propertyName, message)` delegating to `PropertiesValidator.reject(context, propertyName, message)`.
       - Format switch `case` branches on a single line (e.g. `case FIXED_DELAY: return validateFixedDelay();`).
+      - **Accumulate All Violations**: When validating multiple independent invariants, evaluate each validation method into a boolean variable before combining with `&&` (e.g. `var validA = validateA(); var validB = validateB(); return validA && validB;`). Do **NOT** short-circuit across independent checks so all violations are reported simultaneously.
     - Bind violations to property nodes via `PropertiesValidator.reject(context, "propertyName", "message")`.
     - Keep DTOs pure, clean data carriers without massive `if` blocks.
 
