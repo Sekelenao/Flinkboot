@@ -1,10 +1,10 @@
 package com.flinkboot.core.internal.validation.properties;
 
-import java.util.Objects;
-
 import com.flinkboot.core.api.properties.state.StateBackendProperties;
 import com.flinkboot.core.api.properties.state.StateBackendType;
 import jakarta.validation.ConstraintValidatorContext;
+
+import java.util.Objects;
 
 /**
  * Validates cross-field invariants for {@link StateBackendProperties}.

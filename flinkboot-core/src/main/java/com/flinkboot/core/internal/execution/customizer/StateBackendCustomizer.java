@@ -6,8 +6,8 @@ import com.flinkboot.core.api.properties.state.StateBackendType;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.StateBackendOptions;
-import org.apache.flink.configuration.StateLatencyTrackOptions;
 import org.apache.flink.configuration.StateChangelogOptions;
+import org.apache.flink.configuration.StateLatencyTrackOptions;
 
 import java.util.Objects;
 

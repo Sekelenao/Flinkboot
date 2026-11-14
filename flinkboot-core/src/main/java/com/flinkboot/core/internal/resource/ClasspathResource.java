@@ -1,10 +1,10 @@
 package com.flinkboot.core.internal.resource;
 
-import java.io.InputStream;
-import java.util.Objects;
-
 import com.flinkboot.core.api.exception.resource.ResourceNotFoundException;
 import com.flinkboot.core.api.resource.Resource;
+
+import java.io.InputStream;
+import java.util.Objects;
 
 public final class ClasspathResource implements Resource {
 

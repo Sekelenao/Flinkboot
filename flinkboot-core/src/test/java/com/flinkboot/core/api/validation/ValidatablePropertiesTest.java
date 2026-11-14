@@ -1,7 +1,7 @@
 package com.flinkboot.core.api.validation;
 
-import com.flinkboot.core.internal.validation.ConfigurationValidator;
 import com.flinkboot.core.api.exception.configuration.ConfigurationValidationException;
+import com.flinkboot.core.internal.validation.ConfigurationValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
