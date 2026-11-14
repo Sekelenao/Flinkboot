@@ -68,7 +68,7 @@ class KafkaSourcePropertiesTest {
             assertAll(
                 () -> assertEquals("my-source", config.name()),
                 () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
-                () -> assertEquals("my-group", config.groupId()),
+                () -> assertEquals(Optional.of("my-group"), config.groupId()),
                 () -> assertEquals(List.of("topic-a", "topic-b"), config.topics()),
                 () -> assertTrue(config.topicPattern().isEmpty()),
                 () -> assertTrue(config.partitions().isEmpty()),
@@ -364,10 +364,9 @@ class KafkaSourcePropertiesTest {
         }
 
         @ParameterizedTest
-        @NullAndEmptySource
-        @ValueSource(strings = {"   ", "\t\n"})
-        @DisplayName("Should fail validation when groupId is null, empty, or blank")
-        void shouldFailWhenGroupIdIsInvalid(String groupId) {
+        @ValueSource(strings = {"", "   ", "\t\n"})
+        @DisplayName("Should fail validation when groupId is blank")
+        void shouldFailWhenGroupIdIsBlank(String groupId) {
             var config = new KafkaSourceProperties(
                 "my-source",
                 List.of("localhost:9092"),
@@ -386,6 +385,29 @@ class KafkaSourcePropertiesTest {
             assertAll(
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("group-id")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should pass validation when groupId is null and startingOffsets is not COMMITTED")
+        void shouldPassWhenGroupIdIsNull() {
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                null,
+                null,
+                List.of("topic-a"),
+                null,
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                null
+            );
+
+            assertAll(
+                () -> assertTrue(config.groupId().isEmpty()),
+                () -> assertTrue(validator.validate(config).isEmpty())
             );
         }
 
@@ -765,7 +787,7 @@ class KafkaSourcePropertiesTest {
             assertAll(
                 () -> assertEquals("full-kafka-source", config.name()),
                 () -> assertEquals(List.of("localhost:9092", "localhost:9093"), config.bootstrapServers()),
-                () -> assertEquals("analytics-group", config.groupId()),
+                () -> assertEquals(Optional.of("analytics-group"), config.groupId()),
                 () -> assertEquals(Optional.of("analytics-reader"), config.clientIdPrefix()),
                 () -> assertEquals(List.of("orders", "payments"), config.topics()),
                 () -> assertTrue(config.partitions().isEmpty()),
@@ -795,7 +817,7 @@ class KafkaSourcePropertiesTest {
             assertAll(
                 () -> assertEquals("minimal-kafka-source", config.name()),
                 () -> assertEquals(List.of("localhost:9092"), config.bootstrapServers()),
-                () -> assertEquals("minimal-group", config.groupId()),
+                () -> assertEquals(Optional.of("minimal-group"), config.groupId()),
                 () -> assertTrue(config.clientIdPrefix().isEmpty()),
                 () -> assertEquals(List.of("orders"), config.topics()),
                 () -> assertTrue(config.partitions().isEmpty()),

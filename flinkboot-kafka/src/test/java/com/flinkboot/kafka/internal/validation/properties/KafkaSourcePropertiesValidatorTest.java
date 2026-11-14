@@ -9,6 +9,8 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Answers;
 
 import java.util.List;
@@ -383,6 +385,99 @@ class KafkaSourcePropertiesValidatorTest {
             verify(context).buildConstraintViolationWithTemplate(
                 "boundedness must be explicitly specified (BOUNDED or UNBOUNDED) when stopping-offsets is configured"
             );
+        }
+
+        @Test
+        @DisplayName("Should pass when group-id is absent and offsets do not use a COMMITTED strategy")
+        void shouldPassWhenGroupIdAbsentWithNonCommittedOffsets() {
+            var context = mock(ConstraintValidatorContext.class);
+            var props = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                null,
+                null,
+                List.of("my-topic"),
+                null,
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                KafkaBoundedness.BOUNDED,
+                DEFAULT_STOPPING_OFFSETS,
+                Map.of()
+            );
+
+            assertTrue(KafkaSourcePropertiesValidator.validate(props, context));
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = KafkaOffsetInitializer.class, names = {"COMMITTED", "COMMITTED_EARLIEST", "COMMITTED_LATEST"})
+        @DisplayName("Should fail when group-id is absent and starting-offsets uses a COMMITTED strategy")
+        void shouldFailWhenGroupIdAbsentWithCommittedStartingOffsets(KafkaOffsetInitializer strategy) {
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
+            var props = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                null,
+                null,
+                List.of("my-topic"),
+                null,
+                null,
+                new KafkaOffsetProperties(strategy, null, null, null),
+                null,
+                null,
+                Map.of()
+            );
+
+            assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "group-id is required when starting-offsets or stopping-offsets uses a COMMITTED strategy"
+            )).addPropertyNode("group-id");
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = KafkaOffsetInitializer.class, names = {"COMMITTED", "COMMITTED_EARLIEST", "COMMITTED_LATEST"})
+        @DisplayName("Should fail when group-id is absent and stopping-offsets uses a COMMITTED strategy")
+        void shouldFailWhenGroupIdAbsentWithCommittedStoppingOffsets(KafkaOffsetInitializer strategy) {
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
+            var props = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                null,
+                null,
+                List.of("my-topic"),
+                null,
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                KafkaBoundedness.BOUNDED,
+                new KafkaOffsetProperties(strategy, null, null, null),
+                Map.of()
+            );
+
+            assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "group-id is required when starting-offsets or stopping-offsets uses a COMMITTED strategy"
+            )).addPropertyNode("group-id");
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = KafkaOffsetInitializer.class, names = {"COMMITTED", "COMMITTED_EARLIEST", "COMMITTED_LATEST"})
+        @DisplayName("Should pass when group-id is present and starting-offsets uses a COMMITTED strategy")
+        void shouldPassWhenGroupIdPresentWithCommittedStartingOffsets(KafkaOffsetInitializer strategy) {
+            var context = mock(ConstraintValidatorContext.class);
+            var props = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                "group",
+                null,
+                List.of("my-topic"),
+                null,
+                null,
+                new KafkaOffsetProperties(strategy, null, null, null),
+                null,
+                null,
+                Map.of()
+            );
+
+            assertTrue(KafkaSourcePropertiesValidator.validate(props, context));
         }
     }
 }

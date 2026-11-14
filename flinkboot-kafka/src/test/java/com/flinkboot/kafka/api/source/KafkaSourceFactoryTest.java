@@ -90,6 +90,29 @@ class KafkaSourceFactoryTest {
         }
 
         @Test
+        @DisplayName("Should successfully build KafkaSource and KafkaSourceBuilder when groupId is absent")
+        void shouldBuildKafkaSourceWithoutGroupId() {
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                null,
+                null,
+                List.of("test-topic"),
+                null,
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                null
+            );
+
+            assertAll(
+                () -> assertNotNull(KafkaSourceFactory.supplyFor(config, TEST_SCHEMA)),
+                () -> assertNotNull(KafkaSourceFactory.supplyBuilderFor(config, TEST_SCHEMA))
+            );
+        }
+
+        @Test
         @DisplayName("Should successfully build with valid TIMESTAMP offset config")
         void shouldBuildWithTimestamp() {
             var timestampOffsets = new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 1689717600000L, null, null);
