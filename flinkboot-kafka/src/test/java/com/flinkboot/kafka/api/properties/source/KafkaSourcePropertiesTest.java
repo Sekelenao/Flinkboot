@@ -829,6 +829,25 @@ class KafkaSourcePropertiesTest {
         }
 
         @Test
+        @DisplayName("Should deserialize minimal YAML without group-id as Optional.empty()")
+        void shouldDeserializeYamlWithoutGroupId() throws Exception {
+            var yaml = "name: \"ephemeral-kafka-source\"\n"
+                + "bootstrap-servers:\n"
+                + "  - \"localhost:9092\"\n"
+                + "topics:\n"
+                + "  - \"orders\"\n"
+                + "starting-offsets:\n"
+                + "  strategy: EARLIEST\n";
+
+            var config = yamlMapper.readValue(yaml, KafkaSourceProperties.class);
+
+            assertAll(
+                () -> assertEquals(Optional.empty(), config.groupId()),
+                () -> assertTrue(validator.validate(config).isEmpty())
+            );
+        }
+
+        @Test
         @DisplayName("Should deserialize YAML with partition subscriptions")
         void shouldDeserializeYamlWithPartitions() throws Exception {
             var yaml = "name: \"partition-kafka-source\"\n"

@@ -408,6 +408,27 @@ class KafkaSourcePropertiesValidatorTest {
             assertTrue(KafkaSourcePropertiesValidator.validate(props, context));
         }
 
+        @Test
+        @DisplayName("Should pass when group-id is absent, starting-offsets is non-committed, and stopping-offsets is absent")
+        void shouldPassWhenGroupIdAndStoppingOffsetsAbsentWithNonCommittedStartingOffsets() {
+            var context = mock(ConstraintValidatorContext.class);
+            var props = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                null,
+                null,
+                List.of("my-topic"),
+                null,
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                Map.of()
+            );
+
+            assertTrue(KafkaSourcePropertiesValidator.validate(props, context));
+        }
+
         @ParameterizedTest
         @EnumSource(value = KafkaOffsetInitializer.class, names = {"COMMITTED", "COMMITTED_EARLIEST", "COMMITTED_LATEST"})
         @DisplayName("Should fail when group-id is absent and starting-offsets uses a COMMITTED strategy")
@@ -474,6 +495,28 @@ class KafkaSourcePropertiesValidatorTest {
                 new KafkaOffsetProperties(strategy, null, null, null),
                 null,
                 null,
+                Map.of()
+            );
+
+            assertTrue(KafkaSourcePropertiesValidator.validate(props, context));
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = KafkaOffsetInitializer.class, names = {"COMMITTED", "COMMITTED_EARLIEST", "COMMITTED_LATEST"})
+        @DisplayName("Should pass when group-id is present and stopping-offsets uses a COMMITTED strategy")
+        void shouldPassWhenGroupIdPresentWithCommittedStoppingOffsets(KafkaOffsetInitializer strategy) {
+            var context = mock(ConstraintValidatorContext.class);
+            var props = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                "group",
+                null,
+                List.of("my-topic"),
+                null,
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                KafkaBoundedness.BOUNDED,
+                new KafkaOffsetProperties(strategy, null, null, null),
                 Map.of()
             );
 
