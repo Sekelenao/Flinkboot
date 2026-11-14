@@ -254,5 +254,20 @@ class CheckpointingPropertiesValidatorTest {
 
             assertTrue(CheckpointingPropertiesValidator.validate(props, context));
         }
+
+        @Test
+        @DisplayName("Should fail when storage is JOBMANAGER and storage-uri is specified")
+        void shouldFailWhenStorageIsJobManagerAndStorageUriIsSpecified() {
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
+            var props = new CheckpointingProperties(
+                true, Duration.ofSeconds(10), null, null, null, null,
+                null, null, null, CheckpointStorageType.JOBMANAGER, "file:///tmp/checkpoints", null
+            );
+
+            assertFalse(CheckpointingPropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "storage-uri can only be specified when checkpoint storage is FILESYSTEM"
+            )).addPropertyNode("storage-uri");
+        }
     }
 }
