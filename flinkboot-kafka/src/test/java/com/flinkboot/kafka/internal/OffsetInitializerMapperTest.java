@@ -1,5 +1,6 @@
 package com.flinkboot.kafka.internal;
 
+import com.flinkboot.core.api.exception.configuration.ConfigurationValidationException;
 import com.flinkboot.kafka.api.properties.source.KafkaOffsetInitializer;
 import com.flinkboot.kafka.api.properties.source.KafkaOffsetProperties;
 import com.flinkboot.kafka.api.properties.source.KafkaOffsetResetStrategy;
@@ -19,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("OffsetInitializerMapper")
 class OffsetInitializerMapperTest {
@@ -84,5 +86,18 @@ class OffsetInitializerMapperTest {
             () -> assertNotNull(partitionOffsets),
             () -> assertEquals(100L, partitionOffsets.get(topicPartition))
         );
+    }
+
+    @Test
+    @DisplayName("Should throw ConfigurationValidationException when duplicate topic-partition offsets are configured")
+    void shouldThrowOnDuplicateTopicPartitionOffsets() {
+        var first = new TopicPartitionOffsetProperties("test-topic", 0, 100L);
+        var duplicate = new TopicPartitionOffsetProperties("test-topic", 0, 200L);
+        var props = new KafkaOffsetProperties(
+            KafkaOffsetInitializer.OFFSETS, null, List.of(first, duplicate), KafkaOffsetResetStrategy.EARLIEST
+        );
+
+        var ex = assertThrows(ConfigurationValidationException.class, () -> OffsetInitializerMapper.map(props));
+        assertTrue(ex.getMessage().contains("test-topic-0"));
     }
 }
