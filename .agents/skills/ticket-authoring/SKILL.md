@@ -29,3 +29,14 @@ Scale the issue depth strictly to the concrete scope of the work:
 - **Immutability & Safety**: Enforce `private final` fields, defensive copies, and unmodifiable views.
 - **Changelog**: Require updating `CHANGELOG.md` under the unreleased version section for any user-facing change.
 - **Out of Scope**: Explicitly define what must NOT be touched to prevent scope creep.
+
+## 4. GitHub Labels & Title Conventions
+
+- **Title Prefix**: Start issue titles with `[Feature]: `, `[Bug]: `, `[Refactor]: `, or `[Documentation]: `.
+- **Type Labels**: Apply `bug` for `[Bug]` issues, `feature` for `[Feature]` issues, `dependencies` for dependency updates, and `github_actions` for CI workflow updates (omit type labels for pure `[Refactor]` or `[Documentation]` unless adding a feature).
+- **Language Label**: Always apply `java` when the issue involves modifying `.java` source, test, or Javadoc files.
+- **Triage & Readiness Labels**:
+  - Apply `accepted` when the issue has been validated by the maintainer and is ready for implementation.
+  - Apply `good first issue` for small, well-scoped tasks suitable for external contributors.
+  - Apply `needs-triage` or `draft` when the scope is not yet finalized or approved.
+- **Milestone**: Assign the target release milestone when specified.

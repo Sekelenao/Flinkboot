@@ -76,3 +76,8 @@ All audit subagents (including `module-scanner` and `pr-reviewer`) must consult 
 - **Status**: **REJECTED**
 - **Rationale**: `PlaceholderResolver` intentionally restricts placeholders to strict `${VARIABLE_NAME}` lookups against environment variables or startup arguments. Introducing fallback syntax adds parsing complexity, ambiguity around colons in values (such as Kafka endpoints or URLs `host:9092`), and risks masking missing configuration in production. Missing placeholders must fail fast.
 
+## 15. Ordering & Redundant Assertions in `CollectingSinkAssert`
+- **Pattern**: Requesting `containsExactly(...)`, `doesNotContain(...)`, or `satisfies(Consumer<List<T>>)` on `CollectingSinkAssert` (or flagging `contains(T...)` for using a `HashSet` and ignoring order/duplicates).
+- **Status**: **REJECTED**
+- **Rationale**: In Apache Flink pipelines with `parallelism > 1`, records are emitted across parallel subtasks in non-deterministic order; encouraging strict order assertions like `containsExactly(...)` promotes flaky tests. `contains(T...)` intentionally checks set membership (`equals`). Negative and custom assertions are already covered by `noneMatch(...)` and direct access via `sink.elements()`.
+
