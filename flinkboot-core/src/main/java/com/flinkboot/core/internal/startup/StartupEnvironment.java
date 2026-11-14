@@ -5,6 +5,7 @@ import com.flinkboot.core.internal.annotation.VisibleForTesting;
 import com.flinkboot.core.internal.parser.bool.StrictBooleanParser;
 import com.flinkboot.core.internal.parser.integer.IntegerParser;
 import com.flinkboot.core.internal.parser.yaml.ParserFeatures;
+import com.flinkboot.core.internal.validation.ValidationFeatures;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,18 +53,23 @@ public final class StartupEnvironment {
             .orElse(Collections.singletonList("classpath:job-configuration.yaml"));
     }
 
-    public ParserFeatures parserFeatures(){
+    public ParserFeatures parserFeatures() {
+        return ParserFeatures.builder()
+            .permitOverride(flag("flinkboot-configuration-override"))
+            .listMerging(flag("flinkboot-configuration-list-merging"))
+            .build();
+    }
+
+    public ValidationFeatures validationFeatures() {
         var validationCapacity = get(VIOLATIONS_LOG_SIZE)
             .map(value -> IntegerParser.parseStrictlyPositive(value, () -> new IntegerParsingException(
                 "Invalid value for '" + VIOLATIONS_LOG_SIZE
                     + "': must be a strictly positive integer, but was '" + value + "'"
             )))
             .orElse(10);
-        return ParserFeatures.builder()
-            .permitOverride(flag("flinkboot-configuration-override"))
-            .listMerging(flag("flinkboot-configuration-list-merging"))
+        return ValidationFeatures.builder()
             .disableValidation(flag("flinkboot-configuration-disable-validation"))
-            .validationCapacity(validationCapacity)
+            .capacity(validationCapacity)
             .build();
     }
 
