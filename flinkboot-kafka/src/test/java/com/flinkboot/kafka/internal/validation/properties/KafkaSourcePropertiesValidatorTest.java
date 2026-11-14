@@ -522,5 +522,47 @@ class KafkaSourcePropertiesValidatorTest {
 
             assertTrue(KafkaSourcePropertiesValidator.validate(props, context));
         }
+
+        @Test
+        @DisplayName("Should pass cross-field group-id validation when starting-offsets is null")
+        void shouldPassGroupIdValidationWhenStartingOffsetsIsNull() {
+            var context = mock(ConstraintValidatorContext.class);
+            var props = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                null,
+                null,
+                List.of("my-topic"),
+                null,
+                null,
+                null,
+                null,
+                null,
+                Map.of()
+            );
+
+            assertTrue(KafkaSourcePropertiesValidator.validate(props, context));
+        }
+
+        @Test
+        @DisplayName("Should pass cross-field group-id validation when starting-offsets strategy is null")
+        void shouldPassGroupIdValidationWhenStartingOffsetsStrategyIsNull() {
+            var context = mock(ConstraintValidatorContext.class);
+            var props = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                null,
+                null,
+                List.of("my-topic"),
+                null,
+                null,
+                new KafkaOffsetProperties(null, null, null, null),
+                null,
+                null,
+                Map.of()
+            );
+
+            assertTrue(KafkaSourcePropertiesValidator.validate(props, context));
+        }
     }
 }

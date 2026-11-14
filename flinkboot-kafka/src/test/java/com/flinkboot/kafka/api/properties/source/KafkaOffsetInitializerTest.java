@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("KafkaOffsetInitializer")
@@ -52,6 +53,25 @@ class KafkaOffsetInitializerTest {
         @DisplayName("Should return empty optional for parameterized initializers")
         void shouldReturnEmptyOptionalForParameterizedInitializers(KafkaOffsetInitializer initializer) {
             assertTrue(initializer.offsetsInitializer().isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("Group ID Requirement")
+    class GroupIdRequirement {
+
+        @ParameterizedTest
+        @EnumSource(value = KafkaOffsetInitializer.class, names = {"COMMITTED", "COMMITTED_EARLIEST", "COMMITTED_LATEST"})
+        @DisplayName("Should require group-id for committed offset strategies")
+        void shouldRequireGroupIdForCommittedStrategies(KafkaOffsetInitializer initializer) {
+            assertTrue(initializer.requiresGroupId());
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = KafkaOffsetInitializer.class, names = {"EARLIEST", "LATEST", "TIMESTAMP", "OFFSETS"})
+        @DisplayName("Should not require group-id for non-committed offset strategies")
+        void shouldNotRequireGroupIdForNonCommittedStrategies(KafkaOffsetInitializer initializer) {
+            assertFalse(initializer.requiresGroupId());
         }
     }
 }

@@ -2,25 +2,16 @@ package com.flinkboot.kafka.internal.validation.properties;
 
 import com.flinkboot.core.internal.validation.properties.PropertiesValidator;
 import com.flinkboot.kafka.api.properties.source.KafkaBoundedness;
-import com.flinkboot.kafka.api.properties.source.KafkaOffsetInitializer;
 import com.flinkboot.kafka.api.properties.source.KafkaOffsetProperties;
 import com.flinkboot.kafka.api.properties.source.KafkaSourceProperties;
 import jakarta.validation.ConstraintValidatorContext;
 
-import java.util.EnumSet;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Validates cross-field invariants for {@link KafkaSourceProperties}.
  */
 public final class KafkaSourcePropertiesValidator {
-
-    private static final Set<KafkaOffsetInitializer> COMMITTED_STRATEGIES = EnumSet.of(
-        KafkaOffsetInitializer.COMMITTED,
-        KafkaOffsetInitializer.COMMITTED_EARLIEST,
-        KafkaOffsetInitializer.COMMITTED_LATEST
-    );
 
     private final KafkaSourceProperties properties;
 
@@ -66,25 +57,25 @@ public final class KafkaSourcePropertiesValidator {
         return true;
     }
 
+    private static boolean requiresGroupId(KafkaOffsetProperties offsets) {
+        if (offsets == null || offsets.strategy() == null) {
+            return false;
+        }
+        return offsets.strategy().requiresGroupId();
+    }
+
     private boolean validateGroupId() {
         if (properties.groupId().isPresent()) {
             return true;
         }
-        var usesCommittedStarting = isCommittedStrategy(properties.startingOffsets());
-        var usesCommittedStopping = properties.stoppingOffsets()
-            .map(this::isCommittedStrategy)
+        var startingRequiresGroupId = requiresGroupId(properties.startingOffsets());
+        var stoppingRequiresGroupId = properties.stoppingOffsets()
+            .map(KafkaSourcePropertiesValidator::requiresGroupId)
             .orElse(false);
-        if (usesCommittedStarting || usesCommittedStopping) {
+        if (startingRequiresGroupId || stoppingRequiresGroupId) {
             return reject("group-id", "group-id is required when starting-offsets or stopping-offsets uses a COMMITTED strategy");
         }
         return true;
-    }
-
-    private boolean isCommittedStrategy(KafkaOffsetProperties offsets) {
-        if (offsets == null || offsets.strategy() == null) {
-            return false;
-        }
-        return COMMITTED_STRATEGIES.contains(offsets.strategy());
     }
 
     private boolean reject(String property, String message) {
