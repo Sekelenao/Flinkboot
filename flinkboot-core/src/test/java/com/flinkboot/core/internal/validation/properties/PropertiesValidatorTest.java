@@ -6,10 +6,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,46 +54,59 @@ class PropertiesValidatorTest {
     }
 
     @Nested
-    @DisplayName("reject")
-    class Reject {
+    @DisplayName("compute")
+    class Compute {
 
         @Test
-        @DisplayName("Should throw NullPointerException when context is null")
-        void shouldThrowWhenContextIsNull() {
-            assertThrows(NullPointerException.class, () -> PropertiesValidator.reject(null, "prop", "msg"));
-        }
-
-        @Test
-        @DisplayName("Should throw NullPointerException when property is null")
-        void shouldThrowWhenPropertyIsNull() {
+        @DisplayName("Should throw NullPointerException when arguments are null")
+        void shouldThrowWhenArgumentsAreNull() {
             var context = mock(ConstraintValidatorContext.class);
-            assertThrows(NullPointerException.class, () -> PropertiesValidator.reject(context, null, "msg"));
+            List<ValidationRule<String>> rules = List.of();
+            List<ValidationRule<String>> rulesWithNull = Collections.singletonList(null);
+
+            assertThrows(NullPointerException.class, () -> PropertiesValidator.compute(null, context, rules));
+            assertThrows(NullPointerException.class, () -> PropertiesValidator.compute("props", null, rules));
+            assertThrows(NullPointerException.class, () -> PropertiesValidator.compute("props", context, null));
+            assertThrows(NullPointerException.class, () -> PropertiesValidator.compute("props", context, rulesWithNull));
         }
 
         @Test
-        @DisplayName("Should throw NullPointerException when message is null")
-        void shouldThrowWhenMessageIsNull() {
+        @DisplayName("Should return true when all rules pass")
+        void shouldReturnTrueWhenAllRulesPass() {
             var context = mock(ConstraintValidatorContext.class);
-            assertThrows(NullPointerException.class, () -> PropertiesValidator.reject(context, "prop", null));
+            List<ValidationRule<String>> rules = List.of(p -> Optional.empty(), p -> Optional.empty());
+
+            var valid = PropertiesValidator.compute("props", context, rules);
+
+            assertTrue(valid);
+            verify(context, never()).disableDefaultConstraintViolation();
         }
 
         @Test
-        @DisplayName("Should disable default violation, build property violation, and return false")
-        void shouldBuildViolationAndReturnFalse() {
+        @DisplayName("Should evaluate all rules without short-circuiting and register all violations")
+        void shouldAccumulateAllViolations() {
             var context = mock(ConstraintValidatorContext.class);
             var builder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.class);
             var nodeBuilder = mock(ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderCustomizableContext.class);
 
-            when(context.buildConstraintViolationWithTemplate("error message")).thenReturn(builder);
-            when(builder.addPropertyNode("targetProperty")).thenReturn(nodeBuilder);
+            when(context.buildConstraintViolationWithTemplate("first error")).thenReturn(builder);
+            when(context.buildConstraintViolationWithTemplate("second error")).thenReturn(builder);
+            when(builder.addPropertyNode("first")).thenReturn(nodeBuilder);
+            when(builder.addPropertyNode("second")).thenReturn(nodeBuilder);
 
-            var result = PropertiesValidator.reject(context, "targetProperty", "error message");
+            List<ValidationRule<String>> rules = List.of(
+                p -> Optional.of(new PropertyViolation("first", "first error")),
+                p -> Optional.empty(),
+                p -> Optional.of(new PropertyViolation("second", "second error"))
+            );
 
-            assertFalse(result);
-            verify(context).disableDefaultConstraintViolation();
-            verify(context).buildConstraintViolationWithTemplate("error message");
-            verify(builder).addPropertyNode("targetProperty");
-            verify(nodeBuilder).addConstraintViolation();
+            var valid = PropertiesValidator.compute("props", context, rules);
+
+            assertFalse(valid);
+            verify(context).buildConstraintViolationWithTemplate("first error");
+            verify(builder).addPropertyNode("first");
+            verify(context).buildConstraintViolationWithTemplate("second error");
+            verify(builder).addPropertyNode("second");
         }
     }
 }

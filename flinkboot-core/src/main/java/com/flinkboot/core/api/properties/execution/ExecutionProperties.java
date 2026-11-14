@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.flinkboot.core.api.validation.ValidatableProperties;
 import com.flinkboot.core.internal.annotation.Generated;
-import com.flinkboot.core.internal.validation.properties.ExecutionPropertiesValidator;
+import com.flinkboot.core.internal.validation.properties.execution.ExecutionPropertiesValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.constraints.Positive;
 import org.hibernate.validator.constraints.time.DurationMin;

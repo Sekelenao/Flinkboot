@@ -38,18 +38,13 @@ In Flinkboot, all configuration classes that bind to YAML/JSON configuration fil
         return MyPropertiesValidator.validate(this, context);
     }
     ```
-  - Create a dedicated validator class in `internal.validation.properties`:
-    - **Simple validators (single method)**:
+  - Create a dedicated validator class in `internal.validation.properties.<domain>` orchestrating `ValidationRule<T>` implementations:
+    - Each cross-field invariant lives in its own `public final` `ValidationRule<MyProperties>` class inside `internal.validation.properties.<domain>` (returning `Optional<PropertyViolation>` with no dependency on Jakarta `ConstraintValidatorContext`).
+    - The `*PropertiesValidator` facade in `internal.validation.properties.<domain>` declares:
+      - `private static final List<ValidationRule<MyProperties>> RULES = List.of(...);`
       - Private constructor throwing `new AssertionError("You cannot instantiate this class")`.
-      - Static method `public static boolean validate(MyProperties properties, ConstraintValidatorContext context)`.
-    - **Complex validators (> 1 method / sub-configurations)**:
-      - Store `properties` and `context` as `private final` fields.
-      - Private constructor validating non-null arguments via `Objects.requireNonNull(..., "... must not be null")`.
-      - Static facade `public static boolean validate(MyProperties properties, ConstraintValidatorContext context) { return new MyPropertiesValidator(properties, context).execute(); }`.
-      - Instance helper `reject(propertyName, message)` delegating to `PropertiesValidator.reject(context, propertyName, message)`.
-      - Format switch `case` branches on a single line (e.g. `case FIXED_DELAY: return validateFixedDelay();`).
-      - **Accumulate All Violations**: When validating multiple independent invariants, evaluate each validation method into a boolean variable before combining with `&&` (e.g. `var validA = validateA(); var validB = validateB(); return validA && validB;`). Do **NOT** short-circuit across independent checks so all violations are reported simultaneously.
-    - Bind violations to property nodes via `PropertiesValidator.reject(context, "propertyName", "message")`.
+      - Static facade `public static boolean validate(MyProperties properties, ConstraintValidatorContext context) { return PropertiesValidator.compute(properties, context, RULES); }`.
+    - `PropertiesValidator.compute(...)` evaluates all rules without short-circuiting so all violations are reported simultaneously.
     - Keep DTOs pure, clean data carriers without massive `if` blocks.
 
 ## 4. Getters & Accessors Rules
