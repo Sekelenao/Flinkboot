@@ -81,3 +81,18 @@ All audit subagents (including `module-scanner` and `pr-reviewer`) must consult 
 - **Status**: **REJECTED**
 - **Rationale**: In Apache Flink pipelines with `parallelism > 1`, records are emitted across parallel subtasks in non-deterministic order; encouraging strict order assertions like `containsExactly(...)` promotes flaky tests. `contains(T...)` intentionally checks set membership (`equals`). Negative and custom assertions are already covered by `noneMatch(...)` and direct access via `sink.elements()`.
 
+## 16. Bootstrap ClassLoader Null Fallback in `ClasspathResource`
+- **Pattern**: Requiring a `ClassLoader.getSystemClassLoader()` fallback in `ClasspathResource` when `ClasspathResource.class.getClassLoader()` returns `null`.
+- **Status**: **REJECTED**
+- **Rationale**: `Class.getClassLoader()` only returns `null` for classes loaded by the JVM bootstrap classloader (JDK classes or `-Xbootclasspath`). Application and Flinkboot library classes are never loaded by the bootstrap classloader, making this fallback dead/untestable defensive code.
+
+## 17. Strict Flag/Value Lookahead & `--key=value` Rejection in `CommandLine`
+- **Pattern**: Flagging `CommandLine.parse` for consuming `--flag` tokens as option values when a preceding option value is omitted, or for treating `--key=value` as a boolean flag name.
+- **Status**: **REJECTED**
+- **Rationale**: `CommandLine` intentionally keeps a minimal `--key value` / `--flag` parsing contract without `--key=value` syntax or heuristic lookahead rejecting `--` prefixes in option values.
+
+## 18. Pre-Creation `Consumer<Configuration>` Overload on `Flinkboot.executionEnvironment(JobProperties)`
+- **Pattern**: Requesting a `Flinkboot.executionEnvironment(JobProperties, Consumer<Configuration>)` overload to mutate `Configuration` before `StreamExecutionEnvironment` creation.
+- **Status**: **REJECTED**
+- **Rationale**: Users can already obtain and configure `StreamExecutionEnvironment` post-creation via `StreamExecutionEnvironment#configure(ReadableConfig, ClassLoader)` or `env.getConfig()`. Adding a `Consumer<Configuration>` overload expands the `Flinkboot` public API surface unnecessarily.
+
