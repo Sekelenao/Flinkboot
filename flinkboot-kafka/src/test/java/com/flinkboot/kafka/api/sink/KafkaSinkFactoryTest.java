@@ -7,6 +7,7 @@ import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchemaBuilder;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
+import org.apache.flink.connector.kafka.sink.KafkaSinkBuilder;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -273,6 +274,74 @@ class KafkaSinkFactoryTest {
                         )
                     );
                     assertEquals("schemaCustomizer must not be null", ex.getMessage());
+                }
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("supplyFor (Consumer<KafkaRecordSerializationSchemaBuilder> and Consumer<KafkaSinkBuilder>)")
+    class SupplySchemaAndBuilderCustomizers {
+
+        @Test
+        @DisplayName("Should apply schema customizer and builder customizer before building KafkaSink")
+        void shouldApplySchemaAndBuilderCustomizers() throws Exception {
+            Consumer<KafkaRecordSerializationSchemaBuilder<String>> schemaCustomizer = builder ->
+                builder.setValueSerializationSchema(new SimpleStringSchema());
+            var builderCustomized = new AtomicBoolean();
+            Consumer<KafkaSinkBuilder<String>> builderCustomizer = builder -> {
+                assertNotNull(builder);
+                builderCustomized.set(true);
+            };
+
+            var sink = KafkaSinkFactory.supplyFor(DEFAULT_CONFIG, schemaCustomizer, builderCustomizer);
+
+            var field = KafkaSink.class.getDeclaredField("recordSerializer");
+            field.setAccessible(true);
+
+            @SuppressWarnings("unchecked")
+            var sinkSerializer = (KafkaRecordSerializationSchema<String>) field.get(sink);
+            var sinkRecord = sinkSerializer.serialize("payload", null, null);
+
+            assertAll(
+                () -> assertNotNull(sink),
+                () -> assertTrue(builderCustomized.get()),
+                () -> assertEquals("my-topic", sinkRecord.topic()),
+                () -> assertEquals("payload", new String(sinkRecord.value(), StandardCharsets.UTF_8))
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw NullPointerException when parameters are null")
+        void shouldThrowExceptionWhenParamsAreNull() {
+            Consumer<KafkaRecordSerializationSchemaBuilder<String>> schemaCustomizer = builder -> {};
+            Consumer<KafkaSinkBuilder<String>> builderCustomizer = builder -> {};
+
+            assertAll(
+                () -> {
+                    var ex = assertThrows(
+                        NullPointerException.class,
+                        () -> KafkaSinkFactory.supplyFor((KafkaSinkProperties) null, schemaCustomizer, builderCustomizer)
+                    );
+                    assertEquals("config must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(
+                        NullPointerException.class,
+                        () -> KafkaSinkFactory.supplyFor(
+                            DEFAULT_CONFIG,
+                            (Consumer<KafkaRecordSerializationSchemaBuilder<String>>) null,
+                            builderCustomizer
+                        )
+                    );
+                    assertEquals("schemaCustomizer must not be null", ex.getMessage());
+                },
+                () -> {
+                    var ex = assertThrows(
+                        NullPointerException.class,
+                        () -> KafkaSinkFactory.supplyFor(DEFAULT_CONFIG, schemaCustomizer, null)
+                    );
+                    assertEquals("builderCustomizer must not be null", ex.getMessage());
                 }
             );
         }
