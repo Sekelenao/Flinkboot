@@ -39,6 +39,14 @@ public final class CheckpointingPropertiesValidator {
             }
         }
 
+        if (storage.isPresent() && storage.get() == CheckpointStorageType.JOBMANAGER && properties.storageUri().isPresent()) {
+            return PropertiesValidator.reject(
+                context,
+                "storage-uri",
+                "storage-uri can only be specified when checkpoint storage is FILESYSTEM"
+            );
+        }
+
         var minPause = properties.minPauseBetweenCheckpoints();
         var maxConcurrent = properties.maxConcurrentCheckpoints();
 
