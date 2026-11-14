@@ -1,9 +1,9 @@
 package com.flinkboot.kafka.api.properties.source;
 
-import java.util.Optional;
-
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
+
+import java.util.Optional;
 
 /**
  * Offset initialization strategies for Kafka sources.

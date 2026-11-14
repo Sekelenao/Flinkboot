@@ -1,7 +1,6 @@
 package com.flinkboot.test.api.assertion.type;
 
 import com.flinkboot.test.api.sink.CollectingSink;
-
 import org.junit.jupiter.api.Assertions;
 
 import java.util.Arrays;

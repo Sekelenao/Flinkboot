@@ -1,7 +1,6 @@
 package com.flinkboot.test.api.assertion.type;
 
 import com.flinkboot.test.api.sink.CollectingSink;
-
 import org.apache.flink.api.connector.sink2.WriterInitContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

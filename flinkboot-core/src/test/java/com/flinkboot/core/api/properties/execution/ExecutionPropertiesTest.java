@@ -2,7 +2,6 @@ package com.flinkboot.core.api.properties.execution;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import com.flinkboot.core.internal.validation.Validators;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;

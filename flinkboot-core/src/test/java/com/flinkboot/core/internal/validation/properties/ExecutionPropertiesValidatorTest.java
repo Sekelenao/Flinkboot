@@ -1,5 +1,12 @@
 package com.flinkboot.core.internal.validation.properties;
 
+import com.flinkboot.core.api.properties.execution.ExecutionProperties;
+import jakarta.validation.ConstraintValidatorContext;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.mockito.Answers;
+
 import java.lang.reflect.InvocationTargetException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -7,14 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.mockito.Answers;
 import static org.mockito.Mockito.mock;
-
-import com.flinkboot.core.api.properties.execution.ExecutionProperties;
-import jakarta.validation.ConstraintValidatorContext;
 
 @DisplayName("ExecutionPropertiesValidator")
 class ExecutionPropertiesValidatorTest {

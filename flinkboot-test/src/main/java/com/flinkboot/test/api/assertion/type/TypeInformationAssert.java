@@ -1,7 +1,6 @@
 package com.flinkboot.test.api.assertion.type;
 
 import com.flinkboot.test.internal.pojo.PojoValidator;
-
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 
