@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -87,21 +88,22 @@ class DurationTypeInfoTest {
 
         @Test
         @DisplayName("Should support Flink DataStream keyBy with Duration keys")
-        void shouldSupportKeyByWithDurationKeys() {
+        void shouldSupportKeyByWithDurationKeys() throws Exception {
             var env = StreamExecutionEnvironment.getExecutionEnvironment();
-            var keyed = env.fromData(
+            env.setParallelism(1);
+
+            var collected = env.fromData(
                     DurationTypeInfo.INSTANCE,
                     Duration.ofSeconds(1),
                     Duration.ofSeconds(2),
                     Duration.ofSeconds(1))
-                .keyBy(duration -> duration, DurationTypeInfo.INSTANCE);
-            keyed.reduce(Duration::plus).print();
+                .keyBy(duration -> duration, DurationTypeInfo.INSTANCE)
+                .reduce(Duration::plus)
+                .executeAndCollect(10);
 
-            var streamGraph = env.getStreamGraph();
-
-            assertAll(
-                () -> assertSame(DurationTypeInfo.INSTANCE, keyed.getKeyType()),
-                () -> assertFalse(streamGraph.getStreamNodes().isEmpty())
+            assertEquals(
+                List.of(Duration.ofSeconds(1), Duration.ofSeconds(2), Duration.ofSeconds(2)),
+                collected
             );
         }
     }

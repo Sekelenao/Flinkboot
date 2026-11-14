@@ -18,6 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("DurationComparator")
@@ -147,19 +149,32 @@ class DurationComparatorTest {
         @Test
         @DisplayName("Should compute hash and compare against reference")
         void shouldComputeHashAndCompareAgainstReference() {
-            var comparator = new DurationComparator(true);
-            var otherComparator = new DurationComparator(true);
+            var ascending = new DurationComparator(true);
+            var descending = new DurationComparator(false);
+            var largerComparator = new DurationComparator(true);
+            var smallerComparator = new DurationComparator(true);
+            var equalComparator = new DurationComparator(true);
+
             var ref = Duration.ofSeconds(10);
+            var smaller = Duration.ofSeconds(5);
             var larger = Duration.ofSeconds(20);
 
-            comparator.setReference(ref);
-            otherComparator.setReference(larger);
+            ascending.setReference(ref);
+            descending.setReference(ref);
+            largerComparator.setReference(larger);
+            smallerComparator.setReference(smaller);
+            equalComparator.setReference(Duration.ofSeconds(10));
 
             assertAll(
-                () -> assertEquals(ref.hashCode(), comparator.hash(ref)),
-                () -> assertTrue(comparator.equalToReference(Duration.ofSeconds(10))),
-                () -> assertFalse(comparator.equalToReference(larger)),
-                () -> assertTrue(comparator.compareToReference(otherComparator) > 0)
+                () -> assertEquals(ref.hashCode(), ascending.hash(ref)),
+                () -> assertTrue(ascending.equalToReference(Duration.ofSeconds(10))),
+                () -> assertFalse(ascending.equalToReference(larger)),
+                () -> assertTrue(ascending.compareToReference(largerComparator) > 0),
+                () -> assertTrue(ascending.compareToReference(smallerComparator) < 0),
+                () -> assertEquals(0, ascending.compareToReference(equalComparator)),
+                () -> assertTrue(descending.compareToReference(largerComparator) < 0),
+                () -> assertTrue(descending.compareToReference(smallerComparator) > 0),
+                () -> assertEquals(0, descending.compareToReference(equalComparator))
             );
         }
     }
@@ -208,7 +223,7 @@ class DurationComparatorTest {
         }
 
         @Test
-        @DisplayName("Should handle truncated, zero-length, and padded normalized key lengths")
+        @DisplayName("Should handle zero, negative, single-byte, offset, and padded normalized key lengths")
         void shouldHandleVariousNormalizedKeyLengths() {
             var comparator = new DurationComparator(true);
             var first = Duration.ofSeconds(5, 0x01020304);
@@ -217,18 +232,34 @@ class DurationComparatorTest {
             var segment = MemorySegmentFactory.allocateUnpooledSegment(16);
             segment.put(0, (byte) 0x7F);
             comparator.putNormalizedKey(first, segment, 0, 0);
-            byte untouchedByte = segment.get(0);
+            byte untouchedZeroLen = segment.get(0);
+            comparator.putNormalizedKey(first, segment, 0, -3);
+            byte untouchedNegativeLen = segment.get(0);
 
-            byte[] prefixSecondsA = normalizedKey(comparator, Duration.ofSeconds(-1), 5);
-            byte[] prefixSecondsB = normalizedKey(comparator, Duration.ofSeconds(1), 5);
+            var nullMarkerOnly = normalizedKey(comparator, null, 1);
+            var nonNullMarkerOnly = normalizedKey(comparator, first, 1);
 
-            byte[] prefixNanosA = normalizedKey(comparator, first, 11);
-            byte[] prefixNanosB = normalizedKey(comparator, second, 11);
+            var offsetSegment = MemorySegmentFactory.allocateUnpooledSegment(16);
+            offsetSegment.put(2, (byte) 0x55);
+            comparator.putNormalizedKey(first, offsetSegment, 3, 13);
+            byte untouchedBeforeOffset = offsetSegment.get(2);
+            byte offsetNullMarker = offsetSegment.get(3);
 
-            byte[] padded = normalizedKey(comparator, first, 16);
+            var prefixSecondsA = normalizedKey(comparator, Duration.ofSeconds(-1), 5);
+            var prefixSecondsB = normalizedKey(comparator, Duration.ofSeconds(1), 5);
+
+            var prefixNanosA = normalizedKey(comparator, first, 11);
+            var prefixNanosB = normalizedKey(comparator, second, 11);
+
+            var padded = normalizedKey(comparator, first, 16);
 
             assertAll(
-                () -> assertEquals((byte) 0x7F, untouchedByte),
+                () -> assertEquals((byte) 0x7F, untouchedZeroLen),
+                () -> assertEquals((byte) 0x7F, untouchedNegativeLen),
+                () -> assertEquals((byte) 0, nullMarkerOnly[0]),
+                () -> assertEquals((byte) 1, nonNullMarkerOnly[0]),
+                () -> assertEquals((byte) 0x55, untouchedBeforeOffset),
+                () -> assertEquals((byte) 1, offsetNullMarker),
                 () -> assertTrue(Arrays.compareUnsigned(prefixSecondsA, prefixSecondsB) < 0),
                 () -> assertEquals(0, Arrays.compareUnsigned(prefixNanosA, prefixNanosB)),
                 () -> assertEquals(0, padded[13]),
@@ -238,17 +269,47 @@ class DurationComparatorTest {
         }
 
         @Test
-        @DisplayName("Should duplicate comparator preserving sort order")
+        @DisplayName("Should duplicate comparator preserving sort order in both directions")
         void shouldDuplicatePreservingSortOrder() throws IOException {
+            var ascending = new DurationComparator(true);
+            var ascendingCopy = ascending.duplicate();
             var descending = new DurationComparator(false);
-            var copy = descending.duplicate();
+            var descendingCopy = descending.duplicate();
 
             assertAll(
-                () -> assertNotSame(descending, copy),
-                () -> assertTrue(copy.compare(Duration.ofSeconds(1), Duration.ofSeconds(5)) > 0),
-                () -> assertTrue(copy.compareSerialized(
+                () -> assertNotSame(ascending, ascendingCopy),
+                () -> assertTrue(ascendingCopy.compare(Duration.ofSeconds(1), Duration.ofSeconds(5)) < 0),
+                () -> assertTrue(ascendingCopy.compareSerialized(
+                    serialize(Duration.ofSeconds(1)),
+                    serialize(Duration.ofSeconds(5))) < 0),
+                () -> assertNotSame(descending, descendingCopy),
+                () -> assertTrue(descendingCopy.compare(Duration.ofSeconds(1), Duration.ofSeconds(5)) > 0),
+                () -> assertTrue(descendingCopy.compareSerialized(
                     serialize(Duration.ofSeconds(1)),
                     serialize(Duration.ofSeconds(5))) > 0)
+            );
+        }
+
+        @Test
+        @DisplayName("Should reject key-normalized serialization and expose flat comparators and key extraction")
+        void shouldExposeKeyExtractionAndFlatComparators() {
+            var comparator = new DurationComparator(true);
+            var value = Duration.ofSeconds(42);
+            var target = new Object[3];
+            var out = new DataOutputSerializer(16);
+            var in = new DataInputDeserializer(new byte[0]);
+            var flat = comparator.getFlatComparators();
+
+            assertAll(
+                () -> assertFalse(comparator.supportsSerializationWithKeyNormalization()),
+                () -> assertThrows(UnsupportedOperationException.class,
+                    () -> comparator.writeWithKeyNormalization(value, out)),
+                () -> assertThrows(UnsupportedOperationException.class,
+                    () -> comparator.readWithKeyDenormalization(value, in)),
+                () -> assertEquals(1, comparator.extractKeys(value, target, 1)),
+                () -> assertSame(value, target[1]),
+                () -> assertEquals(1, flat.length),
+                () -> assertSame(comparator, flat[0])
             );
         }
     }
