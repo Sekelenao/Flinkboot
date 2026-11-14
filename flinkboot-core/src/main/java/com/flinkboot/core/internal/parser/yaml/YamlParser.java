@@ -10,6 +10,7 @@ import com.flinkboot.core.api.exception.parsing.YamlParsingException;
 import com.flinkboot.core.internal.annotation.VisibleForTesting;
 import com.flinkboot.core.internal.startup.EnvVarResolver;
 import com.flinkboot.core.internal.validation.ConfigurationValidator;
+import com.flinkboot.core.internal.validation.ValidationFeatures;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,20 +27,19 @@ public final class YamlParser implements AutoCloseable {
 
     private final MergeProcessor mergeProcessor;
 
-    private final ParserFeatures parserFeatures;
-
-    public YamlParser(ParserFeatures features) {
-        this(additionalConfiguration -> {}, Objects.requireNonNull(features));
+    public YamlParser(ParserFeatures parserFeatures, ValidationFeatures validationFeatures) {
+        this(additionalConfiguration -> {}, Objects.requireNonNull(parserFeatures), Objects.requireNonNull(validationFeatures));
     }
 
-    public YamlParser(Consumer<YAMLMapper.Builder> additionalConfiguration, ParserFeatures features) {
-        this(additionalConfiguration, features, new PlaceholderResolver(new EnvVarResolver(System::getenv)));
+    public YamlParser(Consumer<YAMLMapper.Builder> additionalConfiguration, ParserFeatures parserFeatures, ValidationFeatures validationFeatures) {
+        this(additionalConfiguration, parserFeatures, validationFeatures, new PlaceholderResolver(new EnvVarResolver(System::getenv)));
     }
 
     @VisibleForTesting
-    YamlParser(Consumer<YAMLMapper.Builder> additionalConfiguration, ParserFeatures features, PlaceholderResolver placeholderResolver) {
+    YamlParser(Consumer<YAMLMapper.Builder> additionalConfiguration, ParserFeatures parserFeatures, ValidationFeatures validationFeatures, PlaceholderResolver placeholderResolver) {
         Objects.requireNonNull(additionalConfiguration);
-        this.parserFeatures = Objects.requireNonNull(features);
+        Objects.requireNonNull(parserFeatures);
+        Objects.requireNonNull(validationFeatures);
         Objects.requireNonNull(placeholderResolver);
         var builder = YAMLMapper.builder()
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
@@ -50,22 +50,23 @@ public final class YamlParser implements AutoCloseable {
         additionalConfiguration.accept(builder);
         this.mapper = builder.build();
         this.root = mapper.createObjectNode();
-        this.mergeProcessor = new MergeProcessor((ObjectNode) root, features, placeholderResolver);
-        this.validator = new ConfigurationValidator(features.validationCapacity());
+        this.mergeProcessor = new MergeProcessor((ObjectNode) root, parserFeatures, placeholderResolver);
+        this.validator = ConfigurationValidator.from(validationFeatures);
     }
 
-    public YamlParser(YAMLMapper mapper, ParserFeatures parserFeatures){
-        this(mapper, parserFeatures, new PlaceholderResolver(new EnvVarResolver(System::getenv)));
+    public YamlParser(YAMLMapper mapper, ParserFeatures parserFeatures, ValidationFeatures validationFeatures){
+        this(mapper, parserFeatures, validationFeatures, new PlaceholderResolver(new EnvVarResolver(System::getenv)));
     }
 
     @VisibleForTesting
-    YamlParser(YAMLMapper mapper, ParserFeatures parserFeatures, PlaceholderResolver placeholderResolver){
-        this.parserFeatures = Objects.requireNonNull(parserFeatures);
+    YamlParser(YAMLMapper mapper, ParserFeatures parserFeatures, ValidationFeatures validationFeatures, PlaceholderResolver placeholderResolver){
+        Objects.requireNonNull(parserFeatures);
+        Objects.requireNonNull(validationFeatures);
         Objects.requireNonNull(placeholderResolver);
         this.mapper = Objects.requireNonNull(mapper);
         this.root = mapper.createObjectNode();
         this.mergeProcessor = new MergeProcessor((ObjectNode) root, parserFeatures, placeholderResolver);
-        this.validator = new ConfigurationValidator(parserFeatures.validationCapacity());
+        this.validator = ConfigurationValidator.from(validationFeatures);
     }
 
     public void parse(InputStream source){
@@ -91,9 +92,7 @@ public final class YamlParser implements AutoCloseable {
             if (yaml == null) {
                 throw new YamlParsingException("Configuration could not be mapped to target class: " + type.getName());
             }
-            if (!parserFeatures.disableValidation()) {
-                validator.validate(yaml);
-            }
+            validator.validate(yaml);
             return yaml;
         } catch (IOException | IllegalArgumentException exception) {
             throw new YamlParsingException(exception.getMessage(), exception);

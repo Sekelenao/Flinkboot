@@ -119,7 +119,7 @@ public final class Flinkboot {
      */
     public <C> C configuration(Class<C> configurationClass) throws IOException {
         Objects.requireNonNull(configurationClass, "configurationClass must not be null");
-        try(var parser = new YamlParser(startupEnvironment.parserFeatures())) {
+        try(var parser = new YamlParser(startupEnvironment.parserFeatures(), startupEnvironment.validationFeatures())) {
             return readConfigurations(configurationClass, parser);
         }
     }
@@ -139,7 +139,7 @@ public final class Flinkboot {
     public <C> C configuration(Class<C> configurationClass, Consumer<YAMLMapper.Builder> customizer) throws IOException {
         Objects.requireNonNull(configurationClass, "configurationClass must not be null");
         Objects.requireNonNull(customizer, "customizer must not be null");
-        try(var parser = new YamlParser(customizer, startupEnvironment.parserFeatures())) {
+        try(var parser = new YamlParser(customizer, startupEnvironment.parserFeatures(), startupEnvironment.validationFeatures())) {
             return readConfigurations(configurationClass, parser);
         }
     }
@@ -159,7 +159,7 @@ public final class Flinkboot {
     public <C> C configuration(Class<C> configurationClass, YAMLMapper mapper) throws IOException {
         Objects.requireNonNull(configurationClass, "configurationClass must not be null");
         Objects.requireNonNull(mapper, "mapper must not be null");
-        try(var parser = new YamlParser(mapper, startupEnvironment.parserFeatures())) {
+        try(var parser = new YamlParser(mapper, startupEnvironment.parserFeatures(), startupEnvironment.validationFeatures())) {
             return readConfigurations(configurationClass, parser);
         }
     }

@@ -14,6 +14,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -75,7 +76,7 @@ class ConfigurationValidatorTest {
         @DisplayName("Should successfully instantiate when capacity is positive")
         void shouldInstantiateWhenCapacityIsPositive() {
             assertDoesNotThrow(() -> {
-                try (var validator = new ConfigurationValidator(5)) {
+                try (var validator = new JakartaConfigurationValidator(5)) {
                     // instantiated
                 }
             });
@@ -84,14 +85,14 @@ class ConfigurationValidatorTest {
         @Test
         @DisplayName("Should throw IllegalArgumentException when capacity is zero")
         void shouldThrowWhenCapacityIsZero() {
-            var exception = assertThrows(IllegalArgumentException.class, () -> new ConfigurationValidator(0));
+            var exception = assertThrows(IllegalArgumentException.class, () -> new JakartaConfigurationValidator(0));
             assertEquals("Capacity must be strictly positive", exception.getMessage());
         }
 
         @Test
         @DisplayName("Should throw IllegalArgumentException when capacity is negative")
         void shouldThrowWhenCapacityIsNegative() {
-            var exception = assertThrows(IllegalArgumentException.class, () -> new ConfigurationValidator(-3));
+            var exception = assertThrows(IllegalArgumentException.class, () -> new JakartaConfigurationValidator(-3));
             assertEquals("Capacity must be strictly positive", exception.getMessage());
         }
     }
@@ -103,7 +104,7 @@ class ConfigurationValidatorTest {
         @Test
         @DisplayName("Should throw NullPointerException when configuration is null")
         void shouldThrowWhenConfigurationIsNull() {
-            try (var validator = new ConfigurationValidator(10)) {
+            try (var validator = new JakartaConfigurationValidator(10)) {
                 assertThrows(NullPointerException.class, () -> validator.validate(null));
             }
         }
@@ -111,7 +112,7 @@ class ConfigurationValidatorTest {
         @Test
         @DisplayName("Should pass without exception when configuration has no violations")
         void shouldPassWhenNoViolations() {
-            try (var validator = new ConfigurationValidator(10)) {
+            try (var validator = new JakartaConfigurationValidator(10)) {
                 assertDoesNotThrow(() -> validator.validate(new ValidConfig()));
             }
         }
@@ -119,7 +120,7 @@ class ConfigurationValidatorTest {
         @Test
         @DisplayName("Should throw ConfigurationValidationException with formatted message for single violation")
         void shouldThrowWithFormattedMessageForSingleViolation() {
-            try (var validator = new ConfigurationValidator(10)) {
+            try (var validator = new JakartaConfigurationValidator(10)) {
                 var exception = assertThrows(ConfigurationValidationException.class, () -> validator.validate(new SingleViolationConfig()));
                 var message = exception.getMessage();
 
@@ -133,7 +134,7 @@ class ConfigurationValidatorTest {
         @Test
         @DisplayName("Should throw ConfigurationValidationException and format property path to kebab-case")
         void shouldFormatPropertyPathToKebabCase() {
-            try (var validator = new ConfigurationValidator(10)) {
+            try (var validator = new JakartaConfigurationValidator(10)) {
                 var exception = assertThrows(ConfigurationValidationException.class, () -> validator.validate(new CamelCaseConfig()));
                 var message = exception.getMessage();
 
@@ -144,7 +145,7 @@ class ConfigurationValidatorTest {
         @Test
         @DisplayName("Should throw ConfigurationValidationException and list all violations when below capacity")
         void shouldListAllViolationsWhenBelowCapacity() {
-            try (var validator = new ConfigurationValidator(10)) {
+            try (var validator = new JakartaConfigurationValidator(10)) {
                 var exception = assertThrows(ConfigurationValidationException.class, () -> validator.validate(new FourViolationsConfig()));
                 var message = exception.getMessage();
 
@@ -161,7 +162,7 @@ class ConfigurationValidatorTest {
         @Test
         @DisplayName("Should truncate and append overflow suffix when violations exceed capacity")
         void shouldTruncateAndAppendSuffixWhenExceedingCapacity() {
-            try (var validator = new ConfigurationValidator(10)) {
+            try (var validator = new JakartaConfigurationValidator(10)) {
                 var exception = assertThrows(ConfigurationValidationException.class, () -> validator.validate(new TwelveViolationsConfig()));
                 var message = exception.getMessage();
 
@@ -182,8 +183,66 @@ class ConfigurationValidatorTest {
         @Test
         @DisplayName("Should close validator factory gracefully")
         void shouldCloseGracefully() {
-            var validator = new ConfigurationValidator(10);
+            var validator = new JakartaConfigurationValidator(10);
             assertDoesNotThrow(validator::close);
+        }
+    }
+
+    @Nested
+    @DisplayName("Factory")
+    class Factory {
+
+        @Test
+        @DisplayName("Should throw NullPointerException when features is null")
+        void shouldThrowWhenFeaturesIsNull() {
+            assertThrows(NullPointerException.class, () -> ConfigurationValidator.from(null));
+        }
+
+        @Test
+        @DisplayName("Should return NoOpConfigurationValidator when validation is disabled")
+        void shouldReturnNoOpValidatorWhenValidationIsDisabled() {
+            var features = ValidationFeatures.builder()
+                .disableValidation(true)
+                .capacity(10)
+                .build();
+
+            try (var validator = ConfigurationValidator.from(features)) {
+                assertInstanceOf(NoOpConfigurationValidator.class, validator);
+            }
+        }
+
+        @Test
+        @DisplayName("Should return JakartaConfigurationValidator when validation is enabled")
+        void shouldReturnJakartaValidatorWhenValidationIsEnabled() {
+            var features = ValidationFeatures.builder()
+                .disableValidation(false)
+                .capacity(10)
+                .build();
+
+            try (var validator = ConfigurationValidator.from(features)) {
+                assertInstanceOf(JakartaConfigurationValidator.class, validator);
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("NoOp")
+    class NoOp {
+
+        @Test
+        @DisplayName("Should throw NullPointerException when configuration is null")
+        void shouldThrowWhenConfigurationIsNull() {
+            try (var validator = new NoOpConfigurationValidator()) {
+                assertThrows(NullPointerException.class, () -> validator.validate(null));
+            }
+        }
+
+        @Test
+        @DisplayName("Should skip validation without throwing on invalid configuration")
+        void shouldSkipValidation() {
+            try (var validator = new NoOpConfigurationValidator()) {
+                assertDoesNotThrow(() -> validator.validate(new SingleViolationConfig()));
+            }
         }
     }
 }

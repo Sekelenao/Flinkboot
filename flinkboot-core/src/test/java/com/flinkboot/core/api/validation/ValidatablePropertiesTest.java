@@ -1,7 +1,7 @@
 package com.flinkboot.core.api.validation;
 
 import com.flinkboot.core.api.exception.configuration.ConfigurationValidationException;
-import com.flinkboot.core.internal.validation.ConfigurationValidator;
+import com.flinkboot.core.internal.validation.JakartaConfigurationValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -47,7 +47,7 @@ class ValidatablePropertiesTest {
         @Test
         @DisplayName("Should pass validation when validate() returns true")
         void shouldPassWhenValid() {
-            try (var validator = new ConfigurationValidator(10)) {
+            try (var validator = new JakartaConfigurationValidator(10)) {
                 assertDoesNotThrow(() -> validator.validate(new ValidObject()));
             }
         }
@@ -55,7 +55,7 @@ class ValidatablePropertiesTest {
         @Test
         @DisplayName("Should fail validation and attach violation to custom property node")
         void shouldFailWithCustomPropertyNode() {
-            try (var validator = new ConfigurationValidator(10)) {
+            try (var validator = new JakartaConfigurationValidator(10)) {
                 var ex = assertThrows(ConfigurationValidationException.class, () -> validator.validate(new InvalidObjectWithCustomProperty()));
                 assertAll(
                     () -> assertTrue(ex.getMessage().contains("customField:")),
@@ -67,7 +67,7 @@ class ValidatablePropertiesTest {
         @Test
         @DisplayName("Should fail validation with default template when no custom node added")
         void shouldFailWithDefaultViolation() {
-            try (var validator = new ConfigurationValidator(10)) {
+            try (var validator = new JakartaConfigurationValidator(10)) {
                 var ex = assertThrows(ConfigurationValidationException.class, () -> validator.validate(new InvalidObjectDefaultViolation()));
                 assertTrue(ex.getMessage().contains("Invalid configuration properties"));
             }

@@ -14,6 +14,7 @@ import com.flinkboot.core.api.exception.parsing.UnresolvedPropertyPlaceholderExc
 import com.flinkboot.core.api.exception.parsing.YamlParsingException;
 import com.flinkboot.core.api.properties.JobProperties;
 import com.flinkboot.core.internal.startup.EnvVarResolver;
+import com.flinkboot.core.internal.validation.ValidationFeatures;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -50,8 +51,11 @@ class YamlParserTest {
     private static final ParserFeatures STANDARD_FEATURES = ParserFeatures.builder()
         .permitOverride(false)
         .listMerging(false)
+        .build();
+
+    private static final ValidationFeatures STANDARD_VALIDATION = ValidationFeatures.builder()
         .disableValidation(false)
-        .validationCapacity(10)
+        .capacity(10)
         .build();
 
     enum JobType {
@@ -159,7 +163,7 @@ class YamlParserTest {
         @DisplayName("Should create instance with custom YAMLMapper and ParserFeatures")
         void shouldCreateInstanceWithCustomMapperAndFeatures() {
             var mapper = new YAMLMapper();
-            var parser = new YamlParser(mapper, STANDARD_FEATURES);
+            var parser = new YamlParser(mapper, STANDARD_FEATURES, STANDARD_VALIDATION);
             assertNotNull(parser);
             assertDoesNotThrow(parser::close);
         }
@@ -169,7 +173,7 @@ class YamlParserTest {
         void shouldCreateInstanceWithCustomMapperFeaturesAndResolver() {
             var mapper = new YAMLMapper();
             var resolver = new PlaceholderResolver(new EnvVarResolver(key -> null));
-            var parser = new YamlParser(mapper, STANDARD_FEATURES, resolver);
+            var parser = new YamlParser(mapper, STANDARD_FEATURES, STANDARD_VALIDATION, resolver);
             assertNotNull(parser);
             assertDoesNotThrow(parser::close);
         }
@@ -179,7 +183,7 @@ class YamlParserTest {
         void shouldParseSuccessfullyWithCustomMapper() {
             var mapper = new YAMLMapper();
             var yaml = "name: \"CustomMapperApp\"\nvalue: 99\n";
-            try (var parser = new YamlParser(mapper, STANDARD_FEATURES)) {
+            try (var parser = new YamlParser(mapper, STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
                 var config = parser.convertTo(TestConfig.class);
                 assertAll(
@@ -198,17 +202,22 @@ class YamlParserTest {
             Consumer<YAMLMapper.Builder> customizer = builder -> {};
 
             assertAll(
-                () -> assertThrows(NullPointerException.class, () -> new YamlParser((ParserFeatures) null)),
-                () -> assertThrows(NullPointerException.class, () -> new YamlParser((Consumer<YAMLMapper.Builder>) null, STANDARD_FEATURES)),
-                () -> assertThrows(NullPointerException.class, () -> new YamlParser(customizer, null)),
-                () -> assertThrows(NullPointerException.class, () -> new YamlParser((Consumer<YAMLMapper.Builder>) null, STANDARD_FEATURES, resolver)),
-                () -> assertThrows(NullPointerException.class, () -> new YamlParser(customizer, null, resolver)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser(null, STANDARD_VALIDATION)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser(STANDARD_FEATURES, null)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser((Consumer<YAMLMapper.Builder>) null, STANDARD_FEATURES, STANDARD_VALIDATION)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser(customizer, null, STANDARD_VALIDATION)),
                 () -> assertThrows(NullPointerException.class, () -> new YamlParser(customizer, STANDARD_FEATURES, null)),
-                () -> assertThrows(NullPointerException.class, () -> new YamlParser((YAMLMapper) null, STANDARD_FEATURES)),
-                () -> assertThrows(NullPointerException.class, () -> new YamlParser(mapper, null)),
-                () -> assertThrows(NullPointerException.class, () -> new YamlParser((YAMLMapper) null, STANDARD_FEATURES, resolver)),
-                () -> assertThrows(NullPointerException.class, () -> new YamlParser(mapper, null, resolver)),
-                () -> assertThrows(NullPointerException.class, () -> new YamlParser(mapper, STANDARD_FEATURES, null))
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser((Consumer<YAMLMapper.Builder>) null, STANDARD_FEATURES, STANDARD_VALIDATION, resolver)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser(customizer, null, STANDARD_VALIDATION, resolver)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser(customizer, STANDARD_FEATURES, null, resolver)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser(customizer, STANDARD_FEATURES, STANDARD_VALIDATION, null)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser((YAMLMapper) null, STANDARD_FEATURES, STANDARD_VALIDATION)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser(mapper, null, STANDARD_VALIDATION)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser(mapper, STANDARD_FEATURES, null)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser((YAMLMapper) null, STANDARD_FEATURES, STANDARD_VALIDATION, resolver)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser(mapper, null, STANDARD_VALIDATION, resolver)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser(mapper, STANDARD_FEATURES, null, resolver)),
+                () -> assertThrows(NullPointerException.class, () -> new YamlParser(mapper, STANDARD_FEATURES, STANDARD_VALIDATION, null))
             );
         }
     }
@@ -225,7 +234,7 @@ class YamlParserTest {
         @DisplayName("Should successfully parse YAML configuration with standard or case-insensitive properties")
         void shouldParseYamlConfigurations(String yamlContent) {
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+            try (var parser = new YamlParser(STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 parser.parse(stream);
                 var config = parser.convertTo(TestConfig.class);
                 assertAll(
@@ -241,7 +250,7 @@ class YamlParserTest {
         void shouldThrowExceptionWhenYamlContainsUnknownProperties() {
             var yamlContent = "name: \"Flink Job\"\nvalue: 42\nextraField: \"value\"\n";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+            try (var parser = new YamlParser(STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 parser.parse(stream);
                 assertThrows(YamlParsingException.class, () -> parser.convertTo(TestConfig.class));
             }
@@ -253,7 +262,7 @@ class YamlParserTest {
             var yamlContent = "type: \"streaming\"\n";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
 
-            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+            try (var parser = new YamlParser(STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 parser.parse(stream);
                 var config = parser.convertTo(TestConfigWithEnum.class);
                 assertAll(
@@ -271,7 +280,7 @@ class YamlParserTest {
             Consumer<YAMLMapper.Builder> additionalConfigurations = builder -> {
                 builder.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
             };
-            try (var customizedParser = new YamlParser(additionalConfigurations, STANDARD_FEATURES); var inputStream = new ByteArrayInputStream(bytes)) {
+            try (var customizedParser = new YamlParser(additionalConfigurations, STANDARD_FEATURES, STANDARD_VALIDATION); var inputStream = new ByteArrayInputStream(bytes)) {
                 customizedParser.parse(inputStream);
                 var config = customizedParser.convertTo(TestConfigWithEnum.class);
                 assertAll(
@@ -279,7 +288,7 @@ class YamlParserTest {
                     () -> assertNull(config.type())
                 );
             }
-            try (var defaultParser = new YamlParser(STANDARD_FEATURES); var inputStream = new ByteArrayInputStream(bytes)) {
+            try (var defaultParser = new YamlParser(STANDARD_FEATURES, STANDARD_VALIDATION); var inputStream = new ByteArrayInputStream(bytes)) {
                 defaultParser.parse(inputStream);
                 assertThrows(YamlParsingException.class, () -> defaultParser.convertTo(TestConfigWithEnum.class));
             }
@@ -290,12 +299,12 @@ class YamlParserTest {
         void shouldParseTwice() {
             var yamlContent = "name: \"Flink Job\"\nvalue: 42\n";
             var bytes = yamlContent.getBytes(StandardCharsets.UTF_8);
-            try (var parser1 = new YamlParser(STANDARD_FEATURES)) {
+            try (var parser1 = new YamlParser(STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 parser1.parse(new ByteArrayInputStream(bytes));
                 var config1 = parser1.convertTo(TestConfig.class);
                 assertNotNull(config1);
             }
-            try (var parser2 = new YamlParser(STANDARD_FEATURES)) {
+            try (var parser2 = new YamlParser(STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 parser2.parse(new ByteArrayInputStream(bytes));
                 var config2 = parser2.convertTo(TestConfig.class);
                 assertNotNull(config2);
@@ -308,8 +317,8 @@ class YamlParserTest {
             var baseYaml = "name: \"BaseApp\"\nvalue: 42\n";
             var overrideYaml = "value: 100\n";
 
-            var features = ParserFeatures.builder().permitOverride(true).listMerging(false).disableValidation(false).validationCapacity(10).build();
-            try (var parser = new YamlParser(features)) {
+            var features = ParserFeatures.builder().permitOverride(true).listMerging(false).build();
+            try (var parser = new YamlParser(features, STANDARD_VALIDATION)) {
                 parser.parse(new ByteArrayInputStream(baseYaml.getBytes(StandardCharsets.UTF_8)));
                 parser.parse(new ByteArrayInputStream(overrideYaml.getBytes(StandardCharsets.UTF_8)));
 
@@ -328,7 +337,7 @@ class YamlParserTest {
             var firstYaml = "name: \"BaseApp\"\n";
             var secondYaml = "value: 42\n";
 
-            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+            try (var parser = new YamlParser(STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 parser.parse(new ByteArrayInputStream(firstYaml.getBytes(StandardCharsets.UTF_8)));
                 parser.parse(new ByteArrayInputStream(secondYaml.getBytes(StandardCharsets.UTF_8)));
 
@@ -347,7 +356,7 @@ class YamlParserTest {
             var yamlContent = "name: \"\"\nvalue: 0\n";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
 
-            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+            try (var parser = new YamlParser(STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 parser.parse(stream);
                 var exception = assertThrows(ConfigurationValidationException.class, () -> parser.convertTo(TestConfig.class));
                 assertAll(
@@ -363,14 +372,12 @@ class YamlParserTest {
         void shouldNotThrowWhenValidationIsDisabled() {
             var yamlContent = "name: \"\"\nvalue: 0\n";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-            var features = ParserFeatures.builder()
-                .permitOverride(false)
-                .listMerging(false)
+            var validationFeatures = ValidationFeatures.builder()
                 .disableValidation(true)
-                .validationCapacity(10)
+                .capacity(10)
                 .build();
 
-            try (var parser = new YamlParser(features)) {
+            try (var parser = new YamlParser(STANDARD_FEATURES, validationFeatures)) {
                 parser.parse(stream);
                 var config = parser.convertTo(TestConfig.class);
                 assertAll(
@@ -385,14 +392,12 @@ class YamlParserTest {
         @DisplayName("Should truncate validation errors according to configured validationCapacity")
         void shouldTruncateValidationErrorsAccordingToValidationCapacity() {
             var yaml = "name: \"\"\nvalue: 0\n";
-            var features = ParserFeatures.builder()
-                .permitOverride(false)
-                .listMerging(false)
+            var validationFeatures = ValidationFeatures.builder()
                 .disableValidation(false)
-                .validationCapacity(1)
+                .capacity(1)
                 .build();
 
-            try (var parser = new YamlParser(features)) {
+            try (var parser = new YamlParser(STANDARD_FEATURES, validationFeatures)) {
                 parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
                 var exception = assertThrows(ConfigurationValidationException.class, () -> parser.convertTo(TestConfig.class));
                 assertAll(
@@ -405,7 +410,7 @@ class YamlParserTest {
         @Test
         @DisplayName("Should throw NullPointerException when source or class is null")
         void shouldThrowExceptionWhenParamsAreNull() {
-            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+            try (var parser = new YamlParser(STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 assertAll(
                     () -> assertThrows(NullPointerException.class, () -> parser.parse(null)),
                     () -> assertThrows(NullPointerException.class, () -> parser.convertTo(null))
@@ -418,7 +423,7 @@ class YamlParserTest {
         void shouldThrowExceptionWhenYamlIsMalformed() {
             var yamlContent = "name: \"Flink Job\nvalue: invalid_number\n";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+            try (var parser = new YamlParser(STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 var exception = assertThrows(YamlParsingException.class, () -> parser.parse(stream));
                 assertAll(
                     () -> assertNotNull(exception.getMessage(), "Exception message should not be null"),
@@ -433,7 +438,7 @@ class YamlParserTest {
         void shouldSilentlyIgnoreEmptyYaml() {
             var yamlContent = "";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+            try (var parser = new YamlParser(STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 assertDoesNotThrow(() -> parser.parse(stream));
             }
         }
@@ -443,7 +448,7 @@ class YamlParserTest {
         void shouldSilentlyIgnoreNullYamlLiteral() {
             var yamlContent = "null";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+            try (var parser = new YamlParser(STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 assertDoesNotThrow(() -> parser.parse(stream));
             }
         }
@@ -458,7 +463,7 @@ class YamlParserTest {
         @DisplayName("Should silently ignore whitespace-only and comments-only YAML")
         void shouldSilentlyIgnoreWhitespaceOnlyAndCommentsOnlyYaml(String yamlContent) {
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+            try (var parser = new YamlParser(STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 assertDoesNotThrow(() -> parser.parse(stream));
             }
         }
@@ -468,7 +473,7 @@ class YamlParserTest {
         void shouldThrowExceptionWhenWhitespaceOnlyYamlContainsTabs() {
             var yamlContent = " \n\t ";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+            try (var parser = new YamlParser(STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 assertThrows(YamlParsingException.class, () -> parser.parse(stream));
             }
         }
@@ -483,7 +488,7 @@ class YamlParserTest {
         @DisplayName("Should preserve previously parsed configuration when parsing whitespace-only or comments-only YAML")
         void shouldPreserveConfigurationWhenParsingWhitespaceOnlyOrCommentsOnlyYaml(String yamlContent) {
             var baseYaml = "name: \"Flink Job\"\nvalue: 42\n";
-            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+            try (var parser = new YamlParser(STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 parser.parse(new ByteArrayInputStream(baseYaml.getBytes(StandardCharsets.UTF_8)));
                 var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
                 assertDoesNotThrow(() -> parser.parse(stream));
@@ -499,7 +504,7 @@ class YamlParserTest {
         @Test
         @DisplayName("Should throw YamlParsingException when configuration resolves to null")
         void shouldThrowExceptionWhenConfigurationResolvesToNull() {
-            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+            try (var parser = new YamlParser(STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 assertThrows(YamlParsingException.class, () -> parser.convertTo(Void.class));
             }
         }
@@ -511,7 +516,7 @@ class YamlParserTest {
             Consumer<YAMLMapper.Builder> additionalConfigurations = builder -> builder.addModule(failingModule);
             var yamlContent = "name: \"Flink Job\"\nvalue: 42\n";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-            try (var parser = new YamlParser(additionalConfigurations, STANDARD_FEATURES)) {
+            try (var parser = new YamlParser(additionalConfigurations, STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 parser.parse(stream);
                 var exception = assertThrows(YamlParsingException.class, () -> parser.convertTo(TestConfig.class));
                 assertAll(
@@ -530,7 +535,7 @@ class YamlParserTest {
         void shouldThrowExceptionWhenYamlRootIsNonObject() {
             var yamlContent = "- item1\n- item2\n";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
-            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+            try (var parser = new YamlParser(STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 assertThrows(YamlParsingException.class, () -> parser.parse(stream));
             }
         }
@@ -541,8 +546,8 @@ class YamlParserTest {
             var baseYaml = "items:\n  - \"item1\"\n  - \"item2\"\n";
             var overrideYaml = "items:\n  - \"item3\"\n";
 
-            var features = ParserFeatures.builder().permitOverride(false).listMerging(true).disableValidation(false).validationCapacity(10).build();
-            try (var parser = new YamlParser(features)) {
+            var features = ParserFeatures.builder().permitOverride(false).listMerging(true).build();
+            try (var parser = new YamlParser(features, STANDARD_VALIDATION)) {
                 parser.parse(new ByteArrayInputStream(baseYaml.getBytes(StandardCharsets.UTF_8)));
                 parser.parse(new ByteArrayInputStream(overrideYaml.getBytes(StandardCharsets.UTF_8)));
 
@@ -562,19 +567,19 @@ class YamlParserTest {
         @Test
         @DisplayName("With permitOverride=false and listMerging=false: should throw exception on any override or list merge")
         void shouldThrowExceptionOnAnyOverrideOrListMerge() {
-            var features = ParserFeatures.builder().permitOverride(false).listMerging(false).disableValidation(false).validationCapacity(10).build();
+            var features = ParserFeatures.builder().permitOverride(false).listMerging(false).build();
             var yaml1 = "name: \"Base\"\nvalue: 42\n";
             var yaml2 = "value: 100\n";
             var yamlList1 = "items:\n  - \"a\"\n";
             var yamlList2 = "items:\n  - \"b\"\n";
 
-            try (var parser = new YamlParser(features)) {
+            try (var parser = new YamlParser(features, STANDARD_VALIDATION)) {
                 parser.parse(new ByteArrayInputStream(yaml1.getBytes(StandardCharsets.UTF_8)));
                 var stream = new ByteArrayInputStream(yaml2.getBytes(StandardCharsets.UTF_8));
                 assertThrows(YamlParsingException.class, () -> parser.parse(stream));
             }
 
-            try (var parser = new YamlParser(features)) {
+            try (var parser = new YamlParser(features, STANDARD_VALIDATION)) {
                 parser.parse(new ByteArrayInputStream(yamlList1.getBytes(StandardCharsets.UTF_8)));
                 var stream = new ByteArrayInputStream(yamlList2.getBytes(StandardCharsets.UTF_8));
                 assertThrows(YamlParsingException.class, () -> parser.parse(stream));
@@ -584,13 +589,13 @@ class YamlParserTest {
         @Test
         @DisplayName("With permitOverride=true and listMerging=false: should override scalars and replace lists")
         void shouldOverrideScalarsAndReplaceLists() {
-            var features = ParserFeatures.builder().permitOverride(true).listMerging(false).disableValidation(false).validationCapacity(10).build();
+            var features = ParserFeatures.builder().permitOverride(true).listMerging(false).build();
             var yaml1 = "name: \"Base\"\nvalue: 42\n";
             var yaml2 = "value: 100\n";
             var yamlList1 = "items:\n  - \"a\"\n";
             var yamlList2 = "items:\n  - \"b\"\n";
 
-            try (var parser = new YamlParser(features)) {
+            try (var parser = new YamlParser(features, STANDARD_VALIDATION)) {
                 parser.parse(new ByteArrayInputStream(yaml1.getBytes(StandardCharsets.UTF_8)));
                 parser.parse(new ByteArrayInputStream(yaml2.getBytes(StandardCharsets.UTF_8)));
                 var config = parser.convertTo(TestConfig.class);
@@ -601,7 +606,7 @@ class YamlParserTest {
                 );
             }
 
-            try (var parser = new YamlParser(features)) {
+            try (var parser = new YamlParser(features, STANDARD_VALIDATION)) {
                 parser.parse(new ByteArrayInputStream(yamlList1.getBytes(StandardCharsets.UTF_8)));
                 parser.parse(new ByteArrayInputStream(yamlList2.getBytes(StandardCharsets.UTF_8)));
                 var config = parser.convertTo(TestConfigWithList.class);
@@ -615,19 +620,19 @@ class YamlParserTest {
         @Test
         @DisplayName("With permitOverride=false and listMerging=true: should throw on scalar override but append lists")
         void shouldThrowOnScalarOverrideButAppendLists() {
-            var features = ParserFeatures.builder().permitOverride(false).listMerging(true).disableValidation(false).validationCapacity(10).build();
+            var features = ParserFeatures.builder().permitOverride(false).listMerging(true).build();
             var yaml1 = "name: \"Base\"\nvalue: 42\n";
             var yaml2 = "value: 100\n";
             var yamlList1 = "items:\n  - \"a\"\n";
             var yamlList2 = "items:\n  - \"b\"\n";
 
-            try (var parser = new YamlParser(features)) {
+            try (var parser = new YamlParser(features, STANDARD_VALIDATION)) {
                 parser.parse(new ByteArrayInputStream(yaml1.getBytes(StandardCharsets.UTF_8)));
                 var stream = new ByteArrayInputStream(yaml2.getBytes(StandardCharsets.UTF_8));
                 assertThrows(YamlParsingException.class, () -> parser.parse(stream));
             }
 
-            try (var parser = new YamlParser(features)) {
+            try (var parser = new YamlParser(features, STANDARD_VALIDATION)) {
                 parser.parse(new ByteArrayInputStream(yamlList1.getBytes(StandardCharsets.UTF_8)));
                 parser.parse(new ByteArrayInputStream(yamlList2.getBytes(StandardCharsets.UTF_8)));
                 var config = parser.convertTo(TestConfigWithList.class);
@@ -641,13 +646,13 @@ class YamlParserTest {
         @Test
         @DisplayName("With permitOverride=true and listMerging=true: should override scalars and append lists")
         void shouldOverrideScalarsAndAppendLists() {
-            var features = ParserFeatures.builder().permitOverride(true).listMerging(true).disableValidation(false).validationCapacity(10).build();
+            var features = ParserFeatures.builder().permitOverride(true).listMerging(true).build();
             var yamlScalar1 = "name: \"Base\"\nvalue: 42\n";
             var yamlScalar2 = "value: 100\n";
             var yamlList1 = "items:\n  - \"a\"\n";
             var yamlList2 = "items:\n  - \"b\"\n";
 
-            try (var parser = new YamlParser(features)) {
+            try (var parser = new YamlParser(features, STANDARD_VALIDATION)) {
                 parser.parse(new ByteArrayInputStream(yamlScalar1.getBytes(StandardCharsets.UTF_8)));
                 parser.parse(new ByteArrayInputStream(yamlScalar2.getBytes(StandardCharsets.UTF_8)));
                 var config = parser.convertTo(TestConfig.class);
@@ -658,7 +663,7 @@ class YamlParserTest {
                 );
             }
 
-            try (var parser = new YamlParser(features)) {
+            try (var parser = new YamlParser(features, STANDARD_VALIDATION)) {
                 parser.parse(new ByteArrayInputStream(yamlList1.getBytes(StandardCharsets.UTF_8)));
                 parser.parse(new ByteArrayInputStream(yamlList2.getBytes(StandardCharsets.UTF_8)));
                 var configList = parser.convertTo(TestConfigWithList.class);
@@ -675,8 +680,6 @@ class YamlParserTest {
             var features = ParserFeatures.builder()
                 .permitOverride(true)
                 .listMerging(true)
-                .disableValidation(false)
-                .validationCapacity(10)
                 .build();
 
             var yaml1 = "env: \"dev\"\n" +
@@ -702,7 +705,7 @@ class YamlParserTest {
                 "    options:\n" +
                 "      - \"readOnly=true\"\n";
 
-            try (var parser = new YamlParser(features)) {
+            try (var parser = new YamlParser(features, STANDARD_VALIDATION)) {
                 parser.parse(new ByteArrayInputStream(yaml1.getBytes(StandardCharsets.UTF_8)));
                 parser.parse(new ByteArrayInputStream(yaml2.getBytes(StandardCharsets.UTF_8)));
 
@@ -737,7 +740,7 @@ class YamlParserTest {
         void shouldThrowValidationExceptionWhenJobKeyIsEmptyInYaml() {
             var yaml = "job:   \n";
 
-            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+            try (var parser = new YamlParser(STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
                 var exception = assertThrows(ConfigurationValidationException.class, () -> parser.convertTo(TestConfigWithJob.class));
                 assertTrue(exception.getMessage().contains("job"));
@@ -752,7 +755,7 @@ class YamlParserTest {
                 "    execution:\n" +
                 "      parallelism: 2\n";
 
-            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+            try (var parser = new YamlParser(STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
                 var exception = assertThrows(ConfigurationValidationException.class, () -> parser.convertTo(TestConfigWithJob.class));
                 assertTrue(exception.getMessage().contains("name"));
@@ -771,7 +774,7 @@ class YamlParserTest {
                 "instant: \"2026-08-16T18:00:00Z\"\n" +
                 "date: \"2026-08-16\"\n";
 
-            try (var parser = new YamlParser(STANDARD_FEATURES)) {
+            try (var parser = new YamlParser(STANDARD_FEATURES, STANDARD_VALIDATION)) {
                 parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
                 var config = parser.convertTo(TestConfigWithTime.class);
 
@@ -796,7 +799,7 @@ class YamlParserTest {
             var env = Map.of("APP_NAME", "ProductionApp");
             var placeholderResolver = new PlaceholderResolver(new EnvVarResolver(env::get));
 
-            try (var parser = new YamlParser(builder -> {}, STANDARD_FEATURES, placeholderResolver)) {
+            try (var parser = new YamlParser(builder -> {}, STANDARD_FEATURES, STANDARD_VALIDATION, placeholderResolver)) {
                 parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
                 var config = parser.convertTo(TestConfig.class);
 
@@ -818,7 +821,7 @@ class YamlParserTest {
             );
             var placeholderResolver = new PlaceholderResolver(new EnvVarResolver(env::get));
 
-            try (var parser = new YamlParser(builder -> {}, STANDARD_FEATURES, placeholderResolver)) {
+            try (var parser = new YamlParser(builder -> {}, STANDARD_FEATURES, STANDARD_VALIDATION, placeholderResolver)) {
                 parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
                 var config = parser.convertTo(TestConfigWithList.class);
 
@@ -845,7 +848,7 @@ class YamlParserTest {
             );
             var placeholderResolver = new PlaceholderResolver(new EnvVarResolver(env::get));
 
-            try (var parser = new YamlParser(builder -> {}, STANDARD_FEATURES, placeholderResolver)) {
+            try (var parser = new YamlParser(builder -> {}, STANDARD_FEATURES, STANDARD_VALIDATION, placeholderResolver)) {
                 parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
                 var config = parser.convertTo(ComplexConfig.class);
 
@@ -864,7 +867,7 @@ class YamlParserTest {
             var yaml = "name: \"${UNDEFINED_SECRET}\"\nvalue: 1\n";
             var placeholderResolver = new PlaceholderResolver(new EnvVarResolver(key -> null));
 
-            try (var parser = new YamlParser(builder -> {}, STANDARD_FEATURES, placeholderResolver)) {
+            try (var parser = new YamlParser(builder -> {}, STANDARD_FEATURES, STANDARD_VALIDATION, placeholderResolver)) {
                 var stream = new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8));
                 var exception = assertThrows(UnresolvedPropertyPlaceholderException.class, () -> parser.parse(stream));
                 assertTrue(exception.getMessage().contains("UNDEFINED_SECRET"));
