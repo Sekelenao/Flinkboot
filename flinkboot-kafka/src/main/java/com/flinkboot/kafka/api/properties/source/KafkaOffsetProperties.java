@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.flinkboot.core.api.validation.ValidatableProperties;
 import com.flinkboot.core.internal.annotation.Generated;
-import com.flinkboot.kafka.internal.validation.properties.KafkaOffsetPropertiesValidator;
+import com.flinkboot.kafka.internal.validation.properties.offset.KafkaOffsetPropertiesValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
