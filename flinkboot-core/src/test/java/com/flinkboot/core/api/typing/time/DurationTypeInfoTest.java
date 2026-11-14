@@ -1,7 +1,10 @@
 package com.flinkboot.core.api.typing.time;
 
+import com.flinkboot.core.internal.time.DurationComparator;
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.serialization.SerializerConfigImpl;
+import org.apache.flink.api.common.typeinfo.AtomicType;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -11,6 +14,7 @@ import java.time.Duration;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -56,6 +60,49 @@ class DurationTypeInfoTest {
         void shouldCreateSerializerWithExecutionConfig() {
             var serializer = typeInfo.createSerializer(new ExecutionConfig());
             assertSame(DurationSerializer.INSTANCE, serializer);
+        }
+    }
+
+    @Nested
+    @DisplayName("Comparator Creation")
+    class ComparatorCreation {
+
+        @Test
+        @DisplayName("Should implement AtomicType and create DurationComparator with requested sort order")
+        void shouldCreateComparatorWithRequestedSortOrder() {
+            var config = new ExecutionConfig();
+            var ascending = typeInfo.createComparator(true, config);
+            var descending = typeInfo.createComparator(false, config);
+            var smaller = Duration.ofSeconds(1);
+            var larger = Duration.ofSeconds(5);
+
+            assertAll(
+                () -> assertInstanceOf(AtomicType.class, typeInfo),
+                () -> assertInstanceOf(DurationComparator.class, ascending),
+                () -> assertInstanceOf(DurationComparator.class, descending),
+                () -> assertTrue(ascending.compare(smaller, larger) < 0),
+                () -> assertTrue(descending.compare(smaller, larger) > 0)
+            );
+        }
+
+        @Test
+        @DisplayName("Should support Flink DataStream keyBy with Duration keys")
+        void shouldSupportKeyByWithDurationKeys() {
+            var env = StreamExecutionEnvironment.getExecutionEnvironment();
+            var keyed = env.fromData(
+                    DurationTypeInfo.INSTANCE,
+                    Duration.ofSeconds(1),
+                    Duration.ofSeconds(2),
+                    Duration.ofSeconds(1))
+                .keyBy(duration -> duration, DurationTypeInfo.INSTANCE);
+            keyed.reduce(Duration::plus).print();
+
+            var streamGraph = env.getStreamGraph();
+
+            assertAll(
+                () -> assertSame(DurationTypeInfo.INSTANCE, keyed.getKeyType()),
+                () -> assertFalse(streamGraph.getStreamNodes().isEmpty())
+            );
         }
     }
 
