@@ -20,6 +20,18 @@ import java.util.UUID;
  * later records may mutate values that were already collected. Disable object reuse when a test
  * needs to assert collected values, or emit immutable or snapshotted values.
  *
+ * <h3>Example:</h3>
+ * <p>Use {@code try-with-resources} so {@link #close()} automatically clears this sink's
+ * collected elements after job execution:
+ * <pre>{@code
+ * try (var sink = new CollectingSink<OrderEvent>()) {
+ *     stream.sinkTo(sink);
+ *     env.execute();
+ *
+ *     FlinkbootAssertions.assertThat(sink).hasSize(2);
+ * }
+ * }</pre>
+ *
  * @param <T> the type of elements collected by this sink
  */
 public final class CollectingSink<T> implements Sink<T>, AutoCloseable {
