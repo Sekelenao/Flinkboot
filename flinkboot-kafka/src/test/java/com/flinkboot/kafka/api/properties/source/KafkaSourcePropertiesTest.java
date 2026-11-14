@@ -8,6 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -143,6 +144,19 @@ class KafkaSourcePropertiesTest {
             assertAll(
                 () -> assertEquals(Optional.empty(), absent.clientIdPrefix()),
                 () -> assertEquals(Optional.of("orders-reader"), configured.clientIdPrefix())
+            );
+        }
+
+        @Test
+        @DisplayName("Should return an empty or configured group ID from the canonical constructor")
+        void shouldConstructWithOptionalGroupId() {
+            var absent = new KafkaSourceProperties("my-source", List.of("localhost:9092"), null, null,
+                List.of("topic-a"), null, null, DEFAULT_STARTING_OFFSETS, null, null, null);
+            var configured = new KafkaSourceProperties("my-source", List.of("localhost:9092"), "my-group", null,
+                List.of("topic-a"), null, null, DEFAULT_STARTING_OFFSETS, null, null, null);
+            assertAll(
+                () -> assertTrue(absent.groupId().isEmpty()),
+                () -> assertEquals(Optional.of("my-group"), configured.groupId())
             );
         }
 
@@ -408,6 +422,56 @@ class KafkaSourcePropertiesTest {
             assertAll(
                 () -> assertTrue(config.groupId().isEmpty()),
                 () -> assertTrue(validator.validate(config).isEmpty())
+            );
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = KafkaOffsetInitializer.class, names = {"COMMITTED", "COMMITTED_EARLIEST", "COMMITTED_LATEST"})
+        @DisplayName("Should fail validation when groupId is null and startingOffsets uses a COMMITTED strategy")
+        void shouldFailWhenGroupIdIsNullWithCommittedStartingOffsets(KafkaOffsetInitializer strategy) {
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                null,
+                null,
+                List.of("topic-a"),
+                null,
+                null,
+                new KafkaOffsetProperties(strategy, null, null, null),
+                null,
+                null,
+                null
+            );
+
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("group-id")))
+            );
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = KafkaOffsetInitializer.class, names = {"COMMITTED", "COMMITTED_EARLIEST", "COMMITTED_LATEST"})
+        @DisplayName("Should fail validation when groupId is null and stoppingOffsets uses a COMMITTED strategy")
+        void shouldFailWhenGroupIdIsNullWithCommittedStoppingOffsets(KafkaOffsetInitializer strategy) {
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                null,
+                null,
+                List.of("topic-a"),
+                null,
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                KafkaBoundedness.BOUNDED,
+                new KafkaOffsetProperties(strategy, null, null, null),
+                null
+            );
+
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("group-id")))
             );
         }
 
@@ -1017,6 +1081,20 @@ class KafkaSourcePropertiesTest {
             var absent = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", null,
                 List.of("topic"), null, null, DEFAULT_STARTING_OFFSETS, null, null, null);
             var configured = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", "orders-reader",
+                List.of("topic"), null, null, DEFAULT_STARTING_OFFSETS, null, null, null);
+            assertAll(
+                () -> assertNotEquals(absent, configured),
+                () -> assertNotEquals(configured, absent),
+                () -> assertNotEquals(absent.hashCode(), configured.hashCode())
+            );
+        }
+
+        @Test
+        @DisplayName("Should distinguish configurations with and without a group ID")
+        void shouldCompareNullAndNonNullGroupIds() {
+            var absent = new KafkaSourceProperties("source", List.of("localhost:9092"), null, null,
+                List.of("topic"), null, null, DEFAULT_STARTING_OFFSETS, null, null, null);
+            var configured = new KafkaSourceProperties("source", List.of("localhost:9092"), "group", null,
                 List.of("topic"), null, null, DEFAULT_STARTING_OFFSETS, null, null, null);
             assertAll(
                 () -> assertNotEquals(absent, configured),

@@ -12,6 +12,7 @@ import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.connector.source.Boundedness;
+import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 import org.apache.flink.util.Collector;
@@ -24,9 +25,11 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -91,7 +94,7 @@ class KafkaSourceFactoryTest {
 
         @Test
         @DisplayName("Should successfully build KafkaSource and KafkaSourceBuilder when groupId is absent")
-        void shouldBuildKafkaSourceWithoutGroupId() {
+        void shouldBuildKafkaSourceWithoutGroupId() throws Exception {
             var config = new KafkaSourceProperties(
                 "my-source",
                 List.of("localhost:9092"),
@@ -106,9 +109,19 @@ class KafkaSourceFactoryTest {
                 null
             );
 
+            var source = KafkaSourceFactory.supplyFor(config, TEST_SCHEMA);
+            var builderSource = KafkaSourceFactory.supplyBuilderFor(config, TEST_SCHEMA).build();
+
+            var propsField = KafkaSource.class.getDeclaredField("props");
+            propsField.setAccessible(true);
+            var sourceProps = (Properties) propsField.get(source);
+            var builderSourceProps = (Properties) propsField.get(builderSource);
+
             assertAll(
-                () -> assertNotNull(KafkaSourceFactory.supplyFor(config, TEST_SCHEMA)),
-                () -> assertNotNull(KafkaSourceFactory.supplyBuilderFor(config, TEST_SCHEMA))
+                () -> assertNotNull(source),
+                () -> assertFalse(sourceProps.containsKey("group.id")),
+                () -> assertNotNull(builderSource),
+                () -> assertFalse(builderSourceProps.containsKey("group.id"))
             );
         }
 
