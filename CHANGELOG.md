@@ -22,6 +22,7 @@ All notable user-facing changes to this project are documented in this file.
 - **Savepoint Restore Mode Compatibility**: Removed `RestoreMode.LEGACY`. Applications configuring `restore-mode: LEGACY` or referencing `RestoreMode.LEGACY` in Java must migrate to the supported `CLAIM` or `NO_CLAIM` mode according to the intended savepoint ownership behavior.
 
 #### flinkboot-kafka
+- **Optional `group-id` in `KafkaSourceProperties` (#362)**: `KafkaSourceProperties#groupId()` now returns `Optional<String>` instead of `String`, allowing ephemeral or read-only Kafka sources without a consumer group ID. `group-id` remains required when `starting-offsets` or `stopping-offsets` uses a `COMMITTED*` strategy (`COMMITTED`, `COMMITTED_EARLIEST`, `COMMITTED_LATEST`).
 - **Migration of `starting-offsets` to Nested Object**: In both YAML configuration and the Java API, `starting-offsets` is no longer a scalar value but a structured nested object requiring a `strategy` key (e.g. `starting-offsets: { strategy: EARLIEST }`). Flat configuration keys `starting-offsets-timestamp` and `starting-offsets-partition-offsets` have been removed in favor of `timestamp` and `partitions` within this nested block. In Java, flattened accessors on `KafkaSourceProperties` are replaced by `config.startingOffsets().strategy()`, `.timestamp()`, and `.partitions()`.
 
 #### Global & Namespace

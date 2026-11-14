@@ -2,6 +2,7 @@ package com.flinkboot.kafka.internal.validation.properties;
 
 import com.flinkboot.core.internal.validation.properties.PropertiesValidator;
 import com.flinkboot.kafka.api.properties.source.KafkaBoundedness;
+import com.flinkboot.kafka.api.properties.source.KafkaOffsetProperties;
 import com.flinkboot.kafka.api.properties.source.KafkaSourceProperties;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -28,7 +29,8 @@ public final class KafkaSourcePropertiesValidator {
     private boolean execute() {
         var validSubscription = validateTopicSubscription();
         var validBoundedness = validateBoundedness();
-        return validSubscription && validBoundedness;
+        var validGroupId = validateGroupId();
+        return validSubscription && validBoundedness && validGroupId;
     }
 
     private boolean validateTopicSubscription() {
@@ -51,6 +53,27 @@ public final class KafkaSourcePropertiesValidator {
         var isBounded = properties.boundedness().orElse(KafkaBoundedness.UNBOUNDED) == KafkaBoundedness.BOUNDED;
         if (isBounded && properties.stoppingOffsets().isEmpty()) {
             return reject("stopping-offsets", "stopping-offsets is required when boundedness is BOUNDED");
+        }
+        return true;
+    }
+
+    private static boolean requiresGroupId(KafkaOffsetProperties offsets) {
+        if (offsets == null || offsets.strategy() == null) {
+            return false;
+        }
+        return offsets.strategy().requiresGroupId();
+    }
+
+    private boolean validateGroupId() {
+        if (properties.groupId().isPresent()) {
+            return true;
+        }
+        var startingRequiresGroupId = requiresGroupId(properties.startingOffsets());
+        var stoppingRequiresGroupId = properties.stoppingOffsets()
+            .map(KafkaSourcePropertiesValidator::requiresGroupId)
+            .orElse(false);
+        if (startingRequiresGroupId || stoppingRequiresGroupId) {
+            return reject("group-id", "group-id is required when starting-offsets or stopping-offsets uses a COMMITTED strategy");
         }
         return true;
     }

@@ -33,7 +33,7 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
     @NotEmpty
     private final List<@NotBlank String> bootstrapServers;
 
-    @NotBlank
+    @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
     private final String groupId;
 
     @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
@@ -62,7 +62,7 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
      *
      * @param name             source operator name in Flink DAG
      * @param bootstrapServers list of Kafka broker addresses
-     * @param groupId          Kafka consumer group ID
+     * @param groupId          optional Kafka consumer group ID
      * @param clientIdPrefix   optional prefix for unique Kafka client IDs across source subtasks
      * @param topics           list of topics to consume from (mutually exclusive with {@code topicPattern} and {@code partitions})
      * @param topicPattern     regular expression pattern to match topics against (mutually exclusive with {@code topics} and {@code partitions})
@@ -126,12 +126,12 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
     }
 
     /**
-     * Returns the Kafka consumer group ID.
+     * Returns the optional Kafka consumer group ID.
      *
-     * @return the group ID string
+     * @return an {@link Optional} containing the group ID, or empty if not configured
      */
-    public String groupId() {
-        return groupId;
+    public Optional<String> groupId() {
+        return Optional.ofNullable(groupId);
     }
 
     /**

@@ -12,36 +12,39 @@ public enum KafkaOffsetInitializer {
     /**
      * Start consuming from the earliest available offset in each partition.
      */
-    EARLIEST(OffsetsInitializer.earliest()),
+    EARLIEST(OffsetsInitializer.earliest(), false),
     /**
      * Start consuming from the latest available offset (end) in each partition.
      */
-    LATEST(OffsetsInitializer.latest()),
+    LATEST(OffsetsInitializer.latest(), false),
     /**
      * Start consuming from committed consumer group offsets.
      */
-    COMMITTED(OffsetsInitializer.committedOffsets()),
+    COMMITTED(OffsetsInitializer.committedOffsets(), true),
     /**
      * Start consuming from committed consumer group offsets, falling back to earliest if none are committed.
      */
-    COMMITTED_EARLIEST(OffsetsInitializer.committedOffsets(OffsetResetStrategy.EARLIEST)),
+    COMMITTED_EARLIEST(OffsetsInitializer.committedOffsets(OffsetResetStrategy.EARLIEST), true),
     /**
      * Start consuming from committed consumer group offsets, falling back to latest if none are committed.
      */
-    COMMITTED_LATEST(OffsetsInitializer.committedOffsets(OffsetResetStrategy.LATEST)),
+    COMMITTED_LATEST(OffsetsInitializer.committedOffsets(OffsetResetStrategy.LATEST), true),
     /**
      * Start consuming from a specific timestamp (requires {@code timestamp}).
      */
-    TIMESTAMP(null),
+    TIMESTAMP(null, false),
     /**
      * Start consuming from explicit partition offsets (requires {@code partitions}).
      */
-    OFFSETS(null);
+    OFFSETS(null, false);
 
     private final OffsetsInitializer offsetsInitializer;
 
-    KafkaOffsetInitializer(OffsetsInitializer offsetsInitializer) {
+    private final boolean requiresGroupId;
+
+    KafkaOffsetInitializer(OffsetsInitializer offsetsInitializer, boolean requiresGroupId) {
         this.offsetsInitializer = offsetsInitializer;
+        this.requiresGroupId = requiresGroupId;
     }
 
     /**
@@ -52,5 +55,14 @@ public enum KafkaOffsetInitializer {
      */
     public Optional<OffsetsInitializer> offsetsInitializer() {
         return Optional.ofNullable(offsetsInitializer);
+    }
+
+    /**
+     * Returns whether this strategy requires a Kafka consumer group ID.
+     *
+     * @return {@code true} if this strategy reads committed offsets from a consumer group
+     */
+    public boolean requiresGroupId() {
+        return requiresGroupId;
     }
 }

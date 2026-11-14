@@ -54,10 +54,10 @@ public final class KafkaSourceFactory {
 
         var builder = KafkaSource.<T>builder()
             .setBootstrapServers(String.join(",", config.bootstrapServers()))
-            .setGroupId(config.groupId())
             .setStartingOffsets(startingOffsets)
             .setDeserializer(schema);
 
+        config.groupId().ifPresent(builder::setGroupId);
         config.clientIdPrefix().ifPresent(builder::setClientIdPrefix);
 
         config.stoppingOffsets().ifPresent(stopping -> {
