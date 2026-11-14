@@ -64,6 +64,7 @@ All notable user-facing changes to this project are documented in this file.
 ### 🔵 Fixes & Diagnostics
 
 #### flinkboot-core
+- **Support `Duration` Keys in `.keyBy(...)` (#365)**: `DurationTypeInfo` now implements `AtomicType<Duration>` and provides an internal `DurationComparator` (`TypeComparator<Duration>`), resolving runtime failures when using `Duration` fields or streams as keys in Flink `.keyBy(...)` operations.
 - **Checkpoint Storage Filesystem URI Validation (#246)**: Enforces that `storage-uri` is provided (not null and not blank) whenever `storage` is configured as `FILESYSTEM`, failing fast during Bean Validation with diagnostic message `"storage-uri must be specified when checkpoint storage is FILESYSTEM"` on property path `"storage-uri"`.
 - **Reject `storage-uri` for JobManager Checkpoint Storage (#369)**: Rejects configurations that set `storage-uri` while `storage` is `JOBMANAGER`, where the URI is never used, failing fast during Bean Validation with diagnostic message `"storage-uri can only be specified when checkpoint storage is FILESYSTEM"` on property path `"storage-uri"`.
 - **Canonical State Backend Custom Class Diagnostic Path**: Binds cross-field validation violations in `StateBackendProperties` (`custom-class must be specified...` and `custom-class can only be specified...`) to the canonical kebab-case configuration key `custom-class` instead of the internal Java field name `customClass`.
