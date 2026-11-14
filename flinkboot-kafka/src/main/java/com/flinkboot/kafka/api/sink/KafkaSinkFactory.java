@@ -146,6 +146,32 @@ public final class KafkaSinkFactory {
     }
 
     /**
+     * Creates and builds a {@link KafkaSink} from configuration properties
+     * using a customizer for the record serialization schema builder pre-configured with the topic,
+     * and a customizer applied to the sink builder before construction.
+     *
+     * @param config           the sink configuration properties
+     * @param schemaCustomizer the customizer applied to the pre-configured schema builder
+     * @param builderCustomizer the customizer applied to the pre-configured sink builder before construction
+     * @param <T>              the input record type
+     * @return a built and immutable {@link KafkaSink}
+     * @throws NullPointerException if {@code config}, {@code schemaCustomizer}, or {@code builderCustomizer} is {@code null}
+     */
+    public static <T> KafkaSink<T> supplyFor(
+        KafkaSinkProperties config,
+        Consumer<KafkaRecordSerializationSchemaBuilder<T>> schemaCustomizer,
+        Consumer<KafkaSinkBuilder<T>> builderCustomizer
+    ) {
+        Objects.requireNonNull(config, "config must not be null");
+        Objects.requireNonNull(schemaCustomizer, "schemaCustomizer must not be null");
+        Objects.requireNonNull(builderCustomizer, "builderCustomizer must not be null");
+
+        var builder = supplyBuilderFor(config, schemaCustomizer);
+        builderCustomizer.accept(builder);
+        return builder.build();
+    }
+
+    /**
      * Creates and pre-configures a {@link KafkaSinkBuilder} from configuration properties
      * using a value-only serialization schema targeting the configured topic.
      *
