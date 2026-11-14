@@ -1,5 +1,6 @@
 package com.flinkboot.kafka.internal;
 
+import com.flinkboot.core.api.exception.configuration.ConfigurationValidationException;
 import com.flinkboot.kafka.api.properties.source.KafkaOffsetInitializer;
 import com.flinkboot.kafka.api.properties.source.KafkaOffsetProperties;
 import com.flinkboot.kafka.api.properties.source.KafkaOffsetResetStrategy;
@@ -36,7 +37,11 @@ public final class OffsetInitializerMapper {
         var offsetInitializerConfiguration = new HashMap<TopicPartition, Long>();
         for (var entry : partitionOffsets) {
             var topicPartition = new TopicPartition(entry.topic(), entry.partition());
-            offsetInitializerConfiguration.put(topicPartition, entry.offset());
+            if (offsetInitializerConfiguration.putIfAbsent(topicPartition, entry.offset()) != null) {
+                throw new ConfigurationValidationException(
+                    "Duplicate offset configuration for topic-partition: " + topicPartition
+                );
+            }
         }
         return OffsetsInitializer.offsets(offsetInitializerConfiguration, resetStrategy.offsetResetStrategy());
     }
