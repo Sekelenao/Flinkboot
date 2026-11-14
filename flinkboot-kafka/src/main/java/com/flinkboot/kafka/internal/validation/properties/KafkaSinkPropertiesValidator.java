@@ -1,11 +1,11 @@
 package com.flinkboot.kafka.internal.validation.properties;
 
-import java.util.Objects;
-
 import com.flinkboot.core.internal.validation.properties.PropertiesValidator;
 import com.flinkboot.kafka.api.properties.sink.KafkaDeliveryGuarantee;
 import com.flinkboot.kafka.api.properties.sink.KafkaSinkProperties;
 import jakarta.validation.ConstraintValidatorContext;
+
+import java.util.Objects;
 
 /**
  * Validates cross-field invariants for {@link KafkaSinkProperties}.

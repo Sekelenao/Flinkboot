@@ -1,10 +1,10 @@
 package com.flinkboot.core.internal.validation.properties;
 
-import java.util.Objects;
-
 import com.flinkboot.core.api.properties.checkpointing.CheckpointStorageType;
 import com.flinkboot.core.api.properties.checkpointing.CheckpointingProperties;
 import jakarta.validation.ConstraintValidatorContext;
+
+import java.util.Objects;
 
 /**
  * Validates cross-field invariants for {@link CheckpointingProperties}.

@@ -3,6 +3,7 @@ package com.flinkboot.core.internal.execution;
 import com.flinkboot.core.api.exception.execution.UnsupportedExecutionEnvironmentException;
 import com.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
 import com.flinkboot.core.api.properties.JobProperties;
+import com.flinkboot.core.api.properties.checkpointing.CheckpointStorageType;
 import com.flinkboot.core.api.properties.checkpointing.CheckpointingMode;
 import com.flinkboot.core.api.properties.checkpointing.CheckpointingProperties;
 import com.flinkboot.core.api.properties.checkpointing.ExternalizedCheckpointCleanupMode;
@@ -16,7 +17,6 @@ import com.flinkboot.core.api.properties.restart.RestartStrategyProperties;
 import com.flinkboot.core.api.properties.restart.RestartStrategyType;
 import com.flinkboot.core.api.properties.savepoint.RestoreMode;
 import com.flinkboot.core.api.properties.savepoint.SavepointRestoreProperties;
-import com.flinkboot.core.api.properties.checkpointing.CheckpointStorageType;
 import com.flinkboot.core.api.properties.state.StateBackendProperties;
 import com.flinkboot.core.api.properties.state.StateBackendType;
 import org.apache.flink.api.common.RuntimeExecutionMode;
@@ -44,9 +44,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("ExecutionEnvironmentFactory Tests")
 class ExecutionEnvironmentFactoryTest {

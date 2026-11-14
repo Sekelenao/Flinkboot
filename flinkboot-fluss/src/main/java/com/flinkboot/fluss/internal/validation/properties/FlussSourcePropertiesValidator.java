@@ -1,11 +1,11 @@
 package com.flinkboot.fluss.internal.validation.properties;
 
-import java.util.Objects;
-
 import com.flinkboot.core.internal.validation.properties.PropertiesValidator;
 import com.flinkboot.fluss.api.properties.source.FlussSourceProperties;
 import com.flinkboot.fluss.api.properties.source.FlussStartupMode;
 import jakarta.validation.ConstraintValidatorContext;
+
+import java.util.Objects;
 
 /**
  * Validates cross-field invariants for {@link FlussSourceProperties}.

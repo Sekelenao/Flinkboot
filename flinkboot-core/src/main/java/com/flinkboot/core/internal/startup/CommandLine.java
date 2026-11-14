@@ -1,5 +1,7 @@
 package com.flinkboot.core.internal.startup;
 
+import com.flinkboot.core.api.exception.parsing.CommandLineParsingException;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,8 +10,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-
-import com.flinkboot.core.api.exception.parsing.CommandLineParsingException;
 
 final class CommandLine {
 
