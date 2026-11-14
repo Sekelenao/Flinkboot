@@ -1,8 +1,11 @@
 package com.flinkboot.core.api.typing.time;
 
+import com.flinkboot.core.internal.time.DurationComparator;
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.serialization.SerializerConfig;
+import org.apache.flink.api.common.typeinfo.AtomicType;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.common.typeutils.TypeComparator;
 import org.apache.flink.api.common.typeutils.TypeSerializer;
 
 import java.time.Duration;
@@ -10,7 +13,7 @@ import java.time.Duration;
 /**
  * Flink {@link TypeInformation} representation for {@link Duration}.
  */
-public class DurationTypeInfo extends TypeInformation<Duration> {
+public class DurationTypeInfo extends TypeInformation<Duration> implements AtomicType<Duration> {
 
     private static final long serialVersionUID = 1L;
 
@@ -47,6 +50,11 @@ public class DurationTypeInfo extends TypeInformation<Duration> {
     @Override
     public boolean isKeyType() {
         return true;
+    }
+
+    @Override
+    public TypeComparator<Duration> createComparator(boolean sortOrderAscending, ExecutionConfig executionConfig) {
+        return new DurationComparator(sortOrderAscending);
     }
 
     @Override
