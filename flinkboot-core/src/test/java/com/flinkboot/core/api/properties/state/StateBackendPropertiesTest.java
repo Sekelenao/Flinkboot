@@ -199,6 +199,16 @@ class StateBackendPropertiesTest {
         }
 
         @ParameterizedTest
+        @ValueSource(strings = {"com.example.CustomBackend\n", "  \ncom.example.CustomBackend\r\n"})
+        @DisplayName("Should pass validation when custom-class is non-blank with line terminators")
+        void shouldPassValidationWhenCustomClassHasLineTerminators(String customClass) {
+            var config = new StateBackendProperties(StateBackendType.CUSTOM, null, null, customClass, null);
+            var violations = validator.validate(config);
+
+            assertTrue(violations.isEmpty(), "Should have no violations");
+        }
+
+        @ParameterizedTest
         @NullSource
         @EnumSource(value = StateBackendType.class, names = "CUSTOM", mode = EnumSource.Mode.EXCLUDE)
         @DisplayName("Should fail validation when custom-class is provided for non-CUSTOM state backend")

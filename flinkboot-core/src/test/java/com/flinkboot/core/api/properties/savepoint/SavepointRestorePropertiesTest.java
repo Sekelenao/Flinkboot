@@ -153,6 +153,28 @@ class SavepointRestorePropertiesTest {
             ));
         }
 
+        @ParameterizedTest
+        @ValueSource(strings = {"/tmp/savepoint\n", "  \n/tmp/savepoint\r\n"})
+        @DisplayName("Should pass validation when savepointPath is non-blank with line terminators")
+        void shouldPassValidationWhenSavepointPathHasLineTerminators(String savepointPath) {
+            var config = new SavepointRestoreProperties(savepointPath, true, RestoreMode.CLAIM, "/tmp/savepoints");
+
+            var violations = validator.validate(config);
+
+            assertTrue(violations.isEmpty(), "Should have no violations");
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"/tmp/savepoints\n", "  \n/tmp/savepoints\r\n"})
+        @DisplayName("Should pass validation when directory is non-blank with line terminators")
+        void shouldPassValidationWhenDirectoryHasLineTerminators(String directory) {
+            var config = new SavepointRestoreProperties("/tmp/savepoint-1", true, RestoreMode.CLAIM, directory);
+
+            var violations = validator.validate(config);
+
+            assertTrue(violations.isEmpty(), "Should have no violations");
+        }
+
         @Test
         @DisplayName("Should fail validation when both savepointPath and directory are null")
         void shouldFailValidationWhenBothSavepointPathAndDirectoryAreNull() {

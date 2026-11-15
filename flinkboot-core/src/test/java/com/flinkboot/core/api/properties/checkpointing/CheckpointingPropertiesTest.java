@@ -288,6 +288,19 @@ class CheckpointingPropertiesTest {
             );
         }
 
+        @ParameterizedTest
+        @ValueSource(strings = {"file:///tmp/checkpoints\n", "  \ns3://bucket/checkpoints\r\n"})
+        @DisplayName("Should pass validation when storageUri is non-blank with line terminators")
+        void shouldPassValidationWhenStorageUriHasLineTerminators(String storageUri) {
+            var config = new CheckpointingProperties(
+                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, false, null, null, storageUri, null
+            );
+            var violations = validator.validate(config);
+
+            assertTrue(violations.isEmpty(), "Should have no violations");
+        }
+
         @Test
         @DisplayName("Should pass validation when storageUri is null")
         void shouldPassValidationWhenStorageUriNull() {

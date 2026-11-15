@@ -239,6 +239,22 @@ class KafkaSinkPropertiesTest {
             );
         }
 
+        @ParameterizedTest
+        @ValueSource(strings = {"tx-prefix\n", "  \ntx-prefix\r\n"})
+        @DisplayName("Should pass validation when transactional-id-prefix is non-blank with line terminators")
+        void shouldPassWhenTransactionalIdPrefixHasLineTerminators(String transactionalIdPrefix) {
+            var props = new KafkaSinkProperties(
+                "my-sink",
+                List.of("localhost:9092"),
+                "my-topic",
+                KafkaDeliveryGuarantee.EXACTLY_ONCE,
+                transactionalIdPrefix,
+                null
+            );
+            var violations = validator.validate(props);
+            assertTrue(violations.isEmpty(), "Should have no violations");
+        }
+
         @Test
         @DisplayName("Should fail validation when transactional-id-prefix is empty")
         void shouldFailWhenTransactionalIdPrefixIsEmpty() {

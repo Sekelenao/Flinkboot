@@ -126,6 +126,15 @@ class LocalWebUiPropertiesTest {
             );
         }
 
+        @ParameterizedTest
+        @ValueSource(strings = {"localhost\n", "  \n0.0.0.0\r\n"})
+        @DisplayName("Should pass validation when bindAddress is non-blank with line terminators")
+        void shouldPassValidationWhenBindAddressHasLineTerminators(String bindAddress) {
+            var config = new LocalWebUiProperties(true, 8081, bindAddress);
+            var violations = validator.validate(config);
+            assertTrue(violations.isEmpty(), "Should have no violations when bindAddress is non-blank with line terminators");
+        }
+
         @Test
         @DisplayName("Should pass validation when enabled is null")
         void shouldPassValidationWhenEnabledIsNull() {

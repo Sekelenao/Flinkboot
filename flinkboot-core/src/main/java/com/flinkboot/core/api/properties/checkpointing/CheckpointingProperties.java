@@ -52,7 +52,7 @@ public final class CheckpointingProperties implements ValidatableProperties, Ser
 
     private final CheckpointStorageType storage;
 
-    @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
+    @Pattern(regexp = "\\s*\\S.*", flags = Pattern.Flag.DOTALL, message = "must not be blank")
     private final String storageUri;
 
     @PositiveOrZero

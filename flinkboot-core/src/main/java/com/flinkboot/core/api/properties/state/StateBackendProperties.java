@@ -25,7 +25,7 @@ public final class StateBackendProperties implements Serializable, ValidatablePr
     private final StateBackendType type;
     private final Boolean incremental;
     private final Boolean latencyTracking;
-    @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
+    @Pattern(regexp = "\\s*\\S.*", flags = Pattern.Flag.DOTALL, message = "must not be blank")
     private final String customClass;
     private final Boolean changelog;
 

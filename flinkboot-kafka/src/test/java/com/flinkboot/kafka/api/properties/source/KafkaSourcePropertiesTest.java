@@ -513,6 +513,47 @@ class KafkaSourcePropertiesTest {
             );
         }
 
+        @ParameterizedTest
+        @ValueSource(strings = {"my-group\n", "  \nmy-group\r\n"})
+        @DisplayName("Should pass validation when groupId is non-blank with line terminators")
+        void shouldPassWhenGroupIdHasLineTerminators(String groupId) {
+            var config = new KafkaSourceProperties("my-source", List.of("localhost:9092"), groupId, null,
+                List.of("topic-a"), null, null, DEFAULT_STARTING_OFFSETS, null, null, null);
+            var violations = validator.validate(config);
+            assertTrue(violations.isEmpty(), "Should have no violations");
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"my-client\n", "  \nmy-client\r\n"})
+        @DisplayName("Should pass validation when clientIdPrefix is non-blank with line terminators")
+        void shouldPassWhenClientIdPrefixHasLineTerminators(String clientIdPrefix) {
+            var config = new KafkaSourceProperties("my-source", List.of("localhost:9092"), "my-group", clientIdPrefix,
+                List.of("topic-a"), null, null, DEFAULT_STARTING_OFFSETS, null, null, null);
+            var violations = validator.validate(config);
+            assertTrue(violations.isEmpty(), "Should have no violations");
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"orders-.*\n", "  \norders-.*\r\nevents-.*"})
+        @DisplayName("Should pass validation when topicPattern is non-blank with line terminators")
+        void shouldPassWhenTopicPatternHasLineTerminators(String topicPattern) {
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                null,
+                null,
+                topicPattern,
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                null
+            );
+            var violations = validator.validate(config);
+            assertTrue(violations.isEmpty(), "Should have no violations");
+        }
+
         @Test
         @DisplayName("Should fail validation when both topics and topic-pattern are configured")
         void shouldFailWhenBothTopicsAndTopicPatternSpecified() {
