@@ -156,13 +156,39 @@ class SavepointRestorePropertiesTest {
         @Test
         @DisplayName("Should fail validation when both savepointPath and directory are null")
         void shouldFailValidationWhenBothSavepointPathAndDirectoryAreNull() {
-            var config = new SavepointRestoreProperties(null, true, RestoreMode.CLAIM, null);
+            var config = new SavepointRestoreProperties(null, null, null, null);
 
             var violations = validator.validate(config);
 
             assertEquals(1, violations.size());
             assertTrue(violations.stream().anyMatch(violation ->
                 violation.getPropertyPath().toString().equals("savepoint-path")
+            ));
+        }
+
+        @Test
+        @DisplayName("Should fail validation when allowNonRestoredState is set without savepointPath")
+        void shouldFailValidationWhenAllowNonRestoredStateIsSetWithoutSavepointPath() {
+            var config = new SavepointRestoreProperties(null, false, null, "/tmp/savepoints");
+
+            var violations = validator.validate(config);
+
+            assertEquals(1, violations.size());
+            assertTrue(violations.stream().anyMatch(violation ->
+                violation.getPropertyPath().toString().equals("allow-non-restored-state")
+            ));
+        }
+
+        @Test
+        @DisplayName("Should fail validation when restoreMode is set without savepointPath")
+        void shouldFailValidationWhenRestoreModeIsSetWithoutSavepointPath() {
+            var config = new SavepointRestoreProperties(null, null, RestoreMode.NO_CLAIM, "/tmp/savepoints");
+
+            var violations = validator.validate(config);
+
+            assertEquals(1, violations.size());
+            assertTrue(violations.stream().anyMatch(violation ->
+                violation.getPropertyPath().toString().equals("restore-mode")
             ));
         }
     }

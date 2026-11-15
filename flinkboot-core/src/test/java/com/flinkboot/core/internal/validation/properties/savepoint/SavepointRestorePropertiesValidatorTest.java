@@ -74,12 +74,36 @@ class SavepointRestorePropertiesValidatorTest {
         @DisplayName("Should fail when both savepointPath and directory are empty")
         void shouldFailWhenBothSavepointPathAndDirectoryAreEmpty() {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-            var props = new SavepointRestoreProperties(null, true, RestoreMode.CLAIM, null);
+            var props = new SavepointRestoreProperties(null, null, null, null);
 
             assertFalse(SavepointRestorePropertiesValidator.validate(props, context));
             verify(context.buildConstraintViolationWithTemplate(
                 "at least one of savepoint-path or directory must be specified"
             )).addPropertyNode("savepoint-path");
+        }
+
+        @Test
+        @DisplayName("Should fail when allow-non-restored-state is set without savepoint-path")
+        void shouldFailWhenAllowNonRestoredStateIsSetWithoutSavepointPath() {
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
+            var props = new SavepointRestoreProperties(null, true, null, "/tmp/savepoints");
+
+            assertFalse(SavepointRestorePropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "allow-non-restored-state cannot be set when savepoint-path is absent"
+            )).addPropertyNode("allow-non-restored-state");
+        }
+
+        @Test
+        @DisplayName("Should fail when restore-mode is set without savepoint-path")
+        void shouldFailWhenRestoreModeIsSetWithoutSavepointPath() {
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
+            var props = new SavepointRestoreProperties(null, null, RestoreMode.CLAIM, "/tmp/savepoints");
+
+            assertFalse(SavepointRestorePropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "restore-mode cannot be set when savepoint-path is absent"
+            )).addPropertyNode("restore-mode");
         }
 
         @Test
