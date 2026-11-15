@@ -341,11 +341,11 @@ class CheckpointingPropertiesTest {
             var violations = validator.validate(config);
 
             assertAll(
-                () -> assertFalse(violations.isEmpty()),
+                () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v ->
                     v.getPropertyPath().toString().equals("storage-uri")
-                        && v.getMessage().equals("storage-uri must be specified when checkpoint storage is FILESYSTEM")
-                ))
+                        && v.getMessage().equals("must not be blank")
+                ), "Violation must target 'storage-uri' with single 'must not be blank' message")
             );
         }
 

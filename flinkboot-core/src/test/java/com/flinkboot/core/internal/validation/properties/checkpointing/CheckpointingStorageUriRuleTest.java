@@ -6,7 +6,6 @@ import com.flinkboot.core.internal.validation.properties.PropertyViolation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Duration;
@@ -28,14 +27,12 @@ class CheckpointingStorageUriRuleTest {
         assertEquals("properties must not be null", exception.getMessage());
     }
 
-    @ParameterizedTest
-    @NullSource
-    @ValueSource(strings = {"", "   "})
-    @DisplayName("Should fail when storage is FILESYSTEM and storage-uri is missing or blank")
-    void shouldFailWhenFilesystemWithoutStorageUri(String storageUri) {
+    @Test
+    @DisplayName("Should fail when storage is FILESYSTEM and storage-uri is missing")
+    void shouldFailWhenFilesystemWithoutStorageUri() {
         var props = new CheckpointingProperties(
             true, Duration.ofSeconds(10), null, null, null, null, null, null, null,
-            CheckpointStorageType.FILESYSTEM, storageUri, null
+            CheckpointStorageType.FILESYSTEM, null, null
         );
 
         assertEquals(
@@ -45,6 +42,18 @@ class CheckpointingStorageUriRuleTest {
             )),
             rule.check(props)
         );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "   "})
+    @DisplayName("Should pass when storage is FILESYSTEM and storage-uri is blank (delegated to @Pattern)")
+    void shouldPassWhenFilesystemWithBlankStorageUri(String storageUri) {
+        var props = new CheckpointingProperties(
+            true, Duration.ofSeconds(10), null, null, null, null, null, null, null,
+            CheckpointStorageType.FILESYSTEM, storageUri, null
+        );
+
+        assertTrue(rule.check(props).isEmpty());
     }
 
     @Test
