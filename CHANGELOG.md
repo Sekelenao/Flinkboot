@@ -66,6 +66,7 @@ All notable user-facing changes to this project are documented in this file.
 
 #### flinkboot-core
 - **Aligned Checkpoint Timeout Validation (#370)**: Rejects `checkpointing.aligned-checkpoint-timeout` during Bean Validation when `checkpointing.unaligned-checkpoints` is explicitly `false`, preventing configurations that Flink would silently ignore at runtime.
+- **Disable Checkpointing When `checkpointing.enabled` Is `false` (#368)**: Calls `disableCheckpointing()` on the created `StreamExecutionEnvironment` when `checkpointing.enabled` is explicitly `false`, preventing cluster-level `execution.checkpointing.interval` defaults from keeping checkpointing active.
 - **Support `Duration` Keys in `.keyBy(...)` (#365)**: `DurationTypeInfo` now implements `AtomicType<Duration>`, resolving runtime failures when using `Duration` fields or streams as keys in Flink `.keyBy(...)` operations.
 - **Checkpoint Storage URI Validation (#246, #369)**: Enforces during Bean Validation that `checkpointing.storage-uri` is non-blank when `storage` is `FILESYSTEM`, and rejects configurations that set `storage-uri` when `storage` is `JOBMANAGER`.
 - **Exponential Backoff Configuration Validation**: Rejects `exponential-delay` configurations specifying only one of `initial-backoff` or `max-backoff` (preventing Flink runtime failures from upstream default fallbacks) and rejects `backoff-multiplier: 1.0` (must be strictly greater than `1.0`).

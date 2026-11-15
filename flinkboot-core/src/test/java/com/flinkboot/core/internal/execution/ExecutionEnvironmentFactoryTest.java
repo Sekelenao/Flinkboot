@@ -42,6 +42,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -128,6 +129,65 @@ class ExecutionEnvironmentFactoryTest {
                 () -> assertEquals("s3://my-bucket/checkpoints", flinkConfig.get(CheckpointingOptions.CHECKPOINTS_DIRECTORY)),
                 () -> assertEquals(5, flinkConfig.get(CheckpointingOptions.TOLERABLE_FAILURE_NUMBER))
             );
+        }
+
+        @Test
+        @DisplayName("Should disable checkpointing on environment when checkpointing.enabled is false")
+        void shouldDisableCheckpointingWhenEnabledIsFalse() {
+            var chkConfig = new CheckpointingProperties(
+                false, null, null, null, null, null, null, null, null, null, null, null
+            );
+            var props = Map.of("execution.checkpointing.interval", "5000");
+            var envProps = new ExecutionEnvironmentProperties(null, chkConfig, null, null, null, null, props);
+            var jobConfig = new JobProperties("disabled-checkpoint-job", envProps);
+
+            var factory = new ExecutionEnvironmentFactory();
+            var env = factory.create(jobConfig);
+
+            assertFalse(env.getCheckpointConfig().isCheckpointingEnabled());
+        }
+
+        @Test
+        @DisplayName("Should preserve checkpointing when checkpointing is absent")
+        void shouldPreserveCheckpointingWhenCheckpointingIsAbsent() {
+            var props = Map.of("execution.checkpointing.interval", "5000");
+            var envProps = new ExecutionEnvironmentProperties(null, null, null, null, null, null, props);
+            var jobConfig = new JobProperties("absent-checkpoint-job", envProps);
+
+            var factory = new ExecutionEnvironmentFactory();
+            var env = factory.create(jobConfig);
+
+            assertTrue(env.getCheckpointConfig().isCheckpointingEnabled());
+        }
+
+        @Test
+        @DisplayName("Should preserve checkpointing when checkpointing.enabled is omitted")
+        void shouldPreserveCheckpointingWhenEnabledIsOmitted() {
+            var chkConfig = new CheckpointingProperties(
+                null, Duration.ofMillis(5000), null, null, null, null, null, null, null, null, null, null
+            );
+            var envProps = new ExecutionEnvironmentProperties(null, chkConfig, null, null, null, null, null);
+            var jobConfig = new JobProperties("omitted-enabled-checkpoint-job", envProps);
+
+            var factory = new ExecutionEnvironmentFactory();
+            var env = factory.create(jobConfig);
+
+            assertTrue(env.getCheckpointConfig().isCheckpointingEnabled());
+        }
+
+        @Test
+        @DisplayName("Should preserve checkpointing when checkpointing.enabled is true")
+        void shouldPreserveCheckpointingWhenEnabledIsTrue() {
+            var chkConfig = new CheckpointingProperties(
+                true, Duration.ofMillis(5000), null, null, null, null, null, null, null, null, null, null
+            );
+            var envProps = new ExecutionEnvironmentProperties(null, chkConfig, null, null, null, null, null);
+            var jobConfig = new JobProperties("explicit-enabled-checkpoint-job", envProps);
+
+            var factory = new ExecutionEnvironmentFactory();
+            var env = factory.create(jobConfig);
+
+            assertTrue(env.getCheckpointConfig().isCheckpointingEnabled());
         }
 
         @Test
