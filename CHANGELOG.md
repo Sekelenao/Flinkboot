@@ -65,6 +65,7 @@ All notable user-facing changes to this project are documented in this file.
 ### 🔵 Fixes & Diagnostics
 
 #### flinkboot-core
+- **Merge All Documents in Multi-Document YAML Files (#401)**: Updated `YamlParser.parse(InputStream)` to parse and sequentially merge all YAML documents separated by `---` instead of silently ignoring documents after the first.
 - **Reject Incremental Checkpointing with `HASHMAP` State Backend (#400)**: Rejects `state-backend.incremental: true` during Bean Validation when `state-backend.type` is `HASHMAP`, preventing silent runtime ignores since `HashMapStateBackend` does not support incremental checkpoints.
 - **Reject Savepoint Restore Options Without `savepoint-path` (#388)**: Fails Bean Validation when `savepoint-restore.allow-non-restored-state` or `savepoint-restore.restore-mode` is configured without `savepoint-path`, preventing options configured alongside `directory` alone from being silently ignored.
 - **Unaligned Checkpoints Mode Validation (#391)**: Rejects `checkpointing.unaligned-checkpoints: true` during Bean Validation when `checkpointing.mode` is `AT_LEAST_ONCE`, preventing runtime failures since Flink only supports unaligned checkpoints with `EXACTLY_ONCE`.
