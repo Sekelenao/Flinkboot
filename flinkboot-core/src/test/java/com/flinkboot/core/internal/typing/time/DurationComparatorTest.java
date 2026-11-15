@@ -78,6 +78,23 @@ class DurationComparatorTest {
                 () -> assertEquals(0, comparator.compare(smaller, Duration.ofSeconds(1)))
             );
         }
+
+        @Test
+        @DisplayName("Should handle null values consistently in in-memory comparison")
+        void shouldHandleNullsInComparison() {
+            var ascending = new DurationComparator(true);
+            var descending = new DurationComparator(false);
+            var nonNull = Duration.ofSeconds(1);
+
+            assertAll(
+                () -> assertEquals(0, ascending.compare(null, null)),
+                () -> assertTrue(ascending.compare(null, nonNull) < 0),
+                () -> assertTrue(ascending.compare(nonNull, null) > 0),
+                () -> assertEquals(0, descending.compare(null, null)),
+                () -> assertTrue(descending.compare(null, nonNull) > 0),
+                () -> assertTrue(descending.compare(nonNull, null) < 0)
+            );
+        }
     }
 
     @Nested
@@ -175,6 +192,39 @@ class DurationComparatorTest {
                 () -> assertTrue(descending.compareToReference(largerComparator) < 0),
                 () -> assertTrue(descending.compareToReference(smallerComparator) > 0),
                 () -> assertEquals(0, descending.compareToReference(equalComparator))
+            );
+        }
+
+        @Test
+        @DisplayName("Should handle null values safely in hash and reference operations")
+        void shouldHandleNullsInHashAndReferenceOperations() {
+            var ascendingNullRef = new DurationComparator(true);
+            var descendingNullRef = new DurationComparator(false);
+            var ascendingNonNullRef = new DurationComparator(true);
+            var descendingNonNullRef = new DurationComparator(false);
+            var otherNullRef = new DurationComparator(true);
+            var otherNonNullRef = new DurationComparator(true);
+
+            var nonNull = Duration.ofSeconds(10);
+
+            ascendingNullRef.setReference(null);
+            descendingNullRef.setReference(null);
+            ascendingNonNullRef.setReference(nonNull);
+            descendingNonNullRef.setReference(nonNull);
+            otherNullRef.setReference(null);
+            otherNonNullRef.setReference(nonNull);
+
+            assertAll(
+                () -> assertEquals(0, ascendingNullRef.hash(null)),
+                () -> assertTrue(ascendingNullRef.equalToReference(null)),
+                () -> assertFalse(ascendingNullRef.equalToReference(nonNull)),
+                () -> assertFalse(ascendingNonNullRef.equalToReference(null)),
+                () -> assertEquals(0, ascendingNullRef.compareToReference(otherNullRef)),
+                () -> assertTrue(ascendingNullRef.compareToReference(otherNonNullRef) > 0),
+                () -> assertTrue(ascendingNonNullRef.compareToReference(otherNullRef) < 0),
+                () -> assertEquals(0, descendingNullRef.compareToReference(otherNullRef)),
+                () -> assertTrue(descendingNullRef.compareToReference(otherNonNullRef) < 0),
+                () -> assertTrue(descendingNonNullRef.compareToReference(otherNullRef) > 0)
             );
         }
     }
