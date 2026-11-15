@@ -98,7 +98,7 @@ class CheckpointingPropertiesValidatorTest {
             verify(context).buildConstraintViolationWithTemplate("interval must be specified when checkpointing is enabled");
             verify(context).buildConstraintViolationWithTemplate("storage-uri must be specified when checkpoint storage is FILESYSTEM");
             verify(context).buildConstraintViolationWithTemplate("max-concurrent-checkpoints must be 1 when min-pause-between-checkpoints is greater than 0");
-            verify(context).buildConstraintViolationWithTemplate("aligned-checkpoint-timeout cannot be set when unaligned-checkpoints is false");
+            verify(context).buildConstraintViolationWithTemplate("aligned-checkpoint-timeout requires unaligned-checkpoints to be true");
         }
     }
 }
