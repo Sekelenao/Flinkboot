@@ -368,6 +368,26 @@ class CheckpointingPropertiesTest {
                 ), "Expected violation on property 'aligned-checkpoint-timeout'")
             );
         }
+
+        @Test
+        @DisplayName("Should fail validation when mode is AT_LEAST_ONCE and unalignedCheckpoints is true")
+        void shouldFailWhenModeIsAtLeastOnceAndUnalignedCheckpointsIsTrue() {
+            var config = new CheckpointingProperties(
+                true, Duration.ofSeconds(1), CheckpointingMode.AT_LEAST_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, true, null, null, null, null
+            );
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("unaligned-checkpoints")
+                        && v.getMessageTemplate().equals(
+                            "unaligned-checkpoints cannot be true when mode is AT_LEAST_ONCE"
+                        )
+                ), "Expected violation on property 'unaligned-checkpoints'")
+            );
+        }
     }
 
     @Nested

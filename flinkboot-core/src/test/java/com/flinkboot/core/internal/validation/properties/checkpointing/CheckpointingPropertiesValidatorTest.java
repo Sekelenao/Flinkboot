@@ -1,6 +1,7 @@
 package com.flinkboot.core.internal.validation.properties.checkpointing;
 
 import com.flinkboot.core.api.properties.checkpointing.CheckpointStorageType;
+import com.flinkboot.core.api.properties.checkpointing.CheckpointingMode;
 import com.flinkboot.core.api.properties.checkpointing.CheckpointingProperties;
 import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.DisplayName;
@@ -99,6 +100,19 @@ class CheckpointingPropertiesValidatorTest {
             verify(context).buildConstraintViolationWithTemplate("storage-uri must be specified when checkpoint storage is FILESYSTEM");
             verify(context).buildConstraintViolationWithTemplate("max-concurrent-checkpoints must be 1 when min-pause-between-checkpoints is greater than 0");
             verify(context).buildConstraintViolationWithTemplate("aligned-checkpoint-timeout requires unaligned-checkpoints to be true");
+        }
+
+        @Test
+        @DisplayName("Should fail when mode is AT_LEAST_ONCE and unaligned-checkpoints is true")
+        void shouldFailWhenModeIsAtLeastOnceAndUnalignedEnabled() {
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
+            var props = new CheckpointingProperties(
+                true, Duration.ofSeconds(10), CheckpointingMode.AT_LEAST_ONCE, null, null, null,
+                null, true, null, null, null, null
+            );
+
+            assertFalse(CheckpointingPropertiesValidator.validate(props, context));
+            verify(context).buildConstraintViolationWithTemplate("unaligned-checkpoints cannot be true when mode is AT_LEAST_ONCE");
         }
     }
 }

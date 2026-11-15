@@ -16,7 +16,8 @@ public final class CheckpointingPropertiesValidator {
         new CheckpointingIntervalRule(),
         new CheckpointingStorageUriRule(),
         new CheckpointingConcurrencyRule(),
-        new CheckpointingAlignedTimeoutRule()
+        new CheckpointingAlignedTimeoutRule(),
+        new CheckpointingUnalignedModeRule()
     );
 
     private CheckpointingPropertiesValidator() {
