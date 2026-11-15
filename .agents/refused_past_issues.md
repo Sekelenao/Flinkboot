@@ -74,7 +74,7 @@ All audit subagents (including `module-scanner` and `pr-reviewer`) must consult 
 ## 14. Default Fallback Value Syntax in PlaceholderResolver (`${VAR:default}`)
 - **Pattern**: Supporting default fallback value syntax `${VAR:default}` or `${VAR:-default}` in `PlaceholderResolver`.
 - **Status**: **REJECTED**
-- **Rationale**: `PlaceholderResolver` intentionally restricts placeholders to strict `${VARIABLE_NAME}` lookups against environment variables or startup arguments. Introducing fallback syntax adds parsing complexity, ambiguity around colons in values (such as Kafka endpoints or URLs `host:9092`), and risks masking missing configuration in production. Missing placeholders must fail fast.
+- **Rationale**: `PlaceholderResolver` intentionally restricts placeholders to strict `${VARIABLE_NAME}` lookups against environment variables. Introducing fallback syntax adds parsing complexity, ambiguity around colons in values (such as Kafka endpoints or URLs `host:9092`), and risks masking missing configuration in production. Missing placeholders must fail fast.
 
 ## 15. Ordering & Redundant Assertions in `CollectingSinkAssert`
 - **Pattern**: Requesting `containsExactly(...)`, `doesNotContain(...)`, or `satisfies(Consumer<List<T>>)` on `CollectingSinkAssert` (or flagging `contains(T...)` for using a `HashSet` and ignoring order/duplicates).
@@ -95,4 +95,44 @@ All audit subagents (including `module-scanner` and `pr-reviewer`) must consult 
 - **Pattern**: Requesting a `Flinkboot.executionEnvironment(JobProperties, Consumer<Configuration>)` overload to mutate `Configuration` before `StreamExecutionEnvironment` creation.
 - **Status**: **REJECTED**
 - **Rationale**: Users can already obtain and configure `StreamExecutionEnvironment` post-creation via `StreamExecutionEnvironment#configure(ReadableConfig, ClassLoader)` or `env.getConfig()`. Adding a `Consumer<Configuration>` overload expands the `Flinkboot` public API surface unnecessarily.
+
+## 19. Making `KafkaSinkProperties.topic` Optional for `TopicSelector`
+- **Pattern**: Making `topic` optional in `KafkaSinkProperties` so `KafkaSinkFactory.supplyBuilderFor(KafkaSinkProperties, Consumer<KafkaRecordSerializationSchemaBuilder<T>>)` can call `setTopicSelector(...)` without conflicting with `setTopic(config.topic())`.
+- **Status**: **REJECTED**
+- **Rationale**: In the vast majority of pipelines, a Kafka sink writes to a single static topic; keeping `topic` `@NotBlank` preserves strict startup validation for YAML configurations. Advanced users who need dynamic multi-topic routing can already supply a custom `KafkaRecordSerializationSchema<T>` via `KafkaSinkFactory.supplyBuilderFor(KafkaSinkProperties, KafkaRecordSerializationSchema<T>)` or use Flink's `KafkaSink.builder()` directly.
+
+## 20. Distinguishing Explicit Empty `partitions: []` from `null` in `KafkaOffsetPropertiesValidator`
+- **Pattern**: Rejecting `partitions: []` when `strategy` is not `OFFSETS` in `KafkaOffsetPropertiesValidator`.
+- **Status**: **REJECTED**
+- **Rationale**: Across Flinkboot DTOs, `null` and empty lists (`[]`) are intentionally normalized to `Collections.emptyList()`. Distinguishing between `null` and `[]` solely to reject `partitions: []` adds complexity without practical production value.
+
+## 21. Duplicate `(topic, partition)` Check in `KafkaSourceFactory`
+- **Pattern**: Failing fast on duplicate `(topic, partition)` entries in `KafkaSourceFactory.supplyBuilderFor` when building `Set<TopicPartition>`.
+- **Status**: **REJECTED**
+- **Rationale**: Unlike `OffsetInitializerMapper` (which builds a `Map<TopicPartition, Long>` where duplicate keys with potentially conflicting offset values are ambiguous and cause `Collectors.toMap` to fail), `KafkaSourceFactory` builds a value-less `Set<TopicPartition>`. Duplicate entries are harmlessly deduplicated by `Collectors.toSet()`, and validation of partition uniqueness in `KafkaSourcePropertiesValidator` is already rejected under Rule 4.
+
+## 22. Per-Branch Ancestor Tracking in `PojoValidator`
+- **Pattern**: Replacing the global `visited` `Set<TypeInformation<?>>` in `PojoValidator` with per-branch ancestor tracking to report all distinct field paths sharing the same invalid `TypeInformation`.
+- **Status**: **REJECTED**
+- **Rationale**: Tracking only branch ancestors would re-traverse valid complex subtrees repeatedly whenever a POJO has multiple fields of the same type, degrading performance unless full subtree result caching is added. Keeping the global `visited` set already reports every distinct `TypeInformation` violation in one test run and is the right simplicity/performance trade-off.
+
+## 23. Custom `ClassLoader` Resolution in `SerializationValidator`
+- **Pattern**: Subclassing `ObjectInputStream` in `SerializationValidator` to resolve classes via `actual.getClass().getClassLoader()` instead of the default `latestUserDefinedLoader()`.
+- **Status**: **REJECTED (Defer Until Needed)**
+- **Rationale**: Standard JUnit tests run under the same application classloader, where `ObjectInputStream` resolves test classes normally. Adding custom `ObjectInputStream` subclassing is unnecessary complexity for a scenario unlikely to occur; if a user ever reports a `ClassNotFoundException` under an isolated classloader, it can be addressed then.
+
+## 24. Supporting `null` Elements in `CollectingSinkRegistry`
+- **Pattern**: Allowing `null` records in `CollectingSinkRegistry.append(UUID, Object)` and `CollectingSinkRegistry.elements(UUID)`.
+- **Status**: **REJECTED**
+- **Rationale**: Apache Flink's `DataStream` runtime and native serializers generally forbid `null` records during serialization and shuffling. Rejecting `null` via `Objects.requireNonNull` in `CollectingSinkRegistry` aligns with Flink's non-null record contract and Flinkboot's strict nullability rules.
+
+## 25. CLI Argument Resolution in `PlaceholderResolver` (`YamlParser`)
+- **Pattern**: Wiring `StartupEnvironment::get` into `PlaceholderResolver` / `YamlParser` so `${VAR}` YAML placeholders can also be resolved from CLI arguments.
+- **Status**: **REJECTED**
+- **Rationale**: YAML placeholders are frequently used for secrets (passwords, tokens, SASL credentials); encouraging users to pass them as CLI arguments risks exposing secrets in `ps`, `/proc/<pid>/cmdline`, and job logs. Additionally, `EnvVarResolver` normalizes keys to `UPPER_SNAKE_CASE` for `System::getenv`, whereas `CommandLine` expects `kebab-case` options. Keeping `PlaceholderResolver` strictly backed by `System::getenv` is safer and cleaner.
+
+## 26. Relaxing `CheckpointingIntervalRule` for Cluster-Inherited `interval`
+- **Pattern**: Allowing `checkpointing` sub-properties (such as `storage` or `storage-uri`) to be configured without `interval` so `execution.checkpointing.interval` can be inherited from `flink-conf.yaml`.
+- **Status**: **REJECTED**
+- **Rationale**: Flinkboot intentionally enforces explicit configuration rather than implicit guessing or partial cluster-config inheritance for `checkpointing`. Requiring `interval` whenever `checkpointing` is configured is an intentional validation invariant.
 
