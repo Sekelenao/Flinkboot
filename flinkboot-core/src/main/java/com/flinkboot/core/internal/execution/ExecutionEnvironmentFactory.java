@@ -2,6 +2,7 @@ package com.flinkboot.core.internal.execution;
 
 import com.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
 import com.flinkboot.core.api.properties.JobProperties;
+import com.flinkboot.core.api.properties.checkpointing.CheckpointingProperties;
 import com.flinkboot.core.internal.execution.customizer.CheckpointingCustomizer;
 import com.flinkboot.core.internal.execution.customizer.EnvironmentCustomizer;
 import com.flinkboot.core.internal.execution.customizer.ExecutionCustomizer;
@@ -48,6 +49,18 @@ public final class ExecutionEnvironmentFactory {
             .filter(ui -> ui.enabled().orElse(true))
             .isPresent();
 
-        return ExecutionEnvironmentProvider.get(useLocalWebUi).createEnvironment(configuration);
+        var environment = ExecutionEnvironmentProvider.get(useLocalWebUi).createEnvironment(configuration);
+
+        boolean checkpointingDisabled = jobProperties.environment()
+            .flatMap(ExecutionEnvironmentProperties::checkpointing)
+            .flatMap(CheckpointingProperties::enabled)
+            .filter(enabled -> !enabled)
+            .isPresent();
+
+        if (checkpointingDisabled) {
+            environment.getCheckpointConfig().disableCheckpointing();
+        }
+
+        return environment;
     }
 }
