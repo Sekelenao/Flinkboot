@@ -191,6 +191,24 @@ class SavepointRestorePropertiesTest {
                 violation.getPropertyPath().toString().equals("restore-mode")
             ));
         }
+
+        @Test
+        @DisplayName("Should report all violations when both allowNonRestoredState and restoreMode are set without savepointPath")
+        void shouldReportAllViolationsWhenBothRestoreOptionsAreSetWithoutSavepointPath() {
+            var config = new SavepointRestoreProperties(null, true, RestoreMode.CLAIM, "/tmp/savepoints");
+
+            var violations = validator.validate(config);
+
+            assertEquals(2, violations.size());
+            assertAll(
+                () -> assertTrue(violations.stream().anyMatch(violation ->
+                    violation.getPropertyPath().toString().equals("allow-non-restored-state")
+                )),
+                () -> assertTrue(violations.stream().anyMatch(violation ->
+                    violation.getPropertyPath().toString().equals("restore-mode")
+                ))
+            );
+        }
     }
 
     @Nested

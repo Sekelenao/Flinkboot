@@ -14,7 +14,8 @@ public final class SavepointRestorePropertiesValidator {
 
     private static final List<ValidationRule<SavepointRestoreProperties>> RULES = List.of(
         new SavepointRestoreLocationRule(),
-        new SavepointRestoreOptionsRule()
+        new SavepointAllowNonRestoredStateRule(),
+        new SavepointRestoreModeRule()
     );
 
     private SavepointRestorePropertiesValidator() {
