@@ -141,4 +141,10 @@ All audit subagents (including `module-scanner` and `pr-reviewer`) must consult 
 - **Status**: **REJECTED**
 - **Rationale**: `ClassAssert` uses `TypeExtractor.createTypeInfo`, which never produces `RowTypeInfo` (a `Row` field becomes `GenericTypeInfo<Row>`), so this only affects explicit `TypeInformationAssert` calls with named `RowTypeInfo`. Unnamed `RowTypeInfo` falls back to generic `f0`, `f1` names, and adding `instanceof RowTypeInfo` couples a generic `CompositeType<?>` handler to a concrete subclass for a purely cosmetic path change.
 
+## 28. Failing Fast on Empty `flinkboot-configurations` in `StartupEnvironment`
+- **Pattern**: Throwing an exception in `StartupEnvironment.configurationResourceLocations()` when `flinkboot-configurations` is explicitly provided as blank or comma-only and resolves to an empty list.
+- **Status**: **REJECTED**
+- **Rationale**: When a configuration DTO has required fields, Jakarta Bean Validation already fails fast with `ConfigurationValidationException`. When all fields are optional, passing an empty `flinkboot-configurations` intentionally allows loading zero YAML files and relying on defaults without forcing users to create a dummy empty YAML file.
+
+
 
