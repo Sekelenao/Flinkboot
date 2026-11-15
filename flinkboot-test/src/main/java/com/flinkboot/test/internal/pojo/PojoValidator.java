@@ -55,7 +55,7 @@ public final class PojoValidator {
         var errors = new ArrayList<String>();
         tasks.add(new PojoValidationTask<>("$", typeInfo));
         while (!tasks.isEmpty()) {
-            processTask(tasks.pop(), errors::add);
+            processTask(tasks.remove(), errors::add);
         }
         if (!errors.isEmpty()) {
             var message = new StringBuilder("Found ")
