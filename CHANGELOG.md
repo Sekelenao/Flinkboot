@@ -65,6 +65,7 @@ All notable user-facing changes to this project are documented in this file.
 ### 🔵 Fixes & Diagnostics
 
 #### flinkboot-core
+- **Unaligned Checkpoints Mode Validation (#391)**: Rejects `checkpointing.unaligned-checkpoints: true` during Bean Validation when `checkpointing.mode` is `AT_LEAST_ONCE`, preventing runtime failures since Flink only supports unaligned checkpoints with `EXACTLY_ONCE`.
 - **Safe `null` Handling in `DurationComparator` (#390)**: Handled `null` `Duration` values consistently across `hash`, `equalToReference`, `compareToReference`, and `compare` (using `null < non-null` ordering respecting sort direction), preventing `NullPointerException` when comparing or hashing nullable `Duration` records.
 - **Aligned Checkpoint Timeout Validation (#370)**: Rejects `checkpointing.aligned-checkpoint-timeout` during Bean Validation when `checkpointing.unaligned-checkpoints` is explicitly `false`, preventing configurations that Flink would silently ignore at runtime.
 - **Disable Checkpointing When `checkpointing.enabled` Is `false` (#368)**: Calls `disableCheckpointing()` on the created `StreamExecutionEnvironment` when `checkpointing.enabled` is explicitly `false`, preventing cluster-level `execution.checkpointing.interval` defaults from keeping checkpointing active.
