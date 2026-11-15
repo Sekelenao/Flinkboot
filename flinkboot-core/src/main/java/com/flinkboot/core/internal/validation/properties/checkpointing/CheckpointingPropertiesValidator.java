@@ -15,7 +15,8 @@ public final class CheckpointingPropertiesValidator {
     private static final List<ValidationRule<CheckpointingProperties>> RULES = List.of(
         new CheckpointingIntervalRule(),
         new CheckpointingStorageUriRule(),
-        new CheckpointingConcurrencyRule()
+        new CheckpointingConcurrencyRule(),
+        new CheckpointingAlignedTimeoutRule()
     );
 
     private CheckpointingPropertiesValidator() {

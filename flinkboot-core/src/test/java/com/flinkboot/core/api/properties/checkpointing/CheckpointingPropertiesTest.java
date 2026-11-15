@@ -102,7 +102,7 @@ class CheckpointingPropertiesTest {
         void shouldPassValidationWhenValid() {
             var config = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, false, Duration.ZERO, CheckpointStorageType.FILESYSTEM, "s3://bucket", 0
+                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, true, Duration.ZERO, CheckpointStorageType.FILESYSTEM, "s3://bucket", 0
             );
             var violations = validator.validate(config);
             assertTrue(violations.isEmpty());
@@ -113,11 +113,11 @@ class CheckpointingPropertiesTest {
         void shouldPassValidationWhenTolerableCheckpointFailuresPositiveOrZero() {
             var configZero = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                null, false, Duration.ZERO, null, null, 0
+                null, false, null, null, null, 0
             );
             var configPositive = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                null, false, Duration.ZERO, null, null, 5
+                null, false, null, null, null, 5
             );
 
             assertAll(
@@ -131,7 +131,7 @@ class CheckpointingPropertiesTest {
         void shouldFailValidationWhenTolerableCheckpointFailuresNegative() {
             var config = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                null, false, Duration.ZERO, null, null, -1
+                null, false, null, null, null, -1
             );
             var violations = validator.validate(config);
 
@@ -204,11 +204,11 @@ class CheckpointingPropertiesTest {
         void shouldFailValidationWhenIntervalZeroOrNegative() {
             var zeroInterval = new CheckpointingProperties(
                 true, Duration.ZERO, CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                null, false, Duration.ZERO, null, null, null
+                null, false, null, null, null, null
             );
             var negativeInterval = new CheckpointingProperties(
                 true, Duration.ofSeconds(-1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                null, false, Duration.ZERO, null, null, null
+                null, false, null, null, null, null
             );
 
             assertAll(
@@ -222,11 +222,11 @@ class CheckpointingPropertiesTest {
         void shouldFailValidationWhenTimeoutZeroOrNegative() {
             var zeroTimeout = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ZERO, Duration.ZERO, 1,
-                null, false, Duration.ZERO, null, null, null
+                null, false, null, null, null, null
             );
             var negativeTimeout = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(-10), Duration.ZERO, 1,
-                null, false, Duration.ZERO, null, null, null
+                null, false, null, null, null, null
             );
 
             assertAll(
@@ -240,7 +240,7 @@ class CheckpointingPropertiesTest {
         void shouldFailValidationWhenMinPauseNegative() {
             var negativeMinPause = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ofSeconds(-1), 1,
-                null, false, Duration.ZERO, null, null, null
+                null, false, null, null, null, null
             );
             var violations = validator.validate(negativeMinPause);
 
@@ -257,7 +257,7 @@ class CheckpointingPropertiesTest {
         void shouldFailValidationWhenAlignedCheckpointTimeoutNegative() {
             var negativeTimeout = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                null, false, Duration.ofSeconds(-5), null, null, null
+                null, true, Duration.ofSeconds(-5), null, null, null
             );
             var violations = validator.validate(negativeTimeout);
 
@@ -275,7 +275,7 @@ class CheckpointingPropertiesTest {
         void shouldFailValidationWhenStorageUriBlank(String storageUri) {
             var config = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                null, false, Duration.ZERO, null, storageUri, null
+                null, false, null, null, storageUri, null
             );
             var violations = validator.validate(config);
 
@@ -293,7 +293,7 @@ class CheckpointingPropertiesTest {
         void shouldPassValidationWhenStorageUriNull() {
             var config = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                null, false, Duration.ZERO, null, null, null
+                null, false, null, null, null, null
             );
             var violations = validator.validate(config);
             assertTrue(violations.isEmpty());
@@ -304,7 +304,7 @@ class CheckpointingPropertiesTest {
         void shouldFailWhenStorageIsFileSystemAndStorageUriIsNull() {
             var config = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                null, false, Duration.ZERO, CheckpointStorageType.FILESYSTEM, null, null
+                null, false, null, CheckpointStorageType.FILESYSTEM, null, null
             );
             var violations = validator.validate(config);
 
@@ -323,7 +323,7 @@ class CheckpointingPropertiesTest {
         void shouldFailWhenStorageIsFileSystemAndStorageUriIsBlank(String blankUri) {
             var config = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                null, false, Duration.ZERO, CheckpointStorageType.FILESYSTEM, blankUri, null
+                null, false, null, CheckpointStorageType.FILESYSTEM, blankUri, null
             );
             var violations = validator.validate(config);
 
@@ -341,10 +341,30 @@ class CheckpointingPropertiesTest {
         void shouldPassWhenStorageIsJobManagerAndStorageUriIsNull() {
             var config = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                null, false, Duration.ZERO, CheckpointStorageType.JOBMANAGER, null, null
+                null, false, null, CheckpointStorageType.JOBMANAGER, null, null
             );
             var violations = validator.validate(config);
             assertTrue(violations.isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should fail validation when unalignedCheckpoints is false and alignedCheckpointTimeout is set")
+        void shouldFailWhenUnalignedCheckpointsIsFalseAndAlignedTimeoutIsSet() {
+            var config = new CheckpointingProperties(
+                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, false, Duration.ofSeconds(2), null, null, null
+            );
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("aligned-checkpoint-timeout")
+                        && v.getMessageTemplate().equals(
+                            "aligned-checkpoint-timeout cannot be set when unaligned-checkpoints is false"
+                        )
+                ), "Expected violation on property 'aligned-checkpoint-timeout'")
+            );
         }
     }
 

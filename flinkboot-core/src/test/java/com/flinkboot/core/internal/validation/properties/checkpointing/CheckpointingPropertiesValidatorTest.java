@@ -91,13 +91,14 @@ class CheckpointingPropertiesValidatorTest {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
             var props = new CheckpointingProperties(
                 true, null, null, null, Duration.ofSeconds(5), 2,
-                null, null, null, CheckpointStorageType.FILESYSTEM, null, null
+                null, false, Duration.ofSeconds(5), CheckpointStorageType.FILESYSTEM, null, null
             );
 
             assertFalse(CheckpointingPropertiesValidator.validate(props, context));
             verify(context).buildConstraintViolationWithTemplate("interval must be specified when checkpointing is enabled");
             verify(context).buildConstraintViolationWithTemplate("storage-uri must be specified when checkpoint storage is FILESYSTEM");
             verify(context).buildConstraintViolationWithTemplate("max-concurrent-checkpoints must be 1 when min-pause-between-checkpoints is greater than 0");
+            verify(context).buildConstraintViolationWithTemplate("aligned-checkpoint-timeout cannot be set when unaligned-checkpoints is false");
         }
     }
 }
