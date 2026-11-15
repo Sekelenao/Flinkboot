@@ -176,6 +176,21 @@ class ExecutionEnvironmentFactoryTest {
         }
 
         @Test
+        @DisplayName("Should preserve checkpointing when checkpointing.enabled is true")
+        void shouldPreserveCheckpointingWhenEnabledIsTrue() {
+            var chkConfig = new CheckpointingProperties(
+                true, Duration.ofMillis(5000), null, null, null, null, null, null, null, null, null, null
+            );
+            var envProps = new ExecutionEnvironmentProperties(null, chkConfig, null, null, null, null, null);
+            var jobConfig = new JobProperties("explicit-enabled-checkpoint-job", envProps);
+
+            var factory = new ExecutionEnvironmentFactory();
+            var env = factory.create(jobConfig);
+
+            assertTrue(env.getCheckpointConfig().isCheckpointingEnabled());
+        }
+
+        @Test
         @DisplayName("Should correctly map FixedDelay RestartStrategyProperties into Flink Configuration")
         void shouldMapFixedDelayRestartStrategyToFlinkConfiguration() {
             var fixed = new FixedDelayRestartProperties(3, Duration.ofMillis(5000));
