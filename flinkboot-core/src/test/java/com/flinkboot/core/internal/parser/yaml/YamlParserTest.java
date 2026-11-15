@@ -466,6 +466,120 @@ class YamlParserTest {
     }
 
     @Nested
+    @DisplayName("Multi-Document YAML")
+    class MultiDocument {
+
+        @Test
+        @DisplayName("Should merge all documents separated by ---")
+        void shouldMergeAllDocuments() {
+            var yaml = "env: \"prod\"\n" +
+                "database:\n" +
+                "  host: \"localhost\"\n" +
+                "---\n" +
+                "database:\n" +
+                "  port: 5432\n" +
+                "  options:\n" +
+                "    - \"ssl=true\"\n" +
+                "replicas: []\n";
+            var parser = new YamlParser(STANDARD_FEATURES);
+            parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+
+            var config = parser.convertTo(ComplexConfig.class);
+            assertAll(
+                () -> assertNotNull(config),
+                () -> assertEquals("prod", config.env()),
+                () -> assertEquals("localhost", config.database().host()),
+                () -> assertEquals(5432, config.database().port()),
+                () -> assertEquals(List.of("ssl=true"), config.database().options()),
+                () -> assertEquals(List.of(), config.replicas())
+            );
+        }
+
+        @Test
+        @DisplayName("Should skip empty documents between --- separators")
+        void shouldSkipEmptyDocuments() {
+            var yaml = "---\n" +
+                "---\n" +
+                "name: \"app\"\n" +
+                "---\n" +
+                "---\n" +
+                "value: 42\n" +
+                "---\n";
+            var parser = new YamlParser(STANDARD_FEATURES);
+            parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+
+            var config = parser.convertTo(TestConfig.class);
+            assertAll(
+                () -> assertNotNull(config),
+                () -> assertEquals("app", config.name()),
+                () -> assertEquals(42, config.value())
+            );
+        }
+
+        @Test
+        @DisplayName("Should allow overriding values across documents when permitOverride is true")
+        void shouldAllowOverrideAcrossDocumentsWhenPermitted() {
+            var yaml = "name: \"initial\"\n" +
+                "value: 1\n" +
+                "---\n" +
+                "value: 99\n";
+            var features = ParserFeatures.builder().permitOverride(true).listMerging(false).build();
+            var parser = new YamlParser(features);
+            parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+
+            var config = parser.convertTo(TestConfig.class);
+            assertAll(
+                () -> assertNotNull(config),
+                () -> assertEquals("initial", config.name()),
+                () -> assertEquals(99, config.value())
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw YamlParsingException when overriding across documents and permitOverride is false")
+        void shouldThrowWhenOverridingAcrossDocumentsAndForbidden() {
+            var yaml = "name: \"initial\"\n" +
+                "value: 1\n" +
+                "---\n" +
+                "value: 99\n";
+            var parser = new YamlParser(STANDARD_FEATURES);
+            var stream = new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8));
+            assertThrows(YamlParsingException.class, () -> parser.parse(stream));
+        }
+
+        @Test
+        @DisplayName("Should merge lists across documents when listMerging is true")
+        void shouldMergeListsAcrossDocumentsWhenPermitted() {
+            var yaml = "items:\n" +
+                "  - \"item1\"\n" +
+                "---\n" +
+                "items:\n" +
+                "  - \"item2\"\n";
+            var features = ParserFeatures.builder().permitOverride(false).listMerging(true).build();
+            var parser = new YamlParser(features);
+            parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+
+            var config = parser.convertTo(TestConfigWithList.class);
+            assertAll(
+                () -> assertNotNull(config),
+                () -> assertEquals(List.of("item1", "item2"), config.items())
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw YamlParsingException when a subsequent document is not an object")
+        void shouldThrowWhenSubsequentDocumentIsNotObject() {
+            var yaml = "name: \"app\"\n" +
+                "value: 1\n" +
+                "---\n" +
+                "- \"not-an-object\"\n";
+            var parser = new YamlParser(STANDARD_FEATURES);
+            var stream = new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8));
+            assertThrows(YamlParsingException.class, () -> parser.parse(stream));
+        }
+    }
+
+    @Nested
     @DisplayName("ParserFeatures Combinations")
     class ParserFeaturesCombinations {
 

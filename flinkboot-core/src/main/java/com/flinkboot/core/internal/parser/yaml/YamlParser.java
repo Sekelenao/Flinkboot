@@ -63,15 +63,18 @@ public final class YamlParser {
 
     public void parse(InputStream source){
         Objects.requireNonNull(source);
-        try {
-            var node = mapper.readTree(source);
-            if (node == null || node.isNull() || node.isMissingNode()) {
-                return;
+        try (var parser = mapper.getFactory().createParser(source);
+             var nodes = mapper.readValues(parser, JsonNode.class)) {
+            while (nodes.hasNextValue()) {
+                var node = nodes.nextValue();
+                if (node == null || node.isNull() || node.isMissingNode()) {
+                    continue;
+                }
+                if (!node.isObject()) {
+                    throw new YamlParsingException("Configuration source is invalid");
+                }
+                mergeProcessor.apply((ObjectNode) node);
             }
-            if (!node.isObject()) {
-                throw new YamlParsingException("Configuration source is invalid");
-            }
-           mergeProcessor.apply((ObjectNode) node);
         } catch (IOException exception) {
             throw new YamlParsingException(exception.getMessage(), exception);
         }
