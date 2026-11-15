@@ -13,7 +13,9 @@ import java.util.List;
 public final class SavepointRestorePropertiesValidator {
 
     private static final List<ValidationRule<SavepointRestoreProperties>> RULES = List.of(
-        new SavepointRestoreLocationRule()
+        new SavepointRestoreLocationRule(),
+        new SavepointAllowNonRestoredStateRule(),
+        new SavepointRestoreModeRule()
     );
 
     private SavepointRestorePropertiesValidator() {
