@@ -136,3 +136,9 @@ All audit subagents (including `module-scanner` and `pr-reviewer`) must consult 
 - **Status**: **REJECTED**
 - **Rationale**: Flinkboot intentionally enforces explicit configuration rather than implicit guessing or partial cluster-config inheritance for `checkpointing`. Requiring `interval` whenever `checkpointing` is configured is an intentional validation invariant.
 
+## 27. `RowTypeInfo` Field Name Formatting in `CompositeTypeHandler`
+- **Pattern**: Special-casing `RowTypeInfo` in `CompositeTypeHandler` to format child validation paths using `getFieldNames()` (e.g. `task.path() + "." + fieldNames[i]`) instead of `[i]`.
+- **Status**: **REJECTED**
+- **Rationale**: `ClassAssert` uses `TypeExtractor.createTypeInfo`, which never produces `RowTypeInfo` (a `Row` field becomes `GenericTypeInfo<Row>`), so this only affects explicit `TypeInformationAssert` calls with named `RowTypeInfo`. Unnamed `RowTypeInfo` falls back to generic `f0`, `f1` names, and adding `instanceof RowTypeInfo` couples a generic `CompositeType<?>` handler to a concrete subclass for a purely cosmetic path change.
+
+
