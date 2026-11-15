@@ -107,6 +107,16 @@ All audit subagents (including `module-scanner` and `pr-reviewer`) must consult 
 - **Status**: **REJECTED**
 - **Rationale**: The formatted string is a human-readable startup error message, not a structured contract meant to be parsed or asserted on by exact ordering.
 
+### 36. Double Backslash Escaping Before Placeholders in `PlaceholderResolver` (`\\${VAR}`)
+- **Pattern**: Treating `\\${VAR}` as an escaped backslash followed by a resolved placeholder in `PlaceholderResolver`.
+- **Status**: **REJECTED**
+- **Rationale**: `PlaceholderResolver` intentionally supports only single-backslash escaping of placeholder syntax (`\${literal}` -> `${literal}`) and does not implement general `\\` backslash escaping elsewhere in strings. Treating `\\` as an escaped backslash only before `${...}` would be inconsistent with the rest of string resolution.
+
+### 37. Resolving `${...}` Placeholders in YAML Map / Object Keys
+- **Pattern**: Resolving `${ENV_VAR}` placeholders in YAML object/map keys inside `PlaceholderResolver.resolveObjectNode`.
+- **Status**: **REJECTED**
+- **Rationale**: YAML keys represent configuration schema paths or driver property names that should remain static, explicit, and readable. Only scalar values and array elements are subject to environment variable interpolation.
+
 ---
 
 ## flinkboot-test
