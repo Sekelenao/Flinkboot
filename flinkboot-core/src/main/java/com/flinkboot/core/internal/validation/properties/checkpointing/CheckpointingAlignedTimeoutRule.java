@@ -8,21 +8,21 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Validates that {@code aligned-checkpoint-timeout} is not configured when
- * {@code unaligned-checkpoints} is explicitly disabled.
+ * Validates that {@code unaligned-checkpoints} is explicitly {@code true}
+ * whenever {@code aligned-checkpoint-timeout} is configured.
  */
 public final class CheckpointingAlignedTimeoutRule implements ValidationRule<CheckpointingProperties> {
 
     @Override
     public Optional<PropertyViolation> check(CheckpointingProperties properties) {
         Objects.requireNonNull(properties, "properties must not be null");
-        boolean unalignedDisabled = properties.unalignedCheckpoints()
-            .filter(unaligned -> !unaligned)
+        boolean unalignedEnabled = properties.unalignedCheckpoints()
+            .filter(Boolean::booleanValue)
             .isPresent();
-        if (unalignedDisabled && properties.alignedCheckpointTimeout().isPresent()) {
+        if (properties.alignedCheckpointTimeout().isPresent() && !unalignedEnabled) {
             return Optional.of(new PropertyViolation(
                 "aligned-checkpoint-timeout",
-                "aligned-checkpoint-timeout cannot be set when unaligned-checkpoints is false"
+                "aligned-checkpoint-timeout requires unaligned-checkpoints to be true"
             ));
         }
         return Optional.empty();
