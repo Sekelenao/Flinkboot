@@ -19,9 +19,9 @@ public final class SavepointRestoreProperties implements Serializable, Validatab
 
     private static final long serialVersionUID = 1L;
 
-    @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
+    @Pattern(regexp = "\\s*\\S.*", flags = Pattern.Flag.DOTALL, message = "must not be blank")
     private final String savepointPath;
-    @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
+    @Pattern(regexp = "\\s*\\S.*", flags = Pattern.Flag.DOTALL, message = "must not be blank")
     private final String directory;
     private final Boolean allowNonRestoredState;
     private final RestoreMode restoreMode;

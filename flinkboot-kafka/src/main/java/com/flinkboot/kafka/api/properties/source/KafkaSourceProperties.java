@@ -33,15 +33,15 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
     @NotEmpty
     private final List<@NotBlank String> bootstrapServers;
 
-    @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
+    @Pattern(regexp = "\\s*\\S.*", flags = Pattern.Flag.DOTALL, message = "must not be blank")
     private final String groupId;
 
-    @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
+    @Pattern(regexp = "\\s*\\S.*", flags = Pattern.Flag.DOTALL, message = "must not be blank")
     private final String clientIdPrefix;
 
     private final List<@NotBlank String> topics;
 
-    @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
+    @Pattern(regexp = "\\s*\\S.*", flags = Pattern.Flag.DOTALL, message = "must not be blank")
     private final String topicPattern;
 
     private final List<@NotNull @Valid TopicPartitionProperties> partitions;

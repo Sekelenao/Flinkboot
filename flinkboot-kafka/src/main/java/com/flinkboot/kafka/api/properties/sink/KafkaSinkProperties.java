@@ -37,7 +37,7 @@ public final class KafkaSinkProperties implements Serializable, ValidatablePrope
     @NotNull
     private final KafkaDeliveryGuarantee deliveryGuarantee;
 
-    @Pattern(regexp = "\\s*\\S.*", message = "must not be blank")
+    @Pattern(regexp = "\\s*\\S.*", flags = Pattern.Flag.DOTALL, message = "must not be blank")
     private final String transactionalIdPrefix;
 
     private final Map<@NotNull String, @NotNull String> properties;

@@ -65,6 +65,7 @@ All notable user-facing changes to this project are documented in this file.
 ### 🔵 Fixes & Diagnostics
 
 #### flinkboot-core
+- **Enable `DOTALL` on Optional Non-Blank `@Pattern` Validations (#403)**: Enabled `Pattern.Flag.DOTALL` on optional non-blank string properties (`LocalWebUiProperties`, `SavepointRestoreProperties`, `CheckpointingProperties`, `StateBackendProperties`, `KafkaSourceProperties`, and `KafkaSinkProperties`) so valid non-blank values containing line terminators (`\n`, `\r`, such as YAML block scalars) are no longer rejected as blank.
 - **Merge All Documents in Multi-Document YAML Files (#401)**: Updated `YamlParser.parse(InputStream)` to parse and sequentially merge all YAML documents separated by `---` instead of silently ignoring documents after the first.
 - **Reject Incremental Checkpointing with `HASHMAP` State Backend (#400)**: Rejects `state-backend.incremental: true` during Bean Validation when `state-backend.type` is `HASHMAP`, preventing silent runtime ignores since `HashMapStateBackend` does not support incremental checkpoints.
 - **Reject Savepoint Restore Options Without `savepoint-path` (#388)**: Fails Bean Validation when `savepoint-restore.allow-non-restored-state` or `savepoint-restore.restore-mode` is configured without `savepoint-path`, preventing options configured alongside `directory` alone from being silently ignored.
