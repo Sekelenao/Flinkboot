@@ -13,7 +13,8 @@ import java.util.List;
 public final class StateBackendPropertiesValidator {
 
     private static final List<ValidationRule<StateBackendProperties>> RULES = List.of(
-        new StateBackendCustomClassRule()
+        new StateBackendCustomClassRule(),
+        new StateBackendIncrementalRule()
     );
 
     private StateBackendPropertiesValidator() {
