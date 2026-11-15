@@ -146,5 +146,26 @@ class StateBackendPropertiesValidatorTest {
                 "custom-class can only be specified when state backend type is CUSTOM"
             )).addPropertyNode("custom-class");
         }
+
+        @Test
+        @DisplayName("Should fail when state backend is HASHMAP and incremental is true")
+        void shouldFailWhenHashMapAndIncrementalTrue() {
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
+            var props = new StateBackendProperties(StateBackendType.HASHMAP, true, null, null, null);
+
+            assertFalse(StateBackendPropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "incremental cannot be true when state backend type is HASHMAP"
+            )).addPropertyNode("incremental");
+        }
+
+        @Test
+        @DisplayName("Should pass when state backend is ROCKSDB and incremental is true")
+        void shouldPassWhenRocksDbAndIncrementalTrue() {
+            var context = mock(ConstraintValidatorContext.class);
+            var props = new StateBackendProperties(StateBackendType.ROCKSDB, true, null, null, null);
+
+            assertTrue(StateBackendPropertiesValidator.validate(props, context));
+        }
     }
 }

@@ -252,6 +252,21 @@ class StateBackendPropertiesTest {
                     && v.getMessage().equals("custom-class can only be specified when state backend type is CUSTOM")
             ));
         }
+
+        @Test
+        @DisplayName("Should fail validation when incremental is true for HASHMAP state backend")
+        void shouldFailValidationWhenIncrementalTrueForHashMap() {
+            var config = new StateBackendProperties(StateBackendType.HASHMAP, true, null, null, null);
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("incremental")
+                        && v.getMessage().equals("incremental cannot be true when state backend type is HASHMAP")
+                ))
+            );
+        }
     }
 
     @Nested
