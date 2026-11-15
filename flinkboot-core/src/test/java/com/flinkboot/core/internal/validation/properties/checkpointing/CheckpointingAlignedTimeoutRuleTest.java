@@ -27,27 +27,29 @@ class CheckpointingAlignedTimeoutRuleTest {
         assertEquals("properties must not be null", exception.getMessage());
     }
 
-    @Test
-    @DisplayName("Should fail when unaligned-checkpoints is false and aligned-checkpoint-timeout is set")
-    void shouldFailWhenUnalignedDisabledAndAlignedTimeoutSet() {
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(booleans = {false})
+    @DisplayName("Should fail when unaligned-checkpoints is false or null and aligned-checkpoint-timeout is set")
+    void shouldFailWhenUnalignedNotEnabledAndAlignedTimeoutSet(Boolean unalignedCheckpoints) {
         var props = new CheckpointingProperties(
-            true, Duration.ofSeconds(10), null, null, null, null, null, false, Duration.ofSeconds(5), null, null, null
+            true, Duration.ofSeconds(10), null, null, null, null, null, unalignedCheckpoints, Duration.ofSeconds(5), null, null, null
         );
 
         assertEquals(
             Optional.of(new PropertyViolation(
                 "aligned-checkpoint-timeout",
-                "aligned-checkpoint-timeout cannot be set when unaligned-checkpoints is false"
+                "aligned-checkpoint-timeout requires unaligned-checkpoints to be true"
             )),
             rule.check(props)
         );
     }
 
     @Test
-    @DisplayName("Should pass when unaligned-checkpoints is false and aligned-checkpoint-timeout is null")
-    void shouldPassWhenUnalignedDisabledAndAlignedTimeoutNull() {
+    @DisplayName("Should pass when unaligned-checkpoints is true and aligned-checkpoint-timeout is set")
+    void shouldPassWhenUnalignedEnabledAndAlignedTimeoutSet() {
         var props = new CheckpointingProperties(
-            true, Duration.ofSeconds(10), null, null, null, null, null, false, null, null, null, null
+            true, Duration.ofSeconds(10), null, null, null, null, null, true, Duration.ofSeconds(5), null, null, null
         );
 
         assertTrue(rule.check(props).isEmpty());
@@ -55,21 +57,11 @@ class CheckpointingAlignedTimeoutRuleTest {
 
     @ParameterizedTest
     @NullSource
-    @ValueSource(booleans = {true})
-    @DisplayName("Should pass when unaligned-checkpoints is true or null and aligned-checkpoint-timeout is set")
-    void shouldPassWhenUnalignedEnabledOrNullAndAlignedTimeoutSet(Boolean unalignedCheckpoints) {
+    @ValueSource(booleans = {false, true})
+    @DisplayName("Should pass when aligned-checkpoint-timeout is null regardless of unaligned-checkpoints")
+    void shouldPassWhenAlignedTimeoutIsNull(Boolean unalignedCheckpoints) {
         var props = new CheckpointingProperties(
-            true, Duration.ofSeconds(10), null, null, null, null, null, unalignedCheckpoints, Duration.ofSeconds(5), null, null, null
-        );
-
-        assertTrue(rule.check(props).isEmpty());
-    }
-
-    @Test
-    @DisplayName("Should pass when both unaligned-checkpoints and aligned-checkpoint-timeout are null")
-    void shouldPassWhenBothAreNull() {
-        var props = new CheckpointingProperties(
-            true, Duration.ofSeconds(10), null, null, null, null, null, null, null, null, null, null
+            true, Duration.ofSeconds(10), null, null, null, null, null, unalignedCheckpoints, null, null, null, null
         );
 
         assertTrue(rule.check(props).isEmpty());

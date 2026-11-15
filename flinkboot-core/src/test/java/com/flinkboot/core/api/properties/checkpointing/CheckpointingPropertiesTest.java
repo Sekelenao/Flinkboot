@@ -347,12 +347,14 @@ class CheckpointingPropertiesTest {
             assertTrue(violations.isEmpty());
         }
 
-        @Test
-        @DisplayName("Should fail validation when unalignedCheckpoints is false and alignedCheckpointTimeout is set")
-        void shouldFailWhenUnalignedCheckpointsIsFalseAndAlignedTimeoutIsSet() {
+        @ParameterizedTest
+        @NullSource
+        @ValueSource(booleans = {false})
+        @DisplayName("Should fail validation when unalignedCheckpoints is false or null and alignedCheckpointTimeout is set")
+        void shouldFailWhenUnalignedCheckpointsIsNotTrueAndAlignedTimeoutIsSet(Boolean unalignedCheckpoints) {
             var config = new CheckpointingProperties(
                 true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                null, false, Duration.ofSeconds(2), null, null, null
+                null, unalignedCheckpoints, Duration.ofSeconds(2), null, null, null
             );
             var violations = validator.validate(config);
 
@@ -361,9 +363,29 @@ class CheckpointingPropertiesTest {
                 () -> assertTrue(violations.stream().anyMatch(v ->
                     v.getPropertyPath().toString().equals("aligned-checkpoint-timeout")
                         && v.getMessageTemplate().equals(
-                            "aligned-checkpoint-timeout cannot be set when unaligned-checkpoints is false"
+                            "aligned-checkpoint-timeout requires unaligned-checkpoints to be true"
                         )
                 ), "Expected violation on property 'aligned-checkpoint-timeout'")
+            );
+        }
+
+        @Test
+        @DisplayName("Should fail validation when mode is AT_LEAST_ONCE and unalignedCheckpoints is true")
+        void shouldFailWhenModeIsAtLeastOnceAndUnalignedCheckpointsIsTrue() {
+            var config = new CheckpointingProperties(
+                true, Duration.ofSeconds(1), CheckpointingMode.AT_LEAST_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, true, null, null, null, null
+            );
+            var violations = validator.validate(config);
+
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("unaligned-checkpoints")
+                        && v.getMessageTemplate().equals(
+                            "unaligned-checkpoints cannot be true when mode is AT_LEAST_ONCE"
+                        )
+                ), "Expected violation on property 'unaligned-checkpoints'")
             );
         }
     }
