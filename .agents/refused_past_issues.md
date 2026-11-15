@@ -77,7 +77,7 @@ All audit subagents (including `module-scanner` and `pr-reviewer`) must consult 
 - **Rationale**: `PlaceholderResolver` intentionally restricts placeholders to strict `${VARIABLE_NAME}` lookups against environment variables. Introducing fallback syntax adds parsing complexity, ambiguity around colons in values (such as Kafka endpoints or URLs `host:9092`), and risks masking missing configuration in production. Missing placeholders must fail fast.
 
 ## 15. Ordering & Redundant Assertions in `CollectingSinkAssert`
-- **Pattern**: Requesting `containsExactly(...)`, `doesNotContain(...)`, or `satisfies(Consumer<List<T>>)` on `CollectingSinkAssert` (or flagging `contains(T...)` for using a `HashSet` and ignoring order/duplicates).
+- **Pattern**: Requesting `containsExactly(...)`, `containsExactlyInAnyOrder(...)`, `doesNotContain(...)`, or `satisfies(Consumer<List<T>>)` on `CollectingSinkAssert` (or flagging `contains(T...)` for using a `HashSet` and ignoring order/duplicates).
 - **Status**: **REJECTED**
 - **Rationale**: In Apache Flink pipelines with `parallelism > 1`, records are emitted across parallel subtasks in non-deterministic order; encouraging strict order assertions like `containsExactly(...)` promotes flaky tests. `contains(T...)` intentionally checks set membership (`equals`). Negative and custom assertions are already covered by `noneMatch(...)` and direct access via `sink.elements()`.
 
@@ -145,6 +145,37 @@ All audit subagents (including `module-scanner` and `pr-reviewer`) must consult 
 - **Pattern**: Throwing an exception in `StartupEnvironment.configurationResourceLocations()` when `flinkboot-configurations` is explicitly provided as blank or comma-only and resolves to an empty list.
 - **Status**: **REJECTED**
 - **Rationale**: When a configuration DTO has required fields, Jakarta Bean Validation already fails fast with `ConfigurationValidationException`. When all fields are optional, passing an empty `flinkboot-configurations` intentionally allows loading zero YAML files and relying on defaults without forcing users to create a dummy empty YAML file.
+
+## 29. Throwaway `StreamExecutionEnvironment` Check in `ExecutionEnvironmentProvider.get(boolean)`
+- **Pattern**: Flagging `ExecutionEnvironmentProvider.get(true)` for calling `StreamExecutionEnvironment.getExecutionEnvironment()` solely to verify `!(defaultEnv instanceof LocalStreamEnvironment)`.
+- **Status**: **REJECTED**
+- **Rationale**: Flink's `contextEnvironmentFactory` is `private static`, so calling `StreamExecutionEnvironment.getExecutionEnvironment()` is the only public Flink API way to detect whether the job is running in a cluster submission context vs. a local environment. This check runs once at startup.
+
+## 30. Tie-Breaking Order in `JakartaConfigurationValidator` Violation Messages
+- **Pattern**: Adding secondary sorting (e.g. `.thenComparing(ConstraintViolation::getMessage)`) in `JakartaConfigurationValidator` to make multi-violation order on the same property path deterministic.
+- **Status**: **REJECTED**
+- **Rationale**: The formatted string is a human-readable startup error message, not a structured contract meant to be parsed or asserted on by exact ordering.
+
+## 31. Rejecting `KafkaOffsetInitializer.EARLIEST` in `stopping-offsets`
+- **Pattern**: Adding a cross-field validation rule to reject `stopping-offsets.strategy: EARLIEST` in `KafkaSourcePropertiesValidator` / `KafkaBoundednessRule`.
+- **Status**: **REJECTED**
+- **Rationale**: Flink's `KafkaSourceBuilder.setBounded(OffsetsInitializer)` natively permits `OffsetsInitializer.earliest()`. Avoiding unnecessary cross-field over-validation keeps Flinkboot aligned with Flink's own API contract.
+
+## 32. Duplicate `Objects.requireNonNull` Preconditions in `FlussSourceFactory` / `FlussSinkFactory`
+- **Pattern**: Flagging `Objects.requireNonNull(...)` in `supplyFor(...)` as redundant because `supplyBuilderFor(...)` repeats the same null checks.
+- **Status**: **REJECTED**
+- **Rationale**: Public API entry points intentionally enforce fail-early `Objects.requireNonNull` preconditions at their boundary.
+
+## 33. Declarative Bounded / Stopping Offsets Support in `FlussSourceProperties`
+- **Pattern**: Requesting `bounded` / `stopping-offsets` YAML properties in `FlussSourceProperties` to mirror `FlussSourceBuilder#setBounded` / `setStoppingOffsets`.
+- **Status**: **REJECTED (Defer Until Needed)**
+- **Rationale**: Not needed at this time; users who require bounded Fluss sources can already configure the builder returned by `FlussSourceFactory.supplyBuilderFor(...)`.
+
+## 34. `Consumer<Builder>` Overloads on `FlussSourceFactory` / `FlussSinkFactory`
+- **Pattern**: Adding `supplyFor(..., Consumer<Builder>)` overloads on `FlussSourceFactory` or `FlussSinkFactory`.
+- **Status**: **REJECTED**
+- **Rationale**: `supplyBuilderFor(...)` is already exposed for custom builder configuration before calling `.build()`. Adding `Consumer<Builder>` overloads expands the public API surface unnecessarily.
+
 
 
 
