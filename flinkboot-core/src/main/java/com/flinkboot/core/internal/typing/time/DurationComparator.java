@@ -7,6 +7,7 @@ import org.apache.flink.core.memory.MemorySegment;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Objects;
 
 /**
  * Internal Flink {@link TypeComparator} for {@link Duration}, aligned with
@@ -32,7 +33,7 @@ public final class DurationComparator extends TypeComparator<Duration> {
 
     @Override
     public int hash(Duration record) {
-        return record.hashCode();
+        return Objects.hashCode(record);
     }
 
     @Override
@@ -42,19 +43,28 @@ public final class DurationComparator extends TypeComparator<Duration> {
 
     @Override
     public boolean equalToReference(Duration candidate) {
-        return candidate.equals(this.reference);
+        return Objects.equals(candidate, this.reference);
     }
 
     @Override
     public int compareToReference(TypeComparator<Duration> referencedComparator) {
         var otherRef = ((DurationComparator) referencedComparator).reference;
-        int cmp = otherRef.compareTo(this.reference);
-        return ascendingComparison ? cmp : -cmp;
+        return compare(otherRef, this.reference);
     }
 
     @Override
     public int compare(Duration first, Duration second) {
-        int cmp = first.compareTo(second);
+        if (first == null && second == null) {
+            return 0;
+        }
+        int cmp;
+        if (first == null) {
+            cmp = -1;
+        } else if (second == null) {
+            cmp = 1;
+        } else {
+            cmp = first.compareTo(second);
+        }
         return ascendingComparison ? cmp : -cmp;
     }
 
