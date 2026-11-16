@@ -106,7 +106,7 @@ jobs:
               mvn -B verify -T 1C --file pom.xml
             else
               echo "Running targeted verification for: $MODULES"
-              mvn -B install -pl flinkboot-core -Dmaven.test.skip=true -Djacoco.skip=true --file pom.xml
+              mvn -B install -pl .,flinkboot-core -Dmaven.test.skip=true -Djacoco.skip=true --file pom.xml
               mvn -B verify -pl "$MODULES" -T 1C --file pom.xml
             fi
           fi
