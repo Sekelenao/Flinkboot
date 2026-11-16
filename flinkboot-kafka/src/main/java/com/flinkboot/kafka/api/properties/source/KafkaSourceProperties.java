@@ -55,7 +55,7 @@ public final class KafkaSourceProperties implements Serializable, ValidatablePro
     @Valid
     private final KafkaOffsetProperties stoppingOffsets;
 
-    private final Map<@NotNull String, @NotNull String> properties;
+    private final Map<@NotBlank String, @NotNull String> properties;
 
     /**
      * Creates a new {@code KafkaSourceProperties} instance.

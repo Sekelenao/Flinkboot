@@ -7,6 +7,8 @@ import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -284,6 +286,43 @@ class FlussSourcePropertiesTest {
                         .anyMatch(v -> v.getPropertyPath().toString().startsWith("bootstrap-servers"))
                 )
             );
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "   ", "\t\n"})
+        @DisplayName("Should fail validation when properties contains a blank key")
+        void shouldFailWhenPropertiesContainsBlankKey(String blankKey) {
+            var props = new FlussSourceProperties(
+                "my-source",
+                List.of("localhost:9123"),
+                "my_db",
+                "my_table",
+                FlussStartupMode.EARLIEST,
+                null,
+                Map.of(blankKey, "value")
+            );
+
+            var violations = validator.validate(props);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().startsWith("properties")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should allow empty string value in properties when key is valid")
+        void shouldAllowEmptyValueInProperties() {
+            var props = new FlussSourceProperties(
+                "my-source",
+                List.of("localhost:9123"),
+                "my_db",
+                "my_table",
+                FlussStartupMode.EARLIEST,
+                null,
+                Map.of("key", "")
+            );
+
+            assertTrue(validator.validate(props).isEmpty());
         }
     }
 

@@ -292,6 +292,39 @@ class FlussSinkPropertiesTest {
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().startsWith("properties")))
             );
         }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "   ", "\t\n"})
+        @DisplayName("Should fail validation when properties contains a blank key")
+        void shouldFailWhenPropertiesContainsBlankKey(String blankKey) {
+            var props = new FlussSinkProperties(
+                "my-sink",
+                List.of("localhost:9123"),
+                "my_db",
+                "my_table",
+                Map.of(blankKey, "value")
+            );
+
+            var violations = validator.validate(props);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().startsWith("properties")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should allow empty string value in properties when key is valid")
+        void shouldAllowEmptyValueInProperties() {
+            var props = new FlussSinkProperties(
+                "my-sink",
+                List.of("localhost:9123"),
+                "my_db",
+                "my_table",
+                Map.of("key", "")
+            );
+
+            assertTrue(validator.validate(props).isEmpty());
+        }
     }
 
     @Nested

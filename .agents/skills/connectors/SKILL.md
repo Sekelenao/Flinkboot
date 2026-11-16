@@ -54,7 +54,7 @@ NEVER promote client tuning knobs or vendor-specific options to first-class fiel
 Every connector DTO must provide an unmodifiable properties map:
 
 ```java
-private final Map<@NotNull String, @NotNull String> properties;
+private final Map<@NotBlank String, @NotNull String> properties;
 ```
 
 - Users configure all vendor-specific tuning directly under properties in their YAML:
