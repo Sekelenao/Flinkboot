@@ -26,6 +26,11 @@ jobs:
       pull-requests: read
     outputs:
       code: ${{ steps.filter.outputs.code }}
+      core: ${{ steps.filter.outputs.core }}
+      test: ${{ steps.filter.outputs.test }}
+      kafka: ${{ steps.filter.outputs.kafka }}
+      fluss: ${{ steps.filter.outputs.fluss }}
+      root: ${{ steps.filter.outputs.root }}
     steps:
       - uses: dorny/paths-filter@v4
         id: filter
@@ -34,6 +39,21 @@ jobs:
             code:
               - '**/src/**'
               - '**/pom.xml'
+              - '.github/workflows/**'
+            core:
+              - 'flinkboot-core/src/**'
+              - 'flinkboot-core/pom.xml'
+            test:
+              - 'flinkboot-test/src/**'
+              - 'flinkboot-test/pom.xml'
+            kafka:
+              - 'flinkboot-kafka/src/**'
+              - 'flinkboot-kafka/pom.xml'
+            fluss:
+              - 'flinkboot-fluss/src/**'
+              - 'flinkboot-fluss/pom.xml'
+            root:
+              - 'pom.xml'
               - '.github/workflows/**'
 
   test:
@@ -58,7 +78,38 @@ jobs:
         run: mvn -B spotless:check
 
       - name: Build with Maven
-        run: mvn -B verify -T 1C --file pom.xml
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          CORE_CHANGED: ${{ needs.changes.outputs.core }}
+          ROOT_CHANGED: ${{ needs.changes.outputs.root }}
+          TEST_CHANGED: ${{ needs.changes.outputs.test }}
+          KAFKA_CHANGED: ${{ needs.changes.outputs.kafka }}
+          FLUSS_CHANGED: ${{ needs.changes.outputs.fluss }}
+        run: |
+          if [ "$EVENT_NAME" = "push" ] || [ "$CORE_CHANGED" = "true" ] || [ "$ROOT_CHANGED" = "true" ]; then
+            echo "Running full repository verification"
+            mvn -B verify -T 1C --file pom.xml
+          else
+            MODULES=""
+            if [ "$TEST_CHANGED" = "true" ]; then
+              MODULES="${MODULES:+$MODULES,}flinkboot-test"
+            fi
+            if [ "$KAFKA_CHANGED" = "true" ]; then
+              MODULES="${MODULES:+$MODULES,}flinkboot-kafka"
+            fi
+            if [ "$FLUSS_CHANGED" = "true" ]; then
+              MODULES="${MODULES:+$MODULES,}flinkboot-fluss"
+            fi
+
+            if [ -z "$MODULES" ]; then
+              echo "No specific leaf module matched; running full repository verification"
+              mvn -B verify -T 1C --file pom.xml
+            else
+              echo "Running targeted verification for: $MODULES"
+              mvn -B install -pl flinkboot-core -Dmaven.test.skip=true -Djacoco.skip=true --file pom.xml
+              mvn -B verify -pl "$MODULES" -T 1C --file pom.xml
+            fi
+          fi
 
       - name: Upload Surefire Reports on Failure
         if: failure()
