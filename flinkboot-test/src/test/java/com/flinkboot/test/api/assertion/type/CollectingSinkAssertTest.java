@@ -218,7 +218,8 @@ class CollectingSinkAssertTest {
                     () -> assertTrue(exception.getMessage().contains("Expected sink to contain [present-1, missing-1, missing-2]")),
                     () -> assertTrue(exception.getMessage().contains("missing: ")),
                     () -> assertTrue(exception.getMessage().contains("missing-1")),
-                    () -> assertTrue(exception.getMessage().contains("missing-2"))
+                    () -> assertTrue(exception.getMessage().contains("missing-2")),
+                    () -> assertTrue(exception.getMessage().contains("actual: [present-1]"))
                 );
             }
         }
@@ -252,7 +253,8 @@ class CollectingSinkAssertTest {
 
                 assertAll(
                     () -> assertTrue(exception.getMessage().contains("Expected sink to contain [expected-record]")),
-                    () -> assertTrue(exception.getMessage().contains("missing: [expected-record]"))
+                    () -> assertTrue(exception.getMessage().contains("missing: [expected-record]")),
+                    () -> assertTrue(exception.getMessage().contains("actual: []"))
                 );
             }
         }
@@ -291,7 +293,10 @@ class CollectingSinkAssertTest {
                     () -> sinkAssert.anyMatch(item -> item.startsWith("gamma"))
                 );
 
-                assertEquals("Expected at least one element to match predicate, but none did", exception.getMessage());
+                assertEquals(
+                    "Expected at least one element to match predicate, but none did (actual: [alpha-1, beta-2])",
+                    exception.getMessage()
+                );
             }
         }
 
@@ -305,7 +310,10 @@ class CollectingSinkAssertTest {
                     () -> sinkAssert.anyMatch(item -> true)
                 );
 
-                assertEquals("Expected at least one element to match predicate, but none did", exception.getMessage());
+                assertEquals(
+                    "Expected at least one element to match predicate, but none did (actual: [])",
+                    exception.getMessage()
+                );
             }
         }
 

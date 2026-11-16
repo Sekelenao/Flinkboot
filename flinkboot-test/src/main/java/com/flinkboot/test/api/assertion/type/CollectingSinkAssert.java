@@ -107,13 +107,16 @@ public final class CollectingSinkAssert<T> {
         if (expected.length == 0) {
             return this;
         }
-        var actualSet = new HashSet<>(sink.elements());
+        var elements = sink.elements();
+        var actualSet = new HashSet<>(elements);
         var missing = Arrays.stream(expected)
             .filter(item -> item == null || !actualSet.contains(item))
             .collect(Collectors.toSet());
         if (!missing.isEmpty()) {
             Assertions.fail(
-                "Expected sink to contain " + Arrays.toString(expected) + ", but missing: " + missing
+                "Expected sink to contain " + Arrays.toString(expected)
+                    + ", but missing: " + missing
+                    + " (actual: " + elements + ")"
             );
         }
         return this;
@@ -131,7 +134,9 @@ public final class CollectingSinkAssert<T> {
         Objects.requireNonNull(predicate, "predicate must not be null");
         var elements = sink.elements();
         if (elements.stream().noneMatch(predicate)) {
-            Assertions.fail("Expected at least one element to match predicate, but none did");
+            Assertions.fail(
+                "Expected at least one element to match predicate, but none did (actual: " + elements + ")"
+            );
         }
         return this;
     }
