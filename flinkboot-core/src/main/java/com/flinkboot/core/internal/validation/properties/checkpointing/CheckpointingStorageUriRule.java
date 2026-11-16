@@ -20,14 +20,11 @@ public final class CheckpointingStorageUriRule implements ValidationRule<Checkpo
         if (storage.isEmpty()) {
             return Optional.empty();
         }
-        if (storage.get() == CheckpointStorageType.FILESYSTEM) {
-            var storageUri = properties.storageUri();
-            if (storageUri.isEmpty() || storageUri.get().isBlank()) {
-                return Optional.of(new PropertyViolation(
-                    "storage-uri",
-                    "storage-uri must be specified when checkpoint storage is FILESYSTEM"
-                ));
-            }
+        if (storage.get() == CheckpointStorageType.FILESYSTEM && properties.storageUri().isEmpty()) {
+            return Optional.of(new PropertyViolation(
+                "storage-uri",
+                "storage-uri must be specified when checkpoint storage is FILESYSTEM"
+            ));
         }
         if (storage.get() == CheckpointStorageType.JOBMANAGER && properties.storageUri().isPresent()) {
             return Optional.of(new PropertyViolation(
