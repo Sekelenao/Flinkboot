@@ -43,7 +43,7 @@ public final class FlussSourceProperties implements Serializable, ValidatablePro
     @PositiveOrZero
     private final Long startupTimestamp;
 
-    private final Map<@NotNull String, @NotNull String> properties;
+    private final Map<@NotBlank String, @NotNull String> properties;
 
     /**
      * Creates a new {@code FlussSourceProperties} instance.

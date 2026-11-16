@@ -32,7 +32,7 @@ public final class FlussSinkProperties implements Serializable {
     @NotBlank
     private final String table;
 
-    private final Map<@NotNull String, @NotNull String> properties;
+    private final Map<@NotBlank String, @NotNull String> properties;
 
     /**
      * Creates a new {@code FlussSinkProperties} instance.

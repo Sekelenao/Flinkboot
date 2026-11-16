@@ -859,6 +859,51 @@ class KafkaSourcePropertiesTest {
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().startsWith("stopping-offsets")))
             );
         }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "   ", "\t\n"})
+        @DisplayName("Should fail validation when properties contains a blank key")
+        void shouldFailWhenPropertiesContainsBlankKey(String blankKey) {
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                null,
+                List.of("topic-a"),
+                null,
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                Map.of(blankKey, "value")
+            );
+
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().startsWith("properties")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should allow empty string value in properties when key is valid")
+        void shouldAllowEmptyValueInProperties() {
+            var config = new KafkaSourceProperties(
+                "my-source",
+                List.of("localhost:9092"),
+                "my-group",
+                null,
+                List.of("topic-a"),
+                null,
+                null,
+                DEFAULT_STARTING_OFFSETS,
+                null,
+                null,
+                Map.of("key", "")
+            );
+
+            assertTrue(validator.validate(config).isEmpty());
+        }
     }
 
     @Nested

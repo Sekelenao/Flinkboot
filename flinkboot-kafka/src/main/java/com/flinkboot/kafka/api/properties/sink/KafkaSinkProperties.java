@@ -40,7 +40,7 @@ public final class KafkaSinkProperties implements Serializable, ValidatablePrope
     @Pattern(regexp = "\\s*\\S.*", flags = Pattern.Flag.DOTALL, message = "must not be blank")
     private final String transactionalIdPrefix;
 
-    private final Map<@NotNull String, @NotNull String> properties;
+    private final Map<@NotBlank String, @NotNull String> properties;
 
     /**
      * Creates a new {@code KafkaSinkProperties} instance.

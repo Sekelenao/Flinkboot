@@ -83,6 +83,9 @@ All notable user-facing changes to this project are documented in this file.
 - **Fail Fast on Duplicate Topic-Partition Offsets (#361)**: Detects duplicate `(topic, partition)` entries in per-partition offset configurations and throws `ConfigurationValidationException` instead of silently overwriting earlier values.
 - **Properties Escape Hatch Application Order (#321)**: Applies client configuration from `properties` last in `KafkaSourceFactory` and `KafkaSinkFactory`, ensuring driver-level properties override typed defaults and options.
 
+#### Connectors & Cross-Cutting
+- **Reject Blank Keys in Connector `properties` Maps (#410)**: Enforced `@NotBlank` on map keys in `KafkaSourceProperties`, `KafkaSinkProperties`, `FlussSourceProperties`, and `FlussSinkProperties` (`Map<@NotBlank String, @NotNull String>`) so empty or whitespace-only keys fail Bean Validation with `ConfigurationValidationException`, while keeping empty string values (`""`) allowed.
+
 ---
 
 ## [0.5.0-1.20]
