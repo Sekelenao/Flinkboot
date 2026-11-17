@@ -20,6 +20,9 @@ public final class ClasspathResource implements Resource {
         while (cleanPath.startsWith("/")) {
             cleanPath = cleanPath.substring(1);
         }
+        if (cleanPath.isEmpty()) {
+            throw new ResourceNotFoundException(location);
+        }
         var classLoader = Thread.currentThread().getContextClassLoader();
         if (classLoader == null) {
             classLoader = ClasspathResource.class.getClassLoader();
