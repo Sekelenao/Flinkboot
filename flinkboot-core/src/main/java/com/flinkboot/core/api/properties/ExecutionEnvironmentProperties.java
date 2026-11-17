@@ -10,6 +10,7 @@ import com.flinkboot.core.api.properties.savepoint.SavepointRestoreProperties;
 import com.flinkboot.core.api.properties.state.StateBackendProperties;
 import com.flinkboot.core.internal.annotation.Generated;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
@@ -46,7 +47,7 @@ public final class ExecutionEnvironmentProperties implements Serializable {
     @Valid
     private final LocalWebUiProperties localWebUi;
 
-    private final Map<@NotNull String, @NotNull String> properties;
+    private final Map<@NotBlank String, @NotNull String> properties;
 
     /**
      * Creates a new {@code ExecutionEnvironmentProperties} instance.
