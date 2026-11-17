@@ -53,10 +53,12 @@ final class CommandLine {
     }
 
     public Optional<String> option(String option) {
+        Objects.requireNonNull(option, "option must not be null");
         return Optional.ofNullable(options.get(option.toLowerCase(Locale.ROOT)));
     }
 
     public boolean flag(String flag) {
+        Objects.requireNonNull(flag, "flag must not be null");
         return flags.contains(flag.toLowerCase(Locale.ROOT));
     }
 

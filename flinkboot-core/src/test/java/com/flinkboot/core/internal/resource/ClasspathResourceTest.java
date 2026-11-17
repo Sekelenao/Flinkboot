@@ -37,6 +37,14 @@ class ClasspathResourceTest {
         assertThrows(ResourceNotFoundException.class, resource::inputStream);
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"", "/", "///"})
+    @DisplayName("Should throw ResourceNotFoundException when path resolves to empty")
+    void shouldThrowExceptionWhenPathResolvesToEmpty(String path) {
+        var resource = new ClasspathResource(path);
+        assertThrows(ResourceNotFoundException.class, resource::inputStream);
+    }
+
     @Test
     @DisplayName("Should fallback to ClasspathResource classloader when context classloader is null")
     void shouldFallbackToClassClassLoaderWhenContextClassLoaderIsNull() throws IOException {
