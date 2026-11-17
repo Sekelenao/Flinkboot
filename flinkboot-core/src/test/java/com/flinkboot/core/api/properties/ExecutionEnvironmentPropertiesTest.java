@@ -20,7 +20,6 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -93,8 +92,11 @@ class ExecutionEnvironmentPropertiesTest {
             Set<ConstraintViolation<ExecutionEnvironmentProperties>> violations = validator.validate(withProperties(properties));
 
             assertAll(
-                () -> assertFalse(violations.isEmpty()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().contains("properties")))
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(
+                    violations.stream().anyMatch(v -> v.getPropertyPath().toString().contains("properties")),
+                    "Expected a ConstraintViolation on properties"
+                )
             );
         }
 
@@ -107,8 +109,11 @@ class ExecutionEnvironmentPropertiesTest {
             Set<ConstraintViolation<ExecutionEnvironmentProperties>> violations = validator.validate(withProperties(properties));
 
             assertAll(
-                () -> assertFalse(violations.isEmpty()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().contains("properties")))
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(
+                    violations.stream().anyMatch(v -> v.getPropertyPath().toString().contains("properties")),
+                    "Expected a ConstraintViolation on properties"
+                )
             );
         }
 
@@ -121,8 +126,11 @@ class ExecutionEnvironmentPropertiesTest {
             Set<ConstraintViolation<ExecutionEnvironmentProperties>> violations = validator.validate(withProperties(properties));
 
             assertAll(
-                () -> assertFalse(violations.isEmpty()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().contains("properties")))
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(
+                    violations.stream().anyMatch(v -> v.getPropertyPath().toString().contains("properties")),
+                    "Expected a ConstraintViolation on properties"
+                )
             );
         }
 
