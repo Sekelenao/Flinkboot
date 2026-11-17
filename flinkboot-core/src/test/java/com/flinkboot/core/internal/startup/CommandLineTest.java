@@ -150,4 +150,30 @@ class CommandLineTest {
             );
         }
     }
+
+    @Nested
+    @DisplayName("Option")
+    class Option {
+
+        @Test
+        @DisplayName("Should throw NullPointerException when option is null")
+        void shouldThrowExceptionWhenOptionIsNull() {
+            var cmd = CommandLine.parse(new String[0]);
+            var exception = assertThrows(NullPointerException.class, () -> cmd.option(null));
+            assertEquals("option must not be null", exception.getMessage());
+        }
+    }
+
+    @Nested
+    @DisplayName("Flag")
+    class Flag {
+
+        @Test
+        @DisplayName("Should throw NullPointerException when flag is null")
+        void shouldThrowExceptionWhenFlagIsNull() {
+            var cmd = CommandLine.parse(new String[0]);
+            var exception = assertThrows(NullPointerException.class, () -> cmd.flag(null));
+            assertEquals("flag must not be null", exception.getMessage());
+        }
+    }
 }
