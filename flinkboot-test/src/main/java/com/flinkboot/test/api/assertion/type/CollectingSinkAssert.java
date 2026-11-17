@@ -68,9 +68,6 @@ public final class CollectingSinkAssert<T> {
      * @throws AssertionError if the sink is not empty
      */
     public CollectingSinkAssert<T> isEmpty() {
-        if (sink.isEmpty()) {
-            return this;
-        }
         var actualSize = sink.size();
         Assertions.assertEquals(
             0,
