@@ -10,6 +10,8 @@ import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -108,6 +110,30 @@ class ExecutionEnvironmentPropertiesTest {
                 () -> assertFalse(violations.isEmpty()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().contains("properties")))
             );
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "   "})
+        @DisplayName("Should fail validation when properties map contains blank key")
+        void shouldFailValidationWhenPropertiesMapContainsBlankKey(String blankKey) {
+            var properties = Map.of(blankKey, "value");
+
+            Set<ConstraintViolation<ExecutionEnvironmentProperties>> violations = validator.validate(withProperties(properties));
+
+            assertAll(
+                () -> assertFalse(violations.isEmpty()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().contains("properties")))
+            );
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"", "   "})
+        @DisplayName("Should pass validation when properties map contains blank value")
+        void shouldPassValidationWhenPropertiesMapContainsBlankValue(String blankValue) {
+            var properties = Map.of("taskmanager.memory.process.size", blankValue);
+
+            Set<ConstraintViolation<ExecutionEnvironmentProperties>> violations = validator.validate(withProperties(properties));
+            assertTrue(violations.isEmpty());
         }
 
         @Test
