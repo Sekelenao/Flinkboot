@@ -62,6 +62,7 @@ Your objective is to conduct thorough, high-standard, and concise reviews of Pul
 
 6. **Changelog Verification (`CHANGELOG.md`)**:
    - If user-facing changes are present: verify that `CHANGELOG.md` is updated under the unreleased version section.
+   - **No Entries for Unreleased Regressions**: If the PR fixes or refines a feature or behavior that was introduced **after the latest release tag** (i.e. did not exist in the previous released version), verify that `CHANGELOG.md` does **NOT** add a standalone fix entry for it (any needed detail belongs in the unreleased feature's existing entry, or no entry at all).
    - If the PR is strictly internal (refactoring, tests, CI): verify that `CHANGELOG.md` is **NOT** modified.
 
 ---

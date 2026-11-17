@@ -117,6 +117,16 @@ All audit subagents (including `module-scanner` and `pr-reviewer`) must consult 
 - **Status**: **REJECTED**
 - **Rationale**: YAML keys represent configuration schema paths or driver property names that should remain static, explicit, and readable. Only scalar values and array elements are subject to environment variable interpolation.
 
+### 38. Rejecting Unclosed `${...` Placeholders in `PlaceholderResolver`
+- **Pattern**: Throwing `UnresolvedPropertyPlaceholderException` when a YAML string value contains an unclosed `${` without a matching `}`.
+- **Status**: **REJECTED**
+- **Rationale**: `PlaceholderResolver` intentionally treats unclosed `${...` sequences as non-placeholder literal text (explicitly covered in `PlaceholderResolverTest.shouldLeaveNonPlaceholderSyntaxUntouched`). Keeping unclosed sequences untouched avoids breaking literal strings that happen to contain `${`.
+
+### 39. Adding `InstantTypeInfoFactory` for `java.time.Instant`
+- **Pattern**: Adding `InstantTypeInfoFactory` returning `Types.INSTANT` under `api.typing.time`.
+- **Status**: **REJECTED**
+- **Rationale**: Apache Flink's `BasicTypeInfo` already registers `java.time.Instant` natively (`BasicTypeInfo.INSTANT_TYPE_INFO` with `InstantSerializer` and `InstantComparator`). Unlike `LocalDate`, `LocalTime`, `LocalDateTime`, or `Duration`, `Instant` fields in Flink POJOs do not fall back to Kryo and do not require `@TypeInfo`.
+
 ---
 
 ## flinkboot-test
