@@ -12,6 +12,18 @@ All notable user-facing changes to this project are documented in this file.
 
 ---
 
+## [0.6.0-2.3]
+
+> [!NOTE]
+> Includes all features, fixes, and breaking changes from `[0.6.0-1.20]` below, adapted for Apache Flink `2.3.0`.
+
+### 🔴 Flink 2.3 Specific Breaking Changes
+- **Apache Flink 2.3.0 & Java 17+ Baseline**: Targets Flink `2.3.0` (`flink-connector-kafka` `5.0.0-2.2`, `fluss-flink-2.3` `1.0.0`) and requires Java `17` or later.
+- **Removal of `com.flinkboot.core.api.typing.collection`**: Removed `ListTypeInfoFactory` and `MapTypeInfoFactory`, as Flink `2.3` natively extracts `List` and `Map` types without requiring `@TypeInfo` annotations.
+- **Removal of Flink 1.x Legacy Overloads**: Removed `DurationTypeInfo#createSerializer(ExecutionConfig)` and `CollectingSink#createWriter(InitContext)`, which were removed in Flink `2.x`.
+
+---
+
 ## [0.6.0-1.20]
 
 ### 🔴 Breaking Changes
