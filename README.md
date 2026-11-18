@@ -12,8 +12,8 @@
   <strong>The Bootstrapping & Reliability Framework for Apache Flink.</strong>
 </p>
 
-[![Java](https://img.shields.io/badge/Java_11%2B-%23ED8B00.svg?logo=openjdk&logoColor=white)](https://docs.oracle.com/en/java/javase/11/docs/api/index.html)
-[![Flink](https://img.shields.io/badge/Flink_1.20-%236f42c1.svg?logo=apacheflink&logoColor=white)](https://flink.apache.org/)
+[![Java](https://img.shields.io/badge/Java_17%2B-%23ED8B00.svg?logo=openjdk&logoColor=white)](https://docs.oracle.com/en/java/javase/17/docs/api/index.html)
+[![Flink](https://img.shields.io/badge/Flink_2.3-%236f42c1.svg?logo=apacheflink&logoColor=white)](https://flink.apache.org/)
 [![Maven Central](https://img.shields.io/maven-central/v/com.flinkboot/flinkboot-core?label=Maven%20central&logo=apachemaven&logoColor=white&color=007ec6&labelColor=007ec6)](https://central.sonatype.com/artifact/com.flinkboot/flinkboot-core)
 ![Tests](https://raw.githubusercontent.com/Sekelenao/Flinkboot/badges/Tests.svg)
 ![Coverage](https://raw.githubusercontent.com/Sekelenao/Flinkboot/badges/Coverage.svg)
