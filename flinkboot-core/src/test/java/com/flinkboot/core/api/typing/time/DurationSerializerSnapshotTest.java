@@ -26,7 +26,7 @@ class DurationSerializerSnapshotTest {
         @DisplayName("Should resolve schema compatibility as compatible as-is")
         void shouldResolveSchemaCompatibility() {
             var snapshot = new DurationSerializerSnapshot();
-            var compatibility = snapshot.resolveSchemaCompatibility(DurationSerializer.INSTANCE);
+            var compatibility = snapshot.resolveSchemaCompatibility(new DurationSerializerSnapshot());
 
             assertAll(
                 () -> assertTrue(compatibility.isCompatibleAsIs())

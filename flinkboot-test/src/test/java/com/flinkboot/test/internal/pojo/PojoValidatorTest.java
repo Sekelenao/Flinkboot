@@ -1,7 +1,5 @@
 package com.flinkboot.test.internal.pojo;
 
-import com.flinkboot.core.api.typing.collection.ListTypeInfoFactory;
-import com.flinkboot.core.api.typing.collection.MapTypeInfoFactory;
 import com.flinkboot.core.api.typing.time.DurationTypeInfoFactory;
 import com.flinkboot.core.api.typing.time.LocalDateTimeTypeInfoFactory;
 import com.flinkboot.core.api.typing.time.LocalDateTypeInfoFactory;
@@ -79,10 +77,8 @@ class PojoValidatorTest {
         @TypeInfo(DurationTypeInfoFactory.class)
         public Duration duration;
 
-        @TypeInfo(ListTypeInfoFactory.class)
         public List<String> list;
 
-        @TypeInfo(MapTypeInfoFactory.class)
         public Map<String, Integer> map;
     }
 
@@ -116,7 +112,6 @@ class PojoValidatorTest {
         public String orderId;
         public NestedItemPojo item;
 
-        @TypeInfo(ListTypeInfoFactory.class)
         public List<NestedItemPojo> items;
     }
 
@@ -309,17 +304,14 @@ class PojoValidatorTest {
     // ==========================================
 
     public static class ListWithUnsupportedElementPojo {
-        @TypeInfo(ListTypeInfoFactory.class)
         public List<OffsetDateTime> dates;
     }
 
     public static class MapWithUnsupportedKeyPojo {
-        @TypeInfo(MapTypeInfoFactory.class)
         public Map<OffsetDateTime, String> map;
     }
 
     public static class MapWithUnsupportedValuePojo {
-        @TypeInfo(MapTypeInfoFactory.class)
         public Map<String, OffsetDateTime> map;
     }
 
@@ -344,12 +336,10 @@ class PojoValidatorTest {
     }
 
     public static class WildcardListWithParentPojo {
-        @TypeInfo(ListTypeInfoFactory.class)
         public List<? extends ParentPojo> items;
     }
 
     public static class WildcardListWithUnsupportedTypePojo {
-        @TypeInfo(ListTypeInfoFactory.class)
         public List<? extends OffsetDateTime> dates;
     }
 
@@ -366,9 +356,6 @@ class PojoValidatorTest {
     public static class RecursiveTreePojo {
         public String value;
         public RecursiveTreePojo parent;
-
-        @TypeInfo(ListTypeInfoFactory.class)
-        public List<RecursiveTreePojo> children;
     }
 
     // ==========================================
@@ -387,7 +374,9 @@ class PojoValidatorTest {
             ValidObjectArrayPojo.class,
             ValidEitherPojo.class,
             ValidSharedChildPojo.class,
-            ValidAnnotatedRootClass.class
+            ValidAnnotatedRootClass.class,
+            UnannotatedListPojo.class,
+            UnannotatedMapPojo.class
         );
     }
 
@@ -405,8 +394,6 @@ class PojoValidatorTest {
             UnannotatedLocalDatePojo.class,
             UnannotatedLocalTimePojo.class,
             UnannotatedDurationPojo.class,
-            UnannotatedListPojo.class,
-            UnannotatedMapPojo.class,
             ListWithUnsupportedElementPojo.class,
             MapWithUnsupportedKeyPojo.class,
             MapWithUnsupportedValuePojo.class,

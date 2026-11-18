@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.flinkboot</groupId>
         <artifactId>flinkboot</artifactId>
-        <version>0.6.0-1.20</version>
+        <version>0.6.0-2.3</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -51,7 +51,7 @@
         <!-- Fluss dependencies -->
         <dependency>
             <groupId>org.apache.fluss</groupId>
-            <artifactId>fluss-flink-1.20</artifactId>
+            <artifactId>fluss-flink-2.3</artifactId>
         </dependency>
 
         <!-- Test -->

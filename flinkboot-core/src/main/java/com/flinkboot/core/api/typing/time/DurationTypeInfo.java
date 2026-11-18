@@ -62,16 +62,6 @@ public class DurationTypeInfo extends TypeInformation<Duration> implements Atomi
         return DurationSerializer.INSTANCE;
     }
 
-    /**
-     * @deprecated since 0.5.0-1.20 in favor of {@link #createSerializer(SerializerConfig)}.
-     *             This method will be removed when upgrading to Flink 2.0.
-     */
-    @Override
-    @Deprecated(since = "0.5.0-1.20", forRemoval = true)
-    public TypeSerializer<Duration> createSerializer(ExecutionConfig config) {
-        return DurationSerializer.INSTANCE;
-    }
-
     @Override
     public String toString() {
         return "Duration";

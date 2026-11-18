@@ -1,6 +1,5 @@
 package com.flinkboot.test.api.sink;
 
-import org.apache.flink.api.connector.sink2.Sink;
 import org.apache.flink.api.connector.sink2.WriterInitContext;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.junit.jupiter.api.DisplayName;
@@ -86,21 +85,6 @@ class CollectingSinkTest {
                 writer.write("modern-event", null);
 
                 assertEquals(List.of("modern-event"), sink.elements());
-            }
-        }
-
-        @Test
-        @SuppressWarnings({"deprecation", "removal"})
-        @DisplayName("Should create writer with legacy InitContext")
-        void shouldCreateWriterWithLegacyContext() throws Exception {
-            try (var sink = new CollectingSink<String>()) {
-                var writer = sink.createWriter((Sink.InitContext) null);
-
-                assertNotNull(writer);
-
-                writer.write("legacy-event", null);
-
-                assertEquals(List.of("legacy-event"), sink.elements());
             }
         }
     }

@@ -6,6 +6,7 @@ import com.flinkboot.core.api.properties.savepoint.SavepointRestoreProperties;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.StateRecoveryOptions;
+import org.apache.flink.core.execution.RecoveryClaimMode;
 
 import java.util.Objects;
 
@@ -47,7 +48,7 @@ public final class SavepointRestoreCustomizer implements EnvironmentCustomizer {
     }
 
     private void applyRestoreMode(RestoreMode restoreMode) {
-        var flinkRestoreMode = org.apache.flink.core.execution.RestoreMode.valueOf(restoreMode.toString());
+        var flinkRestoreMode = RecoveryClaimMode.valueOf(restoreMode.toString());
         toConfigure.set(StateRecoveryOptions.RESTORE_MODE, flinkRestoreMode);
     }
 }

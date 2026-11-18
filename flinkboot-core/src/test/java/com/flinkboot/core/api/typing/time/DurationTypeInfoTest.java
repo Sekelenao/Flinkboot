@@ -54,14 +54,6 @@ class DurationTypeInfoTest {
             var serializer = typeInfo.createSerializer(new SerializerConfigImpl());
             assertSame(DurationSerializer.INSTANCE, serializer);
         }
-
-        @Test
-        @SuppressWarnings({"deprecation", "removal"})
-        @DisplayName("Should create DurationSerializer with legacy ExecutionConfig")
-        void shouldCreateSerializerWithExecutionConfig() {
-            var serializer = typeInfo.createSerializer(new ExecutionConfig());
-            assertSame(DurationSerializer.INSTANCE, serializer);
-        }
     }
 
     @Nested

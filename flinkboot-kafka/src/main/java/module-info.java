@@ -1,5 +1,6 @@
 module com.flinkboot.kafka {
     requires transitive com.flinkboot.core;
+    requires flink.runtime;
     requires kafka.clients;
     requires com.fasterxml.jackson.annotation;
     requires jakarta.validation;

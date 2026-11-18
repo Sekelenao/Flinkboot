@@ -41,19 +41,6 @@ public final class CollectingSink<T> implements Sink<T>, AutoCloseable {
     private final UUID sinkId = UUID.randomUUID();
 
     /**
-     * Creates a sink writer using the legacy initialization context.
-     *
-     * @param context the legacy initialization context
-     * @return a collecting sink writer
-     * @deprecated since 0.5.0-1.20, for removal. Use {@link #createWriter(WriterInitContext)} instead.
-     */
-    @Override
-    @Deprecated(since = "0.5.0-1.20", forRemoval = true)
-    public SinkWriter<T> createWriter(InitContext context) {
-        return new CollectingSinkWriter<>(sinkId);
-    }
-
-    /**
      * Creates a sink writer using the modern writer initialization context.
      *
      * @param context the writer initialization context
