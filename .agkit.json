@@ -1,0 +1,28 @@
+{
+  "harness": "antigravity",
+  "modules": [
+    "engineering",
+    "java-base",
+    "java-flink",
+    "ai-authoring",
+    "agent-audit"
+  ],
+  "git_repository_url": "git@github.com:Sekelenao/AGKIT-TEMPLATE.git",
+  "managed_files": {
+    ".agents/agents/code-scanner.md": "9d3a7b213947d58d1013d1c2f3ecbf60868a8ce147d80259fbf28aff2697859a",
+    ".agents/agents/pr-reviewer.md": "1dff55910de9a7de967a603d67ac23d787163475f23562054c220906a8927231",
+    ".agents/agents/prod-auditor.md": "e4603077cb93614026bd3cd3ec951cf93fbe85cc283fb4f3623cc122ef0d3e51",
+    ".agents/agents/test-auditor.md": "ec1b9526cf91d6034534e23c5a786ffe0a3702408a6b119139be08042e8d2c12",
+    ".agents/skills/agent-authoring/SKILL.md": "39ec432be83c4df15b1a9cd66650b7fdb55db979bac8921eae235f308a54beae",
+    ".agents/skills/flink-hot-path/SKILL.md": "f023b5dcdde53b6157e4f43ee2e1cbcaea7471cf7057b0be8bb73f270249cd8a",
+    ".agents/skills/flink-pojo/SKILL.md": "7f4f9bfe557ff6209742b16e06c53043657f47306e7551e076d09e8858774f27",
+    ".agents/skills/git-commits/SKILL.md": "cc9d4241da7fef26b65380110696ad95edd10139f3a40b791e57dab961ba56e7",
+    ".agents/skills/java-classes-and-records/SKILL.md": "64d59ec2be2398ee3a650a3a827e7fc6cd03218b3cb1c7ccbf1a63b44ff0b39a",
+    ".agents/skills/java-nullability/SKILL.md": "a0e94449e0b4043cbc3a1097924ddf71085fe005d91721813a07f09c345c160b",
+    ".agents/skills/java-targeted-testing/SKILL.md": "9d94051eb5da4b87756e43f0ec47d50b085ba8e66bdb5237166c5245e933d17f",
+    ".agents/skills/java-testing/SKILL.md": "258776032721235ab9a211a5c2a9d97dbb8194dc2203e2a54ea15b04af7dbffc",
+    ".agents/skills/oop-software-design/SKILL.md": "f87fe96c12003beaff4590dd459f080c5060d5c2ca3ec9bdad70d19dfdd0de73",
+    ".agents/skills/skill-authoring/SKILL.md": "f1c5aefa392938e201c9ba61055f77ec826a6285299ae3328478ec61fe274b43",
+    "AGENTS.md": "cc8e843d866766083394e9b59faba286ab1e02559bce60b01b164005a2131e42"
+  }
+}

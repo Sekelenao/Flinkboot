@@ -1,86 +1,30 @@
 ---
 name: properties
-description: Best practices and strict rules for creating Flinkboot configuration properties DTOs (Jackson, Jakarta, Immutability, Fail-fast).
+description: "Enforce Flinkboot configuration properties DTO standards for Jackson binding, Jakarta Bean Validation, composable cross-field rules, and generated boilerplate. Use when creating, modifying, or reviewing Flinkboot *Properties DTOs or their validators."
 ---
 
 # Configuration Properties DTOs
 
-In Flinkboot, all configuration classes that bind to YAML/JSON configuration files must follow these strict rules.
+Follow these rules in addition to `java-classes-and-records` and `java-nullability` whenever creating, modifying, or reviewing Flinkboot `*Properties` DTOs.
 
-## 1. Class Declaration & Immutability
+## Declaration and Jackson Binding
 
-- **Immutability**: Declare all fields as `private final`.
-- **Serializable**: Implement `java.io.Serializable` and declare `private static final long serialVersionUID = 1L;`.
-- **Naming**: Class name must end with `Properties` (e.g. `FlussSourceProperties`, `KafkaSinkProperties`).
+- End every configuration DTO class name with `Properties`, implement `java.io.Serializable`, and declare `private static final long serialVersionUID = 1L;`.
+- Define a single canonical constructor annotated with `@JsonCreator` and annotate every parameter with `@JsonProperty("kebab-case-name")`.
+- Never add backward-compatibility constructor overloads or telescoping constructors chaining `null` values; update the canonical constructor and callers directly.
+- Never call `Objects.requireNonNull(...)` or duplicate Jakarta constraint checks inside the `@JsonCreator` constructor; allow Jackson to build the full object graph so Jakarta Bean Validation reports all missing or invalid keys together.
 
-## 2. Jackson & Constructor Mapping
+## Validation
 
-- **Single Canonical Constructor (No Backward-Compatibility Overloads)**: Configuration properties DTOs must have **exactly one** canonical constructor. Do **NOT** create legacy constructor overloads or telescoping constructors chaining with `null` (`this(..., null)`). When a property is added or modified, update only the canonical constructor and update tests accordingly. Flinkboot favors clean, non-bloated APIs over constructor baggage.
-- **`@JsonCreator`**: Annotate the canonical constructor with `@JsonCreator`.
-- **`@JsonProperty`**: Annotate **every** parameter with `@JsonProperty("kebab-case-name")`.
-- **NO Constructor Null Checks**: Do **NOT** use `Objects.requireNonNull(...)` on constructor parameters. Allow Jackson to construct the DTO with `null` fields so that Jakarta Bean Validation (`@NotNull`, `@NotBlank`, `@NotEmpty`) can inspect the full object graph and report all missing/invalid keys simultaneously.
-- **Cross-Field Validation**: When fields have interdependent requirements (e.g. `mode == TIMESTAMP` requires `timestamp != null`), the DTO implements `ValidatableProperties` (from `com.flinkboot.core.api.validation.ValidatableProperties`). The DTO's `validate(ConstraintValidatorContext context)` delegates in one line to a dedicated static validator in an internal package (e.g. `MyPropertiesValidator.validate(this, context)`).
+- Annotate single-field constraints with Jakarta Bean Validation (`@NotBlank`, `@NotEmpty`, `@NotNull`, `@PositiveOrZero`, `@Positive`, `@Pattern`, `@Valid`).
+- Always validate generic container elements explicitly (`List<@NotBlank String>`, `Map<@NotNull String, @NotNull String>`, `List<@NotNull @Valid NestedProperties>`).
+- For cross-field invariants, implement `ValidatableProperties` on the DTO and delegate `validate(ConstraintValidatorContext context)` in one line to a static `*PropertiesValidator.validate(this, context)` facade in `internal.validation.properties.<domain>`.
+- In `internal.validation.properties.<domain>`, implement each cross-field invariant as a dedicated `public final` `ValidationRule<T>` class returning `Optional<PropertyViolation>` with no dependency on `ConstraintValidatorContext`.
+- In the `*PropertiesValidator` facade, declare `private static final List<ValidationRule<T>> RULES = List.of(...)`, guard instantiation with a private constructor throwing `AssertionError`, and delegate to `PropertiesValidator.compute(properties, context, RULES)` so all rules evaluate without short-circuiting.
 
-## 3. Validation Guidelines (Jakarta & Self-Validating DTOs)
+## Generated Equality and Formatting
 
-- **Single-Field Constraints** $\rightarrow$ **Jakarta Bean Validation**:
-  - Place constraints on fields: `@NotBlank`, `@NotEmpty`, `@NotNull`, `@PositiveOrZero`, `@Positive`, `@Pattern`, `@Valid`.
-  - **Container Element Validation**: Always validate elements inside generic collections:
-    - **String collections** (e.g. `bootstrapServers`, `topics`): Must use `@NotEmpty private final List<@NotBlank String> items;` to strictly reject `null`, empty `""`, and blank `"   "` elements.
-    - **Maps** (e.g. `properties`): Must use `private final Map<@NotNull String, @NotNull String> properties;` to reject null keys and values.
-    - **Nested DTO collections**: Must use `private final List<@NotNull @Valid MyNestedProperties> items;` to reject null elements and trigger recursive Bean Validation.
-  - **NEVER** write duplicate manual checks in the constructor (e.g. do **NOT** write `if (batchSize < 0)` in constructor if `@PositiveOrZero` is present).
-- **Cross-Field Interdependencies** $\rightarrow$ **`ValidatableProperties` & Dedicated Static Validator**:
-  - Implement `ValidatableProperties` on the DTO:
-    ```java
-    @Override
-    public boolean validate(ConstraintValidatorContext context) {
-        return MyPropertiesValidator.validate(this, context);
-    }
-    ```
-  - Create a dedicated validator class in `internal.validation.properties.<domain>` orchestrating `ValidationRule<T>` implementations:
-    - Each cross-field invariant lives in its own `public final` `ValidationRule<MyProperties>` class inside `internal.validation.properties.<domain>` (returning `Optional<PropertyViolation>` with no dependency on Jakarta `ConstraintValidatorContext`).
-    - The `*PropertiesValidator` facade in `internal.validation.properties.<domain>` declares:
-      - `private static final List<ValidationRule<MyProperties>> RULES = List.of(...);`
-      - Private constructor throwing `new AssertionError("You cannot instantiate this class")`.
-      - Static facade `public static boolean validate(MyProperties properties, ConstraintValidatorContext context) { return PropertiesValidator.compute(properties, context, RULES); }`.
-    - `PropertiesValidator.compute(...)` evaluates all rules without short-circuiting so all violations are reported simultaneously.
-    - Keep DTOs pure, clean data carriers without massive `if` blocks.
-
-## 4. Getters & Accessors Rules
-
-- **No `get` prefix**: Method names must match the field name exactly (e.g. `name()`, `bootstrapServers()`, `batchSize()`).
-- **NO Ternary Operators**: **STRICTLY FORBIDDEN** to use ternary operators `? :` in getters.
-- **Optional Values**: Return `Optional<T>`, `OptionalLong`, or `OptionalInt` for nullable fields using explicit `if/return`:
-  ```java
-  public OptionalLong startupTimestamp() {
-      if (startupTimestamp == null) {
-          return OptionalLong.empty();
-      }
-      return OptionalLong.of(startupTimestamp);
-  }
-  ```
-- **Collections & Maps**: Return unmodifiable defensive views (`Collections.unmodifiableList(list)` or `Collections.emptyList()` if null):
-  ```java
-  public List<String> bootstrapServers() {
-      if (bootstrapServers == null) {
-          return Collections.emptyList();
-      }
-      return Collections.unmodifiableList(bootstrapServers);
-  }
-  ```
-
-## 5. `equals()`, `hashCode()` and `toString()`
-
-- **`@Generated`**: Always annotate `equals(Object other)`, `hashCode()`, and `toString()` with `com.flinkboot.core.internal.annotation.Generated`.
-- **`equals` Pattern**:
-  - Parameter named `other` (type `Object`).
-  - `if (!(other instanceof ClassName)) { return false; }`
-  - `var o = (ClassName) other;`
-  - Use `Objects.equals(...)` for objects/collections and `==` for enums and primitive values.
-- **`hashCode` Pattern**: Use `Objects.hash(field1, field2, ...);`.
-- **`toString` Pattern**: Return `"ClassName{" + "field1=" + field1 + ... + '}';`.
-
-## 6. Reference Example
-
-Review `examples/StandardProperties.java` for a complete, compilable reference implementation.
+- Annotate `equals(Object other)`, `hashCode()`, and `toString()` with `com.flinkboot.core.internal.annotation.Generated`.
+- Name the `equals` parameter `other`, check `!(other instanceof ClassName)`, cast with `var o = (ClassName) other;`, and compare objects/collections with `Objects.equals(...)` and primitives/enums with `==`.
+- Implement `hashCode()` with `Objects.hash(...)` and `toString()` returning `ClassName{field1=..., ...}`.
+- Consult `examples/StandardProperties.java` when verifying the exact canonical DTO layout.
