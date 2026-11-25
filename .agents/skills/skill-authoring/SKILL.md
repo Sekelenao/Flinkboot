@@ -1,29 +1,40 @@
 ---
 name: skill-authoring
-description: Rules and checklist for creating, updating, or renaming workspace skills in .agents/skills/. Use when the user asks to create or modify a skill.
+description: "Design, write, and review reusable AI skills with clear trigger descriptions, focused imperative instructions, and progressive disclosure. Use when creating, updating, or auditing a skill in any AI-assisted project."
 ---
 
 # Skill Authoring
 
-## 1. Naming & Frontmatter (Progressive Disclosure)
+Follow these principles when creating, updating, or reviewing a reusable AI skill.
 
-- **Directory Alignment**: The folder path `.agents/skills/<name>/SKILL.md` must match the `name:` field in the YAML frontmatter (`kebab-case`).
-- **Trigger-Oriented Description**: Only `name` and `description` are loaded in context initially. Write a concise `description` stating **what** the skill covers and **when** the agent must activate it.
+## Scope and Naming
 
-## 2. Conciseness & Single Responsibility
+- Give each skill a single, cohesive responsibility (a specific workflow, domain standard, or recurring task).
+- Use a lowercase `kebab-case` identifier that reflects the capability.
+- Ensure the skill ID and trigger scope do not collide or overlap ambiguously with existing skills in the project.
 
-- **Imperative Rules Only**: Write direct `Do` / `Do NOT` rules.
-- **No Philosophical Bloat**: Do NOT include "Rationale", "Why", or "Philosophy" sections. Only add a brief inline clause when the agent needs criteria to evaluate a legitimate exception.
-- **Single Scope**: Each skill owns one distinct domain. Never duplicate or contradict rules owned by another skill.
+## Trigger-Oriented Description
 
-## 3. Examples (`examples/`)
+- Write a concise description that answers two questions: what the skill covers and when the AI should activate it.
+- Include concrete task verbs, artifact types, or contexts that naturally appear in user requests.
+- Keep the description portable across AI harnesses without referencing tool-specific UI or commands.
 
-- **No Inline Code Examples in `SKILL.md`**: Never embed multi-line code blocks inside `SKILL.md`. Keep `SKILL.md` strictly for rules and place all code examples inside the `examples/` subfolder (referencing them from `SKILL.md`) to preserve progressive disclosure.
-- **Strict Compliance**: Every file in `examples/` must strictly obey all existing Flinkboot skills.
+## Instruction Design
 
-## 4. Subagent Synchronization (`.agents/agents/`)
+- Write direct, imperative rules instead of background essays or vague advice.
+- Lead with non-negotiable invariants, decision criteria, and concrete workflows.
+- Avoid illustrative examples that narrow or anchor the AI's behavior toward specific cases; use minimal structural templates only when format ambiguity is costly.
+- Avoid decorative Markdown emphasis (bold/italic asterisks); it wastes tokens without adding semantic value for an LLM.
+- Avoid duplicating project-wide conventions that already live in root instructions; focus on domain- or task-specific guidance.
+- State expected edge-case behavior and failure handling explicitly when mistakes are costly.
 
-Whenever creating, renaming, or deleting a skill, check whether it must be added, updated, or removed in both the `skills:` frontmatter list and the system prompt instructions of:
-- `.agents/agents/module-scanner/agent.md`
-- `.agents/agents/test-auditor/agent.md`
-- `.agents/agents/pr-reviewer/agent.md`
+## Progressive Disclosure
+
+- Keep the main `SKILL.md` concise so it loads cleanly without bloating context.
+- Move lengthy reference tables, checklists, templates, or helper scripts into companion subdirectories (`references/`, `scripts/`).
+- Link companion files using relative paths and specify when to consult them.
+
+## Harness-Agnostic Portability
+
+- Do not hardcode harness-specific configuration directories or vendor-only file paths inside skill instructions.
+- Follow the metadata format required by the target repository.
