@@ -48,7 +48,7 @@ public final class CheckpointingCustomizer implements EnvironmentCustomizer {
     }
 
     private void applyMode(CheckpointingMode mode) {
-        var flinkMode = org.apache.flink.core.execution.CheckpointingMode.valueOf(mode.toString());
+        var flinkMode = org.apache.flink.core.execution.CheckpointingMode.valueOf(mode.name());
         toConfigure.set(CheckpointingOptions.CHECKPOINTING_CONSISTENCY_MODE, flinkMode);
     }
 
@@ -69,7 +69,7 @@ public final class CheckpointingCustomizer implements EnvironmentCustomizer {
     }
 
     private void applyExternalizedCheckpointCleanup(ExternalizedCheckpointCleanupMode externalizedCheckpointCleanup) {
-        var retention = ExternalizedCheckpointRetention.valueOf(externalizedCheckpointCleanup.toString());
+        var retention = ExternalizedCheckpointRetention.valueOf(externalizedCheckpointCleanup.name());
         toConfigure.set(CheckpointingOptions.EXTERNALIZED_CHECKPOINT_RETENTION, retention);
     }
 
@@ -82,7 +82,7 @@ public final class CheckpointingCustomizer implements EnvironmentCustomizer {
     }
 
     private void applyStorage(CheckpointStorageType storage) {
-        var storageName = storage.toString().toLowerCase(Locale.ROOT);
+        var storageName = storage.name().toLowerCase(Locale.ROOT);
         toConfigure.set(CheckpointingOptions.CHECKPOINT_STORAGE, storageName);
     }
 
