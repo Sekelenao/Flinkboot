@@ -31,25 +31,29 @@ public final class MergeProcessor {
         }
     }
 
-    private void processTask(MergeTask task){
-        for (var entry: task.target().properties()){
+    private void processTask(MergeTask task) {
+        var rootNode = new CaseInsensitiveObjectNode(task.root());
+        for (var entry : task.target().properties()) {
             var key = entry.getKey();
             var newValue = entry.getValue();
-            var existingValue = task.root().get(key);
-            if (existingValue == null) {
-                task.root().set(key, placeholderResolver.resolve(newValue));
-            } else if (existingValue.isObject() && newValue.isObject()) {
-                tasks.push(new MergeTask(task.pathOf(key), (ObjectNode) existingValue, (ObjectNode) newValue));
-            } else if (existingValue.isArray() && newValue.isArray() && features.listMerging()) {
-                var existingArray = (ArrayNode) existingValue;
+            var existingOpt = rootNode.find(key);
+            if (existingOpt.isEmpty()) {
+                rootNode.put(key, placeholderResolver.resolve(newValue));
+                continue;
+            }
+            var existing = existingOpt.get();
+            if (existing.value().isObject() && newValue.isObject()) {
+                tasks.push(new MergeTask(task.pathOf(existing.key()), (ObjectNode) existing.value(), (ObjectNode) newValue));
+            } else if (existing.value().isArray() && newValue.isArray() && features.listMerging()) {
+                var existingArray = (ArrayNode) existing.value();
                 var newArray = (ArrayNode) newValue;
                 for (var elem : newArray) {
                     existingArray.add(placeholderResolver.resolve(elem));
                 }
             } else if (features.permitOverride()) {
-                task.root().set(key, placeholderResolver.resolve(newValue));
+                rootNode.put(existing.key(), placeholderResolver.resolve(newValue));
             } else {
-                throw new YamlParsingException("Overriding an existing value is forbidden: " + task.pathOf(key));
+                throw new YamlParsingException("Overriding an existing value is forbidden: " + task.pathOf(existing.key()));
             }
         }
     }
