@@ -47,7 +47,7 @@ public final class SavepointRestoreCustomizer implements EnvironmentCustomizer {
     }
 
     private void applyRestoreMode(RestoreMode restoreMode) {
-        var flinkRestoreMode = org.apache.flink.core.execution.RestoreMode.valueOf(restoreMode.toString());
+        var flinkRestoreMode = org.apache.flink.core.execution.RestoreMode.valueOf(restoreMode.name());
         toConfigure.set(StateRecoveryOptions.RESTORE_MODE, flinkRestoreMode);
     }
 }
