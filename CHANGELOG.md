@@ -12,6 +12,15 @@ All notable user-facing changes to this project are documented in this file.
 
 ---
 
+## [0.7.0-1.20]
+
+### 🔵 Fixes & Diagnostics
+
+#### flinkboot-core
+- **Case-Insensitive YAML Key Merging (#433)**: Matches keys case-insensitively (using `Locale.ROOT`) when merging multiple YAML sources and multi-document files in `YamlParser`, ensuring `permitOverride=false`, value overrides, nested object merging, and `listMerging=true` behave consistently across differing key casings without producing duplicate keys.
+
+---
+
 ## [0.6.0-1.20]
 
 ### 🔴 Breaking Changes
@@ -66,7 +75,6 @@ All notable user-facing changes to this project are documented in this file.
 
 #### flinkboot-core
 
-- **Case-Insensitive YAML Key Merging (#433)**: Matches keys case-insensitively (using `Locale.ROOT`) when merging multiple YAML sources and multi-document files in `YamlParser`, ensuring `permitOverride=false`, value overrides, nested object merging, and `listMerging=true` behave consistently across differing key casings without producing duplicate keys.
 - **Reject Blank Keys in `ExecutionEnvironmentProperties.properties` (#419)**: Enforced `@NotBlank` on map keys in `ExecutionEnvironmentProperties.properties` (`Map<@NotBlank String, @NotNull String>`) so empty or whitespace-only keys fail Bean Validation with `ConfigurationValidationException`, while continuing to allow empty or blank string values.
 - **Fail Fast on Empty Classpath Resource Paths (#420)**: Rejects empty and slash-only classpath locations (such as `classpath:/`, `classpath:///`, or `/`) in `ClasspathResource.inputStream()` with `ResourceNotFoundException` instead of passing `""` to `ClassLoader.getResourceAsStream` and failing later with misleading parsing errors.
 - **Enable `DOTALL` on Optional Non-Blank `@Pattern` Validations (#403)**: Enabled `Pattern.Flag.DOTALL` on optional non-blank string properties (`LocalWebUiProperties`, `SavepointRestoreProperties`, `CheckpointingProperties`, `StateBackendProperties`, `KafkaSourceProperties`, and `KafkaSinkProperties`) so valid non-blank values containing line terminators (`\n`, `\r`, such as YAML block scalars) are no longer rejected as blank.
