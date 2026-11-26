@@ -15,10 +15,24 @@ final class CaseInsensitiveObjectNode {
 
     private final Map<String, String> keysByLower;
 
-    CaseInsensitiveObjectNode(ObjectNode node) {
-        this.node = Objects.requireNonNull(node, "node must not be null");
-        this.keysByLower = new HashMap<>(node.size());
-        node.fieldNames().forEachRemaining(field -> keysByLower.put(field.toLowerCase(Locale.ROOT), field));
+    private CaseInsensitiveObjectNode(ObjectNode node, Map<String, String> keysByLower) {
+        this.node = node;
+        this.keysByLower = keysByLower;
+    }
+
+    static CaseInsensitiveObjectNode from(ObjectNode node) {
+        Objects.requireNonNull(node, "node must not be null");
+        var keysByLower = new HashMap<String, String>();
+        for (var entry : node.properties()) {
+            var field = entry.getKey();
+            var existing = keysByLower.putIfAbsent(field.toLowerCase(Locale.ROOT), field);
+            if (existing != null) {
+                throw new IllegalArgumentException(
+                    "Duplicate case-insensitive key in ObjectNode: " + existing + " and " + field
+                );
+            }
+        }
+        return new CaseInsensitiveObjectNode(node, keysByLower);
     }
 
     Optional<ObjectNodeEntry> find(String key) {

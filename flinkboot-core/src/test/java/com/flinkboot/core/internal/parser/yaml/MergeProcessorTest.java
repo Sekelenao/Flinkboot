@@ -498,5 +498,120 @@ class MergeProcessorTest {
                 () -> assertEquals("b", items.get(1).asText())
             );
         }
+
+        @Test
+        @DisplayName("Should match pre-existing uppercase ID with lowercase id under Turkish locale")
+        void shouldMatchPreExistingUppercaseIdUnderTurkishLocale() {
+            Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+            var overrideRoot = FACTORY.objectNode();
+            var overrideProcessor = new MergeProcessor(overrideRoot, OVERRIDE_ONLY_FEATURES, emptyResolver());
+            overrideProcessor.apply(FACTORY.objectNode().put("ID", "first"));
+            overrideProcessor.apply(FACTORY.objectNode().put("id", "second"));
+
+            var strictRoot = FACTORY.objectNode();
+            var strictProcessor = new MergeProcessor(strictRoot, STRICT_FEATURES, emptyResolver());
+            strictProcessor.apply(FACTORY.objectNode().put("ID", "first"));
+            var conflicting = FACTORY.objectNode().put("id", "second");
+            var exception = assertThrows(YamlParsingException.class, () -> strictProcessor.apply(conflicting));
+
+            assertAll(
+                () -> assertEquals(1, overrideRoot.size()),
+                () -> assertTrue(overrideRoot.has("ID")),
+                () -> assertFalse(overrideRoot.has("id")),
+                () -> assertEquals("second", overrideRoot.get("ID").asText()),
+                () -> assertEquals("Overriding an existing value is forbidden: ID", exception.getMessage())
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("Nested object insertion and override collisions")
+    class NestedObjectInsertionCollisions {
+
+        @Test
+        @DisplayName("Should reject case-colliding children in newly inserted nested object when permitOverride is false")
+        void shouldRejectCaseCollidingChildrenInNewlyInsertedObject() {
+            var root = FACTORY.objectNode();
+            var processor = new MergeProcessor(root, STRICT_FEATURES, emptyResolver());
+            var child = FACTORY.objectNode();
+            child.put("Host", "first");
+            child.put("HOST", "second");
+            var target = FACTORY.objectNode();
+            target.set("database", child);
+
+            var exception = assertThrows(YamlParsingException.class, () -> processor.apply(target));
+
+            assertEquals("Overriding an existing value is forbidden: database.Host", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should collapse case-colliding children in newly inserted nested object when permitOverride is true")
+        void shouldCollapseCaseCollidingChildrenInNewlyInsertedObject() {
+            var root = FACTORY.objectNode();
+            var processor = new MergeProcessor(root, OVERRIDE_ONLY_FEATURES, resolverWith(Map.of("DB_HOST", "prod")));
+            var child = FACTORY.objectNode();
+            child.put("Host", "first");
+            child.put("HOST", "${DB_HOST}");
+            var target = FACTORY.objectNode();
+            target.set("database", child);
+
+            processor.apply(target);
+
+            var database = root.get("database");
+            assertAll(
+                () -> assertEquals(1, database.size()),
+                () -> assertTrue(database.has("Host")),
+                () -> assertFalse(database.has("HOST")),
+                () -> assertEquals("prod", database.get("Host").asText())
+            );
+        }
+
+        @Test
+        @DisplayName("Should collapse case-colliding children when overriding a scalar with a nested object")
+        void shouldCollapseCaseCollidingChildrenWhenOverridingScalarWithObject() {
+            var root = FACTORY.objectNode();
+            var processor = new MergeProcessor(root, OVERRIDE_ONLY_FEATURES, emptyResolver());
+            processor.apply(FACTORY.objectNode().put("Database", "legacy"));
+
+            var child = FACTORY.objectNode();
+            child.put("Host", "first");
+            child.put("HOST", "second");
+            var target = FACTORY.objectNode();
+            target.set("database", child);
+
+            processor.apply(target);
+
+            var database = root.get("Database");
+            assertAll(
+                () -> assertEquals(1, root.size()),
+                () -> assertTrue(root.has("Database")),
+                () -> assertFalse(root.has("database")),
+                () -> assertEquals(1, database.size()),
+                () -> assertTrue(database.has("Host")),
+                () -> assertFalse(database.has("HOST")),
+                () -> assertEquals("second", database.get("Host").asText())
+            );
+        }
+
+        @Test
+        @DisplayName("Should merge case-variant sibling objects within the same target in document order")
+        void shouldMergeCaseVariantSiblingObjectsInDocumentOrder() {
+            var root = FACTORY.objectNode();
+            var processor = new MergeProcessor(root, OVERRIDE_ONLY_FEATURES, emptyResolver());
+            var target = FACTORY.objectNode();
+            target.set("Server", FACTORY.objectNode().put("port", 8080));
+            target.set("server", FACTORY.objectNode().put("port", 9090));
+
+            processor.apply(target);
+
+            var server = root.get("Server");
+            assertAll(
+                () -> assertEquals(1, root.size()),
+                () -> assertTrue(root.has("Server")),
+                () -> assertFalse(root.has("server")),
+                () -> assertEquals(1, server.size()),
+                () -> assertEquals(9090, server.get("port").asInt())
+            );
+        }
     }
 }

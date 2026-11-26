@@ -26,19 +26,31 @@ class CaseInsensitiveObjectNodeTest {
     private static final JsonNodeFactory FACTORY = JsonNodeFactory.instance;
 
     @Nested
-    @DisplayName("Null validation")
-    class NullValidation {
+    @DisplayName("Validation")
+    class Validation {
 
         @Test
-        @DisplayName("Rejects null ObjectNode in constructor")
+        @DisplayName("Rejects null ObjectNode in factory")
         void shouldRejectNullNode() {
-            assertThrows(NullPointerException.class, () -> new CaseInsensitiveObjectNode(null));
+            assertThrows(NullPointerException.class, () -> CaseInsensitiveObjectNode.from(null));
+        }
+
+        @Test
+        @DisplayName("Rejects ObjectNode with pre-existing case-colliding keys")
+        void shouldRejectPreExistingCaseCollidingKeys() {
+            ObjectNode backing = FACTORY.objectNode();
+            backing.put("Name", "first");
+            backing.put("name", "second");
+
+            var exception = assertThrows(IllegalArgumentException.class, () -> CaseInsensitiveObjectNode.from(backing));
+
+            assertEquals("Duplicate case-insensitive key in ObjectNode: Name and name", exception.getMessage());
         }
 
         @Test
         @DisplayName("Rejects null key in find and put")
         void shouldRejectNullKey() {
-            var node = new CaseInsensitiveObjectNode(FACTORY.objectNode());
+            var node = CaseInsensitiveObjectNode.from(FACTORY.objectNode());
 
             assertAll(
                 () -> assertThrows(NullPointerException.class, () -> node.find(null)),
@@ -66,7 +78,7 @@ class CaseInsensitiveObjectNodeTest {
         void shouldReturnEmptyWhenKeyIsAbsent() {
             ObjectNode backing = FACTORY.objectNode();
             backing.put("name", "job");
-            var node = new CaseInsensitiveObjectNode(backing);
+            var node = CaseInsensitiveObjectNode.from(backing);
 
             assertTrue(node.find("other").isEmpty());
         }
@@ -77,7 +89,7 @@ class CaseInsensitiveObjectNodeTest {
         void shouldFindPreExistingKeyIgnoringCase(String lookupKey) {
             ObjectNode backing = FACTORY.objectNode();
             backing.put("Name", "flink-job");
-            var node = new CaseInsensitiveObjectNode(backing);
+            var node = CaseInsensitiveObjectNode.from(backing);
 
             var entry = node.find(lookupKey);
 
@@ -98,7 +110,7 @@ class CaseInsensitiveObjectNodeTest {
         @DisplayName("Inserts new mixed-case key and indexes it for subsequent case-insensitive lookups")
         void shouldInsertAndIndexNewMixedCaseKey() {
             ObjectNode backing = FACTORY.objectNode();
-            var node = new CaseInsensitiveObjectNode(backing);
+            var node = CaseInsensitiveObjectNode.from(backing);
 
             node.put("JobName", TextNode.valueOf("alpha"));
 
@@ -122,7 +134,7 @@ class CaseInsensitiveObjectNodeTest {
             backing.put("First", "1");
             backing.put("Name", "initial");
             backing.put("Last", "3");
-            var node = new CaseInsensitiveObjectNode(backing);
+            var node = CaseInsensitiveObjectNode.from(backing);
 
             node.put("NAME", TextNode.valueOf("updated"));
 
@@ -140,7 +152,7 @@ class CaseInsensitiveObjectNodeTest {
         @DisplayName("Replaces newly inserted key across varying case without creating duplicates")
         void shouldReplaceNewlyInsertedKeyAcrossVaryingCase() {
             ObjectNode backing = FACTORY.objectNode();
-            var node = new CaseInsensitiveObjectNode(backing);
+            var node = CaseInsensitiveObjectNode.from(backing);
 
             node.put("Name", TextNode.valueOf("first"));
             node.put("name", TextNode.valueOf("second"));
@@ -169,12 +181,12 @@ class CaseInsensitiveObjectNodeTest {
         }
 
         @Test
-        @DisplayName("Matches and updates I/i keys identically under Turkish locale")
+        @DisplayName("Matches and updates lowercase items with uppercase ITEMS under Turkish locale")
         void shouldUseRootLocaleUnderTurkishDefault() {
             Locale.setDefault(Locale.forLanguageTag("tr-TR"));
             ObjectNode backing = FACTORY.objectNode();
             backing.put("items", "first");
-            var node = new CaseInsensitiveObjectNode(backing);
+            var node = CaseInsensitiveObjectNode.from(backing);
 
             var found = node.find("ITEMS");
             node.put("ITEMS", TextNode.valueOf("second"));
@@ -185,6 +197,26 @@ class CaseInsensitiveObjectNodeTest {
                 () -> assertEquals(1, backing.size()),
                 () -> assertEquals("second", backing.get("items").asText()),
                 () -> assertFalse(backing.has("ITEMS"))
+            );
+        }
+
+        @Test
+        @DisplayName("Matches and updates pre-existing uppercase ITEMS with lowercase items under Turkish locale")
+        void shouldUseRootLocaleWhenIndexingUppercaseUnderTurkishDefault() {
+            Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+            ObjectNode backing = FACTORY.objectNode();
+            backing.put("ITEMS", "first");
+            var node = CaseInsensitiveObjectNode.from(backing);
+
+            var found = node.find("items");
+            node.put("items", TextNode.valueOf("second"));
+
+            assertAll(
+                () -> assertTrue(found.isPresent()),
+                () -> assertEquals("ITEMS", found.orElseThrow().key()),
+                () -> assertEquals(1, backing.size()),
+                () -> assertEquals("second", backing.get("ITEMS").asText()),
+                () -> assertFalse(backing.has("items"))
             );
         }
 

@@ -32,28 +32,35 @@ public final class MergeProcessor {
     }
 
     private void processTask(MergeTask task) {
-        var rootNode = new CaseInsensitiveObjectNode(task.root());
+        var rootNode = CaseInsensitiveObjectNode.from(task.root());
         for (var entry : task.target().properties()) {
             var key = entry.getKey();
             var newValue = entry.getValue();
             var existingOpt = rootNode.find(key);
-            if (existingOpt.isEmpty()) {
-                rootNode.put(key, placeholderResolver.resolve(newValue));
-                continue;
-            }
-            var existing = existingOpt.get();
-            if (existing.value().isObject() && newValue.isObject()) {
-                tasks.push(new MergeTask(task.pathOf(existing.key()), (ObjectNode) existing.value(), (ObjectNode) newValue));
-            } else if (existing.value().isArray() && newValue.isArray() && features.listMerging()) {
-                var existingArray = (ArrayNode) existing.value();
-                var newArray = (ArrayNode) newValue;
-                for (var elem : newArray) {
-                    existingArray.add(placeholderResolver.resolve(elem));
+            if (existingOpt.isPresent()) {
+                var existing = existingOpt.get();
+                if (existing.value().isObject() && newValue.isObject()) {
+                    tasks.addLast(new MergeTask(task.pathOf(existing.key()), (ObjectNode) existing.value(), (ObjectNode) newValue));
+                    continue;
                 }
-            } else if (features.permitOverride()) {
-                rootNode.put(existing.key(), placeholderResolver.resolve(newValue));
+                if (existing.value().isArray() && newValue.isArray() && features.listMerging()) {
+                    var existingArray = (ArrayNode) existing.value();
+                    for (var elem : newValue) {
+                        existingArray.add(placeholderResolver.resolve(elem));
+                    }
+                    continue;
+                }
+                if (!features.permitOverride()) {
+                    throw new YamlParsingException("Overriding an existing value is forbidden: " + task.pathOf(existing.key()));
+                }
+                key = existing.key();
+            }
+            if (newValue.isObject()) {
+                var childNode = task.root().objectNode();
+                rootNode.put(key, childNode);
+                tasks.addLast(new MergeTask(task.pathOf(key), childNode, (ObjectNode) newValue));
             } else {
-                throw new YamlParsingException("Overriding an existing value is forbidden: " + task.pathOf(existing.key()));
+                rootNode.put(key, placeholderResolver.resolve(newValue));
             }
         }
     }
