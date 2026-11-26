@@ -127,6 +127,41 @@ All audit subagents (including `module-scanner` and `pr-reviewer`) must consult 
 - **Status**: **REJECTED**
 - **Rationale**: Apache Flink's `BasicTypeInfo` already registers `java.time.Instant` natively (`BasicTypeInfo.INSTANT_TYPE_INFO` with `InstantSerializer` and `InstantComparator`). Unlike `LocalDate`, `LocalTime`, `LocalDateTime`, or `Duration`, `Instant` fields in Flink POJOs do not fall back to Kryo and do not require `@TypeInfo`.
 
+### 40. Rejecting YAML `.inf` (`Double.POSITIVE_INFINITY`) on `ExponentialDelayRestartProperties.backoffMultiplier`
+- **Pattern**: Adding a custom constraint or validation rule to reject `Double.POSITIVE_INFINITY` / `Double.isNaN` (YAML `.inf` / `.nan`) on `ExponentialDelayRestartProperties.backoffMultiplier` because `@DecimalMin(value = "1.0", inclusive = false)` permits `+Infinity`.
+- **Status**: **REJECTED**
+- **Rationale**: Writing `.inf` in YAML for a restart backoff multiplier is a contrived edge case that does not warrant adding a custom Bean Validation constraint or cross-field rule for a single field (YAGNI).
+
+### 41. Jakarta EL Injection in `PropertiesValidator.compute` (`buildConstraintViolationWithTemplate`)
+- **Pattern**: Flagging `PropertiesValidator.compute` for passing `PropertyViolation.message()` directly to `context.buildConstraintViolationWithTemplate(...)` as a Jakarta EL injection vector, or recommending `ParameterMessageInterpolator` / custom template escaping.
+- **Status**: **REJECTED**
+- **Rationale**: Since Hibernate Validator 6.2+ (Flinkboot uses 9.x), EL evaluation on custom constraint violations (`buildConstraintViolationWithTemplate`) is disabled by default (`ExpressionLanguageFeatureLevel.NONE`, CVE-2020-10693 fix). Switching to `ParameterMessageInterpolator` would also break built-in Hibernate Validator messages for `@DecimalMin(inclusive = false)` and `@DurationMin`.
+
+### 42. Rejecting Dormant `port` / `bind-address` When `LocalWebUiProperties.enabled` Is `false`
+- **Pattern**: Adding a cross-field validation rule on `LocalWebUiProperties` to reject `port` or `bind-address` when `enabled` is explicitly `false`.
+- **Status**: **REJECTED**
+- **Rationale**: Toggle-based properties DTOs (`LocalWebUiProperties` and `CheckpointingProperties`) intentionally allow dormant sub-options when `enabled: false` so multi-file configuration overrides (e.g. `base.yml` defining `port: 8081` and `prod.yml` overriding `enabled: false`) work cleanly without failing validation.
+
+### 43. Wrapping Missing `flink-runtime-web` Runtime Exceptions in `LocalWebUiExecutionEnvironmentProvider`
+- **Pattern**: Catching Flink's `RuntimeException` from `StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(configuration)` and matching its message to rethrow `UnsupportedExecutionEnvironmentException` when `flink-runtime-web` is absent.
+- **Status**: **REJECTED**
+- **Rationale**: Apache Flink already throws an explicit exception indicating that `flink-runtime-web` is missing from the classpath. Catching `RuntimeException` and string-matching Flink's internal error message is brittle across Flink versions.
+
+### 44. Adding `readResolve()` to Stateless Flink SPI Singletons (`DurationSerializer`, `DurationTypeInfo`)
+- **Pattern**: Requiring `private Object readResolve() { return INSTANCE; }` on `DurationSerializer` and `DurationTypeInfo` to avoid allocating duplicate stateless instances on Java deserialization.
+- **Status**: **REJECTED**
+- **Rationale**: Both classes are completely stateless with value-based `equals`/`hashCode`, deserialization occurs once per task deployment, and Apache Flink's own built-in serializers do not implement `readResolve()`.
+
+### 45. Disabling Environment-Variable-Enabled Boolean Flags via CLI in `StartupEnvironment`
+- **Pattern**: Adding CLI negation syntax (`--no-<flag>` or `--flag=false`) so CLI arguments can override a boolean feature flag set to `true` via environment variables.
+- **Status**: **REJECTED**
+- **Rationale**: `CommandLine` intentionally keeps a minimal presence-only `--flag` contract (consistent with Rule #17). Adding negation syntax for a rare override scenario is unnecessary complexity (YAGNI).
+
+### 46. Removing Explicit `JavaTimeModule` Registration Alongside `findAndAddModules()` in `YamlParser`
+- **Pattern**: Flagging `addModule(new JavaTimeModule())` followed by `findAndAddModules()` in `YamlParser` as redundant.
+- **Status**: **REJECTED**
+- **Rationale**: `addModule(new JavaTimeModule())` guarantees Java time support even when `ServiceLoader` discovery is restricted or shaded, while `findAndAddModules()` intentionally allows downstream users to register additional Jackson modules from their own POM classpath.
+
 ---
 
 ## flinkboot-test
