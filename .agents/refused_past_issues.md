@@ -206,6 +206,11 @@ All audit subagents (including `module-scanner` and `pr-reviewer`) must consult 
 - **Status**: **REJECTED**
 - **Rationale**: In Apache Flink, `TypeHint()` already calls `TypeExtractor.createTypeInfo(...)` in its own constructor and throws `FlinkRuntimeException` before `TypeInformationAssert(TypeHint)` is ever invoked. `TypeInformation.of(typeHint)` merely returns `typeHint.getTypeInfo()`, so deferring it to `isPojo()` would not catch unresolvable anonymous `TypeHint` instances in practice—it would only add nullable field complexity and a `try/catch` for custom `TypeHint` subclasses overriding `getTypeInfo()`.
 
+### 47. Diagnostic Message Collection Order & Deduplication in `CollectingSinkAssert`
+- **Pattern**: Replacing `Collectors.toSet()` with `Collectors.toList()` or `LinkedHashSet` in `CollectingSinkAssert` (`contains`, `allMatch`, `noneMatch`) solely to preserve duplicates or deterministic ordering in assertion failure messages.
+- **Status**: **REJECTED**
+- **Rationale**: Failure messages in `CollectingSinkAssert` are human-readable diagnostics for test debugging, not a structured contract requiring strict ordering or multiplicity preservation (consistent with Rules #15 and #30).
+
 ---
 
 ## flinkboot-kafka
