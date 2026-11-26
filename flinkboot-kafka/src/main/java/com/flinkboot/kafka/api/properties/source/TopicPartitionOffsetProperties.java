@@ -11,7 +11,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Configuration properties specifying a starting offset for a specific Kafka topic partition.
+ * Configuration properties specifying an offset for a specific Kafka topic partition.
  */
 public final class TopicPartitionOffsetProperties implements Serializable {
 
@@ -33,7 +33,7 @@ public final class TopicPartitionOffsetProperties implements Serializable {
      *
      * @param topic     Kafka topic name
      * @param partition partition index (0-indexed)
-     * @param offset    starting offset in the partition
+     * @param offset    offset in the partition
      */
     @JsonCreator
     public TopicPartitionOffsetProperties(
@@ -65,9 +65,9 @@ public final class TopicPartitionOffsetProperties implements Serializable {
     }
 
     /**
-     * Returns the partition starting offset.
+     * Returns the partition offset.
      *
-     * @return the starting offset
+     * @return the offset in the partition
      */
     public long offset() {
         return offset;

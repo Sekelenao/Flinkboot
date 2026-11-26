@@ -10,31 +10,31 @@ import java.util.Optional;
  */
 public enum KafkaOffsetInitializer {
     /**
-     * Start consuming from the earliest available offset in each partition.
+     * Offset boundary at the earliest available offset in each partition.
      */
     EARLIEST(OffsetsInitializer.earliest(), false),
     /**
-     * Start consuming from the latest available offset (end) in each partition.
+     * Offset boundary at the latest available offset (end) in each partition.
      */
     LATEST(OffsetsInitializer.latest(), false),
     /**
-     * Start consuming from committed consumer group offsets.
+     * Offset boundary at committed consumer group offsets.
      */
     COMMITTED(OffsetsInitializer.committedOffsets(), true),
     /**
-     * Start consuming from committed consumer group offsets, falling back to earliest if none are committed.
+     * Offset boundary at committed consumer group offsets, falling back to earliest if none are committed.
      */
     COMMITTED_EARLIEST(OffsetsInitializer.committedOffsets(OffsetResetStrategy.EARLIEST), true),
     /**
-     * Start consuming from committed consumer group offsets, falling back to latest if none are committed.
+     * Offset boundary at committed consumer group offsets, falling back to latest if none are committed.
      */
     COMMITTED_LATEST(OffsetsInitializer.committedOffsets(OffsetResetStrategy.LATEST), true),
     /**
-     * Start consuming from a specific timestamp (requires {@code timestamp}).
+     * Offset boundary at a specific timestamp (requires {@code timestamp}).
      */
     TIMESTAMP(null, false),
     /**
-     * Start consuming from explicit partition offsets (requires {@code partitions}).
+     * Offset boundary at explicit partition offsets (requires {@code partitions}).
      */
     OFFSETS(null, false);
 
