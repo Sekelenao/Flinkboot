@@ -1,0 +1,122 @@
+name: PR Assignment Gate
+
+on:
+  pull_request_target:
+    types: [opened, reopened, edited]
+
+concurrency:
+  group: pr-assignment-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  check-assignment:
+    name: Verify Issue Assignment
+    if: >-
+      github.event.pull_request.state == 'open' &&
+      github.event.pull_request.user.type != 'Bot' &&
+      github.event.pull_request.author_association != 'OWNER' &&
+      github.event.pull_request.author_association != 'MEMBER' &&
+      github.event.pull_request.author_association != 'COLLABORATOR'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: read
+
+    steps:
+      - name: Validate linked issue and assignee
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            const prAuthor = pr.user.login;
+            const contributingUrl = `https://github.com/${owner}/${repo}/blob/main/CONTRIBUTING.md`;
+
+            const closePullRequest = async (reasons) => {
+              const reasonList = reasons.map((reason) => `- ${reason}`).join('\n');
+              const body = [
+                `Thank you for your interest in contributing to Flinkboot, @${prAuthor}!`,
+                '',
+                'This pull request has been automatically closed because it does not meet the contribution prerequisites:',
+                reasonList,
+                '',
+                `Please review [CONTRIBUTING.md](${contributingUrl}), request assignment on an open \`accepted\` issue, and wait for a maintainer to assign you before opening a pull request.`,
+              ].join('\n');
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pr.number,
+                body,
+              });
+
+              await github.rest.pulls.update({
+                owner,
+                repo,
+                pull_number: pr.number,
+                state: 'closed',
+              });
+
+              core.info(`Closed PR #${pr.number} opened by @${prAuthor}: ${reasons.join(' | ')}`);
+            };
+
+            const sanitizedBody = (pr.body ?? '').replace(/<!--[\s\S]*?-->/g, '');
+            const matches = [...sanitizedBody.matchAll(/\b(?:closes|fixes|resolves)\s+#(\d+)\b/gi)];
+            const issueNumbers = [...new Set(matches.map((match) => Number(match[1])))];
+
+            if (issueNumbers.length === 0) {
+              await closePullRequest([
+                'No linked issue was found in the PR description. Please reference an accepted issue using `Closes #<issue_number>`, `Fixes #<issue_number>`, or `Resolves #<issue_number>`.',
+              ]);
+              return;
+            }
+
+            const reasons = [];
+
+            for (const issueNumber of issueNumbers) {
+              let issue;
+              try {
+                const { data } = await github.rest.issues.get({
+                  owner,
+                  repo,
+                  issue_number: issueNumber,
+                });
+                issue = data;
+              } catch (error) {
+                if (error.status === 404 || error.status === 410) {
+                  reasons.push(`Linked issue #${issueNumber} does not exist in this repository.`);
+                  continue;
+                }
+                throw error;
+              }
+
+              if (issue.pull_request) {
+                reasons.push(`#${issueNumber} is a pull request, not an issue.`);
+                continue;
+              }
+
+              if (issue.state !== 'open') {
+                reasons.push(`Linked issue #${issueNumber} is not open (current state: \`${issue.state}\`).`);
+              }
+
+              const hasAcceptedLabel = (issue.labels ?? []).some(
+                (label) => (typeof label === 'string' ? label : label.name)?.toLowerCase() === 'accepted'
+              );
+              if (!hasAcceptedLabel) {
+                reasons.push(`Linked issue #${issueNumber} does not have the \`accepted\` label.`);
+              }
+
+              const isAssigned = (issue.assignees ?? []).some(
+                (assignee) => assignee.login.toLowerCase() === prAuthor.toLowerCase()
+              );
+              if (!isAssigned) {
+                reasons.push(`@${prAuthor} is not assigned to issue #${issueNumber}.`);
+              }
+            }
+
+            if (reasons.length > 0) {
+              await closePullRequest(reasons);
+              return;
+            }
+
+            core.info(`PR #${pr.number} by @${prAuthor} passed assignment gate for issue(s): ${issueNumbers.map((n) => `#${n}`).join(', ')}`);
