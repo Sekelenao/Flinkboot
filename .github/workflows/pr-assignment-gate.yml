@@ -4,9 +4,11 @@ on:
   pull_request_target:
     types: [opened, reopened, edited]
 
+permissions: {}
+
 concurrency:
   group: pr-assignment-gate-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   check-assignment:
@@ -18,6 +20,7 @@ jobs:
       github.event.pull_request.author_association != 'MEMBER' &&
       github.event.pull_request.author_association != 'COLLABORATOR'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       pull-requests: write
       issues: read
@@ -31,6 +34,27 @@ jobs:
             const pr = context.payload.pull_request;
             const prAuthor = pr.user.login;
             const contributingUrl = `https://github.com/${owner}/${repo}/blob/main/CONTRIBUTING.md`;
+            const MAX_LINKED_ISSUES = 10;
+
+            const stripHtmlComments = (input) => {
+              let result = '';
+              let index = 0;
+              while (index < input.length) {
+                const start = input.indexOf('<!--', index);
+                if (start === -1) {
+                  result += input.slice(index);
+                  break;
+                }
+                result += input.slice(index, start);
+                const end = input.indexOf('-->', start + 4);
+                if (end === -1) {
+                  result += input.slice(start);
+                  break;
+                }
+                index = end + 3;
+              }
+              return result;
+            };
 
             const closePullRequest = async (reasons) => {
               const reasonList = reasons.map((reason) => `- ${reason}`).join('\n');
@@ -60,13 +84,24 @@ jobs:
               core.info(`Closed PR #${pr.number} opened by @${prAuthor}: ${reasons.join(' | ')}`);
             };
 
-            const sanitizedBody = (pr.body ?? '').replace(/<!--[\s\S]*?-->/g, '');
-            const matches = [...sanitizedBody.matchAll(/\b(?:closes|fixes|resolves)\s+#(\d+)\b/gi)];
-            const issueNumbers = [...new Set(matches.map((match) => Number(match[1])))];
+            const sanitizedBody = stripHtmlComments(pr.body ?? '');
+            const matches = [...sanitizedBody.matchAll(/\b(?:closes|fixes|resolves)\s+#([1-9]\d{0,9})\b/gi)];
+            const issueNumbers = [...new Set(
+              matches
+                .map((match) => Number(match[1]))
+                .filter((n) => Number.isSafeInteger(n) && n > 0 && n <= 2147483647)
+            )];
 
             if (issueNumbers.length === 0) {
               await closePullRequest([
                 'No linked issue was found in the PR description. Please reference an accepted issue using `Closes #<issue_number>`, `Fixes #<issue_number>`, or `Resolves #<issue_number>`.',
+              ]);
+              return;
+            }
+
+            if (issueNumbers.length > MAX_LINKED_ISSUES) {
+              await closePullRequest([
+                `Too many linked issues (${issueNumbers.length}). Please reference at most ${MAX_LINKED_ISSUES} issues per pull request.`,
               ]);
               return;
             }
