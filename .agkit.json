@@ -5,16 +5,13 @@
     "java-base",
     "java-flink",
     "ai-authoring",
-    "agent-swarm"
+    "agent-audit"
   ],
   "git_repository_url": "git@github.com:Sekelenao/AGKIT-TEMPLATE.git",
   "managed_files": {
     ".agents/agents/code-scanner.md": "9d3a7b213947d58d1013d1c2f3ecbf60868a8ce147d80259fbf28aff2697859a",
-    ".agents/agents/implementer.md": "89a6009683201b683fe3f056d973b53419708576b409475738523cb25345d0f8",
-    ".agents/agents/orchestrator.md": "80280f7ec2f5e97b2d4b824dc161c7bbda25ea53ccd1930493c672468010a0b9",
     ".agents/agents/pr-reviewer.md": "131497f5a151e1439352c2edc2cb4ae3c6e7977730bfec62b4a0ff64d8ed3717",
     ".agents/agents/prod-auditor.md": "e4603077cb93614026bd3cd3ec951cf93fbe85cc283fb4f3623cc122ef0d3e51",
-    ".agents/agents/refiner.md": "e9a266e6f92f0b504f0b25e88ed3cce6684868b3906a3c16428e8cf4948c5f90",
     ".agents/agents/test-auditor.md": "ec1b9526cf91d6034534e23c5a786ffe0a3702408a6b119139be08042e8d2c12",
     ".agents/skills/agent-authoring/SKILL.md": "39ec432be83c4df15b1a9cd66650b7fdb55db979bac8921eae235f308a54beae",
     ".agents/skills/flink-hot-path/SKILL.md": "f023b5dcdde53b6157e4f43ee2e1cbcaea7471cf7057b0be8bb73f270249cd8a",
