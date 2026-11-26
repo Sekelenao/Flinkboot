@@ -36,7 +36,7 @@ public final class ExecutionCustomizer implements EnvironmentCustomizer {
     }
 
     private void applyRuntimeMode(ExecutionRuntimeMode runtimeMode) {
-        var mode = RuntimeExecutionMode.valueOf(runtimeMode.toString());
+        var mode = RuntimeExecutionMode.valueOf(runtimeMode.name());
         toConfigure.set(ExecutionOptions.RUNTIME_MODE, mode);
     }
 
