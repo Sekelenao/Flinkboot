@@ -14,6 +14,11 @@ All notable user-facing changes to this project are documented in this file.
 
 ## [0.7.0-1.20]
 
+### 🟢 Features & Enhancements
+
+#### flinkboot-test
+- **Unshadowed `assertThatObject(T)` Factory Method (#449)**: Added `FlinkbootAssertions.assertThatObject(T)` returning `ObjectAssert<T>` so types shadowed by more specific `assertThat(...)` overloads (such as custom `TypeInformation<T>` instances) can be asserted with `.isSerializable()` without casting to `Object`.
+
 ### 🔵 Fixes & Diagnostics
 
 #### flinkboot-core

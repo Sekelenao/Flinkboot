@@ -108,4 +108,24 @@ public final class FlinkbootAssertions {
         Objects.requireNonNull(typeInfo, "TypeInformation to assert must not be null");
         return new TypeInformationAssert<>(typeInfo);
     }
+
+    /**
+     * Creates a new instance of {@link ObjectAssert} to assert on the specified object without
+     * overload shadowing from more specific {@code assertThat(...)} methods (such as
+     * {@link #assertThat(TypeInformation)}, {@link #assertThat(TypeHint)},
+     * {@link #assertThat(CollectingSink)}, or {@link #assertThat(Class)}).
+     * <p>
+     * Use this method when verifying general object properties, such as Java serialization
+     * compliance, on a type that has its own dedicated {@code assertThat(...)} overload—for
+     * example a custom {@link TypeInformation}.
+     *
+     * @param actual the object to assert
+     * @param <T> the type of the object under assertion
+     * @return the created {@link ObjectAssert} assertion object
+     * @throws NullPointerException if {@code actual} is {@code null}
+     */
+    public static <T> ObjectAssert<T> assertThatObject(T actual) {
+        Objects.requireNonNull(actual, "Object to assert must not be null");
+        return new ObjectAssert<>(actual);
+    }
 }
