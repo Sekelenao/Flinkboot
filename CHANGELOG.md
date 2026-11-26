@@ -12,6 +12,15 @@ All notable user-facing changes to this project are documented in this file.
 
 ---
 
+## [0.7.0-1.20]
+
+### 🔵 Fixes & Diagnostics
+
+#### flinkboot-core
+- **Case-Insensitive YAML Key Merging (#433)**: Matches keys case-insensitively (using `Locale.ROOT`) when merging multiple YAML sources and multi-document files in `YamlParser`, ensuring `permitOverride=false`, value overrides, nested object merging, and `listMerging=true` behave consistently across differing key casings without producing duplicate keys.
+
+---
+
 ## [0.6.0-1.20]
 
 ### 🔴 Breaking Changes
