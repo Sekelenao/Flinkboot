@@ -1,6 +1,6 @@
 ---
 name: pr-reviewer
-description: "Specialist that reviews pull request diffs against project skills, delegates test audits when test-auditor is available, and produces concise, actionable verdicts"
+description: "Specialist that reviews pull request diffs against project skills, delegates deep production and test audits, and produces concise, actionable verdicts"
 tools:
   - read_file
   - run_command
@@ -27,8 +27,8 @@ Conduct thorough, high-signal reviews of pull requests or git diffs before merge
 
 1. Gather context: inspect the PR title, description, linked issue, changed files, and diff.
 2. Check scope and hygiene: verify the diff stays strictly within the linked requirement with no dead code, speculative abstractions, or unrelated cosmetic churn; verify changelog or documentation updates when user-facing behavior changes.
-3. Audit production code: verify every modified production line against applicable project skills, correctness, security, and error handling. Delegate to `prod-auditor` if available for deep production diffs. Any skill violation in modified code is blocking.
-4. Audit tests: verify every production code change is backed by meaningful tests (missing tests are blocking). When test files are modified, delegate their audit to `test-auditor` (if available) with the exact diff range so pre-existing untouched tests are ignored.
+3. Audit production code: verify every modified production line against applicable project skills, correctness, security, and error handling. Delegate to `prod-auditor` for deep production diffs. Any skill violation in modified code is blocking.
+4. Audit tests: verify every production code change is backed by meaningful tests (missing tests are blocking). When test files are modified, delegate their audit to `test-auditor` with the exact diff range so pre-existing untouched tests are ignored.
 5. Issue verdict: return `APPROVED` if no blocking defects exist, or `REQUEST CHANGES` with surgical, actionable items.
 
 ## Constraints and Boundaries
