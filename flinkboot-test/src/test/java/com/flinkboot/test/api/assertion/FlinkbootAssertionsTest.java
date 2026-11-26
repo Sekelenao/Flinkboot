@@ -19,6 +19,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
 import static com.flinkboot.test.api.assertion.FlinkbootAssertions.assertThat;
+import static com.flinkboot.test.api.assertion.FlinkbootAssertions.assertThatObject;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -223,6 +225,51 @@ class FlinkbootAssertionsTest {
         void shouldFailForInvalidPojo() {
             assertThrows(
                 AssertionFailedError.class, () -> assertThat(TypeInformation.of(InvalidPojo.class)).isPojo()
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("assertThatObject(T)")
+    class AssertThatObjectExplicit {
+
+        @Test
+        @DisplayName("Should throw NullPointerException when target object is null")
+        void shouldThrowExceptionWhenObjectIsNull() {
+            var exception = assertThrows(NullPointerException.class, () -> assertThatObject(null));
+            assertEquals("Object to assert must not be null", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should validate serializable objects including types shadowed by specific assertThat overloads")
+        void shouldValidateSerializableObjectsIncludingShadowedTypes() {
+            try (var sink = new CollectingSink<String>()) {
+                var typeInfo = TypeInformation.of(ValidPojo.class);
+                assertAll(
+                    () -> assertDoesNotThrow(() -> assertThatObject(new SerializableSample()).isSerializable()),
+                    () -> assertDoesNotThrow(() -> assertThatObject(typeInfo).isSerializable()),
+                    () -> assertDoesNotThrow(() -> assertThatObject(sink).isSerializable()),
+                    () -> assertDoesNotThrow(() -> assertThatObject(ValidPojo.class).isSerializable())
+                );
+            }
+        }
+
+        @Test
+        @DisplayName("Should throw AssertionFailedError when object is not serializable")
+        void shouldFailForNonSerializableObject() {
+            assertThrows(
+                AssertionFailedError.class,
+                () -> assertThatObject(new NonSerializableSample()).isSerializable()
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw AssertionFailedError when a shadowed type is not serializable")
+        void shouldFailForNonSerializableShadowedType() {
+            var typeHint = new TypeHint<ValidPojo>() {};
+            assertThrows(
+                AssertionFailedError.class,
+                () -> assertThatObject(typeHint).isSerializable()
             );
         }
     }
