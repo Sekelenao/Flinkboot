@@ -19,6 +19,7 @@ import com.flinkboot.core.internal.execution.customizer.PropertiesCustomizer;
 import com.flinkboot.core.internal.execution.customizer.RestartStrategyCustomizer;
 import com.flinkboot.core.internal.execution.customizer.SavepointRestoreCustomizer;
 import com.flinkboot.core.internal.execution.customizer.StateBackendCustomizer;
+import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.apache.flink.configuration.CheckpointingOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.ExecutionOptions;
@@ -29,6 +30,8 @@ import org.apache.flink.configuration.StateLatencyTrackOptions;
 import org.apache.flink.configuration.StateRecoveryOptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -240,6 +243,26 @@ class EnvironmentCustomizersTest {
         assertAll(
                 () -> assertEquals(bufferTimeout, config.get(ExecutionOptions.BUFFER_TIMEOUT)),
                 () -> assertTrue(config.contains(ExecutionOptions.BUFFER_TIMEOUT))
+        );
+    }
+
+    @ParameterizedTest(name = "Runtime mode {0} should map to Flink runtime mode {1}")
+    @CsvSource({
+            "STREAMING, STREAMING",
+            "BATCH, BATCH",
+            "AUTOMATIC, AUTOMATIC"
+    })
+    @DisplayName("Should map ExecutionRuntimeMode to Flink runtime execution mode")
+    void shouldMapExecutionRuntimeMode(ExecutionRuntimeMode runtimeMode, RuntimeExecutionMode expectedMode) {
+        Configuration config = new Configuration();
+        var executionConfig = new ExecutionProperties(runtimeMode, null, null, null, null, null);
+        var envConfig = new ExecutionEnvironmentProperties(executionConfig, null, null, null, null, null, null);
+
+        new ExecutionCustomizer(config).configure(envConfig);
+
+        assertAll(
+                () -> assertEquals(expectedMode, config.get(ExecutionOptions.RUNTIME_MODE)),
+                () -> assertEquals(1, config.toMap().size())
         );
     }
 
