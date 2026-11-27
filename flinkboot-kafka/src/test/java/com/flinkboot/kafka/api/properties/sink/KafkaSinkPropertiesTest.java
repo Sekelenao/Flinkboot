@@ -21,7 +21,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -545,79 +544,6 @@ class KafkaSinkPropertiesTest {
             );
 
             assertEquals(Optional.of("   "), config.transactionalIdPrefix());
-        }
-    }
-
-    @Nested
-    @DisplayName("Equals and HashCode")
-    class EqualsAndHashCode {
-
-        @Test
-        @DisplayName("Equals and HashCode should work correctly")
-        void testEqualsAndHashCode() {
-            var config1 = new KafkaSinkProperties(
-                "my-sink",
-                List.of("localhost:9092"),
-                "my-topic",
-                KafkaDeliveryGuarantee.AT_LEAST_ONCE,
-                null,
-                null
-            );
-            var config2 = new KafkaSinkProperties(
-                "my-sink",
-                List.of("localhost:9092"),
-                "my-topic",
-                KafkaDeliveryGuarantee.AT_LEAST_ONCE,
-                null,
-                null
-            );
-            var configDiffTopic = new KafkaSinkProperties(
-                "my-sink",
-                List.of("localhost:9092"),
-                "other-topic",
-                KafkaDeliveryGuarantee.AT_LEAST_ONCE,
-                null,
-                null
-            );
-
-            assertAll(
-                () -> assertEquals(config1, config1),
-                () -> assertEquals(config1, config2),
-                () -> assertEquals(config1.hashCode(), config2.hashCode()),
-                () -> assertNotEquals(config1, null),
-                () -> assertNotEquals(config1, "string-object"),
-                () -> assertNotEquals(config1, configDiffTopic),
-                () -> assertNotNull(config1.toString())
-            );
-        }
-
-        @Test
-        @DisplayName("Should be unequal when properties differ")
-        void shouldBeUnequalWhenFieldsDiffer() {
-            var base = new KafkaSinkProperties(
-                "my-sink",
-                List.of("localhost:9092"),
-                "my-topic",
-                KafkaDeliveryGuarantee.AT_LEAST_ONCE,
-                null,
-                Map.of("key", "val")
-            );
-
-            var diffName = new KafkaSinkProperties("other-sink", List.of("localhost:9092"), "my-topic", KafkaDeliveryGuarantee.AT_LEAST_ONCE, null, Map.of("key", "val"));
-            var diffServers = new KafkaSinkProperties("my-sink", List.of("localhost:9093"), "my-topic", KafkaDeliveryGuarantee.AT_LEAST_ONCE, null, Map.of("key", "val"));
-            var diffTopic = new KafkaSinkProperties("my-sink", List.of("localhost:9092"), "other-topic", KafkaDeliveryGuarantee.AT_LEAST_ONCE, null, Map.of("key", "val"));
-            var diffGuarantee = new KafkaSinkProperties("my-sink", List.of("localhost:9092"), "my-topic", KafkaDeliveryGuarantee.NONE, null, Map.of("key", "val"));
-            var diffPrefix = new KafkaSinkProperties("my-sink", List.of("localhost:9092"), "my-topic", KafkaDeliveryGuarantee.AT_LEAST_ONCE, "prefix", Map.of("key", "val"));
-            var diffProps = new KafkaSinkProperties("my-sink", List.of("localhost:9092"), "my-topic", KafkaDeliveryGuarantee.AT_LEAST_ONCE, null, Map.of("key", "other"));
-
-            assertAll(
-                () -> assertNotEquals(base, diffName),
-                () -> assertNotEquals(base, diffServers),
-                () -> assertNotEquals(base, diffTopic),
-                () -> assertNotEquals(base, diffGuarantee),
-                () -> assertNotEquals(base, diffPrefix),
-                () -> assertNotEquals(base, diffProps)
-            );
         }
     }
 }

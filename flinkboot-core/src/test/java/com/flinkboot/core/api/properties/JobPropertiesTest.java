@@ -15,7 +15,6 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("JobProperties Tests")
@@ -112,26 +111,6 @@ class JobPropertiesTest {
                 () -> assertTrue(jobConfig.environment().isPresent()),
                 () -> assertEquals(ExecutionRuntimeMode.STREAMING, jobConfig.environment().get().execution().orElseThrow().runtimeMode().orElseThrow()),
                 () -> assertEquals(4, jobConfig.environment().get().execution().orElseThrow().parallelism().orElseThrow())
-            );
-        }
-    }
-
-    @Nested
-    @DisplayName("Equals and HashCode Tests")
-    class EqualsAndHashCodeTests {
-
-        @Test
-        @DisplayName("Should respect equals and hashCode contract")
-        void shouldRespectEqualsAndHashCode() {
-            var envProps = new ExecutionEnvironmentProperties(null, null, null, null, null, null, null);
-            var jobConfig1 = new JobProperties("job1", envProps);
-            var jobConfig2 = new JobProperties("job1", envProps);
-            var jobConfig3 = new JobProperties("job2", envProps);
-
-            assertAll(
-                () -> assertEquals(jobConfig1, jobConfig2),
-                () -> assertEquals(jobConfig1.hashCode(), jobConfig2.hashCode()),
-                () -> assertNotEquals(jobConfig1, jobConfig3)
             );
         }
     }

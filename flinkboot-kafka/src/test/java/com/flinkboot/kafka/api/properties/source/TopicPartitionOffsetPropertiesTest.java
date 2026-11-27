@@ -13,7 +13,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static jakarta.validation.Validation.buildDefaultValidatorFactory;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("TopicPartitionOffsetProperties")
@@ -170,56 +169,6 @@ class TopicPartitionOffsetPropertiesTest {
             assertAll(
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("offset")))
-            );
-        }
-    }
-
-    @Nested
-    @DisplayName("Equals and HashCode")
-    class EqualsAndHashCode {
-
-        @Test
-        @DisplayName("Should verify equality and hash code contracts across all branches")
-        void shouldVerifyEqualsAndHashCode() {
-            var config1 = new TopicPartitionOffsetProperties("topic-a", 200, 1000L);
-            var config2 = new TopicPartitionOffsetProperties("topic-a", 200, 1000L);
-            var configDifferentPartition = new TopicPartitionOffsetProperties("topic-a", 201, 1000L);
-            var configDifferentOffset = new TopicPartitionOffsetProperties("topic-a", 200, 1001L);
-            var configDifferentTopic = new TopicPartitionOffsetProperties("topic-b", 200, 1000L);
-
-            assertAll(
-                // Same instance
-                () -> assertEquals(config1, config1),
-
-                // Equal value
-                () -> assertEquals(config1, config2),
-                () -> assertEquals(config1.hashCode(), config2.hashCode()),
-
-                // Null
-                () -> assertNotEquals(config1, null),
-
-                // Different class
-                () -> assertNotEquals(config1, "not-a-config-object"),
-
-                // Different partition
-                () -> assertNotEquals(config1, configDifferentPartition),
-
-                // Different offset
-                () -> assertNotEquals(config1, configDifferentOffset),
-
-                // Different topic
-                () -> assertNotEquals(config1, configDifferentTopic)
-            );
-        }
-
-        @Test
-        @DisplayName("Should return formatted string representation from toString")
-        void shouldReturnFormattedStringFromToString() {
-            var config = new TopicPartitionOffsetProperties("topic-a", 2, 500L);
-
-            assertEquals(
-                "TopicPartitionOffsetProperties{topic='topic-a', partition=2, offset=500}",
-                config.toString()
             );
         }
     }

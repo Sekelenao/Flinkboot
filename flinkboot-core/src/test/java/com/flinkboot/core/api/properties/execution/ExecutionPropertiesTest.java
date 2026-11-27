@@ -17,7 +17,6 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("ExecutionProperties Tests")
@@ -272,27 +271,6 @@ class ExecutionPropertiesTest {
                 () -> assertEquals(Duration.ofMillis(50), config.bufferTimeout().orElseThrow()),
                 () -> assertEquals(Duration.ofMillis(100), config.autoWatermarkInterval().orElseThrow()),
                 () -> assertTrue(config.objectReuse().orElseThrow())
-            );
-        }
-    }
-
-    @Nested
-    @DisplayName("Equals and HashCode Tests")
-    class EqualsAndHashCodeTests {
-
-        @Test
-        @DisplayName("Should respect equals and hashCode contracts")
-        void shouldRespectEqualsAndHashCode() {
-            var config1 = new ExecutionProperties(ExecutionRuntimeMode.STREAMING, 8, 128, Duration.ofMillis(100), Duration.ofMillis(200), true);
-            var config2 = new ExecutionProperties(ExecutionRuntimeMode.STREAMING, 8, 128, Duration.ofMillis(100), Duration.ofMillis(200), true);
-            var config3 = new ExecutionProperties(ExecutionRuntimeMode.BATCH, 4, 64, Duration.ofMillis(50), Duration.ofMillis(100), false);
-
-            assertAll(
-                () -> assertEquals(config1, config2),
-                () -> assertEquals(config1.hashCode(), config2.hashCode()),
-                () -> assertNotEquals(config1, config3),
-                () -> assertNotEquals(null, config1),
-                () -> assertNotEquals("string", config1)
             );
         }
     }

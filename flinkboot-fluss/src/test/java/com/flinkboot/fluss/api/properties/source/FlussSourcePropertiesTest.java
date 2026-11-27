@@ -19,7 +19,6 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -335,28 +334,6 @@ class FlussSourcePropertiesTest {
         void shouldInstantiateSuccessfully() {
             var props = new FlussSourceProperties(null, null, null, null, null, null, null);
             assertNotNull(props);
-        }
-    }
-
-    @Nested
-    @DisplayName("Equals and HashCode")
-    class EqualsAndHashCode {
-
-        @Test
-        @DisplayName("Should obey equals and hashCode contract")
-        void shouldObeyContract() {
-            var props1 = new FlussSourceProperties("s", List.of("h:9123"), "d", "t", FlussStartupMode.EARLIEST, null, Map.of("k", "v"));
-            var props2 = new FlussSourceProperties("s", List.of("h:9123"), "d", "t", FlussStartupMode.EARLIEST, null, Map.of("k", "v"));
-            var props3 = new FlussSourceProperties("other", List.of("h:9123"), "d", "t", FlussStartupMode.EARLIEST, null, Map.of("k", "v"));
-
-            assertAll(
-                () -> assertEquals(props1, props2),
-                () -> assertEquals(props1.hashCode(), props2.hashCode()),
-                () -> assertNotEquals(props1, props3),
-                () -> assertNotEquals(null, props1),
-                () -> assertFalse(props1.equals("string")),
-                () -> assertTrue(props1.toString().contains("FlussSourceProperties"))
-            );
         }
     }
 

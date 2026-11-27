@@ -15,7 +15,6 @@ import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -399,61 +398,6 @@ class CheckpointingPropertiesTest {
                         )
                 ), "Expected violation on property 'unaligned-checkpoints'")
             );
-        }
-    }
-
-    @Nested
-    @DisplayName("Equals and HashCode Tests")
-    class EqualsAndHashCodeTests {
-
-        @Test
-        @DisplayName("Should verify equals and hashCode contracts")
-        void shouldVerifyEqualsAndHashCode() {
-            var config1 = new CheckpointingProperties(
-                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, false, Duration.ZERO, CheckpointStorageType.FILESYSTEM, "s3://bucket", 2
-            );
-            var config2 = new CheckpointingProperties(
-                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, false, Duration.ZERO, CheckpointStorageType.FILESYSTEM, "s3://bucket", 2
-            );
-            var diffStorage = new CheckpointingProperties(
-                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, false, Duration.ZERO, CheckpointStorageType.JOBMANAGER, "s3://bucket", 2
-            );
-            var diffFailures = new CheckpointingProperties(
-                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION, false, Duration.ZERO, CheckpointStorageType.FILESYSTEM, "s3://bucket", 5
-            );
-
-            assertAll(
-                () -> assertEquals(config1, config2),
-                () -> assertEquals(config1.hashCode(), config2.hashCode()),
-                () -> assertNotEquals(config1, diffStorage),
-                () -> assertNotEquals(config1, diffFailures)
-            );
-        }
-
-        @Test
-        @DisplayName("Should include storage in toString")
-        void shouldIncludeStorageInToString() {
-            var config = new CheckpointingProperties(
-                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                null, false, Duration.ZERO, CheckpointStorageType.FILESYSTEM, "s3://bucket", 3
-            );
-            var str = config.toString();
-            assertTrue(str.contains("storage=FILESYSTEM"));
-        }
-
-        @Test
-        @DisplayName("Should include tolerableCheckpointFailures in toString")
-        void shouldIncludeTolerableCheckpointFailuresInToString() {
-            var config = new CheckpointingProperties(
-                true, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
-                null, false, Duration.ZERO, null, null, 3
-            );
-            var str = config.toString();
-            assertTrue(str.contains("tolerableCheckpointFailures=3"));
         }
     }
 

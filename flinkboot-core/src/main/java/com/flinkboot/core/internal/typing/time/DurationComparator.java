@@ -21,6 +21,8 @@ public final class DurationComparator extends TypeComparator<Duration> {
 
     private final boolean ascendingComparison;
 
+    private final TypeComparator<?>[] comparators = new TypeComparator<?>[]{this};
+
     private transient Duration reference;
     /**
      * Creates a new {@link DurationComparator}.
@@ -183,9 +185,8 @@ public final class DurationComparator extends TypeComparator<Duration> {
     }
 
     @Override
-    @SuppressWarnings("rawtypes")
-    public TypeComparator[] getFlatComparators() {
-        return new TypeComparator[]{this};
+    public TypeComparator<?>[] getFlatComparators() {
+        return comparators;
     }
 
 }

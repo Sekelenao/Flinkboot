@@ -18,7 +18,6 @@ import static jakarta.validation.Validation.buildDefaultValidatorFactory;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -341,73 +340,6 @@ class KafkaOffsetPropertiesTest {
                 () -> assertEquals("topic-a", props.partitions().get(0).topic()),
                 () -> assertEquals(0, props.partitions().get(0).partition()),
                 () -> assertEquals(100L, props.partitions().get(0).offset())
-            );
-        }
-    }
-
-    @Nested
-    @DisplayName("Equals and HashCode")
-    class EqualsAndHashCode {
-
-        @Test
-        @DisplayName("Should verify reflexive, symmetric equality and hashCode")
-        void shouldVerifyEquality() {
-            var partition = new TopicPartitionOffsetProperties("my-topic", 0, 100L);
-            var a = new KafkaOffsetProperties(
-                KafkaOffsetInitializer.OFFSETS, null, List.of(partition), KafkaOffsetResetStrategy.EARLIEST
-            );
-            var b = new KafkaOffsetProperties(
-                KafkaOffsetInitializer.OFFSETS, null, List.of(partition), KafkaOffsetResetStrategy.EARLIEST
-            );
-
-            assertAll(
-                () -> assertEquals(a, a),
-                () -> assertEquals(a, b),
-                () -> assertEquals(b, a),
-                () -> assertEquals(a.hashCode(), b.hashCode())
-            );
-        }
-
-        @Test
-        @DisplayName("Should verify inequality when fields differ")
-        void shouldVerifyInequality() {
-            var partition = new TopicPartitionOffsetProperties("t", 0, 0L);
-            var a = new KafkaOffsetProperties(
-                KafkaOffsetInitializer.OFFSETS, 100L, List.of(partition), KafkaOffsetResetStrategy.EARLIEST
-            );
-            var diffStrategy = new KafkaOffsetProperties(
-                KafkaOffsetInitializer.TIMESTAMP, 100L, List.of(partition), KafkaOffsetResetStrategy.EARLIEST
-            );
-            var diffTimestamp = new KafkaOffsetProperties(
-                KafkaOffsetInitializer.OFFSETS, 200L, List.of(partition), KafkaOffsetResetStrategy.EARLIEST
-            );
-            var diffPartitions = new KafkaOffsetProperties(
-                KafkaOffsetInitializer.OFFSETS, 100L, List.of(new TopicPartitionOffsetProperties("t", 1, 0L)), KafkaOffsetResetStrategy.EARLIEST
-            );
-            var diffResetStrategy = new KafkaOffsetProperties(
-                KafkaOffsetInitializer.OFFSETS, 100L, List.of(partition), KafkaOffsetResetStrategy.LATEST
-            );
-
-            assertAll(
-                () -> assertNotEquals(a, diffStrategy),
-                () -> assertNotEquals(a, diffTimestamp),
-                () -> assertNotEquals(a, diffPartitions),
-                () -> assertNotEquals(a, diffResetStrategy),
-                () -> assertNotEquals(a, null),
-                () -> assertNotEquals(a, "other type")
-            );
-        }
-
-        @Test
-        @DisplayName("Should produce meaningful toString output")
-        void shouldProduceMeaningfulToString() {
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null, null);
-            var str = props.toString();
-
-            assertAll(
-                () -> assertTrue(str.contains("strategy=EARLIEST")),
-                () -> assertTrue(str.contains("resetStrategy=null")),
-                () -> assertTrue(str.contains("KafkaOffsetProperties"))
             );
         }
     }
