@@ -15,7 +15,8 @@ public final class KafkaSourcePropertiesValidator {
     private static final List<ValidationRule<KafkaSourceProperties>> RULES = List.of(
         new KafkaTopicSubscriptionRule(),
         new KafkaBoundednessRule(),
-        new KafkaGroupIdRule()
+        new KafkaGroupIdRule(),
+        new KafkaOffsetTimestampRangeRule()
     );
 
     private KafkaSourcePropertiesValidator() {

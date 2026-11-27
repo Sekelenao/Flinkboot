@@ -644,4 +644,54 @@ class KafkaSourcePropertiesValidatorTest {
             )).addPropertyNode("group-id");
         }
     }
+
+    @Nested
+    @DisplayName("Offset Timestamp Range Validation")
+    class OffsetTimestampRangeValidation {
+
+        @Test
+        @DisplayName("Should pass when starting-offsets and stopping-offsets timestamps are in valid order")
+        void shouldPassWhenOffsetTimestampsAreInOrder() {
+            var context = mock(ConstraintValidatorContext.class);
+            var props = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                null,
+                null,
+                List.of("my-topic"),
+                null,
+                null,
+                new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 100L, null, null),
+                KafkaBoundedness.BOUNDED,
+                new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 200L, null, null),
+                Map.of()
+            );
+
+            assertTrue(KafkaSourcePropertiesValidator.validate(props, context));
+        }
+
+        @Test
+        @DisplayName("Should fail when starting-offsets timestamp is greater than stopping-offsets timestamp")
+        void shouldFailWhenOffsetTimestampsAreInverted() {
+            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
+            var props = new KafkaSourceProperties(
+                "source",
+                List.of("localhost:9092"),
+                null,
+                null,
+                List.of("my-topic"),
+                null,
+                null,
+                new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 200L, null, null),
+                KafkaBoundedness.BOUNDED,
+                new KafkaOffsetProperties(KafkaOffsetInitializer.TIMESTAMP, 100L, null, null),
+                Map.of()
+            );
+
+            assertFalse(KafkaSourcePropertiesValidator.validate(props, context));
+            verify(context.buildConstraintViolationWithTemplate(
+                "stopping-offsets.timestamp must be greater than or equal to starting-offsets.timestamp"
+            )).addPropertyNode("stopping-offsets");
+        }
+    }
 }
