@@ -1,5 +1,5 @@
 module com.flinkboot.test {
-    requires transitive org.junit.jupiter.api;
+    requires org.opentest4j;
 
     exports com.flinkboot.test.api.assertion;
     exports com.flinkboot.test.api.assertion.type;

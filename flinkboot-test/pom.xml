@@ -31,6 +31,13 @@
             <artifactId>flink-core</artifactId>
         </dependency>
 
+        <!-- Assertions -->
+        <dependency>
+            <groupId>org.opentest4j</groupId>
+            <artifactId>opentest4j</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
         <!--   Test   -->
         <dependency>
             <groupId>com.flinkboot</groupId>
@@ -47,7 +54,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <scope>provided</scope>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>

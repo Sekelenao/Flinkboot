@@ -1,7 +1,6 @@
 module com.flinkboot.fluss {
     requires transitive com.flinkboot.core;
     requires com.fasterxml.jackson.annotation;
-    requires com.fasterxml.jackson.databind;
     requires jakarta.validation;
 
     exports com.flinkboot.fluss.api.properties.source;
