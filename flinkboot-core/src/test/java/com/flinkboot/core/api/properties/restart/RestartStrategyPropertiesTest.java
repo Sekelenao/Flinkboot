@@ -388,13 +388,19 @@ class RestartStrategyPropertiesTest {
         }
 
         @Test
-        @DisplayName("Should fail Bean Validation on invalid multiplier or jitter in ExponentialDelay")
+        @DisplayName("Should fail Bean Validation on invalid multiplier, jitter, or non-positive attempts in ExponentialDelay")
         void shouldFailBeanValidationOnInvalidExponentialParams() {
             var expoInvalidMultiplier = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 0.5, Duration.ofHours(1), 0.1, null);
             var expoInvalidJitter = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 1.5, null);
+            var expoZeroAttempts = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, 0);
+            var expoNegativeAttempts = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, -1);
+            var expoPositiveAttempts = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, 5);
             assertAll(
                 () -> assertEquals(1, validator.validate(expoInvalidMultiplier).size()),
-                () -> assertEquals(1, validator.validate(expoInvalidJitter).size())
+                () -> assertEquals(1, validator.validate(expoInvalidJitter).size()),
+                () -> assertEquals(1, validator.validate(expoZeroAttempts).size()),
+                () -> assertEquals(1, validator.validate(expoNegativeAttempts).size()),
+                () -> assertTrue(validator.validate(expoPositiveAttempts).isEmpty())
             );
         }
     }
