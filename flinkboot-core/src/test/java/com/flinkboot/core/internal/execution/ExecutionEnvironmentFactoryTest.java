@@ -8,6 +8,7 @@ import com.flinkboot.core.api.properties.execution.ExecutionProperties;
 import com.flinkboot.core.api.properties.execution.ExecutionRuntimeMode;
 import com.flinkboot.core.api.properties.local.LocalWebUiProperties;
 import org.apache.flink.api.common.RuntimeExecutionMode;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.ExecutionOptions;
 import org.apache.flink.configuration.PipelineOptions;
 import org.apache.flink.configuration.RestOptions;
@@ -169,6 +170,23 @@ class ExecutionEnvironmentFactoryTest {
                 var factory = new ExecutionEnvironmentFactory();
                 assertThrows(UnsupportedExecutionEnvironmentException.class, () -> factory.create(jobConfig));
             }
+        }
+
+        @Test
+        @DisplayName("Should correctly map arbitrary properties into Flink Configuration")
+        void shouldMapPropertiesToFlinkConfiguration() {
+            var props = Map.of("taskmanager.memory.managed.fraction", "0.4", "pipeline.operator-chaining.enabled", "true");
+            var envProps = new ExecutionEnvironmentProperties(null, null, null, null, null, null, props);
+            var jobConfig = new JobProperties("properties-job", envProps);
+
+            var factory = new ExecutionEnvironmentFactory();
+            var env = factory.create(jobConfig);
+            var flinkConfig = (Configuration) env.getConfiguration();
+
+            assertAll(
+                () -> assertEquals("0.4", flinkConfig.getString("taskmanager.memory.managed.fraction", null)),
+                () -> assertEquals("true", flinkConfig.getString("pipeline.operator-chaining.enabled", null))
+            );
         }
 
         @Test

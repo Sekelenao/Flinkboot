@@ -479,5 +479,34 @@ class RestartStrategyPropertiesTest {
                 () -> assertTrue(config.exponentialDelay().orElseThrow().attempts().isEmpty())
             );
         }
+
+        @Test
+        @DisplayName("Should deserialize exponential-delay JSON configuration with attempts")
+        void shouldDeserializeExponentialDelayWithAttemptsJson() throws Exception {
+            String json = "{\n" +
+                "  \"type\": \"EXPONENTIAL_DELAY\",\n" +
+                "  \"exponential-delay\": {\n" +
+                "    \"initial-backoff\": \"PT1S\",\n" +
+                "    \"max-backoff\": \"PT60S\",\n" +
+                "    \"backoff-multiplier\": 2.0,\n" +
+                "    \"reset-backoff-threshold\": \"PT1H\",\n" +
+                "    \"jitter-factor\": 0.1,\n" +
+                "    \"attempts\": 5\n" +
+                "  }\n" +
+                "}";
+
+            RestartStrategyProperties config = mapper.readValue(json, RestartStrategyProperties.class);
+
+            assertAll(
+                () -> assertNotNull(config),
+                () -> assertEquals(RestartStrategyType.EXPONENTIAL_DELAY, config.type().orElseThrow()),
+                () -> assertEquals(Duration.ofSeconds(1), config.exponentialDelay().orElseThrow().initialBackoff().orElseThrow()),
+                () -> assertEquals(Duration.ofSeconds(60), config.exponentialDelay().orElseThrow().maxBackoff().orElseThrow()),
+                () -> assertEquals(2.0, config.exponentialDelay().orElseThrow().backoffMultiplier().orElseThrow()),
+                () -> assertEquals(Duration.ofHours(1), config.exponentialDelay().orElseThrow().resetBackoffThreshold().orElseThrow()),
+                () -> assertEquals(0.1, config.exponentialDelay().orElseThrow().jitterFactor().orElseThrow()),
+                () -> assertEquals(5, config.exponentialDelay().orElseThrow().attempts().orElseThrow())
+            );
+        }
     }
 }
