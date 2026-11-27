@@ -24,6 +24,9 @@ All notable user-facing changes to this project are documented in this file.
 #### flinkboot-core
 - **Case-Insensitive YAML Key Merging (#433)**: Matches keys case-insensitively (using `Locale.ROOT`) when merging multiple YAML sources and multi-document files in `YamlParser`, ensuring `permitOverride=false`, value overrides, nested object merging, and `listMerging=true` behave consistently across differing key casings without producing duplicate keys.
 
+#### flinkboot-kafka
+- **Reject Inverted Offset Timestamps in `KafkaSourcePropertiesValidator` (#438)**: Added `KafkaOffsetTimestampRangeRule` to reject configurations where both `starting-offsets` and `stopping-offsets` use `KafkaOffsetInitializer.TIMESTAMP` with `starting-offsets.timestamp > stopping-offsets.timestamp`.
+
 ---
 
 ## [0.6.0-1.20]
