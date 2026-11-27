@@ -46,8 +46,8 @@ public final class FlussSinkFactory {
             .setBootstrapServers(String.join(",", config.bootstrapServers()))
             .setDatabase(config.database())
             .setTable(config.table())
-            .setOptions(config.properties())
-            .setSerializationSchema(serializationSchema);
+            .setSerializationSchema(serializationSchema)
+            .setOptions(config.properties());
     }
 
     /**
