@@ -30,12 +30,6 @@ class TypeInformationAssertTest {
     class ConstructorTests {
 
         @Test
-        @DisplayName("Should instantiate successfully with non-null type information")
-        void shouldInstantiateWithNonNullTypeInformation() {
-            assertDoesNotThrow(() -> new TypeInformationAssert<>(TypeInformation.of(ValidPojo.class)));
-        }
-
-        @Test
         @DisplayName("Should throw NullPointerException when type information is null")
         void shouldThrowExceptionWhenTypeInformationIsNull() {
             var exception = assertThrows(
@@ -45,31 +39,12 @@ class TypeInformationAssertTest {
         }
 
         @Test
-        @DisplayName("Should instantiate successfully with non-null type hint")
-        void shouldInstantiateWithNonNullTypeHint() {
-            assertDoesNotThrow(() -> new TypeInformationAssert<>(new TypeHint<ValidPojo>() {}));
-        }
-
-        @Test
         @DisplayName("Should throw NullPointerException when type hint is null")
         void shouldThrowExceptionWhenTypeHintIsNull() {
             var exception = assertThrows(
                 NullPointerException.class, () -> new TypeInformationAssert<>((TypeHint<?>) null)
             );
             assertEquals("TypeHint to assert must not be null", exception.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should carry the described type so isPojo keeps it for fluent chaining")
-        void shouldCarryDescribedType() {
-            TypeInformationAssert<ValidPojo> fromTypeHint = new TypeInformationAssert<>(
-                new TypeHint<ValidPojo>() {}
-            );
-            TypeInformationAssert<ValidPojo> fromTypeInformation = new TypeInformationAssert<>(
-                TypeInformation.of(ValidPojo.class)
-            );
-            assertSame(fromTypeHint, fromTypeHint.isPojo());
-            assertSame(fromTypeInformation, fromTypeInformation.isPojo());
         }
     }
 

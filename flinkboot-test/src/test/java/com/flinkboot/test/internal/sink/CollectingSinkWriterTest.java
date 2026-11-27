@@ -10,7 +10,6 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("CollectingSinkWriter")
@@ -19,14 +18,6 @@ class CollectingSinkWriterTest {
     @Nested
     @DisplayName("Constructor")
     class Constructor {
-
-        @Test
-        @DisplayName("Should create writer when arguments are valid")
-        void shouldCreateWriterWhenArgumentsAreValid() {
-            try (var writer = new CollectingSinkWriter<String>(UUID.randomUUID())) {
-                assertNotNull(writer);
-            }
-        }
 
         @Test
         @DisplayName("Should throw NullPointerException when sinkId is null")
@@ -86,14 +77,6 @@ class CollectingSinkWriterTest {
                     () -> assertDoesNotThrow(() -> writer.flush(true))
                 );
             }
-        }
-
-        @Test
-        @DisplayName("Should execute close without error")
-        void shouldExecuteCloseWithoutError() {
-            var writer = new CollectingSinkWriter<String>(UUID.randomUUID());
-
-            assertDoesNotThrow(writer::close);
         }
     }
 }

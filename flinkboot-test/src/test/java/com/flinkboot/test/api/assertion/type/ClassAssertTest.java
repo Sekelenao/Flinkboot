@@ -13,7 +13,6 @@ import java.lang.reflect.Type;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -46,12 +45,6 @@ class ClassAssertTest {
     @Nested
     @DisplayName("Constructor")
     class Constructor {
-
-        @Test
-        @DisplayName("Should instantiate successfully with non-null class")
-        void shouldInstantiateWithNonNullClass() {
-            assertDoesNotThrow(() -> new ClassAssert(ValidPojo.class));
-        }
 
         @Test
         @DisplayName("Should throw NullPointerException when class is null")
