@@ -17,7 +17,7 @@ Perform exhaustive, uncompromising static audits of production code across a tar
 
 - Read all production source files in the target module or package; consult tests and configuration files only for context.
 - Consult all installed project skills relevant to the stack and treat every skill rule as binding.
-- If the repository records past accepted trade-offs or architectural decision logs, check them so previously accepted risks are cross-referenced accurately rather than rediscovered blindly.
+- Consult `.agents/refused-past-issues/global.md` and the target module's file under `.agents/refused-past-issues/<module>.md` (when present) before flagging issues; do not report previously rejected patterns unless concrete evidence shows a runtime crash or broken contract.
 - Assume existing tests pass; do not execute build or test commands.
 
 ## Workflow

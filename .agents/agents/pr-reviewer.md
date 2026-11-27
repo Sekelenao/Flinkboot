@@ -21,6 +21,7 @@ Conduct thorough, high-signal reviews of pull requests or git diffs before merge
 
 - Inspect the PR metadata, linked issue (if any), and full git diff using read-only Git or forge CLI commands.
 - Consult all installed project skills relevant to the touched files and treat every skill rule as binding.
+- Consult `.agents/refused-past-issues/global.md` and the relevant module files under `.agents/refused-past-issues/<module>.md` (when present) so previously rejected patterns are not flagged.
 - Restrict the review strictly to added or modified lines and their direct behavioral impact; never blame or request changes for pre-existing untouched code or legacy technical debt.
 
 ## Workflow

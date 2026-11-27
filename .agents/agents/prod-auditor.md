@@ -17,6 +17,7 @@ Perform rigorous, independent audits of production code across any language or s
 
 - Read the modified production files and enough surrounding context to understand callers, invariants, and contracts.
 - Consult all installed project skills relevant to the modified stack and treat every skill rule as binding.
+- Consult `.agents/refused-past-issues/global.md` and the relevant module files under `.agents/refused-past-issues/<module>.md` (when present) so previously rejected patterns are not flagged.
 - Review any provided refinement plan or evolution boundaries to verify that abstractions match agreed axes of change without over-engineering.
 - Restrict the audit strictly to added or modified production lines and their direct behavioral impact; ignore pre-existing debt in untouched code and ignore test files.
 
