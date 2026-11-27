@@ -10,7 +10,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.time.Duration;
 import java.util.Arrays;
 
@@ -359,7 +363,40 @@ class DurationComparatorTest {
                 () -> assertEquals(1, comparator.extractKeys(value, target, 1)),
                 () -> assertSame(value, target[1]),
                 () -> assertEquals(1, flat.length),
-                () -> assertSame(comparator, flat[0])
+                () -> assertSame(comparator, flat[0]),
+                () -> assertSame(flat, comparator.getFlatComparators())
+            );
+        }
+
+        @Test
+        @DisplayName("Should keep cached flat comparators independent across duplication and Java serialization")
+        void shouldPreserveFlatComparatorsOnDuplicateAndSerialization() throws IOException, ClassNotFoundException {
+            var comparator = new DurationComparator(true);
+            var duplicate = comparator.duplicate();
+
+            var bytesOut = new ByteArrayOutputStream();
+            try (var objectOut = new ObjectOutputStream(bytesOut)) {
+                objectOut.writeObject(comparator);
+            }
+            DurationComparator deserialized;
+            try (var objectIn = new ObjectInputStream(new ByteArrayInputStream(bytesOut.toByteArray()))) {
+                deserialized = (DurationComparator) objectIn.readObject();
+            }
+
+            var originalFlat = comparator.getFlatComparators();
+            var duplicateFlat = duplicate.getFlatComparators();
+            var deserializedFlat = deserialized.getFlatComparators();
+
+            assertAll(
+                () -> assertNotSame(originalFlat, duplicateFlat),
+                () -> assertEquals(1, duplicateFlat.length),
+                () -> assertSame(duplicate, duplicateFlat[0]),
+                () -> assertSame(duplicateFlat, duplicate.getFlatComparators()),
+                () -> assertNotSame(comparator, deserialized),
+                () -> assertNotSame(originalFlat, deserializedFlat),
+                () -> assertEquals(1, deserializedFlat.length),
+                () -> assertSame(deserialized, deserializedFlat[0]),
+                () -> assertSame(deserializedFlat, deserialized.getFlatComparators())
             );
         }
     }
