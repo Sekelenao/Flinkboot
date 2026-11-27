@@ -1,7 +1,7 @@
 package com.flinkboot.fluss.api.source;
 
 import com.flinkboot.fluss.api.properties.source.FlussSourceProperties;
-import com.flinkboot.fluss.api.properties.source.FlussStartupMode;
+import com.flinkboot.fluss.internal.OffsetsInitializerMapper;
 import org.apache.fluss.config.Configuration;
 import org.apache.fluss.flink.source.FlussSource;
 import org.apache.fluss.flink.source.FlussSourceBuilder;
@@ -46,20 +46,13 @@ public final class FlussSourceFactory {
 
         var flussConfig = Configuration.fromMap(config.properties());
 
-        var builder = new FlussSourceBuilder<T>()
+        return new FlussSourceBuilder<T>()
             .setBootstrapServers(String.join(",", config.bootstrapServers()))
             .setDatabase(config.database())
             .setTable(config.table())
             .setFlussConfig(flussConfig)
-            .setDeserializationSchema(deserializationSchema);
-
-        if (config.startupMode() == FlussStartupMode.TIMESTAMP) {
-            builder.setStartingOffsets(FlussStartupMode.fromTimestamp(config.startupTimestamp().orElseThrow()));
-        } else {
-            config.startupMode().offsetsInitializer().ifPresent(builder::setStartingOffsets);
-        }
-
-        return builder;
+            .setDeserializationSchema(deserializationSchema)
+            .setStartingOffsets(OffsetsInitializerMapper.map(config));
     }
 
     /**
