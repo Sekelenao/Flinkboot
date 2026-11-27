@@ -643,6 +643,11 @@ class KafkaSourcePropertiesValidatorTest {
                 "group-id is required when starting-offsets or stopping-offsets uses a COMMITTED strategy"
             )).addPropertyNode("group-id");
         }
+    }
+
+    @Nested
+    @DisplayName("Offset Timestamp Range Validation")
+    class OffsetTimestampRangeValidation {
 
         @Test
         @DisplayName("Should pass when starting-offsets and stopping-offsets timestamps are in valid order")
