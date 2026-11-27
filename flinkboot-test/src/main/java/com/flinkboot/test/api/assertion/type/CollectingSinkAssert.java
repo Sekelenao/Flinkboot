@@ -1,7 +1,7 @@
 package com.flinkboot.test.api.assertion.type;
 
 import com.flinkboot.test.api.sink.CollectingSink;
-import org.junit.jupiter.api.Assertions;
+import org.opentest4j.AssertionFailedError;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -53,11 +53,13 @@ public final class CollectingSinkAssert<T> {
             throw new IllegalArgumentException("expectedSize must not be negative");
         }
         var actualSize = sink.size();
-        Assertions.assertEquals(
-            expectedSize,
-            actualSize,
-            () -> "Expected sink to have size <" + expectedSize + ">, but was <" + actualSize + ">"
-        );
+        if (actualSize != expectedSize) {
+            throw new AssertionFailedError(
+                "Expected sink to have size <" + expectedSize + ">, but was <" + actualSize + ">",
+                expectedSize,
+                actualSize
+            );
+        }
         return this;
     }
 
@@ -69,11 +71,13 @@ public final class CollectingSinkAssert<T> {
      */
     public CollectingSinkAssert<T> isEmpty() {
         var actualSize = sink.size();
-        Assertions.assertEquals(
-            0,
-            actualSize,
-            () -> "Expected sink to be empty, but had size <" + actualSize + ">"
-        );
+        if (actualSize != 0) {
+            throw new AssertionFailedError(
+                "Expected sink to be empty, but had size <" + actualSize + ">",
+                0,
+                actualSize
+            );
+        }
         return this;
     }
 
@@ -85,7 +89,7 @@ public final class CollectingSinkAssert<T> {
      */
     public CollectingSinkAssert<T> isNotEmpty() {
         if (sink.isEmpty()) {
-            Assertions.fail("Expected sink not to be empty, but was empty");
+            throw new AssertionFailedError("Expected sink not to be empty, but was empty");
         }
         return this;
     }
@@ -110,7 +114,7 @@ public final class CollectingSinkAssert<T> {
             .filter(item -> item == null || !actualSet.contains(item))
             .collect(Collectors.toSet());
         if (!missing.isEmpty()) {
-            Assertions.fail(
+            throw new AssertionFailedError(
                 "Expected sink to contain " + Arrays.toString(expected)
                     + ", but missing: " + missing
                     + " (actual: " + elements + ")"
@@ -131,7 +135,7 @@ public final class CollectingSinkAssert<T> {
         Objects.requireNonNull(predicate, "predicate must not be null");
         var elements = sink.elements();
         if (elements.stream().noneMatch(predicate)) {
-            Assertions.fail(
+            throw new AssertionFailedError(
                 "Expected at least one element to match predicate, but none did (actual: " + elements + ")"
             );
         }
@@ -158,7 +162,7 @@ public final class CollectingSinkAssert<T> {
             .filter(predicate.negate())
             .collect(Collectors.toSet());
         if (!nonMatching.isEmpty()) {
-            Assertions.fail(
+            throw new AssertionFailedError(
                 "Expected all elements to match predicate, but non-matching elements found: " + nonMatching
             );
         }
@@ -185,7 +189,7 @@ public final class CollectingSinkAssert<T> {
             .filter(predicate)
             .collect(Collectors.toSet());
         if (!matching.isEmpty()) {
-            Assertions.fail(
+            throw new AssertionFailedError(
                 "Expected no elements to match predicate, but matching elements found: " + matching
             );
         }

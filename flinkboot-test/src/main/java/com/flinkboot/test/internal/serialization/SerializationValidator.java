@@ -1,6 +1,6 @@
 package com.flinkboot.test.internal.serialization;
 
-import org.junit.jupiter.api.Assertions;
+import org.opentest4j.AssertionFailedError;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -35,7 +35,9 @@ public final class SerializationValidator {
         try {
             deserialize(serialize(actual));
         } catch (Exception exception) {
-            Assertions.fail("Expected instance of " + actual.getClass().getName() + " to be serializable", exception);
+            throw new AssertionFailedError(
+                "Expected instance of " + actual.getClass().getName() + " to be serializable", exception
+            );
         }
     }
 }
