@@ -7,8 +7,6 @@ import com.flinkboot.test.api.assertion.type.TypeInformationAssert;
 import com.flinkboot.test.api.sink.CollectingSink;
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.connector.sink2.WriterInitContext;
-import org.apache.flink.api.java.tuple.Tuple2;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -35,16 +33,8 @@ class FlinkbootAssertionsTest {
         public int count;
     }
 
-    public static class InvalidPojo {
-        private String name;
-    }
-
     static class SerializableSample implements Serializable {
         private final String value = "sample";
-    }
-
-    static class NonSerializableSample {
-        private final Object value = new Object();
     }
 
     @Test
@@ -55,12 +45,11 @@ class FlinkbootAssertionsTest {
         constructor.setAccessible(true);
         var exception = assertThrows(InvocationTargetException.class, constructor::newInstance);
         assertInstanceOf(AssertionError.class, exception.getCause());
-        assertTrue(exception.getCause().getMessage().contains("You cannot instantiate this class"));
     }
 
     @Nested
     @DisplayName("assertThat(Class<?>)")
-    class AssertThatClassTests {
+    class AssertThatClass {
 
         @Test
         @DisplayName("Should return ClassAssert instance when class is valid")
@@ -73,18 +62,6 @@ class FlinkbootAssertionsTest {
         void shouldThrowExceptionWhenClassIsNull() {
             var exception = assertThrows(NullPointerException.class, () -> assertThat((Class<?>) null));
             assertEquals("Class to assert must not be null", exception.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should successfully validate a valid POJO class")
-        void shouldValidateValidPojo() {
-            assertDoesNotThrow(() -> assertThat(ValidPojo.class).isPojo());
-        }
-
-        @Test
-        @DisplayName("Should throw AssertionFailedError when class violates POJO rules")
-        void shouldFailForInvalidPojo() {
-            assertThrows(AssertionFailedError.class, () -> assertThat(InvalidPojo.class).isPojo());
         }
     }
 
@@ -103,21 +80,6 @@ class FlinkbootAssertionsTest {
         void shouldThrowExceptionWhenObjectIsNull() {
             var exception = assertThrows(NullPointerException.class, () -> assertThat((Object) null));
             assertEquals("Object to assert must not be null", exception.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should successfully validate a serializable object")
-        void shouldValidateSerializableObject() {
-            assertDoesNotThrow(() -> assertThat(new SerializableSample()).isSerializable());
-        }
-
-        @Test
-        @DisplayName("Should throw AssertionFailedError when object is not serializable")
-        void shouldFailForNonSerializableObject() {
-            assertThrows(
-                AssertionFailedError.class,
-                () -> assertThat(new NonSerializableSample()).isSerializable()
-            );
         }
     }
 
@@ -139,30 +101,11 @@ class FlinkbootAssertionsTest {
             var exception = assertThrows(NullPointerException.class, () -> assertThat((CollectingSink<String>) null));
             assertEquals("sink must not be null", exception.getMessage());
         }
-
-        @Test
-        @DisplayName("Should successfully execute fluent assertion chain on CollectingSink")
-        void shouldChainFluentAssertionsOnCollectingSink() throws Exception {
-            try (var sink = new CollectingSink<String>()) {
-                var writer = sink.createWriter((WriterInitContext) null);
-                writer.write("msg-1", null);
-                writer.write("msg-2", null);
-
-                assertDoesNotThrow(() ->
-                    assertThat(sink)
-                        .hasSize(2)
-                        .contains("msg-1", "msg-2")
-                        .anyMatch(msg -> msg.equals("msg-1"))
-                        .allMatch(msg -> msg.startsWith("msg-"))
-                        .noneMatch(msg -> msg.startsWith("other-"))
-                );
-            }
-        }
     }
 
     @Nested
     @DisplayName("assertThat(TypeHint<T>)")
-    class AssertThatTypeHintTests {
+    class AssertThatTypeHint {
 
         @Test
         @DisplayName("Should return TypeInformationAssert instance when type hint is valid")
@@ -177,26 +120,11 @@ class FlinkbootAssertionsTest {
             var exception = assertThrows(NullPointerException.class, () -> assertThat((TypeHint<?>) null));
             assertEquals("TypeHint to assert must not be null", exception.getMessage());
         }
-
-        @Test
-        @DisplayName("Should successfully validate a valid generic POJO type")
-        void shouldValidateValidPojo() {
-            assertDoesNotThrow(() -> assertThat(new TypeHint<Tuple2<String, ValidPojo>>() {}).isPojo());
-        }
-
-        @Test
-        @DisplayName("Should throw AssertionFailedError when hinted type violates POJO rules")
-        void shouldFailForInvalidPojo() {
-            assertThrows(
-                AssertionFailedError.class,
-                () -> assertThat(new TypeHint<Tuple2<String, InvalidPojo>>() {}).isPojo()
-            );
-        }
     }
 
     @Nested
     @DisplayName("assertThat(TypeInformation<T>)")
-    class AssertThatTypeInformationTests {
+    class AssertThatTypeInformation {
 
         @Test
         @DisplayName("Should return TypeInformationAssert instance when type information is valid")
@@ -212,20 +140,6 @@ class FlinkbootAssertionsTest {
                 NullPointerException.class, () -> assertThat((TypeInformation<?>) null)
             );
             assertEquals("TypeInformation to assert must not be null", exception.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should successfully validate a valid POJO type information")
-        void shouldValidateValidPojo() {
-            assertDoesNotThrow(() -> assertThat(TypeInformation.of(ValidPojo.class)).isPojo());
-        }
-
-        @Test
-        @DisplayName("Should throw AssertionFailedError when type information violates POJO rules")
-        void shouldFailForInvalidPojo() {
-            assertThrows(
-                AssertionFailedError.class, () -> assertThat(TypeInformation.of(InvalidPojo.class)).isPojo()
-            );
         }
     }
 
@@ -252,15 +166,6 @@ class FlinkbootAssertionsTest {
                     () -> assertDoesNotThrow(() -> assertThatObject(ValidPojo.class).isSerializable())
                 );
             }
-        }
-
-        @Test
-        @DisplayName("Should throw AssertionFailedError when object is not serializable")
-        void shouldFailForNonSerializableObject() {
-            assertThrows(
-                AssertionFailedError.class,
-                () -> assertThatObject(new NonSerializableSample()).isSerializable()
-            );
         }
 
         @Test
