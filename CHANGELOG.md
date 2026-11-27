@@ -33,6 +33,7 @@ All notable user-facing changes to this project are documented in this file.
 
 #### flinkboot-fluss
 - **Apply `config.properties()` Last in `FlussSourceFactory` and `FlussSinkFactory` (#441)**: Moved `.setFlussConfig(...)` in `FlussSourceFactory.supplyBuilderFor` and `.setOptions(config.properties())` in `FlussSinkFactory.supplyBuilderFor` to the end of their respective builder chains so explicit Flinkboot configuration is applied first and the generic properties escape hatch behaves consistently with Kafka factories.
+- **Reject Negative Fluss Startup Timestamps (#442)**: `FlussStartupMode.fromTimestamp` now rejects negative timestamps with `IllegalArgumentException`; zero and positive timestamps keep their existing behavior.
 
 ---
 

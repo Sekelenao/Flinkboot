@@ -47,10 +47,14 @@ public enum FlussStartupMode {
     /**
      * Creates an {@link OffsetsInitializer} resolved for a specific timestamp in milliseconds.
      *
-     * @param timestamp the timestamp in milliseconds
+     * @param timestamp the timestamp in milliseconds; must be non-negative
      * @return the resolved {@link OffsetsInitializer}
+     * @throws IllegalArgumentException if the timestamp is negative
      */
     public static OffsetsInitializer fromTimestamp(long timestamp) {
+        if (timestamp < 0) {
+            throw new IllegalArgumentException("timestamp must be non-negative: " + timestamp);
+        }
         return OffsetsInitializer.timestamp(timestamp);
     }
 }
