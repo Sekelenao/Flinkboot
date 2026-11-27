@@ -2,6 +2,7 @@ package com.flinkboot.fluss.api.source;
 
 import com.flinkboot.fluss.api.properties.source.FlussSourceProperties;
 import com.flinkboot.fluss.api.properties.source.FlussStartupMode;
+import org.apache.fluss.client.initializer.OffsetsInitializer;
 import org.apache.fluss.config.Configuration;
 import org.apache.fluss.flink.source.FlussSource;
 import org.apache.fluss.flink.source.FlussSourceBuilder;
@@ -46,20 +47,26 @@ public final class FlussSourceFactory {
 
         var flussConfig = Configuration.fromMap(config.properties());
 
-        var builder = new FlussSourceBuilder<T>()
+        return new FlussSourceBuilder<T>()
             .setBootstrapServers(String.join(",", config.bootstrapServers()))
             .setDatabase(config.database())
             .setTable(config.table())
             .setFlussConfig(flussConfig)
-            .setDeserializationSchema(deserializationSchema);
+            .setDeserializationSchema(deserializationSchema)
+            .setStartingOffsets(resolveStartingOffsets(config));
+    }
 
-        if (config.startupMode() == FlussStartupMode.TIMESTAMP) {
-            builder.setStartingOffsets(FlussStartupMode.fromTimestamp(config.startupTimestamp().orElseThrow()));
-        } else {
-            config.startupMode().offsetsInitializer().ifPresent(builder::setStartingOffsets);
+    private static OffsetsInitializer resolveStartingOffsets(FlussSourceProperties config) {
+        switch (config.startupMode()) {
+            case EARLIEST:
+            case LATEST:
+            case FULL:
+                return config.startupMode().offsetsInitializer().orElseThrow();
+            case TIMESTAMP:
+                return FlussStartupMode.fromTimestamp(config.startupTimestamp().orElseThrow());
+            default:
+                throw new IllegalStateException("Unsupported FlussStartupMode: " + config.startupMode());
         }
-
-        return builder;
     }
 
     /**
