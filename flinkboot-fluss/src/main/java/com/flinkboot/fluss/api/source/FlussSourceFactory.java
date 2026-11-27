@@ -1,8 +1,7 @@
 package com.flinkboot.fluss.api.source;
 
 import com.flinkboot.fluss.api.properties.source.FlussSourceProperties;
-import com.flinkboot.fluss.api.properties.source.FlussStartupMode;
-import org.apache.fluss.client.initializer.OffsetsInitializer;
+import com.flinkboot.fluss.internal.OffsetsInitializerMapper;
 import org.apache.fluss.config.Configuration;
 import org.apache.fluss.flink.source.FlussSource;
 import org.apache.fluss.flink.source.FlussSourceBuilder;
@@ -53,20 +52,7 @@ public final class FlussSourceFactory {
             .setTable(config.table())
             .setFlussConfig(flussConfig)
             .setDeserializationSchema(deserializationSchema)
-            .setStartingOffsets(resolveStartingOffsets(config));
-    }
-
-    private static OffsetsInitializer resolveStartingOffsets(FlussSourceProperties config) {
-        switch (config.startupMode()) {
-            case EARLIEST:
-            case LATEST:
-            case FULL:
-                return config.startupMode().offsetsInitializer().orElseThrow();
-            case TIMESTAMP:
-                return FlussStartupMode.fromTimestamp(config.startupTimestamp().orElseThrow());
-            default:
-                throw new IllegalStateException("Unsupported FlussStartupMode: " + config.startupMode());
-        }
+            .setStartingOffsets(OffsetsInitializerMapper.map(config));
     }
 
     /**
