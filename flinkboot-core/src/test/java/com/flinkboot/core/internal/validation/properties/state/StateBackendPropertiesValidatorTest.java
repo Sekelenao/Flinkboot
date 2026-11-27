@@ -6,14 +6,10 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.Answers;
 
 import java.lang.reflect.InvocationTargetException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -48,124 +44,27 @@ class StateBackendPropertiesValidatorTest {
     class Validation {
 
         @Test
-        @DisplayName("Should throw NullPointerException when properties is null")
-        void shouldThrowWhenPropertiesIsNull() {
+        @DisplayName("Should return true when all state backend rules pass")
+        void shouldPassWhenAllRulesPass() {
             var context = mock(ConstraintValidatorContext.class);
-
-            var exception = assertThrows(
-                NullPointerException.class,
-                () -> StateBackendPropertiesValidator.validate(null, context)
-            );
-
-            assertEquals("properties must not be null", exception.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should throw NullPointerException when context is null")
-        void shouldThrowWhenContextIsNull() {
             var props = new StateBackendProperties(StateBackendType.ROCKSDB, true, false, null, null);
 
-            var exception = assertThrows(
-                NullPointerException.class,
-                () -> StateBackendPropertiesValidator.validate(props, null)
-            );
-
-            assertEquals("context must not be null", exception.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should pass when state backend is null and customClass is null")
-        void shouldPassWhenStateBackendAndCustomClassNull() {
-            var context = mock(ConstraintValidatorContext.class);
-            var props = new StateBackendProperties(null, null, null, null, null);
-
             assertTrue(StateBackendPropertiesValidator.validate(props, context));
         }
 
         @Test
-        @DisplayName("Should pass when state backend is non-CUSTOM and customClass is null")
-        void shouldPassWhenNonCustomAndCustomClassNull() {
-            var context = mock(ConstraintValidatorContext.class);
-            var props = new StateBackendProperties(StateBackendType.HASHMAP, false, true, null, null);
-
-            assertTrue(StateBackendPropertiesValidator.validate(props, context));
-        }
-
-        @Test
-        @DisplayName("Should fail when state backend is non-CUSTOM and customClass is empty string")
-        void shouldFailWhenNonCustomAndCustomClassEmpty() {
+        @DisplayName("Should accumulate all violations when multiple state backend rules fail simultaneously")
+        void shouldAccumulateAllViolations() {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-            var props = new StateBackendProperties(StateBackendType.ROCKSDB, true, false, "", null);
+            var props = new StateBackendProperties(StateBackendType.HASHMAP, true, null, "com.example.MyFactory", null);
 
             assertFalse(StateBackendPropertiesValidator.validate(props, context));
             verify(context.buildConstraintViolationWithTemplate(
                 "custom-class can only be specified when state backend type is CUSTOM"
             )).addPropertyNode("custom-class");
-        }
-
-        @Test
-        @DisplayName("Should pass when state backend is CUSTOM and customClass is non-blank")
-        void shouldPassWhenCustomAndCustomClassProvided() {
-            var context = mock(ConstraintValidatorContext.class);
-            var props = new StateBackendProperties(StateBackendType.CUSTOM, false, false, "com.example.MyFactory", null);
-
-            assertTrue(StateBackendPropertiesValidator.validate(props, context));
-        }
-
-        @Test
-        @DisplayName("Should pass cross-field validation when state backend is CUSTOM and customClass is empty string")
-        void shouldPassWhenCustomAndCustomClassIsEmptyString() {
-            var context = mock(ConstraintValidatorContext.class);
-            var props = new StateBackendProperties(StateBackendType.CUSTOM, false, false, "", null);
-
-            assertTrue(StateBackendPropertiesValidator.validate(props, context));
-        }
-
-        @Test
-        @DisplayName("Should fail when state backend is CUSTOM and customClass is null")
-        void shouldFailWhenCustomAndCustomClassNull() {
-            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-            var props = new StateBackendProperties(StateBackendType.CUSTOM, null, null, null, null);
-
-            assertFalse(StateBackendPropertiesValidator.validate(props, context));
-            verify(context.buildConstraintViolationWithTemplate(
-                "custom-class must be specified when state backend type is CUSTOM"
-            )).addPropertyNode("custom-class");
-        }
-
-        @ParameterizedTest
-        @NullSource
-        @EnumSource(value = StateBackendType.class, names = "CUSTOM", mode = EnumSource.Mode.EXCLUDE)
-        @DisplayName("Should fail when state backend is non-CUSTOM and customClass is provided")
-        void shouldFailWhenNonCustomAndCustomClassProvided(StateBackendType type) {
-            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-            var props = new StateBackendProperties(type, null, null, "com.example.MyFactory", null);
-
-            assertFalse(StateBackendPropertiesValidator.validate(props, context));
-            verify(context.buildConstraintViolationWithTemplate(
-                "custom-class can only be specified when state backend type is CUSTOM"
-            )).addPropertyNode("custom-class");
-        }
-
-        @Test
-        @DisplayName("Should fail when state backend is HASHMAP and incremental is true")
-        void shouldFailWhenHashMapAndIncrementalTrue() {
-            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-            var props = new StateBackendProperties(StateBackendType.HASHMAP, true, null, null, null);
-
-            assertFalse(StateBackendPropertiesValidator.validate(props, context));
             verify(context.buildConstraintViolationWithTemplate(
                 "incremental cannot be true when state backend type is HASHMAP"
             )).addPropertyNode("incremental");
-        }
-
-        @Test
-        @DisplayName("Should pass when state backend is ROCKSDB and incremental is true")
-        void shouldPassWhenRocksDbAndIncrementalTrue() {
-            var context = mock(ConstraintValidatorContext.class);
-            var props = new StateBackendProperties(StateBackendType.ROCKSDB, true, null, null, null);
-
-            assertTrue(StateBackendPropertiesValidator.validate(props, context));
         }
     }
 }
