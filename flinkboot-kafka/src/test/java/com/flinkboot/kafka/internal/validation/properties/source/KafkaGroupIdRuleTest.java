@@ -84,6 +84,11 @@ class KafkaGroupIdRuleTest {
             null, List.of("localhost:9092"), null, null, List.of("t1"), null, null,
             new KafkaOffsetProperties(null, null, null, null), null, null, null
         );
+        var withNullStoppingStrategy = new KafkaSourceProperties(
+            null, List.of("localhost:9092"), null, null, List.of("t1"), null, null,
+            new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null, null),
+            KafkaBoundedness.BOUNDED, new KafkaOffsetProperties(null, null, null, null), null
+        );
         var withEarliest = new KafkaSourceProperties(
             null, List.of("localhost:9092"), null, null, List.of("t1"), null, null,
             new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null, null), null, null, null
@@ -91,6 +96,7 @@ class KafkaGroupIdRuleTest {
 
         assertTrue(rule.check(withNullOffsets).isEmpty());
         assertTrue(rule.check(withNullStrategy).isEmpty());
+        assertTrue(rule.check(withNullStoppingStrategy).isEmpty());
         assertTrue(rule.check(withEarliest).isEmpty());
     }
 }
