@@ -2,6 +2,7 @@ package com.flinkboot.fluss.internal;
 
 import com.flinkboot.fluss.api.properties.source.FlussSourceProperties;
 import com.flinkboot.fluss.api.properties.source.FlussStartupMode;
+import org.apache.fluss.client.initializer.TimestampOffsetsInitializer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,7 +15,6 @@ import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("OffsetsInitializerMapper")
@@ -64,7 +64,7 @@ class OffsetsInitializerMapperTest {
             1700000000000L,
             Map.of()
         );
-        assertNotNull(OffsetsInitializerMapper.map(config));
+        assertInstanceOf(TimestampOffsetsInitializer.class, OffsetsInitializerMapper.map(config));
     }
 
     @Test
