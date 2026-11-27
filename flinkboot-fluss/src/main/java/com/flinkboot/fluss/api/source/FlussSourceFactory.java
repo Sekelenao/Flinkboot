@@ -50,9 +50,9 @@ public final class FlussSourceFactory {
             .setBootstrapServers(String.join(",", config.bootstrapServers()))
             .setDatabase(config.database())
             .setTable(config.table())
-            .setFlussConfig(flussConfig)
             .setDeserializationSchema(deserializationSchema)
-            .setStartingOffsets(OffsetsInitializerMapper.map(config));
+            .setStartingOffsets(OffsetsInitializerMapper.map(config))
+            .setFlussConfig(flussConfig);
     }
 
     /**
