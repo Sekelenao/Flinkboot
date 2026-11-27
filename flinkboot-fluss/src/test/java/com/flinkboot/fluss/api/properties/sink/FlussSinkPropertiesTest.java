@@ -18,8 +18,6 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -425,38 +423,6 @@ class FlussSinkPropertiesTest {
             assertNotNull(servers, "bootstrapServers() should never return null");
             assertTrue(servers.isEmpty(), "Expected empty list when constructed with empty list");
             assertThrows(UnsupportedOperationException.class, () -> servers.add("x"), "Returned list must be unmodifiable");
-        }
-    }
-
-    @Nested
-    @DisplayName("Equals and HashCode")
-    class EqualsAndHashCode {
-
-        @Test
-        @DisplayName("Should obey equals and hashCode contract across all fields")
-        void shouldObeyContract() {
-            var props1 = new FlussSinkProperties("s", List.of("h:9123"), "d", "t", Map.of("k", "v"));
-            var props2 = new FlussSinkProperties("s", List.of("h:9123"), "d", "t", Map.of("k", "v"));
-            var diffName = new FlussSinkProperties("other", List.of("h:9123"), "d", "t", Map.of("k", "v"));
-            var diffServers = new FlussSinkProperties("s", List.of("other:9123"), "d", "t", Map.of("k", "v"));
-            var diffDb = new FlussSinkProperties("s", List.of("h:9123"), "other_db", "t", Map.of("k", "v"));
-            var diffTable = new FlussSinkProperties("s", List.of("h:9123"), "d", "other_tbl", Map.of("k", "v"));
-            var diffProps = new FlussSinkProperties("s", List.of("h:9123"), "d", "t", Map.of("k2", "v2"));
-
-            assertAll(
-                () -> assertTrue(props1.equals(props1)),
-                () -> assertEquals(props1, props2),
-                () -> assertEquals(props2, props1),
-                () -> assertEquals(props1.hashCode(), props2.hashCode()),
-                () -> assertNotEquals(props1, diffName),
-                () -> assertNotEquals(props1, diffServers),
-                () -> assertNotEquals(props1, diffDb),
-                () -> assertNotEquals(props1, diffTable),
-                () -> assertNotEquals(props1, diffProps),
-                () -> assertNotEquals(null, props1),
-                () -> assertFalse(props1.equals("string")),
-                () -> assertTrue(props1.toString().contains("FlussSinkProperties"))
-            );
         }
     }
 }

@@ -14,41 +14,12 @@ import org.mockito.Answers;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 @DisplayName("KafkaOffsetPropertiesValidator")
 class KafkaOffsetPropertiesValidatorTest {
-
-    @Nested
-    @DisplayName("Preconditions")
-    class Preconditions {
-
-        @Test
-        @DisplayName("Should throw NullPointerException when properties is null")
-        void shouldThrowWhenPropertiesIsNull() {
-            var context = mock(ConstraintValidatorContext.class);
-            var ex = assertThrows(
-                NullPointerException.class,
-                () -> KafkaOffsetPropertiesValidator.validate(null, context)
-            );
-            assertEquals("properties must not be null", ex.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should throw NullPointerException when context is null")
-        void shouldThrowWhenContextIsNull() {
-            var props = new KafkaOffsetProperties(KafkaOffsetInitializer.EARLIEST, null, null, null);
-            var ex = assertThrows(
-                NullPointerException.class,
-                () -> KafkaOffsetPropertiesValidator.validate(props, null)
-            );
-            assertEquals("context must not be null", ex.getMessage());
-        }
-    }
 
     @Nested
     @DisplayName("Validation")

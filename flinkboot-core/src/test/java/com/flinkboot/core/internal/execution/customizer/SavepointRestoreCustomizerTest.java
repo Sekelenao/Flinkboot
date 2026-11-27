@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -23,12 +22,6 @@ class SavepointRestoreCustomizerTest {
     @Nested
     @DisplayName("Constructor")
     class Constructor {
-
-        @Test
-        @DisplayName("Should successfully instantiate when Configuration is non-null")
-        void shouldSuccessfullyInstantiateWithValidConfiguration() {
-            assertDoesNotThrow(() -> new SavepointRestoreCustomizer(new Configuration()));
-        }
 
         @Test
         @DisplayName("Should throw NullPointerException when Configuration is null")

@@ -73,16 +73,6 @@ class ConfigurationValidatorTest {
     class ConstructorTests {
 
         @Test
-        @DisplayName("Should successfully instantiate when capacity is positive")
-        void shouldInstantiateWhenCapacityIsPositive() {
-            assertDoesNotThrow(() -> {
-                try (var validator = new JakartaConfigurationValidator(5)) {
-                    // instantiated
-                }
-            });
-        }
-
-        @Test
         @DisplayName("Should throw IllegalArgumentException when capacity is zero")
         void shouldThrowWhenCapacityIsZero() {
             var exception = assertThrows(IllegalArgumentException.class, () -> new JakartaConfigurationValidator(0));

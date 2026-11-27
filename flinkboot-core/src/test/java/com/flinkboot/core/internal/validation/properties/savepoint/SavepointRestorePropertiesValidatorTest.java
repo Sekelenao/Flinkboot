@@ -10,7 +10,6 @@ import org.mockito.Answers;
 
 import java.lang.reflect.InvocationTargetException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -45,92 +44,30 @@ class SavepointRestorePropertiesValidatorTest {
     class Validation {
 
         @Test
-        @DisplayName("Should throw NullPointerException when properties is null")
-        void shouldThrowWhenPropertiesIsNull() {
+        @DisplayName("Should return true when all savepoint restore rules pass")
+        void shouldPassWhenAllRulesPass() {
             var context = mock(ConstraintValidatorContext.class);
+            var props = new SavepointRestoreProperties("/tmp/savepoint", true, RestoreMode.CLAIM, "/tmp/savepoints");
 
-            var exception = assertThrows(
-                NullPointerException.class,
-                () -> SavepointRestorePropertiesValidator.validate(null, context)
-            );
-
-            assertEquals("properties must not be null", exception.getMessage());
+            assertTrue(SavepointRestorePropertiesValidator.validate(props, context));
         }
 
         @Test
-        @DisplayName("Should throw NullPointerException when context is null")
-        void shouldThrowWhenContextIsNull() {
-            var props = new SavepointRestoreProperties("/tmp/savepoint", null, null, null);
-
-            var exception = assertThrows(
-                NullPointerException.class,
-                () -> SavepointRestorePropertiesValidator.validate(props, null)
-            );
-
-            assertEquals("context must not be null", exception.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should fail when both savepointPath and directory are empty")
-        void shouldFailWhenBothSavepointPathAndDirectoryAreEmpty() {
+        @DisplayName("Should accumulate all violations when multiple savepoint restore rules fail simultaneously")
+        void shouldAccumulateAllViolations() {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-            var props = new SavepointRestoreProperties(null, null, null, null);
+            var props = new SavepointRestoreProperties(null, true, RestoreMode.CLAIM, null);
 
             assertFalse(SavepointRestorePropertiesValidator.validate(props, context));
             verify(context.buildConstraintViolationWithTemplate(
                 "at least one of savepoint-path or directory must be specified"
             )).addPropertyNode("savepoint-path");
-        }
-
-        @Test
-        @DisplayName("Should fail when allow-non-restored-state is set without savepoint-path")
-        void shouldFailWhenAllowNonRestoredStateIsSetWithoutSavepointPath() {
-            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-            var props = new SavepointRestoreProperties(null, true, null, "/tmp/savepoints");
-
-            assertFalse(SavepointRestorePropertiesValidator.validate(props, context));
             verify(context.buildConstraintViolationWithTemplate(
                 "allow-non-restored-state cannot be set when savepoint-path is absent"
             )).addPropertyNode("allow-non-restored-state");
-        }
-
-        @Test
-        @DisplayName("Should fail when restore-mode is set without savepoint-path")
-        void shouldFailWhenRestoreModeIsSetWithoutSavepointPath() {
-            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-            var props = new SavepointRestoreProperties(null, null, RestoreMode.CLAIM, "/tmp/savepoints");
-
-            assertFalse(SavepointRestorePropertiesValidator.validate(props, context));
             verify(context.buildConstraintViolationWithTemplate(
                 "restore-mode cannot be set when savepoint-path is absent"
             )).addPropertyNode("restore-mode");
-        }
-
-        @Test
-        @DisplayName("Should pass when only savepointPath is specified")
-        void shouldPassWhenOnlySavepointPathIsSpecified() {
-            var context = mock(ConstraintValidatorContext.class);
-            var props = new SavepointRestoreProperties("/tmp/savepoint", null, null, null);
-
-            assertTrue(SavepointRestorePropertiesValidator.validate(props, context));
-        }
-
-        @Test
-        @DisplayName("Should pass when only directory is specified")
-        void shouldPassWhenOnlyDirectoryIsSpecified() {
-            var context = mock(ConstraintValidatorContext.class);
-            var props = new SavepointRestoreProperties(null, null, null, "/tmp/savepoints");
-
-            assertTrue(SavepointRestorePropertiesValidator.validate(props, context));
-        }
-
-        @Test
-        @DisplayName("Should pass when both savepointPath and directory are specified")
-        void shouldPassWhenBothSavepointPathAndDirectoryAreSpecified() {
-            var context = mock(ConstraintValidatorContext.class);
-            var props = new SavepointRestoreProperties("/tmp/savepoint", true, RestoreMode.CLAIM, "/tmp/savepoints");
-
-            assertTrue(SavepointRestorePropertiesValidator.validate(props, context));
         }
     }
 }

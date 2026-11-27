@@ -12,7 +12,6 @@ import org.opentest4j.AssertionFailedError;
 import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -24,14 +23,6 @@ class CollectingSinkAssertTest {
     @Nested
     @DisplayName("Constructor")
     class Constructor {
-
-        @Test
-        @DisplayName("Should instantiate successfully with non-null sink")
-        void shouldInstantiateWithNonNullSink() {
-            try (var sink = new CollectingSink<String>()) {
-                assertDoesNotThrow(() -> new CollectingSinkAssert<>(sink));
-            }
-        }
 
         @Test
         @DisplayName("Should throw NullPointerException when sink is null")

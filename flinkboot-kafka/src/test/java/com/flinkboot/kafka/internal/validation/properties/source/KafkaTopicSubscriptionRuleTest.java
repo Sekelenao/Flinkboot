@@ -58,6 +58,22 @@ class KafkaTopicSubscriptionRuleTest {
     }
 
     @Test
+    @DisplayName("Should fail on topic-pattern when both topics and empty topic-pattern are specified")
+    void shouldFailWhenTopicsAndEmptyPatternSpecified() {
+        var props = new KafkaSourceProperties(
+            null, List.of("localhost:9092"), null, null, List.of("t1"), "", null, null, null, null, null
+        );
+
+        assertEquals(
+            Optional.of(new PropertyViolation(
+                "topic-pattern",
+                "Exactly one of 'topics', 'topic-pattern', or 'partitions' must be specified"
+            )),
+            rule.check(props)
+        );
+    }
+
+    @Test
     @DisplayName("Should fail on partitions when partitions is combined with topics")
     void shouldFailWhenTopicsAndPartitionsSpecified() {
         var props = new KafkaSourceProperties(

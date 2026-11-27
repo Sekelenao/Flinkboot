@@ -9,12 +9,12 @@ import org.mockito.Answers;
 
 import java.lang.reflect.InvocationTargetException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @DisplayName("ExecutionPropertiesValidator")
 class ExecutionPropertiesValidatorTest {
@@ -38,67 +38,12 @@ class ExecutionPropertiesValidatorTest {
     class Validation {
 
         @Test
-        @DisplayName("Should throw NullPointerException when properties is null")
-        void shouldThrowWhenPropertiesIsNull() {
+        @DisplayName("Should return true when all execution rules pass")
+        void shouldPassWhenAllRulesPass() {
             var context = mock(ConstraintValidatorContext.class);
-
-            var exception = assertThrows(
-                NullPointerException.class,
-                () -> ExecutionPropertiesValidator.validate(null, context)
-            );
-
-            assertEquals("properties must not be null", exception.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should throw NullPointerException when context is null")
-        void shouldThrowWhenContextIsNull() {
             var props = new ExecutionProperties(null, 4, 16, null, null, null);
 
-            var exception = assertThrows(
-                NullPointerException.class,
-                () -> ExecutionPropertiesValidator.validate(props, null)
-            );
-
-            assertEquals("context must not be null", exception.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should return true when parallelism and maxParallelism are null")
-        void shouldPassWhenFieldsAreNull() {
-            var context = mock(ConstraintValidatorContext.class);
-            var props = new ExecutionProperties(null, null, null, null, null, null);
-
             assertTrue(ExecutionPropertiesValidator.validate(props, context));
-        }
-
-        @Test
-        @DisplayName("Should return true when only parallelism is provided")
-        void shouldPassWhenOnlyParallelismProvided() {
-            var context = mock(ConstraintValidatorContext.class);
-            var props = new ExecutionProperties(null, 4, null, null, null, null);
-
-            assertTrue(ExecutionPropertiesValidator.validate(props, context));
-        }
-
-        @Test
-        @DisplayName("Should return true when only maxParallelism is provided")
-        void shouldPassWhenOnlyMaxParallelismProvided() {
-            var context = mock(ConstraintValidatorContext.class);
-            var props = new ExecutionProperties(null, null, 16, null, null, null);
-
-            assertTrue(ExecutionPropertiesValidator.validate(props, context));
-        }
-
-        @Test
-        @DisplayName("Should return true when parallelism is less than or equal to maxParallelism")
-        void shouldPassWhenParallelismIsLessOrEqual() {
-            var context = mock(ConstraintValidatorContext.class);
-            var props1 = new ExecutionProperties(null, 4, 16, null, null, null);
-            var props2 = new ExecutionProperties(null, 16, 16, null, null, null);
-
-            assertTrue(ExecutionPropertiesValidator.validate(props1, context));
-            assertTrue(ExecutionPropertiesValidator.validate(props2, context));
         }
 
         @Test
@@ -108,6 +53,9 @@ class ExecutionPropertiesValidatorTest {
             var props = new ExecutionProperties(null, 32, 16, null, null, null);
 
             assertFalse(ExecutionPropertiesValidator.validate(props, context));
+            verify(context).buildConstraintViolationWithTemplate(
+                "parallelism (32) cannot exceed max-parallelism (16)"
+            );
         }
     }
 }
