@@ -32,6 +32,10 @@ import java.util.UUID;
  * }
  * }</pre>
  *
+ * <p>When running an asynchronous job with {@code env.executeAsync()}, cancel and await job
+ * termination before {@link #close()} runs (for example, inside the {@code try-with-resources}
+ * block) so late writer calls do not re-populate the static registry after cleanup.
+ *
  * @param <T> the type of elements collected by this sink
  */
 public final class CollectingSink<T> implements Sink<T>, AutoCloseable {
@@ -100,6 +104,9 @@ public final class CollectingSink<T> implements Sink<T>, AutoCloseable {
 
     /**
      * Closes this sink and removes all collected elements.
+     *
+     * <p>Ensure any asynchronous job writing to this sink has terminated before calling this
+     * method so late writes do not re-populate the static registry.
      */
     @Override
     public void close() {

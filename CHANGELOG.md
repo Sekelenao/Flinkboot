@@ -21,6 +21,9 @@ All notable user-facing changes to this project are documented in this file.
 
 ### 🔵 Fixes & Diagnostics
 
+#### flinkboot-test
+- **Atomic `append`/`clear` in `CollectingSinkRegistry` (#448)**: Updated `CollectingSinkRegistry.append` to use `ConcurrentHashMap.compute` so queue lookup/creation and element insertion execute atomically under the bin lock without racing against `clear`, and documented in `CollectingSink` that `executeAsync()` jobs must be cancelled and terminated before `close()` runs.
+
 #### flinkboot-core
 - **Case-Insensitive YAML Key Merging (#433)**: Matches keys case-insensitively (using `Locale.ROOT`) when merging multiple YAML sources and multi-document files in `YamlParser`, ensuring `permitOverride=false`, value overrides, nested object merging, and `listMerging=true` behave consistently across differing key casings without producing duplicate keys.
 

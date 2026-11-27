@@ -29,8 +29,11 @@ public final class CollectingSinkRegistry {
     public static void append(UUID sinkId, Object value) {
         Objects.requireNonNull(sinkId, "sinkId must not be null");
         Objects.requireNonNull(value, "value must not be null");
-        ELEMENTS_BY_SINK.computeIfAbsent(sinkId, ignored -> new ConcurrentLinkedQueue<>())
-            .add(value);
+        ELEMENTS_BY_SINK.compute(sinkId, (ignored, existing) -> {
+            var queue = existing != null ? existing : new ConcurrentLinkedQueue<>();
+            queue.add(value);
+            return queue;
+        });
     }
 
     /**
