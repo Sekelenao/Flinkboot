@@ -185,8 +185,7 @@ public final class DurationComparator extends TypeComparator<Duration> {
     }
 
     @Override
-    @SuppressWarnings("rawtypes")
-    public TypeComparator[] getFlatComparators() {
+    public TypeComparator<?>[] getFlatComparators() {
         return comparators;
     }
 
