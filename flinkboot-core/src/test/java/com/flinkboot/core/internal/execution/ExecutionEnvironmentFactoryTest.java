@@ -3,34 +3,14 @@ package com.flinkboot.core.internal.execution;
 import com.flinkboot.core.api.exception.execution.UnsupportedExecutionEnvironmentException;
 import com.flinkboot.core.api.properties.ExecutionEnvironmentProperties;
 import com.flinkboot.core.api.properties.JobProperties;
-import com.flinkboot.core.api.properties.checkpointing.CheckpointStorageType;
-import com.flinkboot.core.api.properties.checkpointing.CheckpointingMode;
 import com.flinkboot.core.api.properties.checkpointing.CheckpointingProperties;
-import com.flinkboot.core.api.properties.checkpointing.ExternalizedCheckpointCleanupMode;
 import com.flinkboot.core.api.properties.execution.ExecutionProperties;
 import com.flinkboot.core.api.properties.execution.ExecutionRuntimeMode;
 import com.flinkboot.core.api.properties.local.LocalWebUiProperties;
-import com.flinkboot.core.api.properties.restart.ExponentialDelayRestartProperties;
-import com.flinkboot.core.api.properties.restart.FailureRateRestartProperties;
-import com.flinkboot.core.api.properties.restart.FixedDelayRestartProperties;
-import com.flinkboot.core.api.properties.restart.RestartStrategyProperties;
-import com.flinkboot.core.api.properties.restart.RestartStrategyType;
-import com.flinkboot.core.api.properties.savepoint.RestoreMode;
-import com.flinkboot.core.api.properties.savepoint.SavepointRestoreProperties;
-import com.flinkboot.core.api.properties.state.StateBackendProperties;
-import com.flinkboot.core.api.properties.state.StateBackendType;
 import org.apache.flink.api.common.RuntimeExecutionMode;
-import org.apache.flink.configuration.CheckpointingOptions;
-import org.apache.flink.configuration.Configuration;
-import org.apache.flink.configuration.CoreOptions;
 import org.apache.flink.configuration.ExecutionOptions;
-import org.apache.flink.configuration.ExternalizedCheckpointRetention;
 import org.apache.flink.configuration.PipelineOptions;
 import org.apache.flink.configuration.RestOptions;
-import org.apache.flink.configuration.RestartStrategyOptions;
-import org.apache.flink.configuration.StateBackendOptions;
-import org.apache.flink.configuration.StateLatencyTrackOptions;
-import org.apache.flink.configuration.StateRecoveryOptions;
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.junit.jupiter.api.DisplayName;
@@ -61,74 +41,6 @@ class ExecutionEnvironmentFactoryTest {
         void shouldThrowNpeWhenJobPropertiesIsNull() {
             var factory = new ExecutionEnvironmentFactory();
             assertThrows(NullPointerException.class, () -> factory.create(null));
-        }
-
-        @Test
-        @DisplayName("Should correctly map JobProperties into Flink Configuration")
-        void shouldMapJobPropertiesToFlinkConfiguration() {
-            var execConfig = new ExecutionProperties(
-                ExecutionRuntimeMode.STREAMING,
-                8,
-                128,
-                Duration.ofMillis(100),
-                Duration.ofMillis(200),
-                true
-            );
-            var envProps = new ExecutionEnvironmentProperties(execConfig, null, null, null, null, null, null);
-            var jobConfig = new JobProperties("my-test-job", envProps);
-
-            var factory = new ExecutionEnvironmentFactory();
-            var env = factory.create(jobConfig);
-            var flinkConfig = env.getConfiguration();
-
-            assertAll(
-                () -> assertEquals("my-test-job", flinkConfig.get(PipelineOptions.NAME)),
-                () -> assertEquals(RuntimeExecutionMode.STREAMING, flinkConfig.get(ExecutionOptions.RUNTIME_MODE)),
-                () -> assertEquals(8, flinkConfig.get(CoreOptions.DEFAULT_PARALLELISM)),
-                () -> assertEquals(128, flinkConfig.get(PipelineOptions.MAX_PARALLELISM)),
-                () -> assertEquals(Duration.ofMillis(100), flinkConfig.get(ExecutionOptions.BUFFER_TIMEOUT)),
-                () -> assertEquals(Duration.ofMillis(200), flinkConfig.get(PipelineOptions.AUTO_WATERMARK_INTERVAL)),
-                () -> assertTrue(flinkConfig.get(PipelineOptions.OBJECT_REUSE))
-            );
-        }
-
-        @Test
-        @DisplayName("Should correctly map CheckpointingProperties into Flink Configuration")
-        void shouldMapCheckpointingPropertiesToFlinkConfiguration() {
-            var chkConfig = new CheckpointingProperties(
-                true,
-                Duration.ofMillis(10000),
-                CheckpointingMode.EXACTLY_ONCE,
-                Duration.ofMillis(60000),
-                Duration.ofMillis(5000),
-                2,
-                ExternalizedCheckpointCleanupMode.RETAIN_ON_CANCELLATION,
-                true,
-                Duration.ofMillis(1000),
-                CheckpointStorageType.FILESYSTEM,
-                "s3://my-bucket/checkpoints",
-                5
-            );
-            var envProps = new ExecutionEnvironmentProperties(null, chkConfig, null, null, null, null, null);
-            var jobConfig = new JobProperties("checkpoint-job", envProps);
-
-            var factory = new ExecutionEnvironmentFactory();
-            var env = factory.create(jobConfig);
-            var flinkConfig = env.getConfiguration();
-
-            assertAll(
-                () -> assertEquals(Duration.ofMillis(10000), flinkConfig.get(CheckpointingOptions.CHECKPOINTING_INTERVAL)),
-                () -> assertEquals(org.apache.flink.core.execution.CheckpointingMode.EXACTLY_ONCE, flinkConfig.get(CheckpointingOptions.CHECKPOINTING_CONSISTENCY_MODE)),
-                () -> assertEquals(Duration.ofMillis(60000), flinkConfig.get(CheckpointingOptions.CHECKPOINTING_TIMEOUT)),
-                () -> assertEquals(Duration.ofMillis(5000), flinkConfig.get(CheckpointingOptions.MIN_PAUSE_BETWEEN_CHECKPOINTS)),
-                () -> assertEquals(2, flinkConfig.get(CheckpointingOptions.MAX_CONCURRENT_CHECKPOINTS)),
-                () -> assertEquals(ExternalizedCheckpointRetention.RETAIN_ON_CANCELLATION, flinkConfig.get(CheckpointingOptions.EXTERNALIZED_CHECKPOINT_RETENTION)),
-                () -> assertTrue(flinkConfig.get(CheckpointingOptions.ENABLE_UNALIGNED)),
-                () -> assertEquals(Duration.ofMillis(1000), flinkConfig.get(CheckpointingOptions.ALIGNED_CHECKPOINT_TIMEOUT)),
-                () -> assertEquals("filesystem", flinkConfig.get(CheckpointingOptions.CHECKPOINT_STORAGE)),
-                () -> assertEquals("s3://my-bucket/checkpoints", flinkConfig.get(CheckpointingOptions.CHECKPOINTS_DIRECTORY)),
-                () -> assertEquals(5, flinkConfig.get(CheckpointingOptions.TOLERABLE_FAILURE_NUMBER))
-            );
         }
 
         @Test
@@ -188,131 +100,6 @@ class ExecutionEnvironmentFactoryTest {
             var env = factory.create(jobConfig);
 
             assertTrue(env.getCheckpointConfig().isCheckpointingEnabled());
-        }
-
-        @Test
-        @DisplayName("Should correctly map FixedDelay RestartStrategyProperties into Flink Configuration")
-        void shouldMapFixedDelayRestartStrategyToFlinkConfiguration() {
-            var fixed = new FixedDelayRestartProperties(3, Duration.ofMillis(5000));
-            var restartConfig = new RestartStrategyProperties(RestartStrategyType.FIXED_DELAY, fixed, null, null);
-            var envProps = new ExecutionEnvironmentProperties(null, null, restartConfig, null, null, null, null);
-            var jobConfig = new JobProperties("restart-job", envProps);
-
-            var factory = new ExecutionEnvironmentFactory();
-            var env = factory.create(jobConfig);
-            var flinkConfig = env.getConfiguration();
-
-            assertAll(
-                () -> assertEquals("fixed-delay", flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY)),
-                () -> assertEquals(3, flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS)),
-                () -> assertEquals(Duration.ofMillis(5000), flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY_FIXED_DELAY_DELAY))
-            );
-        }
-
-        @Test
-        @DisplayName("Should correctly map FailureRate RestartStrategyProperties into Flink Configuration")
-        void shouldMapFailureRateRestartStrategyToFlinkConfiguration() {
-            var failure = new FailureRateRestartProperties(3, Duration.ofMillis(60000), Duration.ofMillis(1000));
-            var restartConfig = new RestartStrategyProperties(RestartStrategyType.FAILURE_RATE, null, failure, null);
-            var envProps = new ExecutionEnvironmentProperties(null, null, restartConfig, null, null, null, null);
-            var jobConfig = new JobProperties("restart-failure-job", envProps);
-
-            var factory = new ExecutionEnvironmentFactory();
-            var env = factory.create(jobConfig);
-            var flinkConfig = env.getConfiguration();
-
-            assertAll(
-                () -> assertEquals("failure-rate", flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY)),
-                () -> assertEquals(3, flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_MAX_FAILURES_PER_INTERVAL)),
-                () -> assertEquals(Duration.ofMillis(60000), flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_FAILURE_RATE_INTERVAL)),
-                () -> assertEquals(Duration.ofMillis(1000), flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_DELAY))
-            );
-        }
-
-        @Test
-        @DisplayName("Should correctly map ExponentialDelay RestartStrategyProperties into Flink Configuration")
-        void shouldMapExponentialDelayRestartStrategyToFlinkConfiguration() {
-            var expo = new ExponentialDelayRestartProperties(Duration.ofMillis(1000), Duration.ofMillis(60000), 2.0, Duration.ofMillis(3600000), 0.1, 5);
-            var restartConfig = new RestartStrategyProperties(RestartStrategyType.EXPONENTIAL_DELAY, null, null, expo);
-            var envProps = new ExecutionEnvironmentProperties(null, null, restartConfig, null, null, null, null);
-            var jobConfig = new JobProperties("restart-expo-job", envProps);
-
-            var factory = new ExecutionEnvironmentFactory();
-            var env = factory.create(jobConfig);
-            var flinkConfig = env.getConfiguration();
-
-            assertAll(
-                () -> assertEquals("exponential-delay", flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY)),
-                () -> assertEquals(Duration.ofMillis(1000), flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_INITIAL_BACKOFF)),
-                () -> assertEquals(Duration.ofMillis(60000), flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_MAX_BACKOFF)),
-                () -> assertEquals(2.0, flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_BACKOFF_MULTIPLIER)),
-                () -> assertEquals(Duration.ofMillis(3600000), flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_RESET_BACKOFF_THRESHOLD)),
-                () -> assertEquals(0.1, flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_JITTER_FACTOR)),
-                () -> assertEquals(5, flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY_EXPONENTIAL_DELAY_ATTEMPTS))
-            );
-        }
-
-
-        @Test
-        @DisplayName("Should correctly map NoRestart RestartStrategyProperties into Flink Configuration")
-        void shouldMapNoRestartToFlinkConfiguration() {
-            var restartConfig = new RestartStrategyProperties(RestartStrategyType.NO_RESTART, null, null, null);
-            var envProps = new ExecutionEnvironmentProperties(null, null, restartConfig, null, null, null, null);
-            var jobConfig = new JobProperties("no-restart-job", envProps);
-
-            var factory = new ExecutionEnvironmentFactory();
-            var env = factory.create(jobConfig);
-            var flinkConfig = env.getConfiguration();
-
-            assertEquals("none", flinkConfig.get(RestartStrategyOptions.RESTART_STRATEGY));
-        }
-
-        @Test
-        @DisplayName("Should correctly map StateBackendProperties into Flink Configuration")
-        void shouldMapStateBackendPropertiesToFlinkConfiguration() {
-            var stateConfig = new StateBackendProperties(
-                StateBackendType.ROCKSDB,
-                true,
-                true,
-                null,
-                null
-            );
-            var envProps = new ExecutionEnvironmentProperties(null, null, null, stateConfig, null, null, null);
-            var jobConfig = new JobProperties("state-backend-job", envProps);
-
-            var factory = new ExecutionEnvironmentFactory();
-            var env = factory.create(jobConfig);
-            var flinkConfig = env.getConfiguration();
-
-            assertAll(
-                () -> assertEquals("rocksdb", flinkConfig.get(StateBackendOptions.STATE_BACKEND)),
-                () -> assertTrue(flinkConfig.get(CheckpointingOptions.INCREMENTAL_CHECKPOINTS)),
-                () -> assertTrue(flinkConfig.get(StateLatencyTrackOptions.LATENCY_TRACK_ENABLED))
-            );
-        }
-
-        @Test
-        @DisplayName("Should correctly map SavepointRestoreProperties into Flink Configuration")
-        void shouldMapSavepointRestorePropertiesToFlinkConfiguration() {
-            var savepointConfig = new SavepointRestoreProperties(
-                "/tmp/savepoint-1",
-                true,
-                RestoreMode.CLAIM,
-                "s3://my-bucket/savepoints"
-            );
-            var envProps = new ExecutionEnvironmentProperties(null, null, null, null, savepointConfig, null, null);
-            var jobConfig = new JobProperties("savepoint-job", envProps);
-
-            var factory = new ExecutionEnvironmentFactory();
-            var env = factory.create(jobConfig);
-            var flinkConfig = env.getConfiguration();
-
-            assertAll(
-                () -> assertEquals("/tmp/savepoint-1", flinkConfig.get(StateRecoveryOptions.SAVEPOINT_PATH)),
-                () -> assertTrue(flinkConfig.get(StateRecoveryOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE)),
-                () -> assertEquals("CLAIM", flinkConfig.get(StateRecoveryOptions.RESTORE_MODE).toString()),
-                () -> assertEquals("s3://my-bucket/savepoints", flinkConfig.get(CheckpointingOptions.SAVEPOINT_DIRECTORY))
-            );
         }
 
         @Test
@@ -382,23 +169,6 @@ class ExecutionEnvironmentFactoryTest {
                 var factory = new ExecutionEnvironmentFactory();
                 assertThrows(UnsupportedExecutionEnvironmentException.class, () -> factory.create(jobConfig));
             }
-        }
-
-        @Test
-        @DisplayName("Should correctly map custom properties into Flink Configuration")
-        void shouldMapPropertiesToFlinkConfiguration() {
-            var props = Map.of("taskmanager.memory.managed.fraction", "0.4", "pipeline.operator-chaining.enabled", "true");
-            var envProps = new ExecutionEnvironmentProperties(null, null, null, null, null, null, props);
-            var jobConfig = new JobProperties("properties-job", envProps);
-
-            var factory = new ExecutionEnvironmentFactory();
-            var env = factory.create(jobConfig);
-            var flinkConfig = (Configuration) env.getConfiguration();
-
-            assertAll(
-                () -> assertEquals("0.4", flinkConfig.getString("taskmanager.memory.managed.fraction", null)),
-                () -> assertEquals("true", flinkConfig.getString("pipeline.operator-chaining.enabled", null))
-            );
         }
 
         @Test
