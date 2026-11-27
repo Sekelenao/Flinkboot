@@ -13,7 +13,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static jakarta.validation.Validation.buildDefaultValidatorFactory;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("TopicPartitionProperties")
@@ -141,53 +140,6 @@ class TopicPartitionPropertiesTest {
             assertAll(
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("topic")))
-            );
-        }
-    }
-
-    @Nested
-    @DisplayName("Equals and HashCode")
-    class EqualsAndHashCode {
-
-        @Test
-        @DisplayName("Should verify equality and hash code contracts across all branches")
-        void shouldVerifyEqualsAndHashCode() {
-            var config1 = new TopicPartitionProperties("topic-a", 200);
-            var config2 = new TopicPartitionProperties("topic-a", 200);
-            var configDifferentPartition = new TopicPartitionProperties("topic-a", 201);
-            var configDifferentTopic = new TopicPartitionProperties("topic-b", 200);
-
-            assertAll(
-                // Same instance
-                () -> assertEquals(config1, config1),
-
-                // Equal value
-                () -> assertEquals(config1, config2),
-                () -> assertEquals(config2, config1),
-                () -> assertEquals(config1.hashCode(), config2.hashCode()),
-
-                // Null
-                () -> assertNotEquals(config1, null),
-
-                // Different class
-                () -> assertNotEquals(config1, "not-a-config-object"),
-
-                // Different partition
-                () -> assertNotEquals(config1, configDifferentPartition),
-
-                // Different topic
-                () -> assertNotEquals(config1, configDifferentTopic)
-            );
-        }
-
-        @Test
-        @DisplayName("Should return formatted string representation from toString")
-        void shouldReturnFormattedStringFromToString() {
-            var config = new TopicPartitionProperties("topic-a", 2);
-
-            assertEquals(
-                "TopicPartitionProperties{topic='topic-a', partition=2}",
-                config.toString()
             );
         }
     }

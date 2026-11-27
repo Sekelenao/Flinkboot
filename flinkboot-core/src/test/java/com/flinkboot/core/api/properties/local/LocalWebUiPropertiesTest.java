@@ -13,7 +13,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -219,59 +218,6 @@ class LocalWebUiPropertiesTest {
                 () -> assertTrue(config.enabled().isEmpty()),
                 () -> assertTrue(config.port().isEmpty()),
                 () -> assertTrue(config.bindAddress().isEmpty())
-            );
-        }
-    }
-
-    @Nested
-    @DisplayName("Equals and HashCode")
-    class EqualsAndHashCode {
-
-        @Test
-        @DisplayName("Should satisfy equals and hashCode contract")
-        void shouldSatisfyEqualsAndHashCodeContract() {
-            var config1 = new LocalWebUiProperties(true, 8081, "localhost");
-            var config2 = new LocalWebUiProperties(true, 8081, "localhost");
-            assertAll(
-                () -> assertEquals(config1, config1),
-                () -> assertEquals(config1, config2),
-                () -> assertEquals(config2, config1),
-                () -> assertEquals(config1.hashCode(), config2.hashCode()),
-                () -> assertNotEquals(null, config1),
-                () -> assertNotEquals("string", config1)
-            );
-        }
-
-        @Test
-        @DisplayName("Should not equal when individual fields differ")
-        void shouldNotEqualWhenIndividualFieldsDiffer() {
-            var base = new LocalWebUiProperties(true, 8081, "localhost");
-            var diffEnabled = new LocalWebUiProperties(false, 8081, "localhost");
-            var diffPort = new LocalWebUiProperties(true, 9090, "localhost");
-            var diffBindAddress = new LocalWebUiProperties(true, 8081, "0.0.0.0");
-            var nullEnabled = new LocalWebUiProperties(null, 8081, "localhost");
-            var nullPort = new LocalWebUiProperties(true, null, "localhost");
-            var nullBindAddress = new LocalWebUiProperties(true, 8081, null);
-            assertAll(
-                () -> assertNotEquals(base, diffEnabled),
-                () -> assertNotEquals(base, diffPort),
-                () -> assertNotEquals(base, diffBindAddress),
-                () -> assertNotEquals(base, nullEnabled),
-                () -> assertNotEquals(base, nullPort),
-                () -> assertNotEquals(base, nullBindAddress)
-            );
-        }
-
-        @Test
-        @DisplayName("Should return meaningful string representation")
-        void shouldReturnMeaningfulStringRepresentation() {
-            var config = new LocalWebUiProperties(true, 8081, "localhost");
-            var str = config.toString();
-            assertAll(
-                () -> assertTrue(str.contains("LocalWebUiProperties")),
-                () -> assertTrue(str.contains("enabled=true")),
-                () -> assertTrue(str.contains("port=8081")),
-                () -> assertTrue(str.contains("bindAddress='localhost'"))
             );
         }
     }

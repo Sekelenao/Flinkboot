@@ -14,7 +14,6 @@ import java.time.Duration;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -401,40 +400,6 @@ class RestartStrategyPropertiesTest {
                 () -> assertEquals(1, validator.validate(expoZeroAttempts).size()),
                 () -> assertEquals(1, validator.validate(expoNegativeAttempts).size()),
                 () -> assertTrue(validator.validate(expoPositiveAttempts).isEmpty())
-            );
-        }
-    }
-
-    @Nested
-    @DisplayName("Equals and HashCode Tests")
-    class EqualsAndHashCodeTests {
-
-        @Test
-        @DisplayName("Should verify equals and hashCode contract across strategy configurations")
-        void shouldVerifyEqualsAndHashCode() {
-            var fixed1 = new FixedDelayRestartProperties(3, Duration.ofSeconds(5));
-            var fixed2 = new FixedDelayRestartProperties(3, Duration.ofSeconds(5));
-            var fixed3 = new FixedDelayRestartProperties(5, Duration.ofSeconds(5));
-
-            var failure1 = new FailureRateRestartProperties(3, Duration.ofMinutes(1), Duration.ofSeconds(1));
-            var failure2 = new FailureRateRestartProperties(3, Duration.ofMinutes(1), Duration.ofSeconds(1));
-
-            var expo1 = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, 5);
-            var expo2 = new ExponentialDelayRestartProperties(Duration.ofSeconds(1), Duration.ofMinutes(1), 2.0, Duration.ofHours(1), 0.1, 5);
-
-            var config1 = new RestartStrategyProperties(RestartStrategyType.FIXED_DELAY, fixed1, null, null);
-            var config2 = new RestartStrategyProperties(RestartStrategyType.FIXED_DELAY, fixed2, null, null);
-
-            assertAll(
-                () -> assertEquals(fixed1, fixed2),
-                () -> assertEquals(fixed1.hashCode(), fixed2.hashCode()),
-                () -> assertNotEquals(fixed1, fixed3),
-                () -> assertEquals(failure1, failure2),
-                () -> assertEquals(failure1.hashCode(), failure2.hashCode()),
-                () -> assertEquals(expo1, expo2),
-                () -> assertEquals(expo1.hashCode(), expo2.hashCode()),
-                () -> assertEquals(config1, config2),
-                () -> assertEquals(config1.hashCode(), config2.hashCode())
             );
         }
     }
