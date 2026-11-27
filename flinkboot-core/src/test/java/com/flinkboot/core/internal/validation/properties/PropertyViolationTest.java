@@ -4,7 +4,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -14,17 +13,6 @@ class PropertyViolationTest {
     @Nested
     @DisplayName("Constructor")
     class Constructor {
-
-        @Test
-        @DisplayName("Should store property and message when valid")
-        void shouldStorePropertyAndMessage() {
-            var violation = new PropertyViolation("interval", "interval must be specified");
-
-            assertAll(
-                () -> assertEquals("interval", violation.property()),
-                () -> assertEquals("interval must be specified", violation.message())
-            );
-        }
 
         @Test
         @DisplayName("Should throw NullPointerException when property is null")

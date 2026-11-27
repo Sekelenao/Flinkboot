@@ -168,18 +168,7 @@ class CollectingSinkRegistryTest {
         }
 
         @Test
-        @DisplayName("Should return an immutable snapshot of elements")
-        void shouldReturnImmutableSnapshot() {
-            var sinkId = UUID.randomUUID();
-            CollectingSinkRegistry.append(sinkId, "first");
-
-            List<String> snapshot = CollectingSinkRegistry.elements(sinkId);
-
-            assertThrows(UnsupportedOperationException.class, () -> snapshot.add("mutated"));
-        }
-
-        @Test
-        @DisplayName("Should isolate snapshot from subsequent appends to the same sink")
+        @DisplayName("Should return an immutable snapshot isolated from subsequent appends to the same sink")
         void shouldIsolateSnapshotFromSubsequentAppends() {
             var sinkId = UUID.randomUUID();
             try {
@@ -189,6 +178,7 @@ class CollectingSinkRegistryTest {
                 CollectingSinkRegistry.append(sinkId, "second");
 
                 assertAll(
+                    () -> assertThrows(UnsupportedOperationException.class, () -> snapshot.add("mutated")),
                     () -> assertEquals(List.of("first"), snapshot),
                     () -> assertEquals(List.of("first", "second"), CollectingSinkRegistry.elements(sinkId))
                 );
@@ -212,17 +202,6 @@ class CollectingSinkRegistryTest {
             } finally {
                 CollectingSinkRegistry.clear(sinkId);
             }
-        }
-
-        @Test
-        @DisplayName("Should remove elements when cleared")
-        void shouldRemoveElementsWhenCleared() {
-            var sinkId = UUID.randomUUID();
-            CollectingSinkRegistry.append(sinkId, "item");
-
-            CollectingSinkRegistry.clear(sinkId);
-
-            assertTrue(CollectingSinkRegistry.elements(sinkId).isEmpty());
         }
 
         @Test

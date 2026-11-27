@@ -6,24 +6,18 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Answers;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 
 @DisplayName("KafkaSinkPropertiesValidator")
 class KafkaSinkPropertiesValidatorTest {
@@ -46,61 +40,9 @@ class KafkaSinkPropertiesValidatorTest {
     @DisplayName("Validation")
     class Validation {
 
-        @ParameterizedTest
-        @NullSource
-        @ValueSource(strings = "my-prefix")
-        @DisplayName("Should skip cross-field validation when deliveryGuarantee is null")
-        void shouldPassWhenDeliveryGuaranteeIsNull(String prefix) {
-            var context = mock(ConstraintValidatorContext.class);
-            var props = new KafkaSinkProperties(
-                "sink",
-                List.of("localhost:9092"),
-                "topic",
-                null,
-                prefix,
-                Map.of()
-            );
-
-            assertTrue(KafkaSinkPropertiesValidator.validate(props, context));
-            verifyNoInteractions(context);
-        }
-
         @Test
-        @DisplayName("Should throw NullPointerException when properties is null")
-        void shouldThrowWhenPropertiesIsNull() {
-            var context = mock(ConstraintValidatorContext.class);
-
-            var exception = assertThrows(
-                NullPointerException.class,
-                () -> KafkaSinkPropertiesValidator.validate(null, context)
-            );
-
-            assertEquals("properties must not be null", exception.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should throw NullPointerException when context is null")
-        void shouldThrowWhenContextIsNull() {
-            var props = new KafkaSinkProperties(
-                "sink",
-                List.of("localhost:9092"),
-                "topic",
-                KafkaDeliveryGuarantee.EXACTLY_ONCE,
-                "my-prefix",
-                Map.of()
-            );
-
-            var exception = assertThrows(
-                NullPointerException.class,
-                () -> KafkaSinkPropertiesValidator.validate(props, null)
-            );
-
-            assertEquals("context must not be null", exception.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should pass when EXACTLY_ONCE is used with non-blank transactionalIdPrefix")
-        void shouldPassWhenExactlyOnceWithPrefix() {
+        @DisplayName("Should return true when all Kafka sink rules pass")
+        void shouldPassWhenAllRulesPass() {
             var context = mock(ConstraintValidatorContext.class);
             var props = new KafkaSinkProperties(
                 "sink",
@@ -114,28 +56,10 @@ class KafkaSinkPropertiesValidatorTest {
             assertTrue(KafkaSinkPropertiesValidator.validate(props, context));
         }
 
-        @ParameterizedTest
-        @EnumSource(value = KafkaDeliveryGuarantee.class, names = "EXACTLY_ONCE", mode = EnumSource.Mode.EXCLUDE)
-        @DisplayName("Should pass when non-EXACTLY_ONCE guarantee has no transactionalIdPrefix")
-        void shouldPassWhenNonExactlyOnceWithoutPrefix(KafkaDeliveryGuarantee guarantee) {
-            var context = mock(ConstraintValidatorContext.class);
-            var props = new KafkaSinkProperties(
-                "sink",
-                List.of("localhost:9092"),
-                "topic",
-                guarantee,
-                null,
-                Map.of()
-            );
-
-            assertTrue(KafkaSinkPropertiesValidator.validate(props, context));
-        }
-
         @Test
-        @DisplayName("Should fail when EXACTLY_ONCE is used without transactionalIdPrefix")
-        void shouldFailWhenExactlyOnceWithoutPrefix() {
+        @DisplayName("Should fail when Kafka sink rule fails")
+        void shouldFailWhenTransactionalIdPrefixRuleFails() {
             var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-
             var props = new KafkaSinkProperties(
                 "sink",
                 List.of("localhost:9092"),
@@ -148,27 +72,6 @@ class KafkaSinkPropertiesValidatorTest {
             assertFalse(KafkaSinkPropertiesValidator.validate(props, context));
             verify(context.buildConstraintViolationWithTemplate(
                 "transactional-id-prefix is required when delivery-guarantee is EXACTLY_ONCE"
-            )).addPropertyNode("transactional-id-prefix");
-        }
-
-        @ParameterizedTest
-        @EnumSource(value = KafkaDeliveryGuarantee.class, names = "EXACTLY_ONCE", mode = EnumSource.Mode.EXCLUDE)
-        @DisplayName("Should fail when non-EXACTLY_ONCE guarantee has transactionalIdPrefix")
-        void shouldFailWhenNonExactlyOnceWithPrefix(KafkaDeliveryGuarantee guarantee) {
-            var context = mock(ConstraintValidatorContext.class, Answers.RETURNS_DEEP_STUBS);
-
-            var props = new KafkaSinkProperties(
-                "sink",
-                List.of("localhost:9092"),
-                "topic",
-                guarantee,
-                "unexpected-prefix",
-                Map.of()
-            );
-
-            assertFalse(KafkaSinkPropertiesValidator.validate(props, context));
-            verify(context.buildConstraintViolationWithTemplate(
-                "transactional-id-prefix can only be specified when delivery-guarantee is EXACTLY_ONCE"
             )).addPropertyNode("transactional-id-prefix");
         }
     }

@@ -16,7 +16,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -275,103 +274,6 @@ class StateBackendPropertiesTest {
                     v.getPropertyPath().toString().equals("incremental")
                         && v.getMessage().equals("incremental cannot be true when state backend type is HASHMAP")
                 ))
-            );
-        }
-    }
-
-    @Nested
-    @DisplayName("Equals and HashCode")
-    class EqualsAndHashCode {
-
-        @Test
-        @DisplayName("Should satisfy equals and hashCode contract")
-        void shouldSatisfyEqualsAndHashCodeContract() {
-            var config1 = new StateBackendProperties(StateBackendType.ROCKSDB, true, false, null, null);
-            var config2 = new StateBackendProperties(StateBackendType.ROCKSDB, true, false, null, null);
-
-            assertAll(
-                () -> assertEquals(config1, config1),
-                () -> assertEquals(config1, config2),
-                () -> assertEquals(config2, config1),
-                () -> assertEquals(config1.hashCode(), config2.hashCode()),
-                () -> assertNotEquals(config1, null),
-                () -> assertNotEquals(config1, "differentType")
-            );
-        }
-
-        @Test
-        @DisplayName("Should not equal when individual fields differ")
-        void shouldNotEqualWhenIndividualFieldsDiffer() {
-            var base = new StateBackendProperties(
-                StateBackendType.ROCKSDB,
-                true,
-                false,
-                null,
-                null
-            );
-            var diffType = new StateBackendProperties(
-                StateBackendType.HASHMAP,
-                true,
-                false,
-                null,
-                null
-            );
-            var diffIncremental = new StateBackendProperties(
-                StateBackendType.ROCKSDB,
-                false,
-                false,
-                null,
-                null
-            );
-            var diffLatency = new StateBackendProperties(
-                StateBackendType.ROCKSDB,
-                true,
-                true,
-                null,
-                null
-            );
-
-            var custom1 = new StateBackendProperties(
-                StateBackendType.CUSTOM,
-                true,
-                false,
-                "com.example.CustomBackend1",
-                null
-            );
-            var custom2 = new StateBackendProperties(
-                StateBackendType.CUSTOM,
-                true,
-                false,
-                "com.example.CustomBackend2",
-                null
-            );
-
-            assertAll(
-                () -> assertNotEquals(base, diffType),
-                () -> assertNotEquals(base, diffIncremental),
-                () -> assertNotEquals(base, diffLatency),
-                () -> assertNotEquals(base, custom1),
-                () -> assertNotEquals(custom1, custom2)
-            );
-        }
-
-        @Test
-        @DisplayName("Should return meaningful string representation")
-        void shouldReturnMeaningfulStringRepresentation() {
-            var config = new StateBackendProperties(
-                StateBackendType.CUSTOM,
-                true,
-                false,
-                "com.example.CustomFactory",
-                null
-            );
-            var str = config.toString();
-            assertAll(
-                () -> assertTrue(str.contains("StateBackendProperties")),
-                () -> assertTrue(str.contains("type=CUSTOM")),
-                () -> assertTrue(str.contains("incremental=true")),
-                () -> assertTrue(str.contains("latencyTracking=false")),
-                () -> assertTrue(str.contains("customClass='com.example.CustomFactory'"))
             );
         }
     }

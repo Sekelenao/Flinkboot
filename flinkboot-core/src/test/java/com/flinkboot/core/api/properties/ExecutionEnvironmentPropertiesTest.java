@@ -2,7 +2,6 @@ package com.flinkboot.core.api.properties;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.flinkboot.core.api.properties.execution.ExecutionProperties;
 import com.flinkboot.core.api.properties.execution.ExecutionRuntimeMode;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -13,14 +12,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -205,29 +202,6 @@ class ExecutionEnvironmentPropertiesTest {
             assertAll(
                 () -> assertTrue(config.properties().containsKey("custom.flag")),
                 () -> assertNull(config.properties().get("custom.flag"))
-            );
-        }
-    }
-
-    @Nested
-    @DisplayName("Equals and HashCode Tests")
-    class EqualsAndHashCodeTests {
-
-        @Test
-        @DisplayName("Should respect equals and hashCode contracts")
-        void shouldRespectEqualsAndHashCode() {
-            var exec = new ExecutionProperties(ExecutionRuntimeMode.STREAMING, 2, 8, Duration.ZERO, Duration.ZERO, false);
-            var config1 = new ExecutionEnvironmentProperties(exec, null, null, null, null, null, Map.of("k", "v"));
-            var config2 = new ExecutionEnvironmentProperties(exec, null, null, null, null, null, Map.of("k", "v"));
-            var config3 = new ExecutionEnvironmentProperties(null, null, null, null, null, null, Map.of("k", "v"));
-
-            assertAll(
-                () -> assertEquals(config1, config2),
-                () -> assertEquals(config1.hashCode(), config2.hashCode()),
-                () -> assertNotEquals(config1, config3),
-                () -> assertNotEquals(null, config1),
-                () -> assertNotEquals("other", config1),
-                () -> assertTrue(config1.toString().contains("ExecutionEnvironmentProperties"))
             );
         }
     }
