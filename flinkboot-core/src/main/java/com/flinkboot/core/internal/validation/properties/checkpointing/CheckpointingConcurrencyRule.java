@@ -4,6 +4,7 @@ import com.flinkboot.core.api.properties.checkpointing.CheckpointingProperties;
 import com.flinkboot.core.internal.validation.properties.PropertyViolation;
 import com.flinkboot.core.internal.validation.properties.ValidationRule;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -17,7 +18,7 @@ public final class CheckpointingConcurrencyRule implements ValidationRule<Checkp
         Objects.requireNonNull(properties, "properties must not be null");
         var minPause = properties.minPauseBetweenCheckpoints();
         var maxConcurrent = properties.maxConcurrentCheckpoints();
-        if (minPause.isPresent() && !minPause.get().isZero()
+        if (minPause.isPresent() && minPause.get().compareTo(Duration.ZERO) > 0
                 && maxConcurrent.isPresent() && maxConcurrent.getAsInt() > 1) {
             return Optional.of(new PropertyViolation(
                 "max-concurrent-checkpoints",
