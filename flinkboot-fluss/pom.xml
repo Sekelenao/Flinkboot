@@ -53,6 +53,10 @@
             <groupId>org.apache.fluss</groupId>
             <artifactId>fluss-flink-1.20</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.fluss</groupId>
+            <artifactId>fluss-client</artifactId>
+        </dependency>
 
         <!-- Test -->
         <dependency>
