@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -51,6 +52,31 @@ class ClasspathResourceTest {
         var originalClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(null);
+
+            var path = "com/flinkboot/core/internal/resource/ClasspathResourceTest.class";
+            var resource = new ClasspathResource(path);
+
+            try (var is = resource.inputStream()) {
+                assertNotNull(is);
+                assertTrue(is.readAllBytes().length > 0);
+            }
+        } finally {
+            Thread.currentThread().setContextClassLoader(originalClassLoader);
+        }
+    }
+
+    @Test
+    @DisplayName("Should fallback to ClasspathResource classloader when non-null context classloader lacks resource")
+    void shouldFallbackToClassClassLoaderWhenContextClassLoaderLacksResource() throws IOException {
+        var originalClassLoader = Thread.currentThread().getContextClassLoader();
+        var emptyClassLoader = new ClassLoader(null) {
+            @Override
+            public InputStream getResourceAsStream(String name) {
+                return null;
+            }
+        };
+        try {
+            Thread.currentThread().setContextClassLoader(emptyClassLoader);
 
             var path = "com/flinkboot/core/internal/resource/ClasspathResourceTest.class";
             var resource = new ClasspathResource(path);

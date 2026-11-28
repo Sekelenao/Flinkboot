@@ -23,15 +23,21 @@ public final class ClasspathResource implements Resource {
         if (cleanPath.isEmpty()) {
             throw new ResourceNotFoundException(location);
         }
-        var classLoader = Thread.currentThread().getContextClassLoader();
-        if (classLoader == null) {
-            classLoader = ClasspathResource.class.getClassLoader();
+        var contextClassLoader = Thread.currentThread().getContextClassLoader();
+        if (contextClassLoader != null) {
+            var stream = contextClassLoader.getResourceAsStream(cleanPath);
+            if (stream != null) {
+                return stream;
+            }
         }
-        var stream = classLoader.getResourceAsStream(cleanPath);
-        if (stream == null) {
-            throw new ResourceNotFoundException(location);
+        var fallbackClassLoader = ClasspathResource.class.getClassLoader();
+        if (fallbackClassLoader != null && fallbackClassLoader != contextClassLoader) {
+            var stream = fallbackClassLoader.getResourceAsStream(cleanPath);
+            if (stream != null) {
+                return stream;
+            }
         }
-        return stream;
+        throw new ResourceNotFoundException(location);
     }
 
 }
