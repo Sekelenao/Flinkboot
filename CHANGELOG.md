@@ -25,6 +25,7 @@ All notable user-facing changes to this project are documented in this file.
 - **Atomic `append`/`clear` in `CollectingSinkRegistry` (#448)**: Updated `CollectingSinkRegistry.append` to use `ConcurrentHashMap.compute` so queue lookup/creation and element insertion execute atomically under the bin lock without racing against `clear`, and documented in `CollectingSink` that `executeAsync()` jobs must be cancelled and terminated before `close()` runs.
 
 #### flinkboot-core
+- **Restrict `max-parallelism` to `[1, 32768]` (#471)**: Replaced `@Positive` with `@Range(min = 1, max = 32768)` on `ExecutionProperties.maxParallelism`, rejecting values outside Flink's `KeyGroupRangeAssignment.UPPER_BOUND_MAX_PARALLELISM` during configuration validation instead of failing at runtime.
 - **Strict Positivity Check in `CheckpointingConcurrencyRule` (#434)**: Updated `CheckpointingConcurrencyRule` to check `minPause.get().compareTo(Duration.ZERO) > 0` instead of `!minPause.get().isZero()`, preventing negative `min-pause-between-checkpoints` values from emitting a contradictory concurrency violation alongside `@DurationMin(millis = 0)`.
 - **Case-Insensitive YAML Key Merging (#433)**: Matches keys case-insensitively (using `Locale.ROOT`) when merging multiple YAML sources and multi-document files in `YamlParser`, ensuring `permitOverride=false`, value overrides, nested object merging, and `listMerging=true` behave consistently across differing key casings without producing duplicate keys.
 
