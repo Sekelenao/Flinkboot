@@ -25,12 +25,12 @@ module com.flinkboot.core {
 
     requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.databind;
-    requires com.fasterxml.jackson.dataformat.yaml;
+    requires transitive com.fasterxml.jackson.dataformat.yaml;
     requires com.fasterxml.jackson.datatype.jsr310;
-    requires jakarta.validation;
+    requires transitive jakarta.validation;
     requires org.hibernate.validator;
     requires org.glassfish.expressly;
-    requires flink.streaming.java;
+    requires transitive flink.streaming.java;
 
     opens com.flinkboot.core.api;
     opens com.flinkboot.core.api.properties;
