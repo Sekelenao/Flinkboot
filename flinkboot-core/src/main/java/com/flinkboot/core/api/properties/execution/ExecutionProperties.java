@@ -7,6 +7,7 @@ import com.flinkboot.core.internal.annotation.Generated;
 import com.flinkboot.core.internal.validation.properties.execution.ExecutionPropertiesValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.constraints.Positive;
+import org.hibernate.validator.constraints.Range;
 import org.hibernate.validator.constraints.time.DurationMin;
 
 import java.io.Serializable;
@@ -28,7 +29,7 @@ public final class ExecutionProperties implements ValidatableProperties, Seriali
     @Positive
     private final Integer parallelism;
 
-    @Positive
+    @Range(min = 1, max = 32768)
     private final Integer maxParallelism;
 
     @DurationMin(millis = -1)

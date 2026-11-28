@@ -26,6 +26,7 @@ All notable user-facing changes to this project are documented in this file.
 
 #### flinkboot-core
 - **Skip cross-field rules when checkpointing is disabled (#473)**: Updated `CheckpointingPropertiesValidator` to return `true` without evaluating cross-field rules when `checkpointing.enabled` is explicitly `false`, allowing multi-file override setups with dormant fields. Single-field bean validation constraints still apply.
+- **Restrict `max-parallelism` to `[1, 32768]` (#471)**: Replaced `@Positive` with `@Range(min = 1, max = 32768)` on `ExecutionProperties.maxParallelism`, rejecting values outside Flink's `KeyGroupRangeAssignment.UPPER_BOUND_MAX_PARALLELISM` during configuration validation instead of failing at runtime.
 - **Strict Positivity Check in `CheckpointingConcurrencyRule` (#434)**: Updated `CheckpointingConcurrencyRule` to check `minPause.get().compareTo(Duration.ZERO) > 0` instead of `!minPause.get().isZero()`, preventing negative `min-pause-between-checkpoints` values from emitting a contradictory concurrency violation alongside `@DurationMin(millis = 0)`.
 - **Case-Insensitive YAML Key Merging (#433)**: Matches keys case-insensitively (using `Locale.ROOT`) when merging multiple YAML sources and multi-document files in `YamlParser`, ensuring `permitOverride=false`, value overrides, nested object merging, and `listMerging=true` behave consistently across differing key casings without producing duplicate keys.
 

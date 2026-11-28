@@ -2,6 +2,8 @@ package com.flinkboot.core.api.properties.execution;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.flinkboot.core.api.exception.configuration.ConfigurationValidationException;
+import com.flinkboot.core.internal.validation.JakartaConfigurationValidator;
 import com.flinkboot.core.internal.validation.Validators;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -17,6 +19,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("ExecutionProperties Tests")
@@ -123,13 +126,14 @@ class ExecutionPropertiesTest {
             );
         }
 
-        @Test
-        @DisplayName("Should fail validation when max-parallelism is non-positive")
-        void shouldFailValidationWithInvalidMaxParallelism() {
+        @ParameterizedTest
+        @ValueSource(ints = {-1, 0, 32769, Integer.MAX_VALUE})
+        @DisplayName("Should fail validation when max-parallelism is outside [1, 32768]")
+        void shouldFailValidationWithInvalidMaxParallelism(int maxParallelism) {
             var config = new ExecutionProperties(
                 ExecutionRuntimeMode.STREAMING,
                 null,
-                -1,
+                maxParallelism,
                 Duration.ofMillis(100),
                 Duration.ofMillis(200),
                 true
@@ -140,6 +144,12 @@ class ExecutionPropertiesTest {
                 () -> assertEquals(1, violations.size()),
                 () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("max-parallelism")))
             );
+
+            try (var configurationValidator = new JakartaConfigurationValidator(10)) {
+                var exception = assertThrows(ConfigurationValidationException.class,
+                    () -> configurationValidator.validate(config));
+                assertTrue(exception.getMessage().contains("max-parallelism"));
+            }
         }
 
         @Test
@@ -207,6 +217,15 @@ class ExecutionPropertiesTest {
                             v.getPropertyPath().toString().equals("buffer-timeout")
                     ), "Violation must target 'buffer-timeout'")
             );
+        }
+
+        @ParameterizedTest
+        @ValueSource(ints = {1, 32768})
+        @DisplayName("Should pass validation when max-parallelism is at valid boundaries")
+        void shouldPassValidationWithValidMaxParallelismBoundaries(int maxParallelism) {
+            var config = new ExecutionProperties(null, maxParallelism, maxParallelism, null, null, null);
+            Set<ConstraintViolation<ExecutionProperties>> violations = validator.validate(config);
+            assertTrue(violations.isEmpty());
         }
 
         @Test
