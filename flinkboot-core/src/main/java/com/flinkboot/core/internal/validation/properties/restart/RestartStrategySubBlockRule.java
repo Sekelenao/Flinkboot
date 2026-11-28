@@ -50,7 +50,7 @@ public final class RestartStrategySubBlockRule implements ValidationRule<Restart
         }
         if (typeOpt.get() != expectedType) {
             return Optional.of(new PropertyViolation(
-                "type",
+                blockName,
                 blockName + " cannot be specified when restart strategy type is " + typeOpt.get()
             ));
         }

@@ -74,7 +74,7 @@ class RestartStrategySubBlockRuleTest {
         );
 
         assertEquals(
-            Optional.of(new PropertyViolation("type", "fixed-delay cannot be specified when restart strategy type is NO_RESTART")),
+            Optional.of(new PropertyViolation("fixed-delay", "fixed-delay cannot be specified when restart strategy type is NO_RESTART")),
             rule.check(props)
         );
     }
