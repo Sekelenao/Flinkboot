@@ -7,6 +7,9 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Answers;
 
 import java.lang.reflect.InvocationTargetException;
@@ -59,11 +62,13 @@ class CheckpointingPropertiesValidatorTest {
             assertEquals("properties must not be null", exception.getMessage());
         }
 
-        @Test
-        @DisplayName("Should throw NullPointerException when context is null")
-        void shouldThrowWhenContextIsNull() {
+        @ParameterizedTest
+        @NullSource
+        @ValueSource(booleans = {true, false})
+        @DisplayName("Should throw NullPointerException when context is null regardless of enabled")
+        void shouldThrowWhenContextIsNull(Boolean enabled) {
             var props = new CheckpointingProperties(
-                true, Duration.ofSeconds(10), null, null, null, null, null, null, null, null, null, null
+                enabled, Duration.ofSeconds(10), null, null, null, null, null, null, null, null, null, null
             );
 
             var exception = assertThrows(

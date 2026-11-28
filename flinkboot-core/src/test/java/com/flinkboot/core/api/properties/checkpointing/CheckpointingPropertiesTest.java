@@ -358,6 +358,95 @@ class CheckpointingPropertiesTest {
             assertTrue(violations.isEmpty());
         }
 
+        @Test
+        @DisplayName("Should pass validation when checkpointing is disabled and storage is FILESYSTEM with null storageUri")
+        void shouldPassValidationWhenDisabledFilesystemWithNullUri() {
+            var config = new CheckpointingProperties(
+                false, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, false, null, CheckpointStorageType.FILESYSTEM, null, null
+            );
+            var violations = validator.validate(config);
+            assertTrue(violations.isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should pass validation when checkpointing is disabled and storage is JOBMANAGER with storageUri")
+        void shouldPassValidationWhenDisabledJobmanagerWithUri() {
+            var config = new CheckpointingProperties(
+                false, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, false, null, CheckpointStorageType.JOBMANAGER, "s3://bucket/checkpoints", null
+            );
+            var violations = validator.validate(config);
+            assertTrue(violations.isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should pass validation when checkpointing is disabled and minPause is 5 seconds with maxConcurrent 2")
+        void shouldPassValidationWhenDisabledMinPauseAndMaxConcurrent() {
+            var config = new CheckpointingProperties(
+                false, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ofSeconds(5), 2,
+                null, false, null, null, null, null
+            );
+            var violations = validator.validate(config);
+            assertTrue(violations.isEmpty());
+        }
+
+        @ParameterizedTest
+        @NullSource
+        @ValueSource(booleans = {false})
+        @DisplayName("Should pass validation when checkpointing is disabled and alignedTimeout is 2 seconds with unaligned false or null")
+        void shouldPassValidationWhenDisabledAlignedTimeoutUnalignedFalseOrNull(Boolean unalignedCheckpoints) {
+            var config = new CheckpointingProperties(
+                false, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, unalignedCheckpoints, Duration.ofSeconds(2), null, null, null
+            );
+            var violations = validator.validate(config);
+            assertTrue(violations.isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should pass validation when checkpointing is disabled and mode is AT_LEAST_ONCE with unaligned true")
+        void shouldPassValidationWhenDisabledAtLeastOnceUnalignedTrue() {
+            var config = new CheckpointingProperties(
+                false, Duration.ofSeconds(1), CheckpointingMode.AT_LEAST_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, true, null, null, null, null
+            );
+            var violations = validator.validate(config);
+            assertTrue(violations.isEmpty());
+        }
+
+        @Test
+        @DisplayName("Should still fail validation when checkpointing is disabled and interval is zero")
+        void shouldFailValidationWhenDisabledIntervalZero() {
+            var config = new CheckpointingProperties(
+                false, Duration.ZERO, CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 1,
+                null, false, null, null, null, null
+            );
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("interval")
+                ), "Violation must target 'interval'")
+            );
+        }
+
+        @Test
+        @DisplayName("Should still fail validation when checkpointing is disabled and maxConcurrentCheckpoints is zero")
+        void shouldFailValidationWhenDisabledMaxConcurrentZero() {
+            var config = new CheckpointingProperties(
+                false, Duration.ofSeconds(1), CheckpointingMode.EXACTLY_ONCE, Duration.ofSeconds(5), Duration.ZERO, 0,
+                null, false, null, null, null, null
+            );
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertEquals(1, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v ->
+                    v.getPropertyPath().toString().equals("max-concurrent-checkpoints")
+                ), "Violation must target 'max-concurrent-checkpoints'")
+            );
+        }
+
         @ParameterizedTest
         @NullSource
         @ValueSource(booleans = {false})
