@@ -6,6 +6,7 @@ import com.flinkboot.core.internal.validation.properties.ValidationRule;
 import jakarta.validation.ConstraintValidatorContext;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Validates cross-field invariants for {@link CheckpointingProperties}.
@@ -25,6 +26,13 @@ public final class CheckpointingPropertiesValidator {
     }
 
     public static boolean validate(CheckpointingProperties properties, ConstraintValidatorContext context) {
+        Objects.requireNonNull(properties, "properties must not be null");
+        Objects.requireNonNull(context, "context must not be null");
+
+        if (!properties.enabled().orElse(true)) {
+            return true;
+        }
+
         return PropertiesValidator.compute(properties, context, RULES);
     }
 }
