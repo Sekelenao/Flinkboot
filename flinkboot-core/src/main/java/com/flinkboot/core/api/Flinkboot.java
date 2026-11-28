@@ -2,6 +2,7 @@ package com.flinkboot.core.api;
 
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.flinkboot.core.api.exception.configuration.ConfigurationValidationException;
+import com.flinkboot.core.api.exception.parsing.UnresolvedPropertyPlaceholderException;
 import com.flinkboot.core.api.exception.parsing.YamlParsingException;
 import com.flinkboot.core.api.properties.JobProperties;
 import com.flinkboot.core.api.resource.Resource;
@@ -99,6 +100,10 @@ public final class Flinkboot {
         for (var location : locations){
             try(var inputStream = Resource.of(location).inputStream()) {
                 parser.parse(inputStream);
+            } catch (UnresolvedPropertyPlaceholderException exception) {
+                throw exception;
+            } catch (YamlParsingException exception) {
+                throw new YamlParsingException("Failed to parse YAML configuration from '" + location + "'", exception);
             }
         }
         var configuration = parser.convertTo(configurationClass);

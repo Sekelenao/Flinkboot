@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.flinkboot.core.api.exception.configuration.ConfigurationValidationException;
 import com.flinkboot.core.api.exception.parsing.UnresolvedPropertyPlaceholderException;
+import com.flinkboot.core.api.exception.parsing.YamlParsingException;
 import com.flinkboot.core.api.properties.JobProperties;
 import com.flinkboot.core.api.properties.execution.ExecutionProperties;
 import com.flinkboot.core.api.properties.state.StateBackendProperties;
@@ -260,6 +261,42 @@ class FlinkbootTest {
 
             var exception = assertThrows(UnresolvedPropertyPlaceholderException.class, () -> flinkboot.configuration(TestConfig.class));
             assertTrue(exception.getMessage().contains("NON_EXISTENT_VAR_NAME"));
+        }
+
+        @Test
+        @DisplayName("Should include resource location in YamlParsingException when configuration root is not an object")
+        void shouldIncludeLocationInYamlParsingException(@TempDir Path tempDir) throws IOException {
+            var file = tempDir.resolve("list-config.yaml");
+            Files.writeString(file, "- item1\n- item2\n");
+            var location = "file:" + file.toAbsolutePath();
+            var flinkboot = Flinkboot.initialize("-flinkboot-configurations", location);
+
+            var exception = assertThrows(YamlParsingException.class, () -> flinkboot.configuration(TestConfig.class));
+            assertAll(
+                () -> assertTrue(exception.getMessage().contains(location)),
+                () -> assertNotNull(exception.getCause()),
+                () -> assertTrue(exception.getCause() instanceof YamlParsingException)
+            );
+        }
+
+        @Test
+        @DisplayName("Should identify the failing resource location in multi-file configurations")
+        void shouldIdentifyFailingLocationInMultiFileConfiguration(@TempDir Path tempDir) throws IOException {
+            var validFile = tempDir.resolve("valid.yaml");
+            var brokenFile = tempDir.resolve("broken.yaml");
+            Files.writeString(validFile, YAML);
+            Files.writeString(brokenFile, "name: [unclosed");
+            var validLocation = "file:" + validFile.toAbsolutePath();
+            var brokenLocation = "file:" + brokenFile.toAbsolutePath();
+            var flinkboot = Flinkboot.initialize("-flinkboot-configurations", validLocation + "," + brokenLocation);
+
+            var exception = assertThrows(YamlParsingException.class, () -> flinkboot.configuration(TestConfig.class));
+            assertAll(
+                () -> assertTrue(exception.getMessage().contains(brokenLocation)),
+                () -> assertFalse(exception.getMessage().contains(validLocation)),
+                () -> assertNotNull(exception.getCause()),
+                () -> assertTrue(exception.getCause() instanceof YamlParsingException)
+            );
         }
 
         @Test
