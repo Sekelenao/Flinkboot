@@ -165,7 +165,7 @@ class RestartStrategyPropertiesTest {
             var violations = validator.validate(config);
             assertAll(
                 () -> assertEquals(1, violations.size()),
-                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("type")))
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("fixed-delay")))
             );
         }
 
@@ -175,9 +175,27 @@ class RestartStrategyPropertiesTest {
             var fixed = new FixedDelayRestartProperties(3, Duration.ofSeconds(5));
             var config1 = new RestartStrategyProperties(RestartStrategyType.FALLBACK, fixed, null, null);
             var config2 = new RestartStrategyProperties(null, fixed, null, null);
+            var violations1 = validator.validate(config1);
+            var violations2 = validator.validate(config2);
             assertAll(
-                () -> assertEquals(1, validator.validate(config1).size()),
-                () -> assertEquals(1, validator.validate(config2).size())
+                () -> assertEquals(1, violations1.size()),
+                () -> assertTrue(violations1.stream().anyMatch(v -> v.getPropertyPath().toString().equals("fixed-delay"))),
+                () -> assertEquals(1, violations2.size()),
+                () -> assertTrue(violations2.stream().anyMatch(v -> v.getPropertyPath().toString().equals("type")))
+            );
+        }
+
+        @Test
+        @DisplayName("Should attach each mismatched sub-block violation to its own property path")
+        void shouldAttachMultipleMismatchedSubBlocksToDistinctPaths() {
+            var fixed = new FixedDelayRestartProperties(3, Duration.ofSeconds(5));
+            var failure = new FailureRateRestartProperties(3, Duration.ofMinutes(1), Duration.ofSeconds(1));
+            var config = new RestartStrategyProperties(RestartStrategyType.NO_RESTART, fixed, failure, null);
+            var violations = validator.validate(config);
+            assertAll(
+                () -> assertEquals(2, violations.size()),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("fixed-delay"))),
+                () -> assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("failure-rate")))
             );
         }
 
