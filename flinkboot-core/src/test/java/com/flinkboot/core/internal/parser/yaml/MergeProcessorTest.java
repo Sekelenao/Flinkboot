@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.flinkboot.core.api.exception.parsing.YamlParsingException;
 import com.flinkboot.core.internal.startup.EnvVarResolver;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -18,13 +17,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -108,7 +105,7 @@ class MergeProcessorTest {
     }
 
     @Nested
-    @DisplayName("Scalar merging and case-insensitive overrides")
+    @DisplayName("Scalar merging and case sensitivity")
     class ScalarMerging {
 
         @Test
@@ -130,8 +127,8 @@ class MergeProcessorTest {
         }
 
         @Test
-        @DisplayName("Should override case-colliding scalar in place while preserving key casing and order")
-        void shouldOverrideCaseCollidingScalarInPlace() {
+        @DisplayName("Should override matching scalar in place while preserving key order")
+        void shouldOverrideMatchingScalarInPlace() {
             var root = FACTORY.objectNode();
             var processor = new MergeProcessor(root, OVERRIDE_ONLY_FEATURES, resolverWith(Map.of("NEW_NAME", "updated")));
 
@@ -140,7 +137,7 @@ class MergeProcessorTest {
                 .put("name", "original")
                 .put("lastKey", "z");
             var second = FACTORY.objectNode()
-                .put("NAME", "${new.name}");
+                .put("name", "${new.name}");
 
             processor.apply(first);
             processor.apply(second);
@@ -148,72 +145,47 @@ class MergeProcessorTest {
             assertAll(
                 () -> assertEquals(3, root.size()),
                 () -> assertEquals(List.of("firstKey", "name", "lastKey"), fieldOrder(root)),
-                () -> assertTrue(root.has("name")),
-                () -> assertFalse(root.has("NAME")),
                 () -> assertEquals("updated", root.get("name").asText())
             );
         }
 
         @Test
-        @DisplayName("Should throw YamlParsingException with existing key path when overriding case-colliding scalar is forbidden")
-        void shouldThrowWhenCaseCollidingScalarOverrideIsForbidden() {
+        @DisplayName("Should throw YamlParsingException when overriding an existing scalar is forbidden")
+        void shouldThrowWhenScalarOverrideIsForbidden() {
             var root = FACTORY.objectNode();
             var processor = new MergeProcessor(root, STRICT_FEATURES, emptyResolver());
 
             processor.apply(FACTORY.objectNode().put("name", "original"));
-            var second = FACTORY.objectNode().put("NAME", "override");
+            var second = FACTORY.objectNode().put("name", "override");
 
             var exception = assertThrows(YamlParsingException.class, () -> processor.apply(second));
 
             assertAll(
                 () -> assertEquals("Overriding an existing value is forbidden: name", exception.getMessage()),
                 () -> assertEquals(1, root.size()),
-                () -> assertFalse(root.has("NAME")),
                 () -> assertEquals("original", root.get("name").asText())
             );
         }
 
         @Test
-        @DisplayName("Should collapse multi-step overrides with varying case into original key without duplicates")
-        void shouldCollapseMultiStepOverridesWithVaryingCase() {
-            var root = FACTORY.objectNode();
-            var processor = new MergeProcessor(root, OVERRIDE_ONLY_FEATURES, emptyResolver());
-
-            processor.apply(FACTORY.objectNode().put("name", "v1"));
-            processor.apply(FACTORY.objectNode().put("Name", "v2"));
-            processor.apply(FACTORY.objectNode().put("NAME", "v3"));
-
-            assertAll(
-                () -> assertEquals(1, root.size()),
-                () -> assertTrue(root.has("name")),
-                () -> assertFalse(root.has("Name")),
-                () -> assertFalse(root.has("NAME")),
-                () -> assertEquals("v3", root.get("name").asText())
-            );
-        }
-
-        @Test
-        @DisplayName("Should detect case-colliding duplicate keys within a single target object")
-        void shouldDetectCaseCollidingKeysWithinSingleTarget() {
-            var target = FACTORY.objectNode()
-                .put("Name", "first")
-                .put("NAME", "second");
+        @DisplayName("Should preserve keys differing only in case within a single target and across apply calls")
+        void shouldPreserveKeysDifferingOnlyInCase() {
+            var strictRoot = FACTORY.objectNode();
+            var strictProcessor = new MergeProcessor(strictRoot, STRICT_FEATURES, resolverWith(Map.of("UPPER_VAL", "B")));
+            strictProcessor.apply(FACTORY.objectNode().put("foo", "a").put("FOO", "${upper.val}"));
 
             var overrideRoot = FACTORY.objectNode();
             var overrideProcessor = new MergeProcessor(overrideRoot, OVERRIDE_ONLY_FEATURES, emptyResolver());
-            overrideProcessor.apply(target);
-
-            var strictRoot = FACTORY.objectNode();
-            var strictProcessor = new MergeProcessor(strictRoot, STRICT_FEATURES, emptyResolver());
-            var exception = assertThrows(YamlParsingException.class, () -> strictProcessor.apply(target));
+            overrideProcessor.apply(FACTORY.objectNode().put("foo", "a"));
+            overrideProcessor.apply(FACTORY.objectNode().put("FOO", "b"));
 
             assertAll(
-                () -> assertEquals(1, overrideRoot.size()),
-                () -> assertTrue(overrideRoot.has("Name")),
-                () -> assertFalse(overrideRoot.has("name")),
-                () -> assertFalse(overrideRoot.has("NAME")),
-                () -> assertEquals("second", overrideRoot.get("Name").asText()),
-                () -> assertEquals("Overriding an existing value is forbidden: Name", exception.getMessage())
+                () -> assertEquals(2, strictRoot.size()),
+                () -> assertEquals("a", strictRoot.get("foo").asText()),
+                () -> assertEquals("B", strictRoot.get("FOO").asText()),
+                () -> assertEquals(2, overrideRoot.size()),
+                () -> assertEquals("a", overrideRoot.get("foo").asText()),
+                () -> assertEquals("b", overrideRoot.get("FOO").asText())
             );
         }
     }
@@ -223,13 +195,13 @@ class MergeProcessorTest {
     class NestedObjectMerging {
 
         @Test
-        @DisplayName("Should merge disjoint child keys under case-colliding parent when override is forbidden")
-        void shouldMergeDisjointChildrenUnderCaseCollidingParent() {
+        @DisplayName("Should merge disjoint child keys under matching parent when override is forbidden")
+        void shouldMergeDisjointChildrenUnderMatchingParent() {
             var root = FACTORY.objectNode();
             var processor = new MergeProcessor(root, STRICT_FEATURES, resolverWith(Map.of("DB_PORT", "5432")));
 
             var first = objectWith("database", FACTORY.objectNode().put("host", "localhost"));
-            var second = objectWith("DATABASE", FACTORY.objectNode().put("port", "${db.port}"));
+            var second = objectWith("database", FACTORY.objectNode().put("port", "${db.port}"));
 
             processor.apply(first);
             processor.apply(second);
@@ -237,8 +209,6 @@ class MergeProcessorTest {
             var database = root.get("database");
             assertAll(
                 () -> assertEquals(1, root.size()),
-                () -> assertTrue(root.has("database")),
-                () -> assertFalse(root.has("DATABASE")),
                 () -> assertEquals(2, database.size()),
                 () -> assertEquals("localhost", database.get("host").asText()),
                 () -> assertEquals("5432", database.get("port").asText())
@@ -246,47 +216,62 @@ class MergeProcessorTest {
         }
 
         @Test
-        @DisplayName("Should override case-colliding nested child under case-colliding parent when override is permitted")
-        void shouldOverrideCaseCollidingNestedChild() {
+        @DisplayName("Should preserve case-distinct keys inside nested map objects")
+        void shouldPreserveCaseDistinctKeysInsideNestedObjects() {
             var root = FACTORY.objectNode();
-            var processor = new MergeProcessor(root, OVERRIDE_ONLY_FEATURES, resolverWith(Map.of("PROD_HOST", "db.prod")));
+            var processor = new MergeProcessor(root, STRICT_FEATURES, resolverWith(Map.of("VAL_UPPER", "prod")));
 
-            var first = objectWith("database", FACTORY.objectNode().put("host", "localhost").put("port", 5432));
-            var second = objectWith("DATABASE", FACTORY.objectNode().put("HOST", "${prod.host}"));
+            var first = objectWith("properties", FACTORY.objectNode().put("env", "dev").put("ENV", "${val.upper}"));
+            var second = objectWith("properties", FACTORY.objectNode().put("Env", "staging"));
 
             processor.apply(first);
             processor.apply(second);
 
-            var database = root.get("database");
+            var properties = root.get("properties");
             assertAll(
-                () -> assertEquals(1, root.size()),
-                () -> assertFalse(root.has("DATABASE")),
-                () -> assertEquals(2, database.size()),
-                () -> assertTrue(database.has("host")),
-                () -> assertFalse(database.has("HOST")),
-                () -> assertEquals("db.prod", database.get("host").asText()),
-                () -> assertEquals(5432, database.get("port").asInt())
+                () -> assertEquals(3, properties.size()),
+                () -> assertEquals("dev", properties.get("env").asText()),
+                () -> assertEquals("prod", properties.get("ENV").asText()),
+                () -> assertEquals("staging", properties.get("Env").asText())
             );
         }
 
         @Test
-        @DisplayName("Should report existing-key path when nested case-colliding child override is forbidden")
-        void shouldReportExistingKeyPathForForbiddenNestedOverride() {
+        @DisplayName("Should report full nested path when nested override is forbidden")
+        void shouldReportFullPathForForbiddenNestedOverride() {
             var root = FACTORY.objectNode();
             var processor = new MergeProcessor(root, STRICT_FEATURES, emptyResolver());
 
             var first = objectWith("app",
-                objectWith("Database",
-                    objectWith("Pool", FACTORY.objectNode().put("MaxSize", 10))));
-            var second = objectWith("APP",
                 objectWith("database",
-                    objectWith("POOL", FACTORY.objectNode().put("maxSize", 20))));
+                    objectWith("pool", FACTORY.objectNode().put("max-size", 10))));
+            var second = objectWith("app",
+                objectWith("database",
+                    objectWith("pool", FACTORY.objectNode().put("max-size", 20))));
 
             processor.apply(first);
 
             var exception = assertThrows(YamlParsingException.class, () -> processor.apply(second));
 
-            assertEquals("Overriding an existing value is forbidden: app.Database.Pool.MaxSize", exception.getMessage());
+            assertEquals("Overriding an existing value is forbidden: app.database.pool.max-size", exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should resolve placeholders inside newly inserted and overriding nested objects")
+        void shouldResolvePlaceholdersInInsertedAndOverridingNestedObjects() {
+            var root = FACTORY.objectNode();
+            var processor = new MergeProcessor(root, OVERRIDE_ONLY_FEATURES, resolverWith(Map.of("DB_HOST", "db.prod")));
+            processor.apply(FACTORY.objectNode().put("database", "legacy"));
+
+            var target = objectWith("database", FACTORY.objectNode().put("host", "${db.host}"));
+            processor.apply(target);
+
+            var database = root.get("database");
+            assertAll(
+                () -> assertTrue(database.isObject()),
+                () -> assertEquals(1, database.size()),
+                () -> assertEquals("db.prod", database.get("host").asText())
+            );
         }
     }
 
@@ -295,19 +280,17 @@ class MergeProcessorTest {
     class ArrayMerging {
 
         @Test
-        @DisplayName("Should append elements with resolved placeholders into existing key when listMerging is enabled and permitOverride is false")
-        void shouldMergeCaseCollidingArraysWhenListMergingEnabledAndOverrideForbidden() {
+        @DisplayName("Should append elements with resolved placeholders when listMerging is enabled and permitOverride is false")
+        void shouldMergeArraysWhenListMergingEnabledAndOverrideForbidden() {
             var root = FACTORY.objectNode();
             var processor = new MergeProcessor(root, LIST_MERGING_ONLY_FEATURES, resolverWith(Map.of("EXTRA_ITEM", "c")));
 
             processor.apply(objectWith("items", arrayOf("a", "b")));
-            processor.apply(objectWith("ITEMS", arrayOf("${extra.item}", "d")));
+            processor.apply(objectWith("items", arrayOf("${extra.item}", "d")));
 
             var items = root.get("items");
             assertAll(
                 () -> assertEquals(1, root.size()),
-                () -> assertTrue(root.has("items")),
-                () -> assertFalse(root.has("ITEMS")),
                 () -> assertEquals(4, items.size()),
                 () -> assertEquals("a", items.get(0).asText()),
                 () -> assertEquals("b", items.get(1).asText()),
@@ -317,39 +300,17 @@ class MergeProcessorTest {
         }
 
         @Test
-        @DisplayName("Should append elements into existing key when both listMerging and permitOverride are enabled")
-        void shouldMergeCaseCollidingArraysWhenBothFlagsEnabled() {
-            var root = FACTORY.objectNode();
-            var processor = new MergeProcessor(root, ALL_FEATURES, emptyResolver());
-
-            processor.apply(objectWith("items", arrayOf("a")));
-            processor.apply(objectWith("Items", arrayOf("b")));
-
-            var items = root.get("items");
-            assertAll(
-                () -> assertEquals(1, root.size()),
-                () -> assertTrue(root.has("items")),
-                () -> assertFalse(root.has("Items")),
-                () -> assertEquals(2, items.size()),
-                () -> assertEquals("a", items.get(0).asText()),
-                () -> assertEquals("b", items.get(1).asText())
-            );
-        }
-
-        @Test
-        @DisplayName("Should replace array under existing key when listMerging is disabled and permitOverride is true")
-        void shouldReplaceCaseCollidingArrayWhenListMergingDisabledAndOverridePermitted() {
+        @DisplayName("Should replace array when listMerging is disabled and permitOverride is true")
+        void shouldReplaceArrayWhenListMergingDisabledAndOverridePermitted() {
             var root = FACTORY.objectNode();
             var processor = new MergeProcessor(root, OVERRIDE_ONLY_FEATURES, resolverWith(Map.of("ITEM", "replaced")));
 
             processor.apply(objectWith("items", arrayOf("a", "b")));
-            processor.apply(objectWith("ITEMS", arrayOf("${item}")));
+            processor.apply(objectWith("items", arrayOf("${item}")));
 
             var items = root.get("items");
             assertAll(
                 () -> assertEquals(1, root.size()),
-                () -> assertTrue(root.has("items")),
-                () -> assertFalse(root.has("ITEMS")),
                 () -> assertEquals(1, items.size()),
                 () -> assertEquals("replaced", items.get(0).asText())
             );
@@ -357,19 +318,18 @@ class MergeProcessorTest {
 
         @Test
         @DisplayName("Should throw YamlParsingException when listMerging and permitOverride are both disabled")
-        void shouldThrowWhenCaseCollidingArrayAndBothFlagsDisabled() {
+        void shouldThrowWhenArrayOverrideAndListMergingAreBothDisabled() {
             var root = FACTORY.objectNode();
             var processor = new MergeProcessor(root, STRICT_FEATURES, emptyResolver());
 
             processor.apply(objectWith("items", arrayOf("a")));
-            var second = objectWith("ITEMS", arrayOf("b"));
+            var second = objectWith("items", arrayOf("b"));
 
             var exception = assertThrows(YamlParsingException.class, () -> processor.apply(second));
 
             assertAll(
                 () -> assertEquals("Overriding an existing value is forbidden: items", exception.getMessage()),
                 () -> assertEquals(1, root.size()),
-                () -> assertFalse(root.has("ITEMS")),
                 () -> assertEquals(1, root.get("items").size())
             );
         }
@@ -393,224 +353,36 @@ class MergeProcessorTest {
 
         @ParameterizedTest(name = "{0}")
         @MethodSource("typeChangePairs")
-        @DisplayName("Should replace value under existing key on case-colliding type change when override is permitted")
+        @DisplayName("Should replace value on type change when override is permitted")
         void shouldReplaceOnTypeChangeWhenOverridePermitted(String scenario, JsonNode initial, JsonNode replacement) {
             var root = FACTORY.objectNode();
             var processor = new MergeProcessor(root, ALL_FEATURES, emptyResolver());
 
             processor.apply(objectWith("entry", initial.deepCopy()));
-            processor.apply(objectWith("ENTRY", replacement.deepCopy()));
+            processor.apply(objectWith("entry", replacement.deepCopy()));
 
             assertAll(
                 () -> assertEquals(1, root.size()),
-                () -> assertTrue(root.has("entry")),
-                () -> assertFalse(root.has("ENTRY")),
                 () -> assertEquals(replacement, root.get("entry"))
             );
         }
 
         @ParameterizedTest(name = "{0}")
         @MethodSource("typeChangePairs")
-        @DisplayName("Should throw YamlParsingException on case-colliding type change when override is forbidden")
+        @DisplayName("Should throw YamlParsingException on type change when override is forbidden")
         void shouldThrowOnTypeChangeWhenOverrideForbidden(String scenario, JsonNode initial, JsonNode replacement) {
             var root = FACTORY.objectNode();
             var processor = new MergeProcessor(root, LIST_MERGING_ONLY_FEATURES, emptyResolver());
 
             processor.apply(objectWith("entry", initial.deepCopy()));
-            var second = objectWith("ENTRY", replacement.deepCopy());
+            var second = objectWith("entry", replacement.deepCopy());
 
             var exception = assertThrows(YamlParsingException.class, () -> processor.apply(second));
 
             assertAll(
                 () -> assertEquals("Overriding an existing value is forbidden: entry", exception.getMessage()),
                 () -> assertEquals(1, root.size()),
-                () -> assertFalse(root.has("ENTRY")),
                 () -> assertEquals(initial, root.get("entry"))
-            );
-        }
-    }
-
-    @Nested
-    @DisplayName("Locale independence")
-    class LocaleIndependence {
-
-        private final Locale previousDefault = Locale.getDefault();
-
-        @AfterEach
-        void restoreLocale() {
-            Locale.setDefault(previousDefault);
-        }
-
-        @Test
-        @DisplayName("Should match id and ID case-insensitively under Turkish locale when override is permitted")
-        void shouldOverrideIdUnderTurkishLocale() {
-            Locale.setDefault(Locale.forLanguageTag("tr-TR"));
-            var root = FACTORY.objectNode();
-            var processor = new MergeProcessor(root, OVERRIDE_ONLY_FEATURES, emptyResolver());
-
-            processor.apply(FACTORY.objectNode().put("id", "first"));
-            processor.apply(FACTORY.objectNode().put("ID", "second"));
-
-            assertAll(
-                () -> assertEquals(1, root.size()),
-                () -> assertTrue(root.has("id")),
-                () -> assertFalse(root.has("ID")),
-                () -> assertEquals("second", root.get("id").asText())
-            );
-        }
-
-        @Test
-        @DisplayName("Should reject overriding id with ID under Turkish locale when override is forbidden")
-        void shouldRejectIdOverrideUnderTurkishLocale() {
-            Locale.setDefault(Locale.forLanguageTag("tr-TR"));
-            var root = FACTORY.objectNode();
-            var processor = new MergeProcessor(root, STRICT_FEATURES, emptyResolver());
-
-            processor.apply(FACTORY.objectNode().put("id", "first"));
-            var second = FACTORY.objectNode().put("ID", "second");
-
-            var exception = assertThrows(YamlParsingException.class, () -> processor.apply(second));
-
-            assertAll(
-                () -> assertEquals("Overriding an existing value is forbidden: id", exception.getMessage()),
-                () -> assertEquals(1, root.size()),
-                () -> assertFalse(root.has("ID"))
-            );
-        }
-
-        @Test
-        @DisplayName("Should merge items and ITEMS arrays under Turkish locale when listMerging is enabled")
-        void shouldMergeItemsArrayUnderTurkishLocale() {
-            Locale.setDefault(Locale.forLanguageTag("tr-TR"));
-            var root = FACTORY.objectNode();
-            var processor = new MergeProcessor(root, LIST_MERGING_ONLY_FEATURES, emptyResolver());
-
-            processor.apply(objectWith("items", arrayOf("a")));
-            processor.apply(objectWith("ITEMS", arrayOf("b")));
-
-            var items = root.get("items");
-            assertAll(
-                () -> assertEquals(1, root.size()),
-                () -> assertTrue(root.has("items")),
-                () -> assertFalse(root.has("ITEMS")),
-                () -> assertEquals(2, items.size()),
-                () -> assertEquals("a", items.get(0).asText()),
-                () -> assertEquals("b", items.get(1).asText())
-            );
-        }
-
-        @Test
-        @DisplayName("Should match pre-existing uppercase ID with lowercase id under Turkish locale")
-        void shouldMatchPreExistingUppercaseIdUnderTurkishLocale() {
-            Locale.setDefault(Locale.forLanguageTag("tr-TR"));
-            var overrideRoot = FACTORY.objectNode();
-            var overrideProcessor = new MergeProcessor(overrideRoot, OVERRIDE_ONLY_FEATURES, emptyResolver());
-            overrideProcessor.apply(FACTORY.objectNode().put("ID", "first"));
-            overrideProcessor.apply(FACTORY.objectNode().put("id", "second"));
-
-            var strictRoot = FACTORY.objectNode();
-            var strictProcessor = new MergeProcessor(strictRoot, STRICT_FEATURES, emptyResolver());
-            strictProcessor.apply(FACTORY.objectNode().put("ID", "first"));
-            var conflicting = FACTORY.objectNode().put("id", "second");
-            var exception = assertThrows(YamlParsingException.class, () -> strictProcessor.apply(conflicting));
-
-            assertAll(
-                () -> assertEquals(1, overrideRoot.size()),
-                () -> assertTrue(overrideRoot.has("ID")),
-                () -> assertFalse(overrideRoot.has("id")),
-                () -> assertEquals("second", overrideRoot.get("ID").asText()),
-                () -> assertEquals("Overriding an existing value is forbidden: ID", exception.getMessage())
-            );
-        }
-    }
-
-    @Nested
-    @DisplayName("Nested object insertion and override collisions")
-    class NestedObjectInsertionCollisions {
-
-        @Test
-        @DisplayName("Should reject case-colliding children in newly inserted nested object when permitOverride is false")
-        void shouldRejectCaseCollidingChildrenInNewlyInsertedObject() {
-            var root = FACTORY.objectNode();
-            var processor = new MergeProcessor(root, STRICT_FEATURES, emptyResolver());
-            var child = FACTORY.objectNode();
-            child.put("Host", "first");
-            child.put("HOST", "second");
-            var target = FACTORY.objectNode();
-            target.set("database", child);
-
-            var exception = assertThrows(YamlParsingException.class, () -> processor.apply(target));
-
-            assertEquals("Overriding an existing value is forbidden: database.Host", exception.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should collapse case-colliding children in newly inserted nested object when permitOverride is true")
-        void shouldCollapseCaseCollidingChildrenInNewlyInsertedObject() {
-            var root = FACTORY.objectNode();
-            var processor = new MergeProcessor(root, OVERRIDE_ONLY_FEATURES, resolverWith(Map.of("DB_HOST", "prod")));
-            var child = FACTORY.objectNode();
-            child.put("Host", "first");
-            child.put("HOST", "${DB_HOST}");
-            var target = FACTORY.objectNode();
-            target.set("database", child);
-
-            processor.apply(target);
-
-            var database = root.get("database");
-            assertAll(
-                () -> assertEquals(1, database.size()),
-                () -> assertTrue(database.has("Host")),
-                () -> assertFalse(database.has("HOST")),
-                () -> assertEquals("prod", database.get("Host").asText())
-            );
-        }
-
-        @Test
-        @DisplayName("Should collapse case-colliding children when overriding a scalar with a nested object")
-        void shouldCollapseCaseCollidingChildrenWhenOverridingScalarWithObject() {
-            var root = FACTORY.objectNode();
-            var processor = new MergeProcessor(root, OVERRIDE_ONLY_FEATURES, emptyResolver());
-            processor.apply(FACTORY.objectNode().put("Database", "legacy"));
-
-            var child = FACTORY.objectNode();
-            child.put("Host", "first");
-            child.put("HOST", "second");
-            var target = FACTORY.objectNode();
-            target.set("database", child);
-
-            processor.apply(target);
-
-            var database = root.get("Database");
-            assertAll(
-                () -> assertEquals(1, root.size()),
-                () -> assertTrue(root.has("Database")),
-                () -> assertFalse(root.has("database")),
-                () -> assertEquals(1, database.size()),
-                () -> assertTrue(database.has("Host")),
-                () -> assertFalse(database.has("HOST")),
-                () -> assertEquals("second", database.get("Host").asText())
-            );
-        }
-
-        @Test
-        @DisplayName("Should merge case-variant sibling objects within the same target in document order")
-        void shouldMergeCaseVariantSiblingObjectsInDocumentOrder() {
-            var root = FACTORY.objectNode();
-            var processor = new MergeProcessor(root, OVERRIDE_ONLY_FEATURES, emptyResolver());
-            var target = FACTORY.objectNode();
-            target.set("Server", FACTORY.objectNode().put("port", 8080));
-            target.set("server", FACTORY.objectNode().put("port", 9090));
-
-            processor.apply(target);
-
-            var server = root.get("Server");
-            assertAll(
-                () -> assertEquals(1, root.size()),
-                () -> assertTrue(root.has("Server")),
-                () -> assertFalse(root.has("server")),
-                () -> assertEquals(1, server.size()),
-                () -> assertEquals(9090, server.get("port").asInt())
             );
         }
     }

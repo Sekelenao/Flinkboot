@@ -32,35 +32,33 @@ public final class MergeProcessor {
     }
 
     private void processTask(MergeTask task) {
-        var rootNode = CaseInsensitiveObjectNode.from(task.root());
+        var rootNode = task.root();
         for (var entry : task.target().properties()) {
             var key = entry.getKey();
             var newValue = entry.getValue();
-            var existingOpt = rootNode.find(key);
-            if (existingOpt.isPresent()) {
-                var existing = existingOpt.get();
-                if (existing.value().isObject() && newValue.isObject()) {
-                    tasks.addLast(new MergeTask(task.pathOf(existing.key()), (ObjectNode) existing.value(), (ObjectNode) newValue));
+            if (rootNode.has(key)) {
+                var existing = rootNode.get(key);
+                if (existing.isObject() && newValue.isObject()) {
+                    tasks.addLast(new MergeTask(task.pathOf(key), (ObjectNode) existing, (ObjectNode) newValue));
                     continue;
                 }
-                if (existing.value().isArray() && newValue.isArray() && features.listMerging()) {
-                    var existingArray = (ArrayNode) existing.value();
+                if (existing.isArray() && newValue.isArray() && features.listMerging()) {
+                    var existingArray = (ArrayNode) existing;
                     for (var elem : newValue) {
                         existingArray.add(placeholderResolver.resolve(elem));
                     }
                     continue;
                 }
                 if (!features.permitOverride()) {
-                    throw new YamlParsingException("Overriding an existing value is forbidden: " + task.pathOf(existing.key()));
+                    throw new YamlParsingException("Overriding an existing value is forbidden: " + task.pathOf(key));
                 }
-                key = existing.key();
             }
             if (newValue.isObject()) {
-                var childNode = task.root().objectNode();
-                rootNode.put(key, childNode);
+                var childNode = rootNode.objectNode();
+                rootNode.set(key, childNode);
                 tasks.addLast(new MergeTask(task.pathOf(key), childNode, (ObjectNode) newValue));
             } else {
-                rootNode.put(key, placeholderResolver.resolve(newValue));
+                rootNode.set(key, placeholderResolver.resolve(newValue));
             }
         }
     }

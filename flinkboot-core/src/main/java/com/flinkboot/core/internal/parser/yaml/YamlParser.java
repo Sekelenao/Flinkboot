@@ -37,7 +37,6 @@ public final class YamlParser {
         Objects.requireNonNull(parserFeatures);
         Objects.requireNonNull(placeholderResolver);
         var builder = YAMLMapper.builder()
-            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS, true)
             .propertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE)
             .addModule(new JavaTimeModule())

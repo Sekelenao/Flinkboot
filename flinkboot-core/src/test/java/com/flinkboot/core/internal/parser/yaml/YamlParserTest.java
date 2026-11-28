@@ -203,13 +203,10 @@ class YamlParserTest {
     @DisplayName("Parse")
     class Parse {
 
-        @ParameterizedTest
-        @ValueSource(strings = {
-            "name: \"Flink Job\"\nvalue: 42\n",
-            "NAME: \"Flink Job\"\nVALUE: 42\n"
-        })
-        @DisplayName("Should successfully parse YAML configuration with standard or case-insensitive properties")
-        void shouldParseYamlConfigurations(String yamlContent) {
+        @Test
+        @DisplayName("Should successfully parse YAML configuration with canonical property casing")
+        void shouldParseYamlConfiguration() {
+            var yamlContent = "name: \"Flink Job\"\nvalue: 42\n";
             var stream = new ByteArrayInputStream(yamlContent.getBytes(StandardCharsets.UTF_8));
             var parser = new YamlParser(STANDARD_FEATURES);
             parser.parse(stream);
@@ -854,219 +851,80 @@ class YamlParserTest {
     }
 
     @Nested
-    @DisplayName("Case-Insensitive Key Collisions")
-    class CaseInsensitiveKeyCollisions {
+    @DisplayName("Case-Sensitive Keys")
+    class CaseSensitiveKeys {
 
         @Test
-        @DisplayName("Should reject top-level case-colliding override across parse calls when permitOverride is false")
-        void shouldRejectTopLevelCaseCollidingOverrideAcrossParseCalls() {
+        @DisplayName("Should reject property keys with non-matching case during conversion")
+        void shouldRejectPropertyKeysWithNonMatchingCase() {
+            var yaml = "NAME: \"Flink Job\"\nVALUE: 42\n";
+            var parser = new YamlParser(STANDARD_FEATURES);
+            parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
+
+            assertThrows(YamlParsingException.class, () -> parser.convertTo(TestConfig.class));
+        }
+
+        @Test
+        @DisplayName("Should prevent bypassing permitOverride=false with differently cased property keys across parse calls")
+        void shouldRejectDifferentlyCasedOverrideAcrossParseCalls() {
             var firstYaml = "name: \"BaseApp\"\nvalue: 42\n";
             var secondYaml = "Name: \"OverrideApp\"\n";
 
             var parser = new YamlParser(STANDARD_FEATURES);
             parser.parse(new ByteArrayInputStream(firstYaml.getBytes(StandardCharsets.UTF_8)));
-            var secondStream = new ByteArrayInputStream(secondYaml.getBytes(StandardCharsets.UTF_8));
+            parser.parse(new ByteArrayInputStream(secondYaml.getBytes(StandardCharsets.UTF_8)));
 
-            var exception = assertThrows(YamlParsingException.class, () -> parser.parse(secondStream));
-            assertEquals("Overriding an existing value is forbidden: name", exception.getMessage());
+            assertThrows(YamlParsingException.class, () -> parser.convertTo(TestConfig.class));
         }
 
         @Test
-        @DisplayName("Should reject top-level case-colliding override in multi-document YAML when permitOverride is false")
-        void shouldRejectTopLevelCaseCollidingOverrideInMultiDocumentYaml() {
-            var yaml = "name: \"BaseApp\"\n" +
-                "value: 42\n" +
-                "---\n" +
-                "Name: \"OverrideApp\"\n";
+        @DisplayName("Should preserve case-distinct map entries in a single document when permitOverride is false")
+        void shouldPreserveCaseDistinctMapEntriesInSingleDocument() {
+            var yaml = "properties:\n" +
+                "  foo: \"lower\"\n" +
+                "  FOO: \"upper\"\n";
 
             var parser = new YamlParser(STANDARD_FEATURES);
-            var stream = new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8));
+            parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
 
-            var exception = assertThrows(YamlParsingException.class, () -> parser.parse(stream));
-            assertEquals("Overriding an existing value is forbidden: name", exception.getMessage());
+            var config = parser.convertTo(TestConfigWithMap.class);
+            assertAll(
+                () -> assertNotNull(config),
+                () -> assertEquals(Map.of("foo", "lower", "FOO", "upper"), config.properties())
+            );
         }
 
         @Test
-        @DisplayName("Should reject nested case-colliding override across parse calls when permitOverride is false")
-        void shouldRejectNestedCaseCollidingOverrideAcrossParseCalls() {
-            var firstYaml = "env: \"dev\"\n" +
-                "database:\n" +
-                "  host: \"localhost\"\n" +
-                "  port: 5432\n";
-            var secondYaml = "DATABASE:\n" +
-                "  HOST: \"db-prod\"\n";
-
-            var parser = new YamlParser(STANDARD_FEATURES);
-            parser.parse(new ByteArrayInputStream(firstYaml.getBytes(StandardCharsets.UTF_8)));
-            var secondStream = new ByteArrayInputStream(secondYaml.getBytes(StandardCharsets.UTF_8));
-
-            var exception = assertThrows(YamlParsingException.class, () -> parser.parse(secondStream));
-            assertEquals("Overriding an existing value is forbidden: database.host", exception.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should reject nested case-colliding override in multi-document YAML when permitOverride is false")
-        void shouldRejectNestedCaseCollidingOverrideInMultiDocumentYaml() {
-            var yaml = "env: \"dev\"\n" +
-                "database:\n" +
-                "  host: \"localhost\"\n" +
-                "  port: 5432\n" +
-                "---\n" +
-                "DATABASE:\n" +
-                "  HOST: \"db-prod\"\n";
-
-            var parser = new YamlParser(STANDARD_FEATURES);
-            var stream = new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8));
-
-            var exception = assertThrows(YamlParsingException.class, () -> parser.parse(stream));
-            assertEquals("Overriding an existing value is forbidden: database.host", exception.getMessage());
-        }
-
-        @Test
-        @DisplayName("Should override case-colliding keys across parse calls and bind cleanly when permitOverride is true")
-        void shouldOverrideCaseCollidingKeysAcrossParseCallsWhenPermitted() {
-            var firstYaml = "env: \"dev\"\n" +
-                "database:\n" +
-                "  host: \"localhost\"\n" +
-                "  port: 5432\n";
-            var secondYaml = "ENV: \"prod\"\n" +
-                "DATABASE:\n" +
-                "  HOST: \"db-prod\"\n";
+        @DisplayName("Should preserve case-distinct map entries across parse calls when permitOverride is true")
+        void shouldPreserveCaseDistinctMapEntriesAcrossParseCallsWhenOverridePermitted() {
+            var firstYaml = "properties:\n" +
+                "  foo: \"lower\"\n";
+            var secondYaml = "properties:\n" +
+                "  FOO: \"upper\"\n";
 
             var features = ParserFeatures.builder().permitOverride(true).listMerging(false).build();
             var parser = new YamlParser(features);
             parser.parse(new ByteArrayInputStream(firstYaml.getBytes(StandardCharsets.UTF_8)));
             parser.parse(new ByteArrayInputStream(secondYaml.getBytes(StandardCharsets.UTF_8)));
 
-            var config = parser.convertTo(ComplexConfig.class);
+            var config = parser.convertTo(TestConfigWithMap.class);
             assertAll(
                 () -> assertNotNull(config),
-                () -> assertEquals("prod", config.env()),
-                () -> assertNotNull(config.database()),
-                () -> assertEquals("db-prod", config.database().host()),
-                () -> assertEquals(5432, config.database().port())
+                () -> assertEquals(Map.of("foo", "lower", "FOO", "upper"), config.properties())
             );
         }
+    }
 
-        @Test
-        @DisplayName("Should override case-colliding keys in multi-document YAML and bind cleanly when permitOverride is true")
-        void shouldOverrideCaseCollidingKeysInMultiDocumentYamlWhenPermitted() {
-            var yaml = "env: \"dev\"\n" +
-                "database:\n" +
-                "  host: \"localhost\"\n" +
-                "  port: 5432\n" +
-                "---\n" +
-                "ENV: \"prod\"\n" +
-                "DATABASE:\n" +
-                "  HOST: \"db-prod\"\n";
+    static final class TestConfigWithMap {
+        private final Map<String, String> properties;
 
-            var features = ParserFeatures.builder().permitOverride(true).listMerging(false).build();
-            var parser = new YamlParser(features);
-            parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-
-            var config = parser.convertTo(ComplexConfig.class);
-            assertAll(
-                () -> assertNotNull(config),
-                () -> assertEquals("prod", config.env()),
-                () -> assertNotNull(config.database()),
-                () -> assertEquals("db-prod", config.database().host()),
-                () -> assertEquals(5432, config.database().port())
-            );
+        @JsonCreator
+        public TestConfigWithMap(@JsonProperty("properties") Map<String, String> properties) {
+            this.properties = properties;
         }
 
-        @Test
-        @DisplayName("Should merge nested objects across case-colliding parent keys across parse calls when permitOverride is false")
-        void shouldMergeNestedObjectsAcrossCaseCollidingParentKeysAcrossParseCalls() {
-            var firstYaml = "env: \"prod\"\n" +
-                "database:\n" +
-                "  host: \"localhost\"\n";
-            var secondYaml = "Database:\n" +
-                "  port: 5432\n" +
-                "  options:\n" +
-                "    - \"ssl=true\"\n" +
-                "replicas: []\n";
-
-            var parser = new YamlParser(STANDARD_FEATURES);
-            parser.parse(new ByteArrayInputStream(firstYaml.getBytes(StandardCharsets.UTF_8)));
-            parser.parse(new ByteArrayInputStream(secondYaml.getBytes(StandardCharsets.UTF_8)));
-
-            var config = parser.convertTo(ComplexConfig.class);
-            assertAll(
-                () -> assertNotNull(config),
-                () -> assertEquals("prod", config.env()),
-                () -> assertNotNull(config.database()),
-                () -> assertEquals("localhost", config.database().host()),
-                () -> assertEquals(5432, config.database().port()),
-                () -> assertEquals(List.of("ssl=true"), config.database().options()),
-                () -> assertEquals(List.of(), config.replicas())
-            );
-        }
-
-        @Test
-        @DisplayName("Should merge nested objects across case-colliding parent keys in multi-document YAML when permitOverride is false")
-        void shouldMergeNestedObjectsAcrossCaseCollidingParentKeysInMultiDocumentYaml() {
-            var yaml = "env: \"prod\"\n" +
-                "database:\n" +
-                "  host: \"localhost\"\n" +
-                "---\n" +
-                "Database:\n" +
-                "  port: 5432\n" +
-                "  options:\n" +
-                "    - \"ssl=true\"\n" +
-                "replicas: []\n";
-
-            var parser = new YamlParser(STANDARD_FEATURES);
-            parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-
-            var config = parser.convertTo(ComplexConfig.class);
-            assertAll(
-                () -> assertNotNull(config),
-                () -> assertEquals("prod", config.env()),
-                () -> assertNotNull(config.database()),
-                () -> assertEquals("localhost", config.database().host()),
-                () -> assertEquals(5432, config.database().port()),
-                () -> assertEquals(List.of("ssl=true"), config.database().options()),
-                () -> assertEquals(List.of(), config.replicas())
-            );
-        }
-
-        @Test
-        @DisplayName("Should merge arrays across case-colliding keys across parse calls when listMerging is true")
-        void shouldMergeArraysAcrossCaseCollidingKeysAcrossParseCalls() {
-            var firstYaml = "items:\n  - \"item1\"\n  - \"item2\"\n";
-            var secondYaml = "ITEMS:\n  - \"item3\"\n";
-
-            var features = ParserFeatures.builder().permitOverride(false).listMerging(true).build();
-            var parser = new YamlParser(features);
-            parser.parse(new ByteArrayInputStream(firstYaml.getBytes(StandardCharsets.UTF_8)));
-            parser.parse(new ByteArrayInputStream(secondYaml.getBytes(StandardCharsets.UTF_8)));
-
-            var config = parser.convertTo(TestConfigWithList.class);
-            assertAll(
-                () -> assertNotNull(config),
-                () -> assertEquals(List.of("item1", "item2", "item3"), config.items())
-            );
-        }
-
-        @Test
-        @DisplayName("Should merge arrays across case-colliding keys in multi-document YAML when listMerging is true")
-        void shouldMergeArraysAcrossCaseCollidingKeysInMultiDocumentYaml() {
-            var yaml = "items:\n" +
-                "  - \"item1\"\n" +
-                "  - \"item2\"\n" +
-                "---\n" +
-                "ITEMS:\n" +
-                "  - \"item3\"\n";
-
-            var features = ParserFeatures.builder().permitOverride(false).listMerging(true).build();
-            var parser = new YamlParser(features);
-            parser.parse(new ByteArrayInputStream(yaml.getBytes(StandardCharsets.UTF_8)));
-
-            var config = parser.convertTo(TestConfigWithList.class);
-            assertAll(
-                () -> assertNotNull(config),
-                () -> assertEquals(List.of("item1", "item2", "item3"), config.items())
-            );
+        public Map<String, String> properties() {
+            return properties;
         }
     }
 
