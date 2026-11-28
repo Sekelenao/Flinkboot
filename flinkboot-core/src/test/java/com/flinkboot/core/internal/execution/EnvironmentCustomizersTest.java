@@ -19,6 +19,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -90,11 +91,13 @@ class EnvironmentCustomizersTest {
         );
     }
 
-    @Test
-    @DisplayName("Should apply buffer timeout when configured to a positive duration")
-    void shouldApplyPositiveBufferTimeout() {
+    @ParameterizedTest(name = "Buffer timeout {0} ms should enable buffer timeout and set duration")
+    @ValueSource(longs = {0, 100})
+    @DisplayName("Should enable and apply buffer timeout when configured to a non-negative duration")
+    void shouldApplyNonNegativeBufferTimeout(long millis) {
         Configuration config = new Configuration();
-        Duration bufferTimeout = Duration.ofMillis(100);
+        config.set(ExecutionOptions.BUFFER_TIMEOUT_ENABLED, false);
+        Duration bufferTimeout = Duration.ofMillis(millis);
 
         var executionConfig = new ExecutionProperties(
                 ExecutionRuntimeMode.STREAMING,
@@ -118,6 +121,8 @@ class EnvironmentCustomizersTest {
         new ExecutionCustomizer(config).configure(envConfig);
 
         assertAll(
+                () -> assertTrue(config.contains(ExecutionOptions.BUFFER_TIMEOUT_ENABLED)),
+                () -> assertTrue(config.get(ExecutionOptions.BUFFER_TIMEOUT_ENABLED)),
                 () -> assertEquals(bufferTimeout, config.get(ExecutionOptions.BUFFER_TIMEOUT)),
                 () -> assertTrue(config.contains(ExecutionOptions.BUFFER_TIMEOUT))
         );
