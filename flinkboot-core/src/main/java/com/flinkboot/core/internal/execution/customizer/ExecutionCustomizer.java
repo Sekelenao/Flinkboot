@@ -52,6 +52,7 @@ public final class ExecutionCustomizer implements EnvironmentCustomizer {
         if (bufferTimeout.isNegative()) {
             toConfigure.set(ExecutionOptions.BUFFER_TIMEOUT_ENABLED, false);
         } else {
+            toConfigure.set(ExecutionOptions.BUFFER_TIMEOUT_ENABLED, true);
             toConfigure.set(ExecutionOptions.BUFFER_TIMEOUT, bufferTimeout);
         }
     }
